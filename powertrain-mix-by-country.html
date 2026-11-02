@@ -154,7 +154,7 @@
           </ul>
         </div>
 
-        <div class="card chart-card">
+        <div class="card chart-card" id="map-card">
           <h2>BEV Share Map</h2>
           <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — a country with no data for the selected period still shows its last available period if one exists. Darker gray means we've researched that country and confirmed no fuel-type breakdown exists (still worth a hover, to see why); lighter gray means it hasn't been looked at yet. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
           <div class="map-wrap">
@@ -367,6 +367,7 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
             <select id="mfr-country-group-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
+            <a href="#" class="mfr-reset-link" data-reset-all title="Back to the world view: clears the country and every filter, and scrolls up to the map">↺ Reset all filters</a>
             <div class="chart-mode-toggle hidden" role="group" aria-label="Monthly or yearly view" id="mfr-period-toggle">
               <button type="button" class="mode-btn active" data-mfr-period="monthly" title="Show recent individual months.">Monthly</button>
               <button type="button" class="mode-btn" data-mfr-period="yearly" title="Show full calendar years.">Yearly</button>
@@ -415,6 +416,7 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
             <select id="mfr-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
+            <a href="#" class="mfr-reset-link" data-reset-all title="Back to the world view: clears the country and every filter, and scrolls up to the map">↺ Reset all filters</a>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -462,6 +464,7 @@
               <button type="button" class="mode-btn" data-mfr-sort-key="icePct" title="Sort by combined petrol + diesel share of each row's own total.">% ICE</button>
             </div>
             <select id="mfr-model-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
+            <a href="#" class="mfr-reset-link" data-reset-all title="Back to the world view: clears the country and every filter, and scrolls up to the map">↺ Reset all filters</a>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -511,6 +514,7 @@
             <span class="filter-bulk">
               <button type="button" class="filter-bulk-btn" data-target="countries" data-action="check">Check all</button> / <button type="button" class="filter-bulk-btn" data-target="countries" data-action="uncheck">Uncheck all</button>
             </span>
+            <a href="#" class="filter-reset-inline" data-reset-all title="Clears the country and every filter, and scrolls up to the map">↺ Reset all</a>
           </div>
           <input type="text" id="country-search" class="filter-search" placeholder="Search countries… (3+ letters)" autocomplete="off">
           <div class="filter-countries" id="filter-countries-group"></div>
@@ -4605,7 +4609,10 @@ continentRankRows.addEventListener('pointerleave', () => { continentTooltip.styl
 // as the Sales by Brand/Model preview popups (see showMfrBrandModelPreview et al. further down
 // this file), just anchored off the .country-label inside each rank-row here instead of there.
 const elecSharePreview = document.getElementById('elec-share-preview');
-const MODEL_YEARLY_COUNTRIES = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? Object.keys(MANUFACTURER_MODEL_YEARLY) : [];
+const MODEL_YEARLY_COUNTRIES = [...new Set([
+  ...(typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? Object.keys(MANUFACTURER_MODEL_YEARLY) : []),
+  ...(typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' ? Object.keys(MANUFACTURER_MODEL_MONTHLY) : [])
+])].sort();   // yearly OR monthly model rows
 
 function elecShareCountries(kind, key){
   return kind === 'continent' ? ALL_COUNTRIES.filter(c => (COUNTRY_CONTINENT[c] || 'OTHER') === key) : [key];
@@ -4698,17 +4705,27 @@ function topVariant(map){
 // model-year (years genuinely differ by country -- disclosed in the panel subtitle rather than
 // forced to a shared year none of them may actually have). Models are identified by
 // canonicalModelKey(), so one car is one row however each country's source spells it.
+// the model rows one country contributes: its latest model YEAR when it has yearly model rows, else (monthly-only sources such as Norway) the months of its latest year, summed
+function latestModelRowsFor(c){
+  const yr = (typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c]) || [];
+  const mo = (typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' && MANUFACTURER_MODEL_MONTHLY[c]) || [];
+  const yMax = yr.length ? Math.max(...yr.map(r => r.year)) : 0;
+  const mMax = mo.length ? Math.max(...mo.map(r => +r.year_month.slice(0, 4))) : 0;
+  if(yMax && yMax >= mMax) return { rows: yr.filter(r => r.year === yMax), label: String(yMax) };
+  if(!mMax) return null;
+  const mr = mo.filter(r => +r.year_month.slice(0, 4) === mMax);
+  return { rows: mr, label: new Set(mr.map(r => r.year_month)).size >= 12 ? String(mMax) : `${mMax} YTD` };
+}
 function buildTopBevModels(countries){
   const byModel = new Map();
   const yearsUsed = new Set();
   let anyModelData = false;
   countries.forEach(c => {
-    const rows = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c];
-    if(!rows || !rows.length) return;
+    const src = latestModelRowsFor(c);
+    if(!src || !src.rows.length) return;
     anyModelData = true;
-    const latestYear = Math.max(...rows.map(r => r.year));
-    yearsUsed.add(latestYear);
-    rows.filter(r => r.year === latestYear && r.bev > 0).forEach(r => {
+    yearsUsed.add(src.label);
+    src.rows.filter(r => r.bev > 0).forEach(r => {
       const key = canonicalModelKey(r.brand, r.model);
       if(!byModel.has(key)) byModel.set(key, { bev: 0, forms: new Map(), brands: new Map() });
       const e = byModel.get(key);
@@ -5625,7 +5642,12 @@ document.querySelectorAll('.filter-bulk-btn').forEach(btn => {
   });
 });
 
-document.getElementById('filter-reset').addEventListener('click', () => {
+// back to the world view: every filter cleared, then up to the map (the user is usually down in the brand / model sections when they reset)
+function scrollToMapCard(){
+  const card = document.getElementById('map-card');
+  if(card) setTimeout(() => card.scrollIntoView({ behavior: document.hidden ? 'auto' : 'smooth', block:'start' }), 80);     // a hidden tab never runs the smooth-scroll animation
+}
+function resetAllFilters(){
   focusedCountry = null;
   selectedFuels = new Set(FUEL_KEYS);
   selectedContinents = new Set(ALL_CONTINENTS);
@@ -5640,6 +5662,13 @@ document.getElementById('filter-reset').addEventListener('click', () => {
   rankTiersBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
   monthsBox.querySelectorAll('input[type="radio"]').forEach(rb => { rb.checked = rb.dataset.month === DEFAULT_MONTH; });
   recompute();
+  scrollToMapCard();
+}
+document.getElementById('filter-reset').addEventListener('click', resetAllFilters);
+document.addEventListener('click', e => {      // the reset links beside the country filters (they move with the filter layouts, so listen on the document)
+  if(!e.target.closest('[data-reset-all]')) return;
+  e.preventDefault();
+  resetAllFilters();
 });
 
 // --- Sales by Brand & Model, only exists for a handful of countries. Annual data
@@ -6612,6 +6641,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrCountry = null;
       mfrYear = null;
       mfrMonthly = false;
+      // forget which country the selects were built for, so selecting the same country again rebuilds them (otherwise the year stays null: "Iceland (null)", "No model data for Iceland in null-annual")
+      mfrMonthSelectWiredFor = null;
+      mfrYearSelectWiredFor = null;
+      mfrLastSyncedPeriod = null;
+      mfrRequestedOverride = null;
       mfrMonthSelect.classList.add('hidden');
       mfrYearSelect.classList.add('hidden');
       if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
@@ -6632,7 +6666,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrYearSelect.classList.remove('hidden');
     const sortedYears = [...availYears].sort((a,b) => b - a);
     const pagePeriod = [...selectedMonths][0];
-    if(mfrYearSelectWiredFor !== mfrCountry){
+    if(mfrYearSelectWiredFor !== mfrCountry || mfrYear == null){
       mfrYearSelect.innerHTML = sortedYears.map(y => `<option value="${y}">${mfrYearOptionLabel(y)}</option>`).join('');
       const yearMatch = pagePeriod && pagePeriod.match(/(\d{4})/);
       const wantYear = yearMatch ? +yearMatch[1] : null;

@@ -1539,6 +1539,10 @@ nav.sidebar-nav a.nav-link-alert:hover{
   padding:0;
 }
 .filter-reset:hover{ text-decoration:underline; }
+.filter-reset-inline, .mfr-reset-link{ color:var(--accent); font-size:11.5px; font-weight:700; text-decoration:none; white-space:nowrap; cursor:pointer; }
+.filter-reset-inline:hover, .mfr-reset-link:hover{ text-decoration:underline; }
+#map-card{ scroll-margin-top:12px; }
+body[data-fl-mode="bar"] #map-card, body[data-fl-mode="drawer"] #map-card{ scroll-margin-top:96px; }
 .filter-actions{ display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
 .copy-link-btn{
   background:var(--accent);
