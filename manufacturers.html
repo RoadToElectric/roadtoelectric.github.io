@@ -115,6 +115,13 @@
   .tl-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .tl-chip.gone{ display:none; }
   .mfr-side .mfr-tl{ margin:0; }
+  .rank-row.is-other .country-label{ font-style:italic; color:var(--text-muted); }
+  #continent-bars .rank-row .country-label, #country-bars .rank-row .country-label{ white-space:normal; text-overflow:clip; line-height:1.15; }      /* long names wrap instead of being cut off */
+  .rank-row .country-label small{ display:block; font-size:10px; font-weight:600; line-height:1.15; color:var(--text-muted); }
+  .world-explain{ margin:2px 0 12px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-alt); font-size:12.5px; line-height:1.5; }
+  .world-explain summary{ cursor:pointer; font-weight:700; }
+  .world-explain p{ margin:6px 0 0; }
+  .world-explain .we-list b{ color:var(--text); }
   .rank-row.is-sel{ background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:8px; box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
   .map-svg .country.has-data{ cursor:pointer; }
   .ctry-sub-note{ margin:6px 0 2px; font-size:12px; color:var(--text-muted); }
@@ -417,6 +424,7 @@
           <button type="button" class="mode-btn" data-group="group">Parent group</button>
         </div>
         <p class="note" id="continent-bars-note" style="display:block"></p>
+        <div id="continent-bars-explain"></div>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
           <span class="rrh-total" id="continent-bars-legend"></span>
@@ -490,6 +498,7 @@ function brandRankBadgeHTML(rank, name, title){
 // Brands that are not listed (the long tail of niche brands) get a stable hash-based color.
 const BRAND_PALETTE = {'Toyota':'#E30613','Ford':'#1B5FD6','BMW':'#B6BDC6','Volkswagen':'#0B2A6F','Hyundai':'#6FB1E0','Honda':'#7A1020','Nissan':'#636971','Kia':'#FF7B6B','Chevrolet':'#E8B400','Mercedes-Benz':'#141414','Renault':'#FFF429','Peugeot':'#616CA7','Tesla':'#C2185B','Suzuki':'#00B1B9','BYD':'#006F5C','Fiat':'#B56478','Skoda':'#4BA82E','Audi':'#AD6A43','Citroen':'#DE6715','Mazda':'#8E44AD','Opel':'#FFC26E','Jeep':'#287028','Subaru':'#182EC6','Dacia':'#1CB588','Volvo':'#213857','Geely':'#BA91E9','Chery':'#F5B29D','Changan':'#0F9DFF','Haval':'#5B3623','Mitsubishi':'#DD1C9C','Lexus':'#3C3C3C','Buick':'#0F360F','GMC':'#937B1A','Ram':'#6A1B4D','Wuling':'#FF82C6','Seat':'#FF3258','Cupra':'#B1BC34','Porsche':'#5E5115','MG':'#AE1B1B','Maruti Suzuki':'#AAF3E2','Tata Motors':'#1A1D87','Mahindra':'#FF9805','Mini':'#96936F','Cadillac':'#A12AD1','Perodua':'#ACD284','Lada':'#7193A4','GAC Aion':'#02FFB7','GAC Trumpchi':'#3F6C8E','Li Auto':'#93DA2E','Land Rover':'#1FDA2D','Leapmotor':'#799332','XPeng':'#00525A','Dodge':'#F2ACCB','Lynk & Co':'#4A18E2','Tank':'#966F61','Proton':'#0AFEEA','Acura':'#6C5555','Xiaomi':'#BD770A','Chrysler':'#9DB4D6','NIO':'#05D9FF','Zeekr':'#673F80','Deepal':'#0084C4','Lincoln':'#E0D3A4','Daihatsu':'#FF23E6','Genesis':'#BD9F94','Isuzu':'#823301','Alfa Romeo':'#481B29','GWM':'#BB4D49','Vauxhall':'#FDF38C','Ora':'#F275F0','DS':'#7049CE','Infiniti':'#919191','Jaguar':'#835308','Lancia':'#0B0D36','Jetour':'#FFDF54','Polestar':'#D9C4BC','Omoda':'#FD6F8F','JAC':'#1460B7','Avatr':'#571673','VinFast':'#00808D','KGM':'#3B5360','Rivian':'#82BFB9','Belgee':'#5BAD5F','Jaecoo':'#8E4844','Tenet':'#AB3E8A','Togg':'#00DB6D','Exeed':'#BCB158','Smart':'#D0FF12','Maserati':'#0164FF','Ferrari':'#FF0D84','Lamborghini':'#8AFC00','Aston Martin':'#033127','Bentley':'#3E5F2D','Rolls-Royce':'#8D0E45','McLaren':'#FF5705','Lotus':'#C3DB28','Abarth':'#C31F40','Alpine':'#A6B5FF','Maxus':'#786BC6','DFSK':'#E88484','Dongfeng':'#203E9C','GAC':'#5C867A','BAIC':'#EE8D51','Neta':'#C8F87E','Denza':'#5F0894','AITO':'#AB18A5','Foton':'#73A375','Iveco':'#0C4A83','Hino':'#F1513F','Mitsubishi Fuso':'#FFC996','UAZ':'#8EC356','GAZ':'#9D8379','Holden':'#FF9979','Solaris':'#DD458F','JMC':'#43D1BE','CMC':'#B69C11','Stellantis':'#B108F9','Other (unclassified)':'#B5ACAC','UMW Holdings':'#4F8C24','NAMI Rostec':'#410000','Vingroup':'#6CDEE6','SAIC':'#AD0A6A','Renault-Nissan':'#AE3D00','Seres':'#009C89','Hongqi':'#AE5D1B','FAW':'#0F80F1','Roewe':'#EF5561'};
 const BRAND_ALIASES = {'Volkswagen AG':'Volkswagen','Volkswagen Group':'Volkswagen','Toyota Motor Corporation':'Toyota','Hyundai Motor Group':'Hyundai','General Motors':'Chevrolet','General Motors Company':'Chevrolet','Ford Motor Company':'Ford','Honda Motor Co.':'Honda','Nissan Motor Corporation':'Nissan','Renault Group':'Renault','BYD Company Ltd.':'BYD','BMW AG':'BMW','BMW Group':'BMW','Zhejiang Geely Holding Group':'Geely','Suzuki Motor Corporation':'Suzuki','Peugeot S.A. (PSA)':'Peugeot','PSA Group / Groupe PSA':'Peugeot','PSA / Groupe PSA':'Peugeot','Tesla, Inc.':'Tesla','Daimler AG':'Mercedes-Benz','Mercedes-Benz Group AG':'Mercedes-Benz','Daimler AG / Geely Holding Group JV':'Smart','Chery Automobile Co. / Chery Holding Group':'Chery','Chery Automobile Co.':'Chery','Caoa Chery':'Chery','Mazda Motor Corporation':'Mazda','Subaru Corporation (Fuji Heavy Industries)':'Subaru','Fiat Chrysler Automobiles N.V.':'Fiat','Fiat S.p.A.':'Fiat','Stellantis N.V.':'Stellantis','SAIC Motor':'SAIC','SAIC Motor Corporation':'SAIC','Tata Group':'Tata Motors','Tata Motors (Jaguar Land Rover)':'Tata Motors','Tata':'Tata Motors','Mahindra Group':'Mahindra','China Changan Automobile Group Co.':'Changan','Changan Automobile':'Changan','China South Industries Group Corp.':'Changan','UMW Holdings':'UMW Holdings','NAMI / Rostec (Russian state)':'NAMI Rostec','Vingroup JSC':'VinFast','Isuzu Motors Ltd.':'Isuzu','Isuzu Ute':'Isuzu','KG Group':'KGM','SsangYong':'KGM','Ssangyong':'KGM','Mitsubishi Motors Corporation':'Mitsubishi','Rivian Automotive, Inc.':'Rivian','Anhui Jianghuai Automobile Group (JAC Motors)':'JAC','Zhejiang Leapmotor Technology Co.':'Leapmotor','XPeng Inc.':'XPeng','Xpeng':'XPeng','NIO Inc.':'NIO','Renault-Nissan Alliance':'Renault-Nissan','Belarusian State / Geely JV':'Belgee','Seres Group Co.':'Seres','Dongfeng Motor Corporation':'Dongfeng','Honda Motor Co':'Honda','Hyundai Motor Company':'Hyundai','Kia Corporation':'Kia','Great Wall Motors':'GWM','Haval Group':'Haval','Toyota, Lexus':'Toyota','Toyota (TCI: Toyota+Lexus combined)':'Toyota','Toyota Motor':'Toyota','BMW, Mini':'BMW','Renault, Dacia':'Renault','Nissan, Infiniti':'Nissan','Jeep, Dodge':'Jeep','Lancia, Chrysler':'Lancia','Chrysler, Jeep, Dodge':'Chrysler','Omoda & Jaecoo':'Omoda','Omoda, Jaecoo':'Omoda','Omoda Jaecoo':'Omoda','MG Roewe':'MG','Gmc':'GMC','RAM':'Ram','smart':'Smart','Mclaren':'McLaren','Geely Galaxy':'Geely','Renault Korea':'Renault','Mitsubishi Fuso':'Mitsubishi Fuso','Citroën':'Citroen','Seat':'Seat','Jaguar Land Rover':'Land Rover','Hino':'Hino','Delorean':'Lotus','Unknown':'Other (unclassified)','Uaz':'UAZ','Gaz':'GAZ','Maruti':'Maruti Suzuki','Baic':'BAIC','XPENG':'XPeng','Vinfast':'VinFast','Mercedes':'Mercedes-Benz','Mercedes Benz':'Mercedes-Benz','Dr Motor':'Chery','DR Motor':'Chery','Caoa':'Chery','Isuzu Ute':'Isuzu','Toyota (incl. Lexus)':'Toyota','Allied Vehicles Ltd':'Allied Vehicles','Xpeng':'XPeng','ZXAUTO':'ZX Auto','ZXAuto':'ZX Auto','Ineos':'INEOS','Man':'MAN','smart':'Smart','Ssangyong':'SsangYong','Togg':'TOGG','Vinfast':'VinFast','Gmc':'GMC','Swm':'SWM','EVO':'Evo','Baic':'BAIC','Can-am':'Can-Am','Austin Healey':'Austin-Healey','Levc':'LEVC','Uaz':'UAZ','Eveasy':'EVEasy','XEV':'Xev','Gaz':'GAZ','Rox':'ROX'};
+Object.assign(BRAND_ALIASES, { 'Bentley (secondary listing)':'Bentley' });
 const BRAND_KEYS_LC = Object.fromEntries(Object.keys(BRAND_PALETTE).map(k => [k.toLowerCase(), k]));
 function brandKey(name){
   if(kind === 'model' && MODEL_BRAND[name]) name = MODEL_BRAND[name];
@@ -600,14 +609,26 @@ function periodYear(p){ return p.type === 'year' ? p.year : +p.ym.slice(0, 4); }
 
 // brand -> parent group as of a year (holdings: sorted [fromYear, holder] list)
 function holder(brand, year){
-  const arr = MANUFACTURER_HOLDINGS[brand];
+  const arr = MANUFACTURER_HOLDINGS[brand] || EXTRA_HOLDERS[brand] || MANUFACTURER_HOLDINGS[HOLDS_LIKE[brand]];
   if(!arr) return brand;
   let h = null;
   for(const [y, name] of arr){ if(y <= year) h = name; }
   return h || arr[0][1];
 }
 // the holdings file calls the owner 'Volkswagen AG' while South Africa reports 'Volkswagen Group' -- one entity
-const GROUP_ALIASES = { 'Volkswagen AG': 'Volkswagen Group' };
+// the holdings file names some groups in several ways: one name per group
+const GROUP_ALIASES = { 'Volkswagen AG':'Volkswagen Group', 'Traton SE (Volkswagen Group)':'Volkswagen Group', 'SAIC Motor':'SAIC Motor Corporation', 'China Changan Automobile Group Co.':'Changan Automobile',
+  'Chery Automobile Co.':'Chery Automobile Co. / Chery Holding Group' };
+// brands with no holdings entry: they follow the holding timeline of a sibling brand, or have one of their own (so they stop showing up as groups of their own)
+const HOLDS_LIKE = { 'Vauxhall':'Opel', 'Haval':'Great Wall Motors', 'Tank':'Great Wall Motors', 'Ora':'Great Wall Motors', 'Wey':'Great Wall Motors', 'Poer':'Great Wall Motors',
+  'GAC Aion':'GAC Motor', 'GAC Trumpchi':'GAC Motor', 'Aion':'GAC Motor', 'GAC':'GAC Motor', 'Trumpchi':'GAC Motor', 'Jetour':'Chery', 'Exeed':'Chery', 'iCAR':'Chery', 'Hino':'Daihatsu', 'LDV':'MG',
+  'FAW':'Hongqi', 'Xiaomi':'Xiaomi Auto' };
+const EXTRA_HOLDERS = { 'Bugatti':[[1998, 'Volkswagen AG'], [2022, 'Bugatti Rimac (Rimac / Porsche)']], 'Scania':[[1998, 'Scania AB (independent)'], [2008, 'Volkswagen AG']] };
+// the one name under which each group's world volume (world-history series) is shown: other names that merely resemble a group (FCA / PSA before Stellantis, joint ventures...) carry only their own tracked sales
+const GROUP_HIST_NAME = { 'Toyota Motor Corporation':'Toyota Motor Corporation', 'Volkswagen Group':'Volkswagen Group', 'General Motors':'General Motors', 'Hyundai Motor Group':'Hyundai Motor Group', 'Ford Motor Company':'Ford Motor Company',
+  'Honda':'Honda Motor Co.', 'Nissan':'Nissan Motor Corporation', 'Renault Group':'Renault Group', 'BMW Group':'BMW AG', 'Mazda':'Mazda Motor Corporation', 'Suzuki':'Suzuki Motor Corporation', 'Mercedes-Benz Group':'Mercedes-Benz Group AG',
+  'Stellantis':'Stellantis N.V.', 'SAIC Motor':'SAIC Motor Corporation', 'Geely Holding':'Zhejiang Geely Holding Group', 'Changan Automobile':'Changan Automobile', 'BYD':'BYD Company Ltd.', 'Chery Automobile':'Chery Automobile Co. / Chery Holding Group',
+  'FAW Group':'FAW Group', 'Dongfeng Motor':'Dongfeng Motor Corporation', 'BAIC Group':'BAIC Group', 'Tata Motors':'Tata Motors (Jaguar Land Rover)', 'Great Wall Motor':'Great Wall Motor Company Limited', 'Tesla':'Tesla, Inc.' };
 // collapse raw spelling/casing variants ("Baic"/"BAIC", "Toyota, Lexus"/"Toyota (TCI: ...)",
 // "Volkswagen Group"/"Volkswagen"...) into one canonical brand BEFORE anything else sees it, so
 // the dropdown, map, bar charts and aggregation all treat them as the same entity instead of
@@ -900,7 +921,7 @@ function compute(){
   COUNTRIES.forEach(c => {
     const m = aggregate(c, period);
     if(!m.size) return;
-    const list = [...m.values()].sort((a, b) => b.total - a.total);
+    const list = [...m.values()].sort((a, b) => (isOtherName(a.name) - isOtherName(b.name)) || b.total - a.total);     // "Other (unclassified)" last: it is never ranked
     const total = list.reduce((s, a) => s + a.total, 0);
     if(!total) return;
     const sel = mfr ? m.get(mfr) || null : null;
@@ -1491,7 +1512,8 @@ function rowHTML(rk, a, max, sel){
 function showModal(e, country){
   const d = byCountry[country];
   if(!d){ modal.innerHTML = `<h3>${country}</h3><div class="sub">No manufacturer breakdown for this period.</div>${historyHTML(country)}`; place(e); return; }
-  const top = d.list.slice(0, 10), max = top[0].total;
+  const rankedBrands = d.list.filter(a => !isOtherName(a.name)), unranked = d.list.filter(a => isOtherName(a.name));     // "Other (unclassified)" is never ranked
+  const top = rankedBrands.slice(0, 10), max = (top[0] || d.list[0]).total;
   let rows = top.map((a, i) => rowHTML(i + 1, a, max, a === d.sel || a === d.sel2)).join('');
   if(d.sel && d.sel2 && d.rank > 10 && d.rank2 > 10){
     // both outside the top 10 shown above -- still order the two appended rows by actual sales,
@@ -1502,6 +1524,7 @@ function showModal(e, country){
     if(d.sel && d.rank > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank, d.sel, max, true);
     if(d.sel2 && d.rank2 > 10) rows += `<div style="text-align:center;color:var(--text-muted);line-height:.9">⋮</div>` + rowHTML(d.rank2, d.sel2, max, true);
   }
+  rows += unranked.map(a => rowHTML('–', a, max, false)).join('');
   const sum = k => d.list.reduce((s, a) => s + a[k], 0);
   const bev = sum('bev'), phev = sum('phev'), other = sum('other');
   const pc = v => (100 * v / d.total).toFixed(1) + '%';
@@ -1619,7 +1642,7 @@ document.addEventListener('click', e => {
 
 // ---- real world totals from the companies' financial reports (assets/manufacturer-fin-report-sales.js), to expose the gap with the tracked countries ----
 const FIN_ENT = new Map(), FIN_BY_SITE = new Map();
-(typeof FIN_REPORT_SALES !== 'undefined' ? FIN_REPORT_SALES : []).forEach(e => { FIN_ENT.set(e.name, e); e.sites.forEach(s => FIN_BY_SITE.set(s, e)); });
+(typeof FIN_REPORT_SALES !== 'undefined' ? FIN_REPORT_SALES : []).forEach(e => { FIN_ENT.set(e.name, e); e.sites.forEach(s => { FIN_BY_SITE.set(s, e); FIN_BY_SITE.set(GROUP_ALIASES[s] || s, e); }); });
 // brands that are the whole company (used when the list is by brand instead of parent group)
 const FIN_BRAND_ALIAS = { 'Tesla':'Tesla', 'Kia':'Kia', 'Volvo':'Volvo Cars', 'Mazda':'Mazda Motor', 'Subaru':'Subaru Corporation', 'Mitsubishi':'Mitsubishi Motors', 'Perodua':'Perodua', 'Proton':'Proton', 'Li Auto':'Li Auto', 'XPeng':'XPeng', 'Leapmotor':'Leapmotor', 'Xiaomi':'Xiaomi (auto)' };
 const finActive = () => cmpMode === 'all' && !filtersActive();      // a reported total only compares with unfiltered all-sales volumes
@@ -1636,7 +1659,7 @@ function finFor(name){
 // no company filing on file (or the projected year): the parent group's worldwide volume from the world-history series, so the rest of the world is still accounted for
 function histRef(name){
   if(groupMode !== 'group' || typeof histFor !== 'function') return null;
-  const h = histFor(name); if(!h || h.via) return null;
+  const h = histFor(name); if(!h || h.via || GROUP_HIST_NAME[h.key] !== name) return null;      // only the group itself carries the group's world volume
   const grp = h.group, yy = period.year, bk = grp.b[String(Math.min(yy, 2025))] || 's';
   const units = period.projected ? groupProjection(grp) : grp.s[String(yy)];
   if(!units) return null;
@@ -1684,7 +1707,7 @@ function brandRowHTML(e, widthDenom){
   const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of ${esc(mfr)}'s world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
   return `<div class="rank-row${e.cls ? ' ' + e.cls : ''}" data-scope="${e.scope}" data-key="${esc(e.key)}">
       ${rankBadge}
-      <span class="country-label">${esc(e.country)}</span>
+      <span class="country-label">${e.labelHTML || esc(e.country)}</span>
       ${pctOfTotal}
       <span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span>
       <span class="total-label" title="Total sales, all motorizations">${fmt(total)}</span>
@@ -1716,6 +1739,19 @@ function aggScope(countries){
   if(sel.total > 0){ rank = 1; ent.forEach((v, k) => { if(!isOtherName(k) && k !== mfr && v > sel.total) rank++; }); }
   return { sel, marketTotal, rank };
 }
+// what "World (tracked countries)" covers, from our country database: the countries with brand-level data for this period, and the ones that have brand data in other periods but not in this one
+function worldExplainHTML(fin){
+  const incl = Object.keys(byCountry).sort(), missing = COUNTRIES.filter(c => !byCountry[c]);
+  const group = list => { const g = {}; list.forEach(c => (g[CONTINENT_LABELS[continentOf(c)] || continentOf(c)] = g[CONTINENT_LABELS[continentOf(c)] || continentOf(c)] || []).push(c));
+    return Object.entries(g).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => `<b>${esc(k)}</b> (${v.length}): ${v.map(esc).join(', ')}`).join('<br>'); };
+  return `<details class="world-explain"><summary>What does “World (tracked countries)” cover?</summary>` +
+    `<p>It is the sum of the <b>${incl.length} countries</b> of our database that have brand-level sales for ${esc(periodLabel(period))}${clsSel.size || motSel.size ? ' under the filters you set' : ''} — ${COUNTRIES.length} countries have brand-level data in at least one period. ` +
+    `Countries for which we only hold a market total (no brand split), or no data for this period, are <b>not</b> in it, so it is lower than the real world volume.</p>` +
+    `<p class="we-list">${group(incl)}</p>` +
+    (missing.length ? `<p>With brand data in other periods but not in this one (${missing.length}): ${missing.map(esc).join(', ')}.</p>` : '') +
+    (fin ? `<p>The first row is the company's reported worldwide figure (${esc(finBasisShort(fin))}); the hatched “All other countries” row is that figure minus these tracked countries: markets without brand data here, differences of basis (wholesale / deliveries vs. registrations) and joint-venture brands filed under another owner.</p>` : '') +
+    `</details>`;
+}
 function renderContinentBarsForBrand(card, title, note, legend, rows){
   title.textContent = `${mfr} — continent by continent`;
   legend.innerHTML = fuelLegendHTML();
@@ -1728,6 +1764,8 @@ function renderContinentBarsForBrand(card, title, note, legend, rows){
   const conts = [...new Set(Object.keys(byCountry).map(continentOf))]
     .map(k => make('continent', k, CONTINENT_LABELS[k] || k)).filter(x => x.total > 0);
   const world = make('world', 'World', f ? 'World (tracked countries)' : 'World', 'world-total');
+  world.labelHTML = 'World<small>tracked countries</small>';        // the description goes under "World" instead of being cut off
+  document.getElementById('continent-bars-explain').innerHTML = worldExplainHTML(f);
   if(!world.total){ rows.innerHTML = `<div class="note" style="display:block">No data for this selection.</div>`; note.textContent = ''; return; }
   const base = f ? f.units : world.total;
   world.pctOfWorld = 100 * world.total / base; conts.forEach(x => { x.pctOfWorld = 100 * x.total / base; });
@@ -1749,6 +1787,7 @@ function renderContinentBars(){
   card.classList.remove('hidden');
   const title = document.getElementById('continent-bars-title'), note = document.getElementById('continent-bars-note'),
         legend = document.getElementById('continent-bars-legend'), rows = document.getElementById('continent-bars');
+  document.getElementById('continent-bars-explain').innerHTML = '';
   if(md === 'rank'){ toggle.classList.add('hidden'); renderContinentBarsForBrand(card, title, note, legend, rows); return; }
 
   if(md === 'market'){
@@ -1763,7 +1802,10 @@ function renderContinentBars(){
       e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total;
       world.set(a.name, e);
     }));
-    const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0);
+    // sales the source does not attribute to a brand: shown at the bottom, never ranked, but part of the market the shares are taken from
+    const otherAgg = { bev:0, phev:0, other:0, total:0 };
+    Object.values(view()).forEach(d => d.list.forEach(a => { if(isOtherName(a.name)){ otherAgg.bev += a.bev; otherAgg.phev += a.phev; otherAgg.other += a.other; otherAgg.total += a.total; } }));
+    const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0) + otherAgg.total;
     // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "All other countries" remainder
     const finOn = !filtersActive() && !ctry;
     const rankedAll = [...world.entries()].map(([name, e]) => {
@@ -1775,7 +1817,7 @@ function renderContinentBars(){
     const anyFin = ranked.some(r => r.gap > 0);
     legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
       (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>All other countries = reported worldwide sales minus the tracked countries</span>` : '');
-    const widthDenom = ranked.length ? ranked[0].eff : 1;
+    const widthDenom = Math.max(ranked.length ? ranked[0].eff : 1, otherAgg.total);
     rows.innerHTML = ranked.map(({ name, e, f, gap, eff, rank }) => {
       const parts = [
         { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
@@ -1794,12 +1836,17 @@ function renderContinentBars(){
         <span class="total-label" title="${esc(totalTip)}">${fmt(eff)}</span>
       </div>`;
     }).join('');
+    if(otherAgg.total > 0){
+      const seg = segmentsHTML([{ value:otherAgg.bev, color:COLORS.bev, label:`BEV: ${fmt(otherAgg.bev)}` }, { value:otherAgg.phev, color:COLORS.phev, label:`PHEV: ${fmt(otherAgg.phev)}` }, { value:otherAgg.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(otherAgg.other)}` }], widthDenom);
+      rows.insertAdjacentHTML('beforeend', `<div class="rank-row is-other" title="Sales the source does not attribute to a brand: shown at the bottom and never ranked"><span class="world-rank-badge"></span><span class="country-label">Other (unclassified)</span><span class="pct-of-total">${worldTotal ? (100 * otherAgg.total / worldTotal).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(otherAgg.total)}</span></div>`);
+    }
     if(ctry) note.textContent = `Top ${WORLD_LIST_CAP} ${what}s in ${ctry} by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of ${ctry}'s market.` +
       (pickNames.length ? ` Your selection (${pickNames.map(esc).join(', ')}) is highlighted.` : ' Pick a manufacturer above to see how it does here year by year.') + ' Click the country on the map again, or remove its chip, to go back to every country.';
     else note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
       (period.type === 'month' ? ` Monthly figures come from the ${Object.keys(byCountry).length} markets that report brand data for ${periodLabel(period)}, not from every country, so they do not include all world sales.` : '') +
       (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "All other countries" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
       ` Pick a manufacturer above to focus this chart on one market instead.`;
+    if(otherAgg.total > 0) note.textContent += ' "Other (unclassified)" is the part of the sales the sources do not attribute to a brand: it sits at the bottom, is never ranked, and is counted in the % shares.';
     return;
   }
 
@@ -2057,10 +2104,10 @@ function bwChartMulti(host, series){
   host.onmouseleave = () => { tip.style.opacity = 0; cur = -1; };
 }
 // manufacturer / brand -> history group: by the parent group the holdings file gives
-const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|audi|porsche|škoda|skoda|seat\b|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
+const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|(?<![a-z])audi(?![a-z])|porsche|škoda|(?<![a-z])skoda(?![a-z])|(?<![a-z])seat(?![a-z])|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
   [/hyundai|kia|genesis/i, 'Hyundai Motor Group'], [/ford motor|^ford$|lincoln/i, 'Ford Motor Company'], [/honda|acura/i, 'Honda'], [/nissan|infiniti/i, 'Nissan'], [/renault|dacia|alpine/i, 'Renault Group'],
-  [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/daimler ag|mercedes|smart$/i, 'Mercedes-Benz Group'],
-  [/stellantis|fiat|psa|peugeot|citro|jeep|opel|vauxhall|chrysler|dodge|ram$|alfa|exor|ds$|maserati/i, 'Stellantis'], [/saic|mg$|roewe|wuling|baojun|maxus/i, 'SAIC Motor'], [/geely|volvo car|polestar|lynk|zeekr/i, 'Geely Holding'],
+  [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/^daimler ag$|mercedes|smart$/i, 'Mercedes-Benz Group'],
+  [/stellantis|fiat|psa|peugeot|citro|jeep|opel|vauxhall|chrysler|dodge|ram$|alfa|ds$|maserati/i, 'Stellantis'], [/saic|mg$|roewe|wuling|baojun|maxus/i, 'SAIC Motor'], [/^(zhejiang )?geely( holding group| automobile)?$|volvo car|polestar|lynk|zeekr/i, 'Geely Holding'],
   [/changan|avatr|deepal/i, 'Changan Automobile'], [/byd|denza|fangchengbao/i, 'BYD'], [/chery|jetour|omoda|jaecoo|exeed/i, 'Chery Automobile'], [/faw|hongqi|bestune/i, 'FAW Group'], [/dongfeng|voyah|nammi/i, 'Dongfeng Motor'],
   [/baic|beijing auto|arcfox/i, 'BAIC Group'], [/tata|jaguar|land rover/i, 'Tata Motors'], [/great wall|gwm|haval|ora$|tank$|wey/i, 'Great Wall Motor'], [/tesla/i, 'Tesla']];
 function histFor(name){
