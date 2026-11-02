@@ -545,6 +545,27 @@
 <script>
 // month key -> { label, raw: { country: [BEV, PHEV, HEV, OTHERS, PETROL, DIESEL, TOTAL] } } — source: ACEA
 const MONTHLY_DATA = {
+  "2026-10": {
+    label: "October 2026",
+    raw: {
+      // Mobility Sweden's official Manadsrapport Nyregistreringar okt 2026 Excel (PB - Drivmedel) -- see September comment for methodology. EL=BEV, Laddhybrid=PHEV, Elhybrid=HEV; others = Etanol (30) + Gas (0) + Ospec. (0). Sum-checked to the exact unit against the sheet's own Totalt row (24,660).
+      "Sweden": [12594,5376,1614,30,4037,1009,24660],
+      // UNRAE monthly bulletin (La struttura del mercato, Ottobre 2026, Per alimentazione, WITH rental) -- see September comment for methodology. GPL (12,070) + Metano (0) folded into petrol (23,806 + 12,070); HEV = full 26,239 + mild 39,324; PHEV incl. REx 17,008; Others = Idrogeno (FCEV=0); figures reconcile exactly to the table's own 133,715 total (the press headline 131,921 is a different count).
+      "Italy": [8122,17008,65563,0,35876,7146,133715],
+      // AUT (Autoalan Tiedotuskeskus) monthly first-registrations CSV, row 2026M10 -- exact counts with ordinary hybrids separated from petrol (PHEV = petrol 550 + diesel 10; HEV = petrol 1,106 + diesel 14); CNG/hydrogen/ethanol = 0; temporary pending ACEA (~24 Nov)
+      "Finland": [3417,560,1120,0,421,167,5685],
+      // OFV (Opplysningsradet for veitrafikken), Norway (monthly) -- direct from OFV's own published fuel-type table (Fordeling per drivstoff), release of 2026-11-02; PHEV = Bensin + Diesel Plugin Hybrid combined (33+0), HEV = Bensin + Diesel Hybrid combined (53+0). BEV 98.8% of 15,725
+      "Norway": [15536,33,53,0,14,89,15725],
+      // AAA DATA (communique-de-presse-du-1er-novembre-2026, aaa-data.fr) -- see September comment for methodology. MHEV+HEV combined into hev (full 28,143 + micro 25,707); Others = Essence-GPL (4,514) + EREV (1,572), as in September; PHEV 10,503; rows sum exactly to 149,340.
+      "France": [61958,10503,53850,6086,14909,2034,149340],
+      // DGT registration data via IEA/GANVAM (ANFAC press note, NP-Matriculaciones-Octubre-2026) -- see August comment for methodology. BEV (16,425) and PHEV (14,619) are ANFAC's own exact turismos-only figures (turismos electrificados article, 31,044 together); Gasolina (17,131), Diesel (2,602) and Resto combustibles (78,754) are the PDF's exact totals (sum 98,487). HEV and Others split the Resto remainder (47,710): HEV = the article's stated 44% share of the market (~43,334), Others = remainder (GLP/GNC/EREV/FCEV) -- both derived, not directly cited.
+      "Spain": [16425,14619,43334,4376,17131,2602,98487]
+    },
+    priorYearBev: {
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065},
+    priorYearTotal: {
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785}
+  },
   "2026-09": {
     label: "September 2026",
     raw: {
@@ -1703,27 +1724,27 @@ const MONTHLY_DATA = {
       "Czechia": [13806,9458,45826,4175,80149,33354,186768],
       "Denmark": [124051,706,11702,2,13000,2327,151788],
       "Estonia": [1153,1278,8387,0,2280,1636,14734],
-      "Finland": [28676,6853,15197,0,4387,1814,56927],
-      "France": [387342,71178,532444,45532,169333,29124,1234953],
+      "Finland": [32093,7413,16317,0,4808,1981,62612],
+      "France": [449300,81681,586294,51618,184242,31158,1384293],
       "Germany": [604144,247489,632695,11194,455913,270363,2221798],
       "Greece": [8180,7657,66900,3627,26390,2418,115172],
       "Hungary": [10443,9834,54774,729,22372,10270,108422],
       "Iceland": [5108,1923,2205,0,545,506,10287],
       "Ireland": [35242,19615,31985,560,25143,15870,128415],
-      "Italy": [101963,121844,625180,78550,258613,83659,1269809],
+      "Italy": [110085,138852,690743,78550,294489,90805,1403524],
       "Latvia": [1831,2318,0,475,10964,1942,17530],
       "Lithuania": [3143,4863,19017,672,5881,3227,36803],
       "Luxembourg": [11615,2306,12218,42,8388,2917,37486],
       "Malta": [2425,563,1754,1,1021,242,6006],
       "Netherlands": [109024,58951,73504,1010,19493,2719,264701],
-      "Norway": [112818,625,709,0,186,851,115189],
+      "Norway": [128354,658,762,0,200,940,130914],
       "Poland": [24404,41526,233853,12671,130500,27543,470497],
       "Portugal": [55508,28350,49447,11236,38396,8809,191746],
       "Romania": [7889,0,55424,11109,16987,5801,97210],
       "Slovakia": [4470,3149,22382,1297,25207,7228,63733],
       "Slovenia": [10457,2020,9281,762,24094,6103,52717],
-      "Spain": [100870,116754,427644,32580,203379,30831,912058],
-      "Sweden": [90871,50655,17828,792,39074,12566,211786],
+      "Spain": [117295,131373,470978,36956,220510,33433,1010545],
+      "Sweden": [103465,56031,19442,822,43111,13575,236446],
       "Switzerland": [45464,21239,62161,7,35375,9291,173537],
       "United Kingdom": [454919,244696,507473,159,486443,45582,1739272],
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
@@ -1796,12 +1817,12 @@ const MONTHLY_DATA = {
       "Georgia":"through Aug 2026",
       "Austria":"through Sep 2026","Belgium":"through Sep 2026","Bulgaria":"through Sep 2026","Croatia":"through Sep 2026",
       "Cyprus":"through Sep 2026","Czechia":"through Sep 2026","Denmark":"through Sep 2026","Estonia":"through Sep 2026",
-      "Finland":"through Sep 2026","France":"through Sep 2026","Germany":"through Sep 2026","Greece":"through Sep 2026",
-      "Hungary":"through Sep 2026","Iceland":"through Sep 2026","Ireland":"through Sep 2026","Italy":"through Sep 2026",
+      "Finland":"through Oct 2026","France":"through Oct 2026","Germany":"through Sep 2026","Greece":"through Sep 2026",
+      "Hungary":"through Sep 2026","Iceland":"through Sep 2026","Ireland":"through Sep 2026","Italy":"through Oct 2026",
       "Latvia":"through Sep 2026","Lithuania":"through Sep 2026","Luxembourg":"through Sep 2026","Malta":"through Sep 2026",
-      "Netherlands":"through Sep 2026","Norway":"through Sep 2026","Poland":"through Sep 2026","Portugal":"through Sep 2026",
-      "Romania":"through Sep 2026","Slovakia":"through Sep 2026","Slovenia":"through Sep 2026","Spain":"through Sep 2026",
-      "Sweden":"through Sep 2026","Switzerland":"through Sep 2026","United Kingdom":"through Sep 2026",
+      "Netherlands":"through Sep 2026","Norway":"through Oct 2026","Poland":"through Sep 2026","Portugal":"through Sep 2026",
+      "Romania":"through Sep 2026","Slovakia":"through Sep 2026","Slovenia":"through Sep 2026","Spain":"through Oct 2026",
+      "Sweden":"through Oct 2026","Switzerland":"through Sep 2026","United Kingdom":"through Sep 2026",
       "Canada":"through Sep 2026 (Q3 est.)",
       "Colombia":"through Sep 2026",
       "Mexico":"through Sep 2026",
@@ -1838,10 +1859,10 @@ const MONTHLY_DATA = {
     priorYearBev: {
       "Ecuador":2694,
       "Austria":46151,"Belgium":108221,"Bulgaria":1673,"Croatia":713,"Cyprus":1149,"Czechia":10180,"Denmark":88452,
-      "Estonia":658,"Finland":19227,"France":216310,"Germany":382202,"Greece":6154,"Hungary":8025,"Iceland":3751,
-      "Ireland":22390,"Italy":61058,"Latvia":1252,"Lithuania":2171,"Luxembourg":9396,"Malta":1541,"Netherlands":94448,
-      "Norway":107605,"Poland":25828,"Portugal":36707,"Romania":5424,"Slovakia":2969,"Slovenia":4424,"Spain":72101,
-      "Sweden":72230,"Switzerland":35725,"United Kingdom":224841,
+      "Estonia":658,"Finland":21452,"France":250418,"Germany":382202,"Greece":6154,"Hungary":8025,"Iceland":3751,
+      "Ireland":22390,"Italy":67338,"Latvia":1252,"Lithuania":2171,"Luxembourg":9396,"Malta":1541,"Netherlands":94448,
+      "Norway":118457,"Poland":25828,"Portugal":36707,"Romania":5424,"Slovakia":2969,"Slovenia":4424,"Spain":81166,
+      "Sweden":80937,"Switzerland":35725,"United Kingdom":224841,
       "Canada":84582,"Mexico":10889,"New Zealand":4119,"United States":1026274,"India":139844,"South Korea":142319,"Taiwan":22006,
       "Israel":40028,
       "Peru":437,
@@ -1857,7 +1878,7 @@ const MONTHLY_DATA = {
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":88335,
-      "Austria":215115,"Belgium":323868,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":134102,"Estonia":9422,"Finland":53933,"France":1186784,"Germany":2110348,"Greece":112232,"Hungary":95953,"Iceland":10681,"Ireland":121659,"Italy":1167768,"Latvia":17566,"Lithuania":31373,"Luxembourg":36494,"Malta":4633,"Netherlands":271973,"Norway":113407,"Poland":427908,"Portugal":171564,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":854660,"Sweden":204027,"Switzerland":168929,"United Kingdom":1042219,"Canada":1455051,"Mexico":842840,"New Zealand":51878,"United States":12209885,"India":3213654,"South Korea":1127726,"Taiwan":258424,
+      "Austria":215115,"Belgium":323868,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":134102,"Estonia":9422,"Finland":60152,"France":1326298,"Germany":2110348,"Greece":112232,"Hungary":95953,"Iceland":10681,"Ireland":121659,"Italy":1293729,"Latvia":17566,"Lithuania":31373,"Luxembourg":36494,"Malta":4633,"Netherlands":271973,"Norway":124545,"Poland":427908,"Portugal":171564,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":951445,"Sweden":228105,"Switzerland":168929,"United Kingdom":1042219,"Canada":1455051,"Mexico":842840,"New Zealand":51878,"United States":12209885,"India":3213654,"South Korea":1127726,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
       "Uruguay":34219,
@@ -1893,14 +1914,14 @@ const MONTHLY_DATA = {
       "Czechia": [18982, 12611, 61101, 5611, 106865, 44472, 249642],
       "Denmark": [167395, 941, 15603, 3, 20409, 3103, 207454],
       "Estonia": [1689, 1704, 11183, 0, 3040, 2181, 19797],
-      "Finland": [39555, 9137, 20263, 0, 5849, 2419, 77223],
-      "France": [533122, 94904, 709925, 61891, 225777, 38832, 1664451],
+      "Finland": [39548, 8896, 19580, 0, 5770, 2377, 76171],
+      "France": [558207, 99251, 703553, 62435, 221090, 37390, 1681926],
       "Germany": [840282, 331185, 843593, 15664, 607884, 360484, 2999092],
       "Greece": [11074, 10209, 89200, 4836, 35187, 3224, 153730],
       "Hungary": [13924, 13599, 73032, 1067, 29829, 13693, 145144],
       "Iceland": [7036, 2564, 2940, 0, 727, 675, 13942],
       "Ireland": [50305, 26694, 42647, 1120, 33524, 21160, 175450],
-      "Italy": [135951, 162459, 833573, 104733, 344817, 111545, 1693078],
+      "Italy": [132102, 166622, 828892, 94260, 353387, 108966, 1684229],
       "Japan": [114734, 45363, 1623140, 531, 764208, 107415, 2655391],
       "Latvia": [2823, 3422, 0, 653, 14619, 2589, 24106],
       "Lithuania": [4434, 6812, 25382, 898, 7969, 4303, 49798],
@@ -1909,15 +1930,15 @@ const MONTHLY_DATA = {
       "Mexico": [29820, 34872, 132637, 0, 1336133, 0, 1533462],
       "Netherlands": [154365, 78601, 98005, 1512, 25991, 3625, 362099],
       "New Zealand": [19950, 12490, 39644, 1087, 33903, 6685, 113759],
-      "Norway": [153982, 833, 945, 0, 248, 1135, 157143],
+      "Norway": [159901, 790, 914, 0, 240, 1128, 162973],
       "Philippines": [43965, 39488, 42768, 0, 336911, 0, 463132],
       "Poland": [32539, 56449, 312961, 17304, 174000, 36724, 629977],
       "Portugal": [76310, 37800, 65929, 14981, 51195, 12614, 258829],
       "Romania": [10519, 0, 73899, 16588, 22649, 7735, 131390],
       "Slovakia": [6262, 4412, 29843, 1729, 33609, 9637, 85492],
       "Slovenia": [14852, 2693, 12375, 1090, 32125, 8137, 71272],
-      "Spain": [138520, 155672, 570192, 43440, 271172, 41108, 1220104],
-      "Sweden": [122941, 67540, 23771, 1056, 52155, 16755, 284218],
+      "Spain": [146197, 157648, 565174, 44347, 264612, 40120, 1218098],
+      "Sweden": [127930, 67237, 23330, 986, 52185, 16290, 287958],
       "Switzerland": [63039, 28319, 82881, 9, 47167, 12388, 233803],
       "Turkey": [160545, 5631, 263316, 10680, 352557, 46052, 838781],
       "United Kingdom": [625259, 341260, 676631, 316, 717091, 70742, 2431299],
@@ -6178,7 +6199,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   // "motorisation rank"). Used by the main Sales by Model list and by the model list inside the
   // Sales by Brand hover popup, so both show the same numbers for the same period.
   function mfrModelRankMaps(){
-    const all = fullMfrRows('model');
+    const all = fullMfrRows('model').filter(r => !MODEL_CATCHALL.test(r.model || ''));      // "(other models)" rows are never ranked
     const totalRank = new Map();
     const categoryRank = new Map();
     if(!all.length) return { totalRank, categoryRank };
@@ -6213,18 +6234,21 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const sorted = kind === 'model' ? visible.slice().sort(mfrModelSortCmp(mfrSortKey)) : visible.slice().sort((a,b) => b[mfrSortKey] - a[mfrSortKey]);
     rowsEl.classList.toggle('raw-mode', mode === 'raw');
     rowsEl.classList.toggle('mfr-total-left', kind !== 'model');       // brand + manufacturing country: the total sits between the name and the bar
-    const globalMax = Math.max(1, ...sorted.map(r => r.total));
-    rowsEl.innerHTML = sorted.map((row, i) => {
+    // "Other (unclassified)" brands and "(other models)" rows are never ranked: they sit at the bottom and the real rows are numbered 1, 2, 3...
+    const isOther = r => kind === 'model' ? MODEL_CATCHALL.test(r.model || '') : /^(other|unknown)/i.test(r.label || '');
+    const ordered = sorted.filter(r => !isOther(r)).concat(sorted.filter(isOther));
+    const globalMax = Math.max(1, ...ordered.map(r => r.total));
+    rowsEl.innerHTML = ordered.map((row, i) => {
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
       const widthDenom = mode === 'raw' ? globalMax : row.total;
       const cat = kind === 'model' ? mfrRowCategory(row) : null;
-      const rankNum = kind === 'model' ? totalRank.get(mfrModelKey(row)) : i + 1;
+      const rankNum = isOther(row) ? '' : kind === 'model' ? totalRank.get(mfrModelKey(row)) : i + 1;
       const catRankNum = kind === 'model' ? categoryRank.get(mfrModelKey(row)) : null;
       // primary number is always the row's rank by total sales; BEV/PHEV models also get a
       // colored secondary badge with their rank among same-powertrain models only (ICE models
       // get an empty placeholder instead, so the country-label column still lines up)
       const catBadgeHTML = kind === 'model'
-        ? ((cat === 'bev' || cat === 'phev')
+        ? ((!isOther(row) && (cat === 'bev' || cat === 'phev'))
             ? `<div class="mfr-rank-badge" style="color:${MFR_CATEGORY_COLORS[cat]}" title="#${catRankNum} best-selling ${MFR_CATEGORY_LABELS[cat]} model">${catRankNum}</div>`
             : `<div class="mfr-rank-badge"></div>`)
         : '';
