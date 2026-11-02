@@ -405,7 +405,7 @@
         <div class="fx-kpis" id="spot-kpis"></div>
         <div class="fx-spot-grid">
           <div class="fx-spot-box"><h3 id="spot-mix-title">Powertrain mix</h3><div id="spot-donut"></div></div>
-          <div class="fx-spot-box"><h3 id="spot-hist-title">Five-year trend</h3><div id="spot-hist"></div></div>
+          <div class="fx-spot-box"><h3 id="spot-hist-title">Five-year trend</h3><div id="spot-hist"></div><div id="spot-months"></div></div>
         </div>
       </div>
 
@@ -785,7 +785,7 @@ function buildPeriodSelect(){
   // run-rate, same method as the 5-year history chart) instead of a plain year-to-date one --
   // a raw partial-year total isn't comparable to the complete prior years in this same list
   let h = '<optgroup label="Years">';
-  YEARS.forEach(y => { h += y === CUR_YEAR ? `<option value="yp:${y}">${y} (Projected)</option>` : `<option value="y:${y}">${y}</option>`; });
+  YEARS.forEach(y => { h += y === CUR_YEAR ? `<option value="yp:${y}">${y} (Projected)</option><option value="y:${y}">${y} year-to-date</option>` : `<option value="y:${y}">${y}</option>`; });
   h += '</optgroup><optgroup label="Months">';
   MONTHS_SHOWN.forEach(m => { h += `<option value="m:${m}">${periodLabel({type:'month', ym:m})}</option>`; });
   h += '</optgroup>';
@@ -1186,6 +1186,7 @@ function donutSVG(parts, centerTop, centerBottom){
 }
 function renderSpotlight(){
   if(ctry){ renderSpotlightCountry(); return; }
+  const spotMonths = document.getElementById('spot-months'); if(spotMonths) spotMonths.innerHTML = '';
   const card = document.getElementById('spot-card'), md = mode();
   const entries = Object.entries(byCountry);
   if(!entries.length){ card.classList.add('hidden'); return; }
@@ -1249,11 +1250,36 @@ function renderSpotlight(){
   document.getElementById('spot-hist-title').textContent = histTitle;
   const histEl = document.getElementById('spot-hist');
   if(!histNames.length){ histEl.innerHTML = '<div class="note" style="display:block">Select a manufacturer or a model above to see how it evolved over the last five years in the markets where data exists for every year.</div>'; return; }
-  drawSpotHist(histEl, histNames, spotHistory(histNames, Object.keys(byCountry)), sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`);
+  const rep = histNames.map(reportSeries);
+  if(rep.every(Boolean)){
+    document.getElementById('spot-hist-title').textContent = 'Five-year trend — company reports';
+    drawSpotHist(histEl, histNames, rep, sr => `${esc(sr.name)}: ${sr.n} of 5 years on file (${sr.src})`);
+  } else {
+    document.getElementById('spot-hist-title').textContent = histTitle + ' — tracked markets (no company report on file)';
+    drawSpotHist(histEl, histNames, spotHistory(histNames, Object.keys(byCountry)), sr => `${esc(sr.name)}: ${sr.n} markets with data in all five years`);
+  }
+  renderSpotMonths(histNames);
+}
+// the running year month by month (every month available) with its year-to-date total, from the tracked markets that report monthly
+function renderSpotMonths(names){
+  const host = document.getElementById('spot-months'); if(!host) return;
+  host.innerHTML = '';
+  const ms = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort();
+  if(!names.length || ms.length < 2) return;
+  const monthly = COUNTRIES.filter(c => MANUFACTURER_MONTHLY[c]);
+  const sers = names.map((name, i) => ({ name, color:names.length > 1 ? matchColor(i + 1) : brandColor(name), rows:ms.map(m => {
+    let v = 0, n = 0; monthly.forEach(c => { const a = aggregate(c, { type:'month', ym:m }).get(name); if(a && a.total > 0){ v += a.total; n++; } });
+    const mn = MONTH_NAMES[+m.slice(5) - 1];
+    return { y:mn.slice(0, 3), v:Math.round(v), kind:'a', bk:'m', none:`no ${name} sales recorded`, basis:`${mn} ${CUR_YEAR}: ${n} countries with monthly data` };
+  }) }));
+  const ytd = sers.map(s => s.rows.reduce((a, r) => a + r.v, 0));
+  host.innerHTML = `<div class="ctry-sub-note" style="margin-top:12px"><b>${CUR_YEAR} month by month</b> (all ${ms.length} months available, tracked markets with monthly data) · year to date: ${sers.map((s, i) => `${sers.length > 1 ? esc(s.name) + ' ' : ''}<b>${fmt(ytd[i])}</b>`).join(' · ')}</div><div class="bw-chart"></div>`;
+  const box = host.querySelector('.bw-chart');
+  if(sers.length > 1) bwChartMulti(box, sers); else bwChart(box, sers[0].rows, sers[0].color);
 }
 function drawSpotHist(histEl, histNames, series, noteFn){
   const years = historyYears();
-  series.forEach(sr => { sr.col = histNames.length > 1 ? matchColor(histNames.indexOf(sr.name) + 1) : brandColor(sr.name); sr.top = sr.vals.map((v, i) => years[i] === CUR_YEAR ? v * 12 / CUR_YEAR_MONTHS_ELAPSED : v); });
+  series.forEach(sr => { sr.col = histNames.length > 1 ? matchColor(histNames.indexOf(sr.name) + 1) : brandColor(sr.name); sr.top = sr.top || sr.vals.map((v, i) => years[i] === CUR_YEAR ? v * 12 / CUR_YEAR_MONTHS_ELAPSED : v); });
   const max = Math.max(1, ...series.flatMap(sr => sr.top));
   histEl.innerHTML = `<div class="fx-hist">` + years.map((y, i) => `<div class="fx-hist-yr"><div class="fx-hist-bars">` + series.map(sr => {
     const h = Math.max(2, 100 * sr.top[i] / max), cur = y === CUR_YEAR, cut = sr.top[i] ? 100 * sr.vals[i] / sr.top[i] : 100;
@@ -1265,6 +1291,7 @@ function drawSpotHist(histEl, histNames, series, noteFn){
 }
 // ---------- Country filter: spotlight of one country ----------
 function renderSpotlightCountry(){
+  const spotMonths = document.getElementById('spot-months'); if(spotMonths) spotMonths.innerHTML = '';
   const card = document.getElementById('spot-card'), d = byCountry[ctry], md = mode();
   card.classList.remove('hidden');
   const kpi = (label, value, sub, color) => `<div class="fx-kpi" style="--k:${color || 'var(--accent)'}"><div class="fx-kpi-label">${label}</div><div class="fx-kpi-value">${value}</div><div class="fx-kpi-sub">${sub || ''}</div></div>`;
@@ -1657,9 +1684,30 @@ function finFor(name){
   return histRef(name);
 }
 // no company filing on file (or the projected year): the parent group's worldwide volume from the world-history series, so the rest of the world is still accounted for
+// brands that are the whole company: the world-history series of their group is their own worldwide volume
+const WHOLE_BRAND = new Set(['Tesla', 'Mazda', 'Suzuki', 'Honda', 'Subaru', 'BYD', 'Mitsubishi', 'Ford']);
+function histGroupFor(name){
+  if(typeof histFor !== 'function') return null;
+  const h = histFor(name);
+  const whole = groupMode === 'group' ? !!h && !h.via && GROUP_HIST_NAME[h.key] === name : !!h && WHOLE_BRAND.has(canonicalBrand(name));     // only the group itself (or a whole-company brand) carries the group's world volume
+  return whole ? h : null;
+}
+// worldwide volume of an entity in a year from the companies' reports / the world-history series (the running year: the projection); null when none is on file
+function reportedUnits(name, year){
+  const e = groupMode === 'group' ? FIN_BY_SITE.get(name) : FIN_ENT.get(FIN_BRAND_ALIAS[name]);
+  const y = e && year !== CUR_YEAR && e.years[String(year)];
+  if(y) return y.units;
+  const h = histGroupFor(name); if(!h) return null;
+  return year === CUR_YEAR ? groupProjection(h.group) : (h.group.s[String(year)] || null);
+}
+function reportSeries(name){
+  const years = historyYears(), top = years.map(y => reportedUnits(name, y));
+  if(top.every(v => v == null)) return null;
+  const f = CUR_YEAR_MONTHS_ELAPSED / 12;
+  return { name, vals: top.map((v, i) => v == null ? 0 : years[i] === CUR_YEAR ? v * f : v), top: top.map(v => v == null ? 0 : v), n: top.filter(v => v != null).length, src: 'company reports / world-history series' };
+}
 function histRef(name){
-  if(groupMode !== 'group' || typeof histFor !== 'function') return null;
-  const h = histFor(name); if(!h || h.via || GROUP_HIST_NAME[h.key] !== name) return null;      // only the group itself carries the group's world volume
+  const h = histGroupFor(name); if(!h) return null;
   const grp = h.group, yy = period.year, bk = grp.b[String(Math.min(yy, 2025))] || 's';
   const units = period.projected ? groupProjection(grp) : grp.s[String(yy)];
   if(!units) return null;
@@ -1674,7 +1722,7 @@ function finRowHTML(label, parts, widthDenom, pct, cls, tip){
   return `<div class="rank-row ${cls}" title="${esc(tip || '')}"><span class="world-rank-badge"></span><span class="country-label">${label}</span>` +
     `<span class="pct-of-total">${pct != null ? pct.toFixed(1) + '%' : ''}</span><span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span><span class="total-label">${fmt(sumParts(parts))}</span></div>`;
 }
-const finReportedRow = f => finRowHTML(f.hist ? (f.proj ? 'World total (projected)' : 'World total') : 'Reported total', [{ value:f.units, color:'#334155', label:'Reported worldwide' }], f.units, 100, 'world-total fin-reported', finTip(f));
+const finReportedRow = f => finRowHTML(f.hist && groupMode === 'group' ? (f.proj ? 'World total (projected)' : 'World total') : f.proj ? 'Reported total (projected)' : 'Reported total', [{ value:f.units, color:'#334155', label:'Reported worldwide' }], f.units, 100, 'world-total fin-reported', finTip(f));
 const finGapRow = (gap, f, denom) => finRowHTML('All other countries', [{ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)}` }], denom, 100 * gap / f.units, 'fin-gap', GAP_TIP);
 function finNote(f, tracked){
   const gap = f.units - tracked;
@@ -1690,7 +1738,7 @@ function fuelLegendHTML(){
   else if(cmpMode === 'nonbev') k = sw(COLORS.other, NONBEV_LABEL + ' only');
   else if(splitOn) k = sw(COLORS.bev, 'BEV') + sw(COLORS.other, NONBEV_LABEL);
   else k = sw(COLORS.bev, 'BEV') + sw(COLORS.phev, 'PHEV') + sw(COLORS.other, 'HEV + ICE + Diesel');
-  const badge = cmpMode === 'all' ? `Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; ` : '';
+  const badge = cmpMode === 'all' ? `Badge = ${esc(mfr)}'s rank in that market (colored like the map) &middot; ` : `Badge = ${esc(mfr)}'s rank by ${cmpMode === 'bev' ? 'BEV' : 'non-BEV'} sales in that market &middot; `;
   return k + `<span class="lg-note">${badge}% on the left = share of ${esc(mfr)}'s world total shown in this chart &middot; number on the right = ${cmpMode === 'all' ? 'total sales, all motorizations' : 'the units compared'} &middot; hover a row for 5-year history and top 10 models</span>`;
 }
 function fuelParts(sel, marketTotal){
@@ -1703,7 +1751,7 @@ function fuelParts(sel, marketTotal){
 function brandRowHTML(e, widthDenom){
   const { bar, outside } = segmentsHTML(e.parts, widthDenom, true);
   const total = e.parts.reduce((s, p) => s + p.value, 0);
-  const rankBadge = e.brandRank ? brandRankBadgeHTML(e.brandRank, mfr) : '<span class="world-rank-badge"></span>';
+  const rankBadge = e.brandRank ? brandRankBadgeHTML(e.brandRank, mfr, cmpMode === 'all' ? undefined : `${esc(mfr)}: #${e.brandRank} by ${cmpMode === 'bev' ? 'BEV' : 'non-BEV'} sales in this market`) : '<span class="world-rank-badge"></span>';
   const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of ${esc(mfr)}'s world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
   return `<div class="rank-row${e.cls ? ' ' + e.cls : ''}" data-scope="${e.scope}" data-key="${esc(e.key)}">
       ${rankBadge}
@@ -1728,16 +1776,26 @@ function scopeCountries(scope, key){
 }
 // the selected manufacturer's totals over a set of countries: {sel:{bev,phev,other,total}, marketTotal, rank}
 function aggScope(countries){
-  const ent = new Map(), sel = { bev:0, phev:0, other:0, total:0 }; let marketTotal = 0;
+  const ent = new Map(), entBev = new Map(), sel = { bev:0, phev:0, other:0, total:0 }; let marketTotal = 0;
   countries.forEach(c => {
     const d = byCountry[c]; if(!d) return;
     marketTotal += (d.market || d.total);
-    d.list.forEach(a => ent.set(a.name, (ent.get(a.name) || 0) + a.total));
+    d.list.forEach(a => { ent.set(a.name, (ent.get(a.name) || 0) + a.total); entBev.set(a.name, (entBev.get(a.name) || 0) + a.bev); });
     if(d.sel){ sel.bev += d.sel.bev; sel.phev += d.sel.phev; sel.other += d.sel.other; sel.total += d.sel.total; }
   });
-  let rank = null;
+  let rank = null, rankBev = null, rankNon = null;
   if(sel.total > 0){ rank = 1; ent.forEach((v, k) => { if(!isOtherName(k) && k !== mfr && v > sel.total) rank++; }); }
-  return { sel, marketTotal, rank };
+  if(sel.bev > 0){ rankBev = 1; entBev.forEach((v, k) => { if(!isOtherName(k) && k !== mfr && v > sel.bev) rankBev++; }); }       // rank by BEV sales
+  const selNon = sel.total - sel.bev;
+  if(selNon > 0){ rankNon = 1; ent.forEach((v, k) => { if(!isOtherName(k) && k !== mfr && v - (entBev.get(k) || 0) > selNon) rankNon++; }); }     // rank by non-BEV sales
+  return { sel, marketTotal, rank, rankBev, rankNon };
+}
+// the rank shown on the left of a row: all sales, or (BEV only / non-BEV only compare) the rank by those units in that market
+const rankFor = a => cmpMode === 'all' ? a.rank : cmpMode === 'bev' ? a.rankBev : a.rankNon;
+function fieldRank(list, name, f){
+  const me = list.find(a => a.name === name); if(!me || !(f(me) > 0)) return null;
+  let r = 1; list.forEach(a => { if(!isOtherName(a.name) && a.name !== name && f(a) > f(me)) r++; });
+  return r;
 }
 // what "World (tracked countries)" covers, from our country database: the countries with brand-level data for this period, and the ones that have brand data in other periods but not in this one
 function worldExplainHTML(fin){
@@ -1759,7 +1817,7 @@ function renderContinentBarsForBrand(card, title, note, legend, rows){
   const make = (scope, key, label, cls) => {
     const cs = scopeCountries(scope, key), a = aggScope(cs);
     const parts = cmpFuelParts(a.sel, a.marketTotal), total = sumParts(parts);
-    return { scope, key, country:label, cls, a, parts, brandRank: cmpMode === 'all' ? a.rank : null, total, yoyHTML: yoyLabelHTML(yoyProjectedScope(cs, mfr)) };
+    return { scope, key, country:label, cls, a, parts, brandRank: rankFor(a), total, yoyHTML: yoyLabelHTML(yoyProjectedScope(cs, mfr)) };
   };
   const conts = [...new Set(Object.keys(byCountry).map(continentOf))]
     .map(k => make('continent', k, CONTINENT_LABELS[k] || k)).filter(x => x.total > 0);
@@ -1916,12 +1974,12 @@ function renderCountryBars(){
     const worldTotal = Object.values(byCountry).reduce((s, d) => s + (d.sel ? cmpValue(d.sel) : 0), 0);
     const all = Object.entries(byCountry)
       .filter(([, d]) => d.sel && cmpValue(d.sel) > 0)
-      .map(([c, d]) => ({ country:c, total:cmpValue(d.sel), rank:d.rank, sel:d.sel, marketTotal:(d.market || d.total) }))
+      .map(([c, d]) => ({ country:c, total:cmpValue(d.sel), rank:d.rank, list:d.list, sel:d.sel, marketTotal:(d.market || d.total) }))
       .sort((a, b) => b.total - a.total);
     const denomWorld = f ? f.units : worldTotal;
     built = all.map(x => ({
       country:x.country, scope:'country', key:x.country,
-      brandRank: cmpMode === 'all' ? x.rank : null,
+      brandRank: cmpMode === 'all' ? x.rank : fieldRank(x.list, mfr, cmpMode === 'bev' ? (a => a.bev) : (a => a.total - a.bev)),
       pctOfWorld: denomWorld ? 100 * x.total / denomWorld : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
       parts: cmpFuelParts(x.sel, x.marketTotal),
@@ -2248,11 +2306,11 @@ const tlHosts = [...document.querySelectorAll('[data-tl]')];
 const tlCache = new Map();
 let tlSig = '', tlTimer = null, tlDirty = false;
 const tlParse = key => { const [t, v] = key.split(':'); return t === 'yp' ? { type:'year', year:+v, projected:true } : t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v }; };
-const tlChipLabel = key => { const p = tlParse(key); return p.type === 'month' ? MONTH_NAMES[+p.ym.slice(5) - 1].slice(0, 3) : p.projected ? `${p.year} proj.` : String(p.year); };
-const tlYearKeys = [...YEARS].sort((a, b) => a - b).map(y => y === CUR_YEAR ? 'yp:' + y : 'y:' + y);
+const tlChipLabel = key => { const p = tlParse(key); return p.type === 'month' ? MONTH_NAMES[+p.ym.slice(5) - 1].slice(0, 3) : p.projected ? `${p.year} proj.` : p.year === CUR_YEAR ? `${p.year} YTD` : String(p.year); };
+const tlYearKeys = [...YEARS].sort((a, b) => a - b).flatMap(y => y === CUR_YEAR ? ['y:' + y, 'yp:' + y] : ['y:' + y]);
 const tlMonthKeys = MONTHS_SHOWN.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort().map(m => 'm:' + m);
 // the frames of the animation, oldest first: every year before the running one, then its months, then the running year projected to a full year
-const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:')).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
+const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:') && k !== 'y:' + CUR_YEAR).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
 // does the selection have sales in this period? (tested for every button only where that is cheap: brand view, no car class)
 function tlAvail(key, force){
   const sig = [kind, groupMode, mfr, mfr2, ctry, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
@@ -2276,7 +2334,7 @@ function selMarketCount(){
 function tlName(key, n){
   const p = tlParse(key), mk = n ? ` · ${n} market${n === 1 ? '' : 's'}` : '';
   if(p.type === 'month') return { big:periodLabel(p), small:'month' + mk };
-  return { big:String(p.year), small:(p.projected ? 'projected full year' : 'full year') + mk };
+  return { big:String(p.year), small:(p.projected ? 'projected full year' : p.year === CUR_YEAR ? 'year to date' : 'full year') + mk };
 }
 const tlChip = k => `<button type="button" class="tl-chip${k.startsWith('yp:') ? ' proj' : ''}" data-tl-key="${k}">${tlChipLabel(k)}</button>`;
 const tlChipsHTML = `<div class="tl-chips"><span class="tl-chips-lbl">Year</span><span class="tl-chip-group">${tlYearKeys.map(tlChip).join('')}</span>` +
