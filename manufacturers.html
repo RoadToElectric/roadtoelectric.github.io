@@ -116,6 +116,14 @@
   .tl-chip.gone{ display:none; }
   .mfr-side .mfr-tl{ margin:0; }
   .rank-row.is-other .country-label{ font-style:italic; color:var(--text-muted); }
+  .rank-rows.wrap-labels .rank-row .country-label{ width:170px; white-space:normal; text-overflow:clip; line-height:1.15; }
+  .rank-rows.wrap-labels .rank-row .total-label{ width:84px; color:var(--text); font-weight:700; font-size:12px; }
+  .rank-row[data-hov] .country-label, .rank-row[data-hov] .bar-track{ cursor:help; }
+  .rank-row[data-hov="country"] .country-label:hover{ color:var(--accent); text-decoration:underline; }
+  .bar-hover.wide, .mfr-modal.wide{ width:820px; }
+  .hv-grid{ display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:18px; align-items:start; }
+  .hv-right .mdl-title:first-child, .hv-left .mdl-title:first-child{ margin-top:0; padding-top:0; border-top:0; }
+  @media (max-width:900px){ .hv-grid{ grid-template-columns:1fr; } .bar-hover.wide, .mfr-modal.wide{ width:420px; } }
   #continent-bars .rank-row .country-label, #country-bars .rank-row .country-label{ white-space:normal; text-overflow:clip; line-height:1.15; }      /* long names wrap instead of being cut off */
   .rank-row .country-label small{ display:block; font-size:10px; font-weight:600; line-height:1.15; color:var(--text-muted); }
   .world-explain{ margin:2px 0 12px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface-alt); font-size:12.5px; line-height:1.5; }
@@ -409,6 +417,18 @@
         </div>
       </div>
 
+      <div class="card chart-card hidden" id="gb-card">
+        <h2 id="gb-title">Sales by group brand</h2>
+        <p class="note" id="gb-note" style="display:block"></p>
+        <div class="rank-rows wrap-labels" id="gb-rows"></div>
+      </div>
+
+      <div class="card chart-card hidden" id="gm-card">
+        <h2 id="gm-title">Sales by group model</h2>
+        <p class="note" id="gm-note" style="display:block"></p>
+        <div class="rank-rows wrap-labels" id="gm-rows"></div>
+      </div>
+
       <div class="card chart-card hidden" id="ctry-card">
         <h2 id="ctry-title">Sales in one country</h2>
         <p class="note" id="ctry-note" style="display:block"></p>
@@ -430,6 +450,18 @@
           <span class="rrh-total" id="continent-bars-legend"></span>
         </div>
         <div class="rank-rows" id="continent-bars"></div>
+      </div>
+
+      <div class="card chart-card hidden" id="wm-card">
+        <h2>Top 50 world sales by model</h2>
+        <p class="note" id="wm-note" style="display:block"></p>
+        <div class="rank-rows wrap-labels" id="wm-rows"></div>
+      </div>
+
+      <div class="card chart-card hidden" id="wc-card">
+        <h2>World sales by country</h2>
+        <p class="note" id="wc-note" style="display:block"></p>
+        <div class="rank-rows wrap-labels" id="wc-rows"></div>
       </div>
 
       <div class="card chart-card" id="bars-card">
@@ -1120,6 +1152,7 @@ function renderMap(){
   renderCtryCard();
   renderCmpBars();
   renderSpotlight();
+  renderExtras();
   renderChipBar();
   updateSegStatus(n);
   syncStrips();
@@ -1537,6 +1570,7 @@ function rowHTML(rk, a, max, sel){
     `<span class="val">${fmt(a.total)}</span></div>`;
 }
 function showModal(e, country){
+  modal.classList.remove('wide');
   const d = byCountry[country];
   if(!d){ modal.innerHTML = `<h3>${country}</h3><div class="sub">No manufacturer breakdown for this period.</div>${historyHTML(country)}`; place(e); return; }
   const rankedBrands = d.list.filter(a => !isOtherName(a.name)), unranked = d.list.filter(a => isOtherName(a.name));     // "Other (unclassified)" is never ranked
@@ -1569,6 +1603,10 @@ function showModal(e, country){
     `<span><i class="sw" style="background:${COLORS.phev}"></i>PHEV <b>${pc(phev)}</b></span>` +
     `<span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel <b>${pc(other)}</b></span></div>` +
     historyHTML(country);
+  if(groupMode === 'group' && kind === 'brand' && mfr){      // group view: the group's brands in this country, on the right
+    const bp = brandsPanelHTML([country]);
+    if(bp){ modal.classList.add('wide'); modal.innerHTML = `<div class="hv-grid"><div class="hv-left">${modal.innerHTML}</div><div class="hv-right">${bp}</div></div>`; }
+  }
   place(e);
 }
 function place(e){
@@ -1886,7 +1924,7 @@ function renderContinentBars(){
       const { bar, outside } = segmentsHTML(parts, widthDenom);
       const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
       const totalTip = gap > 0 ? `Reported worldwide ${fmt(f.units)} = tracked countries ${fmt(e.total)} + all other countries ${fmt(gap)}` : `Total sales in the tracked countries`;
-      return `<div class="rank-row${pickNames.includes(name) ? ' is-sel' : ''}"${f ? ` title="${esc(finTip(f))}"` : ''}>
+      return `<div class="rank-row${pickNames.includes(name) ? ' is-sel' : ''}" data-hov="brand" data-key="${esc(name)}" data-total="${Math.round(eff)}"${f ? ` title="${esc(finTip(f))}"` : ''}>
         ${brandRankBadgeHTML(rank, name, `${esc(name)}: #${rank} in this ranking`)}
         <span class="country-label">${esc(name)}</span>
         ${pct}
@@ -2039,6 +2077,7 @@ function mfrModelLabel(brand, model){
   return [b, f].some(p => p && m.startsWith(p) && m.length > p.length) ? String(model) : `${brand} ${model}`;
 }
 function renderHover(scope, key){
+  hoverPanel.classList.remove('wide');
   const countries = scopeCountries(scope, key), a = aggScope(countries);
   const label = scope === 'world' ? 'World' : scope === 'continent' ? (CONTINENT_LABELS[key] || key) : key;
   let h = `<h3>${esc(mfr)} — ${esc(label)}</h3><div class="sub">${periodLabel(period)} · ${fmt(a.sel.total)} vehicles${a.rank ? ` · #${a.rank} in ${scope === 'world' ? 'the world' : 'this market'}` : ''}</div>`;
@@ -2051,7 +2090,9 @@ function renderHover(scope, key){
     const top = topModelsFor(countries);
     h += top.length ? top.map((m, i) => rowHTML(i + 1, m, top[0].total, kind === 'model' && (m.name === mfr || m.name === mfr2))).join('') : `<div class="sub">No model-level data for ${esc(label)} in this period.</div>`;
   }
-  hoverPanel.innerHTML = h;
+  const bp = groupMode === 'group' && kind === 'brand' && mfr ? brandsPanelHTML(countries) : '';      // group view: the group's brands on the right
+  hoverPanel.classList.toggle('wide', !!bp);
+  hoverPanel.innerHTML = bp ? `<div class="hv-grid"><div class="hv-left">${h}</div><div class="hv-right">${bp}</div></div>` : h;
 }
 function placeHover(e){
   const w = hoverPanel.offsetWidth, h = hoverPanel.offsetHeight;
@@ -2060,10 +2101,11 @@ function placeHover(e){
   if(y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
   hoverPanel.style.left = Math.max(8, x) + 'px'; hoverPanel.style.top = Math.max(8, y) + 'px';
 }
-function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
+function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; hoverPanel.classList.remove('wide'); }
 ['country-bars', 'continent-bars'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('mousemove', e => {
+    if(e.target.closest('.rank-row[data-hov]')) return;      // ranking rows with their own hover window
     const row = e.target.closest('.rank-row[data-scope]');
     if(!row || !(e.target.closest('.country-label') || e.target.closest('.bar-track'))){ hideHover(); return; }
     const k = row.dataset.scope + '|' + row.dataset.key;
@@ -2072,6 +2114,193 @@ function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; }
   });
   el.addEventListener('mouseleave', hideHover);
 });
+
+// ================= new sections and hover windows =================
+function withGroupMode(m, fn){ const prev = groupMode; groupMode = m; try{ return fn(); } finally { groupMode = prev; } }
+const groupOfBrand = (b, y) => { const h = holder(canonicalBrand(b), y); return GROUP_ALIASES[h] || h; };
+const years10 = () => YEARS.slice(0, 10).reverse();                      // oldest -> newest, includes the running year
+// per-(country, year) aggregates, cached until a filter that changes them moves
+const idx = { sig:'', brands:new Map(), models:new Map() };
+function idxFresh(){ const s = [[...clsSel].sort().join(), [...motSel].sort().join(), MODEL_LABEL ? 1 : 0].join('|'); if(idx.sig !== s){ idx.sig = s; idx.brands.clear(); idx.models.clear(); } }
+function brandMap(c, y){ idxFresh(); const k = c + '|' + y; let m = idx.brands.get(k); if(!m){ m = withGroupMode('brand', () => aggregateBrands(c, { type:'year', year:y })); idx.brands.set(k, m); } return m; }
+function modelMapFor(c, p){ idxFresh(); const k = c + '|' + JSON.stringify(p); let m = idx.models.get(k); if(!m){ m = aggregateModels(c, p); idx.models.set(k, m); } return m; }
+let modelsQuiet = null;
+function loadModelsQuiet(){
+  if(MODEL_LABEL) return Promise.resolve();
+  if(!modelsQuiet) modelsQuiet = loadModelData().then(() => { buildModelLabels(); buildModelSelect(); }).catch(() => { modelsQuiet = null; });
+  return modelsQuiet;
+}
+let modelsWatch = null;
+function watchModels(){      // the 24 MB model files load when a section that needs them comes into view
+  if(modelsWatch || typeof IntersectionObserver === 'undefined') return;
+  modelsWatch = new IntersectionObserver(es => { if(es.some(e => e.isIntersecting)){ modelsWatch.disconnect(); modelsWatch = null; loadModelsQuiet().then(renderExtras); } }, { rootMargin:'600px' });
+  ['wm-card', 'gm-card'].forEach(id => modelsWatch.observe(document.getElementById(id)));
+}
+
+// ---- 10-year history: reported when on file, else the tracked markets; the running year in two colours (year to date + projected rest) ----
+function barsHTML(years, series){
+  const max = Math.max(1, ...series.flatMap(s => s.pts.map(q => q.top || 0)));
+  const bars = years.map((y, i) => {
+    const pair = series.map(s => {
+      const q = s.pts[i]; if(q.top == null) return '';
+      const h = Math.max(2, 100 * q.top / max), cur = y === CUR_YEAR && q.val != null && q.val < q.top;
+      if(!cur) return `<div class="hbar" style="height:${h}%;background:${s.color}" title="${esc(s.label)} ${y}${y === CUR_YEAR ? ' projected' : ''}: ${fmt(q.top)}"></div>`;
+      const cut = (100 * q.val / q.top).toFixed(1), tint = `color-mix(in srgb, ${s.color} 32%, white)`;
+      return `<div class="hbar" style="height:${h}%;background:linear-gradient(to top, ${s.color} 0 ${cut}%, ${tint} ${cut}% 100%)" title="${esc(s.label)} ${y} projected: ${fmt(q.top)} (year to date ${fmt(q.val)} + projection ${fmt(q.top - q.val)})"></div>`;
+    }).join('');
+    return `<div class="history-yr"><div class="bars-pair">${pair}</div><div class="hyear">${String(y).slice(2)}${y === CUR_YEAR ? '*' : ''}</div></div>`;
+  }).join('');
+  return `<div class="history"><div class="history-bars">${bars}</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">peak ${compactN(max)} · *${CUR_YEAR}: dark = year to date, light = projected rest of the year</div></div>`;
+}
+function entityHistory(name, asGroup){
+  const years = years10(), cs = ctry ? [ctry] : COUNTRIES, f = CUR_YEAR_MONTHS_ELAPSED / 12;
+  const rep = ctry ? years.map(() => null) : years.map(y => withGroupMode(asGroup ? 'group' : 'brand', () => reportedUnits(name, y)));
+  if(rep.some(v => v != null)) return { basis:'company reports / world-history series', pts:years.map((y, i) => rep[i] == null ? { top:null } : { top:rep[i], val:y === CUR_YEAR ? rep[i] * f : rep[i] }) };
+  const pts = years.map(y => {
+    let v = 0, any = false;
+    cs.forEach(c => { const m = brandMap(c, y); if(!m.size) return; any = true; if(asGroup){ m.forEach((a, b) => { if(!isOtherName(b) && groupOfBrand(b, y) === name) v += a.total; }); } else { const a = m.get(name); if(a) v += a.total; } });
+    return any ? { val:v, top:y === CUR_YEAR ? v / f : v } : { top:null };
+  });
+  return { basis:ctry ? ctry : 'tracked markets, coverage varies by year', pts };
+}
+function modelHistory(label){
+  const years = years10(), f = CUR_YEAR_MONTHS_ELAPSED / 12;
+  const pts = years.map(y => { let v = 0, any = false; COUNTRIES.forEach(c => { if(ctry && c !== ctry) return; const m = modelMapFor(c, { type:'year', year:y }); if(!m.size) return; any = true; const a = m.get(label); if(a) v += a.total; }); return any ? { val:v, top:y === CUR_YEAR ? v / f : v } : { top:null }; });
+  return { basis:ctry ? ctry : 'tracked markets, coverage varies by year', pts };
+}
+function marketHistory(country){
+  const years = years10(), f = CUR_YEAR_MONTHS_ELAPSED / 12;
+  const pts = years.map(y => { const m = brandMap(country, y); if(!m.size) return { top:null }; let v = 0; m.forEach(a => { v += a.total; }); return { val:v, top:y === CUR_YEAR ? v / f : v }; });
+  return { basis:country, pts };
+}
+
+// ---- data for the lists ----
+function brandRowsOf(group, countries){       // the brands of one parent group over the given countries, this period
+  const yr = periodYear(period), acc = new Map();
+  countries.forEach(c => withGroupMode('brand', () => aggregateBrands(c, period)).forEach((a, b) => {
+    if(isOtherName(b) || groupOfBrand(b, yr) !== group) return;
+    const e = acc.get(b) || { name:b, bev:0, phev:0, other:0, total:0 }; e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total; acc.set(b, e);
+  }));
+  return [...acc.values()].sort((x, y) => y.total - x.total);
+}
+function modelRowsOf(countries, brandTest, n){     // models over the given countries, this period (needs the model files)
+  const yr = periodYear(period), agg = new Map(), f = period.projected ? 12 / CUR_YEAR_MONTHS_ELAPSED : 1;
+  countries.forEach(c => modelRowsFor(c).forEach(r => {
+    if(CATCHALL_MODEL.test(r.model) || !classPass(r)) return;
+    if(brandTest && !brandTest(r.brand, yr)) return;
+    const u = rowUnits(r); if(motSel.size && u.total <= 0) return;
+    const label = MODEL_LABEL ? (MODEL_LABEL[modelKey(r.brand, r.model)] || mfrModelLabel(r.brand, r.model)) : mfrModelLabel(r.brand, r.model);
+    const e = agg.get(label) || { name:label, brand:canonicalBrand(r.brand), bev:0, phev:0, other:0, total:0 };
+    e.bev += u.bev * f; e.phev += u.phev * f; e.total += u.total * f; e.other = e.total - e.bev - e.phev; agg.set(label, e);
+  }));
+  return [...agg.values()].sort((a, b) => b.total - a.total).slice(0, n);
+}
+function listRowsHTML(items, hov, pctBase){
+  const denom = Math.max(1, ...items.map(x => x.total));
+  return items.map((x, i) => {
+    const seg = segmentsHTML([{ value:x.bev, color:COLORS.bev, label:`BEV: ${fmt(x.bev)}` }, { value:x.phev, color:COLORS.phev, label:`PHEV: ${fmt(x.phev)}` }, { value:x.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(x.other)}` }], denom);
+    return `<div class="rank-row${x.sel ? ' is-sel' : ''}" data-hov="${hov}" data-key="${esc(x.key || x.name)}" data-total="${Math.round(x.total)}">${brandRankBadgeHTML(i + 1, x.name, `#${i + 1}`)}` +
+      `<span class="country-label">${esc(x.name)}${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</span><span class="pct-of-total">${pctBase ? (100 * x.total / pctBase).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(x.total)}</span></div>`;
+  }).join('');
+}
+const legendLite = () => `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
+
+// ---- the four sections ----
+function setCard(id, on){ document.getElementById(id).classList.toggle('hidden', !on); }
+function renderExtras(){
+  const md = mode(), market = md === 'market' && !ctry, picked = md !== 'market' && kind === 'brand';
+  setCard('wm-card', market); setCard('wc-card', market); setCard('gb-card', picked); setCard('gm-card', picked);
+  if(market){ renderWorldModels(); renderWorldCountries(); }
+  if(picked){ renderGroupBrands(); renderGroupModels(); }
+}
+const modelCountries = () => COUNTRIES.filter(c => (typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c]) || (typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' && MANUFACTURER_MODEL_MONTHLY[c]));
+function renderWorldModels(){
+  const host = document.getElementById('wm-rows'), note = document.getElementById('wm-note');
+  if(!MODEL_LABEL){ host.innerHTML = ''; note.textContent = 'The model files (about 24 MB) load when this section comes into view…'; watchModels(); return; }
+  const cs = modelCountries(), all = modelRowsOf(cs, null, 1e9), items = all.slice(0, 50).map(m => ({ ...m, sub:m.brand, key:m.name })), base = all.reduce((s, m) => s + m.total, 0);
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + listRowsHTML(items, 'model', base);
+  note.textContent = `The 50 best-selling models of ${periodLabel(period)} in the ${cs.length} countries with model-level data (${fmt(base)} units, all models). The % is the share of those sales. Hover a model for its last 10 years and the countries it sells in.`;
+}
+function renderWorldCountries(){
+  const host = document.getElementById('wc-rows'), note = document.getElementById('wc-note');
+  const items = Object.entries(byCountry).map(([c, d]) => ({ name:c, key:c, ...d.list.reduce((s, a) => ({ bev:s.bev + a.bev, phev:s.phev + a.phev, other:s.other + a.other, total:s.total + a.total }), { bev:0, phev:0, other:0, total:0 }) })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  const base = items.reduce((s, x) => s + x.total, 0);
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + listRowsHTML(items, 'country', base);
+  note.textContent = `Total new-vehicle sales of ${periodLabel(period)} in the ${items.length} countries with brand data (${fmt(base)} units): the market of each country, every brand together. The % is the share of these tracked sales. Hover a country for its last 10 years and its best-selling ${groupMode === 'group' ? 'groups' : 'brands'}; click its name to focus the page on it.`;
+}
+function selectedGroups(){
+  const yr = periodYear(period), out = [];
+  [mfr, mfr2].filter(Boolean).forEach(n => { const g = groupMode === 'group' ? n : groupOfBrand(n, yr); let o = out.find(x => x.group === g); if(!o){ o = { group:g, picks:[] }; out.push(o); } o.picks.push(n); });
+  return out;
+}
+const scopeNow = () => ctry ? [ctry] : Object.keys(byCountry);
+function renderGroupBrands(){
+  const host = document.getElementById('gb-rows'), note = document.getElementById('gb-note'), groups = selectedGroups(), cs = scopeNow();
+  document.getElementById('gb-title').textContent = `Sales by group brand — ${groups.map(g => g.group).join(' and ')}${ctry ? ' in ' + ctry : ''}`;
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + groups.map(g => {
+    const items = brandRowsOf(g.group, cs).map(b => ({ ...b, key:b.name, sel:g.picks.includes(b.name) })), base = items.reduce((s, b) => s + b.total, 0);
+    return `<div class="ctry-sub-note"><b>${esc(g.group)}</b> · ${items.length} brands · ${fmt(base)} units</div>` + (items.length ? listRowsHTML(items, 'gbrand', base) : '<p class="note" style="display:block">No brand-level sales recorded for this group in this period.</p>');
+  }).join('');
+  note.textContent = `Every brand of the parent group, ${periodLabel(period)}${ctry ? ', ' + ctry : ', in the countries with brand data'}. The % is the brand's share of the group's sales there. Hover a brand for its last 10 years and its top 10 models.`;
+}
+function renderGroupModels(){
+  const host = document.getElementById('gm-rows'), note = document.getElementById('gm-note'), groups = selectedGroups(), cs = scopeNow();
+  document.getElementById('gm-title').textContent = `Sales by group model — ${groups.map(g => g.group).join(' and ')}${ctry ? ' in ' + ctry : ''}`;
+  if(!MODEL_LABEL){ host.innerHTML = ''; note.textContent = 'The model files (about 24 MB) load when this section comes into view…'; watchModels(); return; }
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + groups.map(g => {
+    const items = modelRowsOf(cs, (b, y) => groupOfBrand(b, y) === g.group, 50).map(m => ({ ...m, sub:m.brand, key:m.name })), base = items.reduce((s, m) => s + m.total, 0);
+    return `<div class="ctry-sub-note"><b>${esc(g.group)}</b> · top ${items.length} models</div>` + (items.length ? listRowsHTML(items, 'model', base) : '<p class="note" style="display:block">No model-level data for this group in this period.</p>');
+  }).join('');
+  note.textContent = `The best-selling models of the group's brands, ${periodLabel(period)}${ctry ? ', ' + ctry : ''} (model-level data exists for part of the countries). Hover a model for its last 10 years and its countries.`;
+}
+
+// ---- hover windows ----
+function brandsPanelHTML(countries){      // 3E: the brands of the selected group(s) in these countries, for the right of a hover window
+  return [mfr, mfr2].filter(Boolean).map(g => {
+    const items = brandRowsOf(g, countries), max = items[0] ? items[0].total : 0;
+    return `<div class="mdl-title">Brands of ${esc(g)} · ${esc(periodLabel(period))}</div>` + (items.length ? items.map((b, i) => rowHTML(i + 1, b, max, false)).join('') : `<div class="sub">No brand-level data.</div>`);
+  }).join('');
+}
+function renderEntityHover(hov, key, row){
+  hoverPanel.classList.add('wide');
+  const per = periodLabel(period), total = +row.dataset.total || 0, k = 'hov|' + hov + '|' + key;
+  let title = key, left = '', right = '';
+  if(hov === 'country'){
+    const h = marketHistory(key), d = byCountry[key], list = d ? d.list.filter(a => !isOtherName(a.name)).slice(0, 10) : [], max = list[0] ? list[0].total : 0;
+    left = `<div class="mdl-title">Market, last 10 years (${esc(h.basis)})</div>` + barsHTML(years10(), [{ label:key, color:'var(--accent)', pts:h.pts }]);
+    right = `<div class="mdl-title">Top 10 ${groupMode === 'group' ? 'groups' : 'brands'} · ${esc(per)}</div>` + list.map((a, i) => rowHTML(i + 1, a, max, a.name === mfr || a.name === mfr2)).join('');
+  } else if(hov === 'model'){
+    const h = modelHistory(key), arr = [];
+    COUNTRIES.forEach(c => { if(ctry && c !== ctry) return; const a = modelMapFor(c, period).get(key); if(a && a.total > 0) arr.push({ name:c, bev:a.bev, phev:a.phev, other:a.other, total:a.total }); });
+    arr.sort((a, b) => b.total - a.total);
+    const top = arr.slice(0, 10), max = top[0] ? top[0].total : 0;
+    left = `<div class="mdl-title">Last 10 years (${esc(h.basis)})</div>` + barsHTML(years10(), [{ label:key, color:brandColor(MODEL_BRAND[key] || key), pts:h.pts }]);
+    right = `<div class="mdl-title">Top 10 countries · ${esc(per)} (${arr.length} with sales)</div>` + top.map((a, i) => rowHTML(i + 1, a, max, false)).join('');
+  } else {                                   // 'brand' (a ranking row) / 'gbrand' (a brand inside the group section)
+    const asGroup = hov === 'brand' && groupMode === 'group', h = entityHistory(key, asGroup), cs = ctry ? [ctry] : Object.keys(byCountry);
+    left = `<div class="mdl-title">Last 10 years (${esc(h.basis)})</div>` + barsHTML(years10(), [{ label:key, color:brandColor(key), pts:h.pts }]);
+    if(asGroup){
+      const items = brandRowsOf(key, cs), max = items[0] ? items[0].total : 0;
+      right = `<div class="mdl-title">All brands of ${esc(key)} · ${esc(per)}</div>` + (items.length ? items.map((b, i) => rowHTML(i + 1, b, max, false)).join('') : '<div class="sub">No brand-level data.</div>');
+    } else if(!MODEL_LABEL){
+      right = `<div class="mdl-title">Top 10 models · ${esc(per)}</div><div class="sub">Loading model data…</div>`;
+      loadModelsQuiet().then(() => { if(hoverKey === k) renderEntityHover(hov, key, row); });
+    } else {
+      const top = modelRowsOf(modelCountries().filter(c => !ctry || c === ctry), (b) => canonicalBrand(b) === key, 10), max = top[0] ? top[0].total : 0;
+      right = `<div class="mdl-title">Top 10 models · ${esc(per)}</div>` + (top.length ? top.map((m, i) => rowHTML(i + 1, m, max, false)).join('') : '<div class="sub">No model-level data for this brand in this period.</div>');
+    }
+  }
+  hoverPanel.innerHTML = `<h3>${esc(title)}</h3><div class="sub">${esc(per)}${total ? ' · ' + fmt(total) + ' vehicles' : ''}</div><div class="hv-grid"><div class="hv-left">${left}</div><div class="hv-right">${right}</div></div>`;
+}
+document.addEventListener('mousemove', e => {
+  const row = e.target.closest && e.target.closest('.rank-row[data-hov]');
+  if(!row || !(e.target.closest('.country-label') || e.target.closest('.bar-track') || e.target.closest('.world-rank-badge'))){ if(hoverKey && hoverKey.startsWith('hov|')) hideHover(); return; }
+  const k = 'hov|' + row.dataset.hov + '|' + row.dataset.key;
+  if(k !== hoverKey){ hoverKey = k; renderEntityHover(row.dataset.hov, row.dataset.key, row); }
+  hoverPanel.style.opacity = 1; placeHover(e);
+});
+document.addEventListener('mouseleave', () => { if(hoverKey && hoverKey.startsWith('hov|')) hideHover(); });
+document.addEventListener('click', e => { const l = e.target.closest && e.target.closest('.rank-row[data-hov="country"] .country-label'); if(l) setCountry(l.closest('.rank-row').dataset.key); });
 
 // ---------- wiring ----------
 
