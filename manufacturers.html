@@ -118,6 +118,8 @@
   .rank-row.is-sel{ background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:8px; box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
   .map-svg .country.has-data{ cursor:pointer; }
   .ctry-sub-note{ margin:6px 0 2px; font-size:12px; color:var(--text-muted); }
+  .bw-hr{ border:0; border-top:1px solid var(--border); margin:6px 0; }
+  .bw-lg .bw-who{ font-weight:800; }
   #continent-bars .rank-row, #country-bars .rank-row{ will-change:transform; }
   /* ---------- compare toggles (country / continent cards) and reported-vs-tracked rows ---------- */
   .cmp-bar{ display:flex; flex-wrap:wrap; gap:12px 26px; align-items:center; margin:6px 0 16px; padding:12px 14px; border-radius:16px; background:var(--surface-alt); border:1px solid var(--border); }
@@ -1297,48 +1299,61 @@ function renderSpotlightCountry(){
 }
 
 // ---------- Country filter: the selected manufacturer / model in that country, year by year and month by month ----------
+// the picked country's sales per year (the top chart while a country is picked): the whole market, or the picked manufacturer(s) side by side
+function renderCountryYears(host, title, note){
+  const names = [mfr, mfr2].filter(Boolean), ys = [...YEARS].sort((a, b) => a - b);
+  host.innerHTML = '';
+  const sers = (names.length ? names : [null]).map((name, i) => {
+    const vals = new Map();
+    ys.forEach(y => {
+      const a = aggregate(ctry, y === CUR_YEAR ? { type:'year', year:y, projected:true } : { type:'year', year:y });
+      if(!a.size) return;
+      const e = name ? a.get(name) : [...a.values()].reduce((s, x) => ({ bev:s.bev + x.bev, phev:s.phev + x.phev, total:s.total + x.total }), { bev:0, phev:0, total:0 });
+      if(e && e.total > 0) vals.set(y, e);
+    });
+    return { name:name || `${ctry}: all tracked brands`, color:!name ? '#6366f1' : names.length > 1 ? matchColor(i + 1) : brandColor(name), vals };
+  });
+  const first = Math.min(...sers.flatMap(s => [...s.vals.keys()]));
+  title.textContent = names.length ? `${names.join(' vs. ')} in ${ctry} — sales per year` : `${ctry} — new-vehicle sales per year`;
+  if(!isFinite(first)){
+    host.innerHTML = `<p class="note" style="display:block">${names.length ? esc(names.join(' and ')) + ': no sales' : 'No manufacturer data'} recorded in ${esc(ctry)} in any year of the data.</p>`;
+    note.textContent = ''; return;
+  }
+  const mixTxt = e => e && e.total ? `BEV ${(100 * e.bev / e.total).toFixed(1)}% · PHEV ${(100 * e.phev / e.total).toFixed(1)}% of ${ctry} sales` : '';
+  sers.forEach(s => {
+    s.rows = [];
+    for(let y = first; y <= CUR_YEAR; y++){
+      const e = s.vals.get(y), proj = y === CUR_YEAR;
+      s.rows.push({ y, v:e ? Math.round(e.total) : 0, kind:proj ? 'proj' : 'a', bk:'w', none:`no ${s.name} sales recorded in ${ctry}`,
+        basis: proj ? `${CUR_YEAR} year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months (a run-rate, not a forecast)` : `sales / registrations in ${ctry}`, extra:mixTxt(e) });
+    }
+  });
+  const box = document.createElement('div'); box.className = 'bw-chart'; host.appendChild(box);
+  if(sers.length > 1) bwChartMulti(box, sers); else bwChart(box, sers[0].rows, sers[0].color);
+  note.innerHTML = `Sales in ${esc(ctry)} per year as reported by the country's source (${CUR_YEAR} is the year-to-date run-rate, hatched). ` +
+    (names.length ? 'Hover a bar for the change vs. the year before and the BEV / PHEV share.' : `The total of the brands tracked for ${esc(ctry)}; earlier years can cover fewer brands. Pick a manufacturer above to see it here.`);
+}
+
 function renderCtryCard(){
   const card = document.getElementById('ctry-card'), host = document.getElementById('ctry-bars'), md = mode();
   if(!ctry || md === 'market'){ card.classList.add('hidden'); host.innerHTML = ''; return; }
   card.classList.remove('hidden');
   const names = md === 'match' ? [mfr, mfr2] : [mfr];
-  document.getElementById('ctry-title').textContent = `${names.join(' vs. ')} in ${ctry}`;
   host.innerHTML = '';
-  const mixTxt = a => a && a.total ? `BEV ${(100 * a.bev / a.total).toFixed(1)}% · PHEV ${(100 * a.phev / a.total).toFixed(1)}% of ${esc(ctry)} sales` : '';
-  let any = false;
-  names.forEach((name, i) => {
-    const col = names.length > 1 ? matchColor(i + 1) : brandColor(name);
-    const byYear = new Map();
-    [...YEARS].sort((a, b) => a - b).forEach(y => {
-      const p = y === CUR_YEAR ? { type:'year', year:y, projected:true } : { type:'year', year:y };
-      const a = aggregate(ctry, p).get(name); if(a && a.total > 0) byYear.set(y, a);
-    });
-    if(!byYear.size){ host.insertAdjacentHTML('beforeend', `<p class="note" style="display:block">${esc(name)}: no sales recorded in ${esc(ctry)} in any year of the data.</p>`); return; }
-    any = true;
-    const first = Math.min(...byYear.keys()), rows = [];
-    for(let y = first; y <= CUR_YEAR; y++){
-      const a = byYear.get(y), proj = y === CUR_YEAR;
-      rows.push({ y, v:a ? Math.round(a.total) : 0, kind:proj ? 'proj' : 'a', bk:'w', none:`no ${name} sales recorded in ${ctry}`,
-        basis: proj ? `${CUR_YEAR} year-to-date x 12 / ${CUR_YEAR_MONTHS_ELAPSED} months (a run-rate, not a forecast)` : `sales / registrations in ${ctry}`, extra: mixTxt(a) });
-    }
-    const box = document.createElement('div'); host.appendChild(box);
-    box.innerHTML = `<div class="bw-sub">${esc(name)}<small>${esc(ctry)} · ${first}–${CUR_YEAR} per year</small></div><div class="bw-chart"></div>`;
-    bwChart(box.querySelector('.bw-chart'), rows, col);
-    // the months on offer (the Period filter's months), when the country reports them
-    const mrows = MONTHS_SHOWN.slice().sort().map(m => {
-      const a = aggregate(ctry, { type:'month', ym:m }).get(name);
-      return { y:`${MONTH_NAMES[+m.slice(5) - 1].slice(0, 3)} ${m.slice(2, 4)}`, v:a ? Math.round(a.total) : 0, kind:'a', bk:'m', none:`no ${name} sales recorded in ${ctry}`, basis:`${MONTH_NAMES[+m.slice(5) - 1]} ${m.slice(0, 4)}`, extra:mixTxt(a) };
-    });
-    if(mrows.filter(r => r.v > 0).length >= 2){
-      const mbox = document.createElement('div'); host.appendChild(mbox);
-      mbox.innerHTML = `<div class="ctry-sub-note">${esc(name)} · month by month</div><div class="bw-chart"></div>`;
-      bwChart(mbox.querySelector('.bw-chart'), mrows, col);
-    }
-  });
-  document.getElementById('ctry-note').textContent = any
-    ? `Full years as reported for ${ctry} (${CUR_YEAR} is the year-to-date run-rate, hatched), then the latest months. Hover a bar for the change vs. the year before and the BEV / PHEV share. The Period filter above still sets which period the spotlight and the brand ranking show.`
-    : '';
+  const mixTxt = a => a && a.total ? `BEV ${(100 * a.bev / a.total).toFixed(1)}% · PHEV ${(100 * a.phev / a.total).toFixed(1)}% of ${ctry} sales` : '';
+  const ms = MONTHS_SHOWN.slice().sort();
+  const sers = names.map((name, i) => ({ name, color:names.length > 1 ? matchColor(i + 1) : brandColor(name), rows:ms.map(m => {
+    const a = aggregate(ctry, { type:'month', ym:m }).get(name), lbl = `${MONTH_NAMES[+m.slice(5) - 1].slice(0, 3)} ${m.slice(2, 4)}`;
+    return { y:lbl, v:a ? Math.round(a.total) : 0, kind:'a', bk:'m', none:`no ${name} sales recorded in ${ctry}`, basis:`${MONTH_NAMES[+m.slice(5) - 1]} ${m.slice(0, 4)}`, extra:mixTxt(a) };
+  }) }));
+  const shown = sers.some(s => s.rows.filter(r => r.v > 0).length >= 2);
+  if(!shown){ card.classList.add('hidden'); return; }
+  document.getElementById('ctry-title').textContent = `${names.join(' vs. ')} in ${ctry} — month by month`;
+  const box = document.createElement('div'); box.className = 'bw-chart'; host.appendChild(box);
+  if(sers.length > 1) bwChartMulti(box, sers); else bwChart(box, sers[0].rows, sers[0].color);
+  document.getElementById('ctry-note').textContent = `The latest months reported for ${ctry} (the months the Period filter offers). Hover a bar for the change vs. the month before and the BEV / PHEV share.`;
 }
+
 // dotted line from the top of each series' first-year bar across to the last year, with the change written at its end
 function drawHistRef(histEl, series){
   const box = histEl.querySelector('.fx-hist'); if(!box) return;
@@ -1963,10 +1978,10 @@ const niceStep = x => { const p10 = Math.pow(10, Math.floor(Math.log10(x))), f =
 const signPct = x => (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(1) + '%';
 const upDn = x => x >= 0 ? 'up' : 'dn';
 // hover card for one bar: value, change vs the year before and 5 years before, position against the best year of the same basis
-function bwStats(rows, i){
-  const r = rows[i];
-  if(!r.v) return `<b>${r.y}</b><br>${esc(r.none || 'no figure')}`;
-  const L = [`<b>${r.y}${r.kind === 'proj' ? ' · projected' : r.kind === 'e' ? ' · estimate' : ''}</b>`, `<span class="bw-big">${fmt(r.v)}</span> vehicles`];
+function bwStats(rows, i, name, col){
+  const r = rows[i], pre = name ? `<b style="color:${col}">${esc(name)}</b> · ` : '';     // a matchup chart names the series
+  if(!r.v) return `${pre}<b>${r.y}</b><br>${esc(r.none || 'no figure')}`;
+  const L = [`${pre}<b>${r.y}${r.kind === 'proj' ? ' · projected' : r.kind === 'e' ? ' · estimate' : ''}</b>`, `<span class="bw-big">${fmt(r.v)}</span> vehicles`];
   const prev = rows[i - 1];
   if(prev && prev.v){
     if(prev.bk === r.bk) L.push(`vs ${prev.y}: <b class="${upDn(r.v - prev.v)}">${signPct(100 * (r.v / prev.v - 1))}</b> (${r.v >= prev.v ? '+' : '−'}${fmt(Math.abs(r.v - prev.v))})`);
@@ -2009,6 +2024,37 @@ function bwChart(host, rows, color){
   };
   host.onmouseleave = () => { tip.style.opacity = 0; cur = -1; };
 }
+// rows of every series share the same years: [{name, color, rows:[{y, v, kind, bk, basis, extra, none}]}]; one chart with the series side by side for each year
+function bwChartMulti(host, series){
+  const n = series.length, R0 = series[0].rows, W = 940, H = 240, m = { t:24, r:10, b:26, l:46 };
+  const top0 = Math.max(1, ...series.flatMap(s => s.rows.map(r => r.v))), step = niceStep(top0 * 1.1 / 4), nT = Math.ceil(top0 * 1.04 / step), mx = nT * step, bw = (W - m.l - m.r) / R0.length;
+  const y = v => H - m.b - (v / mx) * (H - m.t - m.b), id = 'hx' + Math.random().toString(36).slice(2, 7);
+  let g = `<defs>${series.map((s, k) => `<pattern id="${id}${k}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="${s.color}26"/><line x1="0" y1="0" x2="0" y2="6" stroke="${s.color}" stroke-width="2.2"/></pattern>`).join('')}</defs>`;
+  for(let i = 0; i <= nT; i++){ const v = step * i; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : step >= 1e6 ? +(v / 1e6).toFixed(1) + ' M' : mFmt(v)}</text>`; }
+  const dense = R0.length > 10, gap = 3, w = Math.max(2, (bw - 2 * gap) / n);
+  R0.forEach((r0, i) => {
+    series.forEach((s, k) => {
+      const r = s.rows[i], x = m.l + i * bw + gap + k * w, fill = r.kind === 'proj' ? `url(#${id}${k})` : r.kind === 'p' ? s.color + '88' : r.kind === 'e' ? s.color + 'aa' : s.color;
+      if(r.v) g += `<rect x="${x}" y="${y(r.v)}" width="${w - 1}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${s.color}" stroke-dasharray="3 2"` : ''}/>`;
+      if(r.v && (!dense || i === 0 || i === R0.length - 1 || r.kind === 'proj' || r0.y % 5 === 0)) g += `<text class="vl" style="font-size:9px" x="${x + (w - 1) / 2}" y="${y(r.v) - 4}" text-anchor="middle">${mFmt(r.v)}</text>`;
+    });
+    if(!dense || i % 2 === 0 || i === R0.length - 1) g += `<text x="${m.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle">${r0.y}</text>`;
+    g += `<rect class="hit" data-i="${i}" x="${m.l + i * bw}" y="${m.t - 6}" width="${bw}" height="${H - m.t - m.b + 6}"/>`;
+  });
+  const lg = `<div class="bw-lg">${series.map(s => `<span><i style="background:${s.color}"></i><span class="bw-who">${esc(s.name)}</span>${s.sub ? ` <small>${esc(s.sub)}</small>` : ''}</span>`).join('')}</div>`;
+  host.innerHTML = `${lg}<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="bw-tip"></div>`;
+  const tip = host.querySelector('.bw-tip'); let cur = -1;
+  host.onmousemove = e => {
+    const h = e.target.closest && e.target.closest('.hit');
+    if(!h){ tip.style.opacity = 0; return; }
+    const i = +h.dataset.i; if(i !== cur){ tip.innerHTML = series.map(s => bwStats(s.rows, i, s.name, s.color)).join('<hr class="bw-hr">'); cur = i; }
+    const hr = host.getBoundingClientRect(); let x = e.clientX - hr.left + 14, yy = e.clientY - hr.top - tip.offsetHeight - 10;
+    if(x + tip.offsetWidth > hr.width) x = e.clientX - hr.left - tip.offsetWidth - 14;
+    if(yy < 0) yy = e.clientY - hr.top + 16;
+    tip.style.left = Math.max(0, x) + 'px'; tip.style.top = yy + 'px'; tip.style.opacity = 1;
+  };
+  host.onmouseleave = () => { tip.style.opacity = 0; cur = -1; };
+}
 // manufacturer / brand -> history group: by the parent group the holdings file gives
 const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|audi|porsche|škoda|skoda|seat\b|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
   [/hyundai|kia|genesis/i, 'Hyundai Motor Group'], [/ford motor|^ford$|lincoln/i, 'Ford Motor Company'], [/honda|acura/i, 'Honda'], [/nissan|infiniti/i, 'Nissan'], [/renault|dacia|alpine/i, 'Renault Group'],
@@ -2031,6 +2077,7 @@ function renderWorldBars(){
   const card = document.getElementById('world-card'), host = document.getElementById('world-bars'), title = document.getElementById('world-title'), note = document.getElementById('world-note');
   if(!WORLD_PW.length){ card.style.display = 'none'; return; }
   card.style.display = '';
+  if(ctry){ renderCountryYears(host, title, note); return; }      // a country is picked: this chart is that country's sales per year
   const names = kind === 'brand' ? [mfr, mfr2].filter(Boolean) : [];
   const groups = new Map(), missing = [];
   names.forEach(n => { const h = histFor(n); if(!h){ missing.push(n); return; } const e = groups.get(h.key) || { h, names:[] }; e.names.push(n); groups.set(h.key, e); });
@@ -2049,7 +2096,7 @@ function renderWorldBars(){
     note.innerHTML = `Worldwide new light-vehicle sales (cars, SUVs, pickups, light vans), ${WORLD_PW[0].y}–${last.y}${pj ? ` plus a ${pj.y} projection (${(100 * (pj.total / last.total - 1)).toFixed(1)}% vs ${last.y}; hatched)` : ''}. Same series as the <a href="world-car-sales.html">World Car Sales</a> page; earlier years are estimates (lighter bars), 2010–${last.y} anchor on the IEA's global figures. Hover a bar for the change vs the year before and 5 years before. Pick a manufacturer above to see its parent group instead.`;
     return;
   }
-  const palette = ['#e11d48', '#0ea5e9'], keys = [...groups.keys()], usedBk = new Set();
+  const palette = ['#e11d48', '#0ea5e9'], keys = [...groups.keys()], usedBk = new Set(), built = [];
   [...groups.values()].forEach((e, ix) => {
     const grp = e.h.group, years = Object.keys(grp.s).map(Number).sort((a, b) => a - b), y0 = Math.max(2001, years[0]), col = palette[ix] || palette[0];
     const rows = [];
@@ -2061,12 +2108,27 @@ function renderWorldBars(){
     }
     const pj = groupProjection(grp), g = worldGrowth(), wpj = WORLD_PW.find(r => r.proj);
     if(pj) rows.push({ y:2026, v:pj, kind:'proj', bk:grp.b[2025] || 's', basis:`2025 × the world market trend (${signPct(100 * (g - 1))}); not a company forecast`, extra: wpj ? `≈ ${(100 * pj / wpj.total).toFixed(1)}% of the projected world market` : '' });
-    const box = document.createElement('div'); host.appendChild(box);
-    box.innerHTML = `<div class="bw-sub">${esc(e.h.key)}${e.names.some(n => n !== e.h.key) ? `<small>parent group of ${e.names.map(esc).join(', ')}</small>` : ''}<small>${years[0]}–${years[years.length - 1]}</small></div><div class="bw-chart"></div>` +
-      (grp.note ? `<p class="note" style="display:block;margin:2px 0 6px">${esc(grp.note)}</p>` : '');
-    bwChart(box.querySelector('.bw-chart'), rows, col);
+    built.push({ e, rows, col, grp });
+    if(groups.size === 1){
+      const box = document.createElement('div'); host.appendChild(box);
+      box.innerHTML = `<div class="bw-sub">${esc(e.h.key)}${e.names.some(n => n !== e.h.key) ? `<small>parent group of ${e.names.map(esc).join(', ')}</small>` : ''}<small>${years[0]}–${years[years.length - 1]}</small></div><div class="bw-chart"></div>` +
+        (grp.note ? `<p class="note" style="display:block;margin:2px 0 6px">${esc(grp.note)}</p>` : '');
+      bwChart(box.querySelector('.bw-chart'), rows, col);
+  
+    }
     e.col = col;
   });
+  if(built.length > 1){        // two groups: ONE chart, both side by side for every year
+    const ymin = Math.min(...built.map(x => x.rows[0].y)), ymax = Math.max(...built.map(x => x.rows[x.rows.length - 1].y));
+    const series = built.map(x => {
+      const byY = new Map(x.rows.map(r => [r.y, r])), rows = [];
+      for(let yy = ymin; yy <= ymax; yy++) rows.push(byY.get(yy) || { y:yy, v:0, kind:'a', bk:x.rows[0].bk, basis:'', none:'no figure (outside the published top 15–20)' });
+      return { name:x.e.h.key, sub:x.e.names.some(nm => nm !== x.e.h.key) ? 'parent group of ' + x.e.names.join(', ') : '', color:x.col, rows };
+    });
+    const box = document.createElement('div'); box.className = 'bw-chart'; host.appendChild(box);
+    bwChartMulti(box, series);
+    built.forEach(x => { if(x.grp.note) host.insertAdjacentHTML('beforeend', `<p class="note" style="display:block;margin:2px 0 6px">${esc(x.grp.note)}</p>`); });
+  }
   const sw = (bg, t) => `<span><i style="background:${bg}"></i>${t}</span>`, c0 = palette[0];
   host.insertAdjacentHTML('beforeend', `<div class="bw-lg">${usedBk.has('p') ? sw(c0 + '88', 'OICA production (lighter)') : ''}${usedBk.has('s') ? sw(c0, 'F&amp;I Tools sales') : ''}${usedBk.has('r') ? sw(c0, 'company-reported sales / deliveries') : ''}${sw(`repeating-linear-gradient(45deg,#fde7c8 0 3px,${c0} 3px 5px)`, '2026 projection')}</div>`);
   title.textContent = keys.length > 1 ? 'World sales of the two selected manufacturers' : `World sales · ${keys[0]}`;
