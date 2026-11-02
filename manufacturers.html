@@ -116,6 +116,14 @@
   .tl-chip.gone{ display:none; }
   .mfr-side .mfr-tl{ margin:0; }
   .rank-row.is-other .country-label{ font-style:italic; color:var(--text-muted); }
+  .gr-chart{ overflow-x:auto; padding-bottom:4px; }
+  .gr-chart svg{ display:block; max-width:none; }
+  .gr-chart text{ fill:var(--text-muted); font-size:10px; }
+  .gr-chart .gr-zero{ stroke:var(--text); stroke-width:1.2; }
+  .gr-chart .gr-grid{ stroke:var(--border); stroke-dasharray:2 4; }
+  .gr-chart .gr-hit{ fill:transparent; cursor:pointer; }
+  .gr-chart .gr-hit:hover{ fill:rgba(99,102,241,.10); }
+  .gr-chart .gr-axis-t{ font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
   .rank-rows.wrap-labels .rank-row .country-label{ width:170px; white-space:normal; text-overflow:clip; line-height:1.15; }
   .rank-rows.wrap-labels .rank-row .total-label{ width:84px; color:var(--text); font-weight:700; font-size:12px; }
   .rank-row[data-hov] .country-label, .rank-row[data-hov] .bar-track{ cursor:help; }
@@ -462,6 +470,18 @@
         <h2>World sales by country</h2>
         <p class="note" id="wc-note" style="display:block"></p>
         <div class="rank-rows wrap-labels" id="wc-rows"></div>
+      </div>
+
+      <div class="card chart-card" id="gr-card">
+        <div class="chart-header-row">
+          <h2 id="gr-title">Growth by country</h2>
+          <div class="chart-mode-toggle" role="group" aria-label="Variation shown" id="gr-toggle">
+            <button type="button" class="mode-btn active" data-gr="pct" title="Change in % vs the previous period">% variation</button>
+            <button type="button" class="mode-btn" data-gr="units" title="Change in number of units vs the previous period"># of units</button>
+          </div>
+        </div>
+        <p class="note" id="gr-note" style="display:block"></p>
+        <div id="gr-chart" class="gr-chart"></div>
       </div>
 
       <div class="card chart-card" id="bars-card">
@@ -2205,11 +2225,81 @@ function listRowsHTML(items, hov, pctBase){
 }
 const legendLite = () => `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
 
+// ---- Growth by country: change vs the previous comparable period, zero in the middle ----
+let growthMode = 'pct';
+const grCache = { sig:'', m:new Map() };
+function growthPeriods(){
+  const p = period;
+  if(p.type === 'month'){
+    const [y, m] = p.ym.split('-').map(Number), pm = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`, prev = { type:'month', ym:pm };
+    return { cur:p, prev, label:`${periodLabel(p)} vs ${periodLabel(prev)} (month on month)` };
+  }
+  const y = p.year, cur = y === CUR_YEAR ? { type:'year', year:y, projected:true } : p, prev = { type:'year', year:y - 1 };
+  return { cur, prev, label:`${y === CUR_YEAR ? `${y} projected (year to date x 12 / ${CUR_YEAR_MONTHS_ELAPSED})` : y} vs ${y - 1}` };
+}
+function growthVal(c, p, name){
+  const sig = [groupMode, kind, [...clsSel].sort().join(), [...motSel].sort().join(), MODEL_LABEL ? 1 : 0].join('|');
+  if(grCache.sig !== sig){ grCache.sig = sig; grCache.m.clear(); }
+  const k = c + '|' + JSON.stringify(p);
+  let a = grCache.m.get(k); if(!a){ a = aggregate(c, p); grCache.m.set(k, a); }
+  if(!a.size) return null;
+  if(name){ const e = a.get(name); return e ? e.total : 0; }
+  let s = 0; a.forEach(x => { s += x.total; }); return s;
+}
+function renderGrowth(){
+  const card = document.getElementById('gr-card'), host = document.getElementById('gr-chart'), note = document.getElementById('gr-note'), title = document.getElementById('gr-title');
+  if(ctry){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const names = [mfr, mfr2].filter(Boolean), series = names.length ? names : [null], pr = growthPeriods(), mk = growthMode === 'pct' ? 'pct' : 'd';
+  title.textContent = names.length ? `Growth by country — ${names.join(' vs. ')}` : 'Growth by country — total market';
+  document.querySelectorAll('#gr-toggle [data-gr]').forEach(b => b.classList.toggle('active', b.dataset.gr === growthMode));
+  const rows = [];
+  COUNTRIES.forEach(c => {
+    const per = series.map(n => { const cur = growthVal(c, pr.cur, n), prev = growthVal(c, pr.prev, n); if(cur == null || prev == null || !(prev > 0)) return null; return { cur, prev, pct:100 * (cur / prev - 1), d:cur - prev }; });
+    if(per.some(Boolean)) rows.push({ country:c, per });
+  });
+  rows.sort((a, b) => {                                                                                  // biggest growth first; in a matchup by the first brand, countries without it last (ordered by the second)
+    const a0 = a.per[0], b0 = b.per[0], a1 = a.per[1], b1 = b.per[1];
+    if(a0 && b0) return b0[mk] - a0[mk];
+    if(a0 || b0) return a0 ? -1 : 1;
+    return (b1 ? b1[mk] : -Infinity) - (a1 ? a1[mk] : -Infinity);
+  });
+  if(rows.length < 2){ host.innerHTML = '<p class="note" style="display:block">Not enough countries with data for both periods to draw the variation.</p>'; note.textContent = pr.label; return; }
+  const vals = rows.flatMap(r => r.per.filter(Boolean).map(q => q[mk])), abs = vals.map(Math.abs).sort((a, b) => a - b);
+  const maxAbs = abs[abs.length - 1] || 1, p90 = abs[Math.floor(abs.length * 0.9)] || maxAbs;
+  const cap = mk === 'pct' ? Math.max(50, Math.min(maxAbs, p90 * 1.5)) : maxAbs;                    // % mode: a few outliers do not flatten everything else
+  const n = series.length, H = 400, m = { t:22, r:10, b:104, l:58 }, plotH = H - m.t - m.b, y0 = m.t + plotH / 2, half = plotH / 2;
+  const bw = Math.max(n * 9 + 6, ((host.clientWidth || 900) - m.l - m.r) / rows.length), W = Math.round(m.l + m.r + bw * rows.length);      // real pixels, so the country names stay readable; a narrow column scrolls sideways
+  const yv = v => y0 - Math.max(-cap, Math.min(cap, v)) / cap * half, fmtT = v => mk === 'pct' ? (v > 0 ? '+' : '') + Math.round(v) + '%' : (v > 0 ? '+' : v < 0 ? '−' : '') + compactN(Math.abs(v));
+  let g = '';
+  [-1, -.5, 0, .5, 1].forEach(f => { const v = f * cap, yy = y0 - f * half; g += `<line class="${f === 0 ? 'gr-zero' : 'gr-grid'}" x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}"/><text x="${m.l - 6}" y="${yy + 3.5}" text-anchor="end">${f === 0 ? '0' : fmtT(v)}</text>`; });
+  g += `<text class="gr-axis-t" x="${m.l + 6}" y="${m.t + 10}" style="fill:#16a34a">▲ growth</text><text class="gr-axis-t" x="${m.l + 6}" y="${H - m.b - 5}" style="fill:#dc2626">▼ decline</text>`;
+  const w = Math.max(2, (bw - 3) / n);
+  rows.forEach((r, i) => {
+    const x0 = m.l + i * bw;
+    r.per.forEach((q, k) => {
+      if(!q) return;
+      const v = q[mk], top = yv(v), x = x0 + 1.5 + k * w, col = v >= 0 ? '#16a34a' : '#dc2626';
+      g += `<rect x="${x}" y="${Math.min(top, y0)}" width="${Math.max(1.5, w - 1)}" height="${Math.max(1, Math.abs(top - y0))}" rx="1.5" fill="${col}" fill-opacity="${k === 0 ? 1 : .45}" stroke="${col}" stroke-width="${k === 0 ? 0 : 1}"/>`;
+      if(Math.abs(v) > cap) g += `<text x="${x + w / 2}" y="${v > 0 ? m.t - 1 : H - m.b + 1}" text-anchor="middle" style="font-size:9px;font-weight:800;fill:${col}">${v > 0 ? '▲' : '▼'}</text>`;
+    });
+    g += `<text transform="translate(${x0 + bw / 2},${H - m.b + 16}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
+    const tip = `${r.country}: ` + r.per.map((q, k) => q ? `${series[k] ? series[k] + ' ' : ''}${fmt(q.prev)} → ${fmt(q.cur)} (${q.pct >= 0 ? '+' : ''}${q.pct.toFixed(1)}%, ${q.d >= 0 ? '+' : '−'}${fmt(Math.abs(q.d))} units)` : `${series[k] ? series[k] + ': ' : ''}no data in both periods`).join(' · ');
+    g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotH}"><title>${esc(tip)}</title></rect>`;
+  });
+  const lg = n > 1 ? `<div class="bw-lg">${series.map((s, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
+  host.innerHTML = `${lg}<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Growth by country">${g}</svg>`;
+  note.textContent = `${pr.label}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the scale stops at ±${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
+}
+document.getElementById('gr-toggle').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if(!b) return; growthMode = b.dataset.gr; renderGrowth(); });
+document.getElementById('gr-chart').addEventListener('click', e => { const r = e.target.closest('.gr-hit'); if(r) setCountry(r.dataset.country); });
+
 // ---- the four sections ----
 function setCard(id, on){ document.getElementById(id).classList.toggle('hidden', !on); }
 function renderExtras(){
   const md = mode(), market = md === 'market' && !ctry, picked = md !== 'market' && kind === 'brand';
   setCard('wm-card', market); setCard('wc-card', market); setCard('gb-card', picked); setCard('gm-card', picked);
+  renderGrowth();
   if(market){ renderWorldModels(); renderWorldCountries(); }
   if(picked){ renderGroupBrands(); renderGroupModels(); }
 }
