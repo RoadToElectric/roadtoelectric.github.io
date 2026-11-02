@@ -528,6 +528,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/filter-memory.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
@@ -4212,7 +4213,10 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topology => {
   const geo = topojson.feature(topology, topology.objects.countries);
   geoFeatures = geo.features;
   projection.fitExtent([[10,10],[930,450]], geo);
+  // opened without a query string: bring back the last filters (assets/filter-memory.js); a shared link with its own query always wins
+  if(!window.location.search && window.FilterMemory){ const sv = FilterMemory.load(); if(sv && sv.qs) history.replaceState(null, '', window.location.pathname + '?' + sv.qs); }
   applyURLState();
+  mixStateReady = true;
   recompute();
 });
 
@@ -5349,6 +5353,7 @@ function recompute(){
 
 // --- URL state sync: keeps the current period, country focus, and filters in the address bar
 // so copying the URL reproduces the same view for whoever opens it ---
+var mixStateReady = false;      // set once the saved / URL state has been applied, so the first render cannot overwrite what was remembered
 function updateURL(){
   const params = new URLSearchParams();
   const period = [...selectedMonths][0];
@@ -5361,6 +5366,7 @@ function updateURL(){
   if(selectedRankTiers.size !== RANK_TIER_KEYS.length) params.set('ranktiers', [...selectedRankTiers].join(','));
   const qs = params.toString();
   history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+  if(mixStateReady && window.FilterMemory) FilterMemory.save({ qs });
   if(typeof refreshFilterLayout === 'function') refreshFilterLayout();   // assets/mix-filter-layout.js: filter summaries / chips (every filter change ends here)
 }
 

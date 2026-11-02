@@ -905,5 +905,12 @@ document.getElementById('pe-play').addEventListener('click', () => {
 renderBubble();
 </script>
 <script src="assets/notes-toggle.js"></script>
+<script src="assets/filter-memory.js"></script>
+<script>
+FilterMemory.attach([
+  { key:'year', sel:'.pe-year-toggle', type:'seg' }, { key:'metric', sel:'.metric-toggle', type:'seg' }, { key:'era', sel:'#pe-era-dots', type:'seg', cls:'active' }
+]);
+FilterMemory.restore();
+</script>
 </body>
 </html>

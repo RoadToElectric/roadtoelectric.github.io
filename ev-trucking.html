@@ -1011,5 +1011,13 @@ playBtn.addEventListener('click', () => {
 hero(); insights(); fillSelect(); spotlight(); takeoff(); compare(); waffle(); segments(); oil(); fleet(); makers(); refresh();
 })();
 </script>
+<script src="assets/filter-memory.js"></script>
+<script>
+FilterMemory.attach([
+  { key:'mode', sel:'#seg-mode', type:'seg' }, { key:'metric', sel:'#seg-metric', type:'seg' }, { key:'year', sel:'#year', type:'range' },
+  { key:'hide', sel:'#hide-china', type:'check' }, { key:'stk', sel:'#stk-sel', type:'select' }, { key:'sp', sel:'#sp-sel', type:'select' }, { key:'shift', sel:'#shift', type:'check' }
+]);
+FilterMemory.restore();
+</script>
 </body>
 </html>

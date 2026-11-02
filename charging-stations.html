@@ -751,5 +751,13 @@ function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); r
 selected = 'Norway'; refresh();
 })();
 </script>
+<script src="assets/filter-memory.js"></script>
+<script>
+FilterMemory.attach([
+  { key:'year', sel:'#year-seg', type:'seg' }, { key:'scope', sel:'#scope-seg', type:'seg' }, { key:'mc', sel:'#map-country', type:'select' },
+  { key:'bc', sel:'#brand-country', type:'select' }, { key:'rk', sel:'#rk-toggle', type:'seg' }, { key:'co', sel:'#co-metric', type:'seg' }
+]);
+FilterMemory.restore();
+</script>
 </body>
 </html>

@@ -448,6 +448,7 @@
 <div class="mfr-modal bar-hover" id="bar-hover"></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="assets/filter-memory.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
@@ -1608,7 +1609,7 @@ function renderCmpBars(){
       `<div class="cmp-group"><span class="cmp-label">Split</span><button type="button" class="cmp-switch${on ? ' on' : ''}" data-split aria-pressed="${on}" ${cmpMode !== 'all' ? 'disabled' : ''} title="${cmpMode !== 'all' ? 'Pick All sales to split each bar into BEV and non-BEV' : 'Cut each bar into BEV and non-BEV (plug-in hybrids count as non-BEV)'}"><span class="track"><span class="knob"></span></span>BEV / Non-BEV split</button></div>`;
   });
 }
-function refreshBarCards(){ renderContinentBars(); renderCountryBars(); renderCmpBars(); }
+function refreshBarCards(){ renderContinentBars(); renderCountryBars(); renderCmpBars(); saveFilters(); }
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-cmp]');
   if(c){ cmpMode = c.dataset.cmp; refreshBarCards(); return; }
@@ -2166,6 +2167,13 @@ function refresh(rebuildMfr){
   renderQuick(window.__topBrands || [], MODEL_LABEL ? window.__topModels : []);
   renderMap();
   renderWorldBars();
+  saveFilters();
+}
+// the selections are remembered between pages (assets/filter-memory.js): period, brand / model (and the second one), country, group mode, metric, class, motorization, compare toggles
+function saveFilters(){
+  if(!window.FilterMemory) return;
+  FilterMemory.save({ period:selPeriod.value, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, country:selCountry.value,
+    group:groupMode, metric, cls:[...clsSel], mot:[...motSel], cmp:cmpMode, split:splitOn });
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);
@@ -2184,7 +2192,7 @@ document.querySelectorAll('[data-group]').forEach(b => b.onclick = () => {
   } else { mfr = ''; mfr2 = ''; }   // a group can't be split back into one brand
   refresh(true);
 });
-document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); });
+document.querySelectorAll('[data-metric]').forEach(b => b.onclick = () => { if(b.disabled) return; metric = b.dataset.metric; setActive('#metric-toggle', 'metric', metric); renderMap(); saveFilters(); });
 
 // ---------- period strips: year + month buttons, a play button and a scrubber, in the Period filter and above the continent / country charts ----------
 // The period is still the Period dropdown: every button sets it and refreshes the page, so the map, spotlight and both bar charts always agree.
@@ -2346,6 +2354,17 @@ function updateSegStatus(nCountries){
 
 buildPeriodSelect();
 selCountry.innerHTML = '<option value="">All countries</option>' + COUNTRIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+const savedFilters = window.FilterMemory ? FilterMemory.load() : null;
+if(savedFilters){        // put the visitor's last selections back (anything that no longer exists is ignored)
+  if([...selPeriod.options].some(o => o.value === savedFilters.period)) selPeriod.value = savedFilters.period;
+  if([...selCountry.options].some(o => o.value === savedFilters.country)) selCountry.value = savedFilters.country;
+  if(savedFilters.group === 'group'){ groupMode = 'group'; setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode); }
+  if(savedFilters.metric === 'share'){ metric = 'share'; setActive('#metric-toggle', 'metric', metric); }
+  (savedFilters.cls || []).forEach(k => clsSel.add(k)); (savedFilters.mot || []).forEach(k => motSel.add(k));
+  if(['all', 'bev', 'nonbev'].includes(savedFilters.cmp)) cmpMode = savedFilters.cmp;
+  splitOn = !!savedFilters.split && cmpMode === 'all';
+  mfr = savedFilters.mfr || ''; mfr2 = savedFilters.mfr2 || '';
+}
 readPeriod();
 renderSegUI();
 wireCombo(selMfr, document.getElementById('f-mfr-search'), document.getElementById('f-mfr-list'));
@@ -2361,6 +2380,10 @@ fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
   projection.fitExtent([[10, 10], [930, 450]], geo);
   computeGeoInfo();
   refresh(false);
+  if(savedFilters && (savedFilters.model || clsSel.size)) withModelData(() => {
+    if(savedFilters.model){ selModel.value = savedFilters.model; if(selModel.value){ selModel2.value = savedFilters.model2 && savedFilters.model2 !== savedFilters.model ? savedFilters.model2 : ''; selMfr.value = ''; selMfr2.value = ''; } }
+    refresh(false);
+  });
   loadLogos().then(() => renderLogos());   // logos arrive after the first paint
 });
 })();
