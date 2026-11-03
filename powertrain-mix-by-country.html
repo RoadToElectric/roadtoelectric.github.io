@@ -4116,7 +4116,7 @@ function renderTrendsChart(){
     const dotPts = pctSeries.filter(d => d[k] != null && (!isMonthly || d.kind === 'year' || d.kind === 'partial'));
     if(isMonthly){
       g.selectAll(`.trends-span-${k}`).data(dotPts).join('line')
-        .attr('class', `trends-span-${k} trend-span`).attr('x1', d => xScale(d.t0) + 2).attr('x2', d => xScale(d.t0 + d.w) - 2)
+        .attr('class', `trends-span-${k} trend-span`).attr('x1', d => xScale(d.t0 + d.w / 4) + 1).attr('x2', d => xScale(d.t0 + d.w * 3 / 4) - 1)     // the yearly bar is half the year wide, centred on its dot
         .attr('y1', d => yScale(d[k])).attr('y2', d => yScale(d[k])).attr('stroke', FUEL_COLORS[k]).attr('stroke-width', 5).attr('stroke-linecap', 'round').style('opacity', .3).style('pointer-events', 'none');
     }
     g.selectAll(`.trends-dot-${k}`).data(dotPts).join('circle')
