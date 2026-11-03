@@ -125,6 +125,8 @@
   .gr-chart .gr-hit{ fill:transparent; cursor:pointer; }
   .gr-chart .gr-hit:hover{ fill:rgba(99,102,241,.10); }
   .gr-chart .gr-axis-t{ font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  #gr-fuel .mode-btn[data-gf="bev"].active{ background:linear-gradient(135deg,#15803d,#1e8f5f); color:#fff; }
+  #gr-fuel .mode-btn[data-gf="ice"].active{ background:linear-gradient(135deg,#6b7280,#8a8f98); color:#fff; }
   .rank-rows.wrap-labels .rank-row .country-label{ width:170px; white-space:normal; text-overflow:clip; line-height:1.15; }
   .rank-rows.wrap-labels .rank-row .total-label{ width:84px; color:var(--text); font-weight:700; font-size:12px; }
   .rank-row[data-hov] .country-label, .rank-row[data-hov] .bar-track{ cursor:help; }
@@ -422,6 +424,11 @@
         <div class="chart-header-row">
           <h2 id="gr-title">Growth by country</h2>
           <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end">
+            <div class="chart-mode-toggle" role="group" aria-label="Powertrain" id="gr-fuel">
+              <button type="button" class="mode-btn active" data-gf="all" title="Every vehicle sold">All</button>
+              <button type="button" class="mode-btn" data-gf="bev" title="Battery-electric vehicles only: the growth of BEV units">BEV</button>
+              <button type="button" class="mode-btn" data-gf="ice" title="Everything that is not battery-electric (petrol, diesel, hybrids and plug-in hybrids): the growth of those units">ICE</button>
+            </div>
             <div class="chart-mode-toggle" role="group" aria-label="Compared with" id="gr-span">
               <button type="button" class="mode-btn" data-gs="mom" title="Compared with the previous month" hidden>vs prev. month</button>
               <button type="button" class="mode-btn active" data-gs="1" title="Compared with one year earlier">1 YoY</button>
@@ -2244,6 +2251,7 @@ const FLAG_ISO = {Iran:"ir",Pakistan:"pk","Saudi Arabia":"sa",UAE:"ae",Guatemala
 const flagUrl = c => FLAG_ISO[c] ? `https://flagcdn.com/24x18/${FLAG_ISO[c]}.png` : null;
 // ---- Growth by country: change vs the previous comparable period, zero in the middle ----
 let growthMode = 'pct';
+let growthFuel = 'all';                     // 'all' | 'bev' | 'ice' (ice = every unit that is not BEV)
 let growthSpan = null;                      // null = default (month view: previous month, year view: 1 YoY); otherwise 'mom', 1, 3 or 5
 const grCache = { sig:'', m:new Map() };
 function effSpan(){
@@ -2270,15 +2278,17 @@ function growthVal(c, p, name){
   const k = c + '|' + JSON.stringify(p);
   let a = grCache.m.get(k); if(!a){ a = aggregate(c, p); grCache.m.set(k, a); }
   if(!a.size) return null;
-  if(name){ const e = a.get(name); return e ? e.total : 0; }
-  let s = 0; a.forEach(x => { s += x.total; }); return s;
+  const fv = x => { const tt = Math.max(x.total, 0), b = Math.min(Math.max(x.bev || 0, 0), tt); return growthFuel === 'bev' ? b : growthFuel === 'ice' ? tt - b : tt; };
+  if(name){ const e = a.get(name); return e ? fv(e) : 0; }
+  let s = 0; a.forEach(x => { s += fv(x); }); return s;
 }
 function renderGrowth(){
   const card = document.getElementById('gr-card'), host = document.getElementById('gr-chart'), note = document.getElementById('gr-note'), title = document.getElementById('gr-title');
   if(ctry){ card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
   const names = [mfr, mfr2].filter(Boolean), series = names.length ? names : [null], pr = growthPeriods(), mk = growthMode === 'pct' ? 'pct' : 'd';
-  title.textContent = names.length ? `Growth by country — ${names.join(' vs. ')}` : 'Growth by country — total market';
+  title.textContent = (names.length ? `Growth by country — ${names.join(' vs. ')}` : 'Growth by country — total market') + (growthFuel === 'bev' ? ' · BEV' : growthFuel === 'ice' ? ' · ICE' : '');
+  document.querySelectorAll('#gr-fuel [data-gf]').forEach(b => b.classList.toggle('active', b.dataset.gf === growthFuel));
   document.querySelectorAll('#gr-toggle [data-gr]').forEach(b => b.classList.toggle('active', b.dataset.gr === growthMode));
   document.querySelectorAll('#gr-span [data-gs]').forEach(b => { b.hidden = b.dataset.gs === 'mom' && period.type !== 'month'; b.classList.toggle('active', b.dataset.gs === String(effSpan())); });
   const rows = [];
@@ -2328,9 +2338,10 @@ function renderGrowth(){
   });
   const lg = n > 1 ? `<div class="bw-lg">${series.map((s, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
   host.innerHTML = `${lg}<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Growth by country">${g}</svg>`;
-  note.textContent = `${pr.label}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the growth side of the scale stops at +${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
+  note.textContent = `${pr.label}${growthFuel === 'bev' ? ', BEV units only' : growthFuel === 'ice' ? ', ICE units only (everything that is not battery-electric: petrol, diesel, hybrids and plug-in hybrids)' : ''}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the growth side of the scale stops at +${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
 }
 document.getElementById('gr-toggle').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if(!b) return; growthMode = b.dataset.gr; renderGrowth(); });
+document.getElementById('gr-fuel').addEventListener('click', e => { const b = e.target.closest('[data-gf]'); if(!b) return; growthFuel = b.dataset.gf; renderGrowth(); });
 document.getElementById('gr-span').addEventListener('click', e => { const b = e.target.closest('[data-gs]'); if(!b) return; growthSpan = b.dataset.gs === 'mom' ? 'mom' : +b.dataset.gs; renderGrowth(); });
 document.getElementById('gr-chart').addEventListener('click', e => { const r = e.target.closest('.gr-hit'); if(r) setCountry(r.dataset.country); });
 
