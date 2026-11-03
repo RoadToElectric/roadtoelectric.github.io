@@ -100,6 +100,22 @@
   .wo-pie .sum{ font-size:13px; color:var(--text-muted); line-height:1.5; margin-top:6px; }
   .wo-pie .sum b{ color:var(--text); }
   @media (max-width:900px){ .wo-pies{ grid-template-columns:1fr; } }
+  .wi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px 22px; margin-top:12px; }
+  .wi-grp{ border:1px solid var(--border); border-radius:14px; padding:10px 14px 12px; background:var(--surface); }
+  .wi-grp h4{ margin:0 0 6px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); }
+  .wi-lv{ display:block; margin:8px 0 2px; font-size:12.5px; line-height:1.35; }
+  .wi-lv .row{ display:flex; align-items:center; gap:10px; }
+  .wi-lv input[type=range]{ flex:1; accent-color:var(--accent); min-width:0; }
+  .wi-lv .val{ min-width:58px; text-align:right; font-weight:900; font-variant-numeric:tabular-nums; }
+  .wi-lv .val.on{ color:var(--accent-2); }
+  .wi-lv .hint{ font-size:11.5px; color:var(--text-muted); }
+  .wi-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin:12px 0 4px; }
+  .wi-kpi{ border:1px solid var(--border); border-radius:14px; padding:10px 14px; background:var(--surface); border-left:4px solid var(--c, var(--accent)); }
+  .wi-kpi .v{ font-size:23px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .wi-kpi .l{ font-size:12px; color:var(--text-muted); line-height:1.4; }
+  .wi-up{ color:#dc2626; } .wi-dn{ color:#16a34a; }
+  .wi-story{ margin:10px 0 0; padding:10px 14px; border-radius:12px; background:var(--surface-alt); font-size:13px; line-height:1.55; }
+  .wi-story li{ margin:3px 0; }
   .wo-two{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; }
   @media (max-width:1000px){ .wo-two{ grid-template-columns:1fr; } .wo-brow{ grid-template-columns:110px 1fr 62px; } }
 </style>
@@ -207,20 +223,42 @@
         </div>
       </div>
 
+      <!-- 3b. what if -->
+      <div class="card chart-card" id="wi-card">
+        <h2>4 · What if…? Build your own oil scenario</h2>
+        <p class="wo-note">Move the levers and watch world oil demand change from today to 2060. Dashed line = <b>current trends</b> (every lever left at its default). The chart is a simple fleet model, not a forecast: <b>read the assumptions below</b>. “Electric” means battery-electric; plug-in hybrids still burn fuel.</p>
+        <div class="wo-frow" style="margin:2px 0 8px" id="wi-presets"></div>
+        <div class="wo-filters" id="wi-f">
+          <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Scenario levers</span><span class="wo-fsum" id="wi-fsum"></span><i class="wo-car">▾</i></button>
+          <div class="wo-fbody"><div class="wi-grid" id="wi-levers"></div></div>
+        </div>
+        <div class="wi-kpis" id="wi-kpis"></div>
+        <div class="wo-chart" id="wi-chart"></div>
+        <ul class="wi-story" id="wi-story" style="list-style:disc inside"></ul>
+        <details class="wo-method" style="margin-top:10px"><summary>Model assumptions (editable above where marked)</summary>
+          <ol>
+            <li><b>Starting point 2026</b> = the purposes of chart 1 (cars 22 mb/d, trucks, vans and buses 17, aviation 7, shipping 6, plastics and chemicals 16…). The 2026 world car fleet (1.35 billion) and its 4.9% battery-electric share come from the World Car Sales page.</li>
+            <li><b>Electric cars and trucks:</b> each year 5% of the car fleet (6% of the truck fleet) is scrapped and the fleet grows 1% (1.5%). New vehicles follow the electric sales share you choose, rising evenly from today's level (cars 18.8% in 2026, trucks about 10%) to your target at the target year, then held. Oil use of a fleet = what the same fleet would burn without electrics × the share of the fleet that is not electric. Electric vehicles are assumed to be driven like the vehicles they replace.</li>
+            <li><b>Current trends</b> (the defaults): electric new-car share 35% in 2030, 60% in 2040, 75% in 2050; electric new-truck share 15%, 30%, 45%; petrol and diesel vehicles gain 1.0% (cars) and 0.8% (trucks) fuel economy a year; air traffic grows 3% a year with 1.2% yearly efficiency gains (the IEA Oil 2025 outlook has jet fuel at +2.1% a year to 2030); shipping traffic +2% a year with 1% efficiency; feedstocks +1.8% a year (IEA: +2.0% LPG/ethane, +2.5% naphtha); heating, industry and other oil −0.8% a year. These are our assumptions, not IEA scenarios.</li>
+            <li><b>Not modelled:</b> price effects, rebound, biofuels in road fuels, ethane (not oil in some statistics), the oil used to make electricity, country differences. Power plants and refinery fuel move in step with final use.</li>
+          </ol>
+        </details>
+      </div>
+
       <!-- 3. US reality check -->
       <div class="card chart-card" id="us-card">
-        <h2>4 · Reality check: the United States, measured by sector (EIA)</h2>
+        <h2>5 · Reality check: the United States, measured by sector (EIA)</h2>
         <p class="wo-note">The only country where oil use is published by sector for every year since 1949. Real data, not an estimate: transport takes about 70% of US petroleum, industry and homes the rest.</p>
         <div class="wo-filters closed" id="us-f">
           <button type="button" class="wo-ftoggle" aria-expanded="false"><span>Filters</span><span class="wo-fsum" id="us-fsum"></span><i class="wo-car">▾</i></button>
-          <div class="wo-fbody"><div class="wo-frow"><label class="wo-fl">Show</label><div class="wo-seg" id="us-mode"><button type="button" data-v="sector" class="active">By sector</button><button type="button" data-v="product">Transport by fuel</button></div></div></div>
+          <div class="wo-fbody"><div class="wo-frow"><label class="wo-fl">Show</label><div class="wo-seg" id="us-mode"><button type="button" data-v="sector" class="active">By sector</button><button type="button" data-v="product">Transport by fuel</button></div><div class="wo-seg" id="us-unit"><button type="button" data-v="abs" class="active">Million barrels / day</button><button type="button" data-v="pct">% of US oil</button></div></div></div>
         </div>
         <div class="wo-chart" id="us-chart"></div>
       </div>
 
       <!-- 4. production -->
       <div class="card chart-card" id="pr-card">
-        <h2>5 · Oil produced by country, 1960–2025</h2>
+        <h2>6 · Oil produced by country, 1960–2025</h2>
         <p class="wo-note" id="pr-note"></p>
         <div class="wo-filters" id="pr-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="pr-fsum"></span><i class="wo-car">▾</i></button>
@@ -245,7 +283,7 @@
       </div>
 
       <div class="card chart-card" id="rk-card">
-        <h2>6 · Who pumped the most, year by year</h2>
+        <h2>7 · Who pumped the most, year by year</h2>
         <p class="wo-note">Top producers of the selected year (regions as ticked above). Press play to watch the ranking change from 1960.</p>
         <div class="wo-frow" style="margin:0 0 6px"><button type="button" class="wo-play" id="rk-play" aria-label="Play">▶</button>
           <div class="wo-range"><input type="range" id="rk-year" min="1960" max="2025" value="2025" style="width:300px"><b id="rk-yl" style="font-size:20px;color:var(--text)">2025</b></div>
@@ -264,6 +302,7 @@
           <li><b>Cars vs trucks is an estimate.</b> The IEA does not split road oil. We anchor it on the IEA 2017 truck study (trucks use about 17 mb/d, roughly 44% of road oil) and assume trucks, vans and buses were 25% of road oil in 1971, rising evenly to 44% in 2017. Cars, SUVs and motorbikes are the rest. IEA and other estimates put cars at 21–24 mb/d, the same range as our 22.</li>
           <li><b>1950–1970 are estimates:</b> the IEA series starts in 1971, so we keep the 1971 shares and the 1971 ratio between final consumption and total oil. In reality transport was probably smaller and fuel oil for heat and industry larger. <b>2020–2026 are estimates too:</b> each sector follows the IEA Oil 2025 forecast of the fuel it burns (gasoline for cars, diesel for trucks, jet fuel for planes, fuel oil for ships, LPG and naphtha for chemicals). Hatched bands mark these years in the first chart.</li>
           <li><b>“Power plants, refineries &amp; other conversion”</b> is what remains of total oil after the IEA's final-consumption sectors: oil burnt for electricity, refinery fuel, losses and the definition gap between the two sources.</li>
+          <li><b>What-if scenarios (section 4)</b> run a simple fleet model from the 2026 estimate; the assumptions are listed under the chart. They illustrate orders of magnitude, they are not forecasts.</li>
           <li><b>Production by country, 1960–2025:</b> Energy Institute / Our World in Data, crude oil and condensate. Russia includes the Soviet Union before 1985 (the data only splits the republics from 1985). The United States figures of chart 3 come from the US Energy Information Administration (Monthly Energy Review).</li>
         </ol>
         <div id="method-table"></div>
@@ -317,6 +356,8 @@ function stackedArea(host, years, series, o){
     let a = null; years.forEach((yy, i) => { const e = o.est(yy); if(e && a == null) a = yy; if((!e || i === years.length - 1) && a != null){ const b = e ? yy : years[i - 1] + 0.0; g.append('rect').attr('x', x(a)).attr('width', Math.max(2, x(Math.max(b, a)) - x(a))).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', `url(#${id})`).style('pointer-events', 'none'); a = null; } }); }
   const ticks = d3.range(Math.ceil(years[0] / 10) * 10, years[years.length - 1] + 1, 10);
   g.append('g').selectAll('text').data(ticks).join('text').attr('x', d => x(d)).attr('y', H - 8).attr('text-anchor', 'middle').text(d => d);
+  if(o.overlay){ g.append('path').datum(years.map((yy, i) => [yy, o.overlay.vals[i]])).attr('fill', 'none').attr('stroke', o.overlay.color).attr('stroke-width', 2).attr('stroke-dasharray', '6 4').attr('d', d3.line().x(d => x(d[0])).y(d => y(d[1])).curve(d3.curveMonotoneX)).style('pointer-events', 'none'); }
+  (o.mark || []).forEach(([yy, lb]) => { if(yy < years[0] || yy > years[years.length - 1]) return; g.append('line').attr('x1', x(yy)).attr('x2', x(yy)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--text)').attr('stroke-opacity', .55).attr('stroke-dasharray', '3 3').style('pointer-events', 'none'); g.append('text').attr('x', x(yy) + 4).attr('y', m.t + 11).style('font-weight', 800).style('fill', 'var(--text)').text(lb); });
   const rule = g.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--text)').attr('stroke-opacity', .5).style('opacity', 0);
   svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent').style('cursor', 'crosshair')
     .on('mousemove', e => {
@@ -432,18 +473,131 @@ function drawTransport(){
   drawTransport();
 })();
 
-// ---------- 3. US (EIA) ----------
-let usMode = 'sector';
+// ---------- 4. what if ----------
+const WI = { clamp:(v, a, b) => Math.max(a, Math.min(b, v)) };
+const interp = (pts, y) => { if(y <= pts[0][0]) return pts[0][1]; for(let i = 1; i < pts.length; i++) if(y <= pts[i][0]){ const [a, va] = pts[i - 1], [b, vb] = pts[i]; return va + (vb - va) * (y - a) / (b - a); } return pts[pts.length - 1][1]; };
+const BASEPATH = { car:[[2026, 18.8], [2030, 35], [2040, 60], [2050, 75], [2060, 80]], truck:[[2026, 10], [2030, 15], [2040, 30], [2050, 45], [2060, 55]], avNon:[[2026, 0.5], [2040, 5], [2060, 12]], navNon:[[2026, 1], [2040, 15], [2060, 30]] };
+const WI_LEVERS = [
+  { id:'target', grp:'When', label:'Target year for the levers below', min:2030, max:2060, step:1, def:2040, fmt:v => v },
+  { id:'car', grp:'Cars', label:'Electric share of NEW cars at the target year', min:0, max:100, step:1, unit:'%', base:t => interp(BASEPATH.car, t) },
+  { id:'carEff', grp:'Cars', label:'Extra fuel economy of petrol and diesel cars by the target year', min:0, max:50, step:1, unit:'%', def:0 },
+  { id:'carFleet', grp:'Cars', label:'Car fleet growth', min:-1, max:3, step:.1, unit:'%/yr', def:1 },
+  { id:'truck', grp:'Trucks, vans & buses', label:'Electric share of NEW trucks, vans and buses at the target year', min:0, max:100, step:1, unit:'%', base:t => interp(BASEPATH.truck, t) },
+  { id:'truckEff', grp:'Trucks, vans & buses', label:'Extra fuel economy of diesel trucks by the target year', min:0, max:50, step:1, unit:'%', def:0 },
+  { id:'avTraffic', grp:'Aviation', label:'Air traffic growth', min:-2, max:6, step:.1, unit:'%/yr', def:3 },
+  { id:'avEff', grp:'Aviation', label:'Aircraft efficiency gain on top of the current trend (fuel per passenger-km)', min:0, max:70, step:1, unit:'%', def:0 },
+  { id:'avNon', grp:'Aviation', label:'Aviation fuel that is not oil at the target year (sustainable fuels, electric, hydrogen)', min:0, max:100, step:1, unit:'%', base:t => interp(BASEPATH.avNon, t) },
+  { id:'navTraffic', grp:'Shipping', label:'Shipping traffic growth', min:-2, max:6, step:.1, unit:'%/yr', def:2 },
+  { id:'navEff', grp:'Shipping', label:'Ship efficiency gain on top of the current trend', min:0, max:60, step:1, unit:'%', def:0 },
+  { id:'navNon', grp:'Shipping', label:'Shipping fuel that is not oil at the target year (ammonia, methanol, LNG, electric)', min:0, max:100, step:1, unit:'%', base:t => interp(BASEPATH.navNon, t) },
+  { id:'petGrowth', grp:'Plastics & chemicals', label:'Feedstock demand growth', min:-3, max:6, step:.1, unit:'%/yr', def:1.8 },
+  { id:'petSub', grp:'Plastics & chemicals', label:'Plastics replaced or recycled (feedstock avoided) at the target year', min:0, max:60, step:1, unit:'%', def:5 },
+  { id:'other', grp:'Everything else', label:'Heating, industry & other oil use, yearly change', min:-6, max:2, step:.1, unit:'%/yr', def:-0.8 }
+];
+const WIS = {}, WIT = {};                 // value, touched
+WI_LEVERS.forEach(l => { WIS[l.id] = l.def != null ? l.def : l.base(2040); WIT[l.id] = false; });
+const wiVal = (l, t) => WIT[l.id] || l.def != null ? WIS[l.id] : l.base(t);
+function wiRun(S, T){        // S: levers values, T: touched map -> {year: {purpose: mb/d, total}}
+  const U = k => useVal(k, 2026), tg = S.target, out = {};
+  const prog = t => WI.clamp((t - 2026) / (tg - 2026), 0, 1);
+  const lv = id => WI_LEVERS.find(l => l.id === id);
+  const share = (id, t, v0) => T[id] ? v0 + (S[id] - v0) * prog(t) : lv(id).base(t);       // untouched: the calendar baseline path
+  const fin0 = ['road_passenger', 'road_goods', 'aviation', 'navigation', 'rail', 'industry', 'nonenergy', 'residential', 'other'].reduce((q, k) => q + U(k), 0), nf0 = U('nonfinal') / fin0;
+  const E0c = 0.049, E0t = 0.01; let Ec = E0c, Et = E0t;
+  const C0 = U('road_passenger') / (1 - E0c), T0 = U('road_goods') / (1 - E0t);
+  for(let t = 2026; t <= 2060; t++){
+    const n = t - 2026;
+    if(t > 2026){
+      const bc = share('car', t, 18.8) / 100, bt = share('truck', t, 10) / 100, gC = S.carFleet / 100, sC = 0.05, gT = 0.015, sT = 0.06;
+      Ec = (Ec * (1 - sC) + bc * (sC + gC)) / (1 + gC); Et = (Et * (1 - sT) + bt * (sT + gT)) / (1 + gT);
+    }
+    const gC = S.carFleet / 100, cars = C0 * Math.pow((1 + gC) * 0.99, n) * (1 - Ec) * (1 - S.carEff / 100 * prog(t));
+    const trucks = T0 * Math.pow(1.015 * 0.992, n) * (1 - Et) * (1 - S.truckEff / 100 * prog(t));
+    const av = U('aviation') * Math.pow((1 + S.avTraffic / 100) * 0.988, n) * (1 - S.avEff / 100 * prog(t)) * (1 - share('avNon', t, 0.5) / 100);
+    const nav = U('navigation') * Math.pow((1 + S.navTraffic / 100) * 0.99, n) * (1 - S.navEff / 100 * prog(t)) * (1 - share('navNon', t, 1) / 100);
+    const ne = U('nonenergy') * Math.pow(1 + S.petGrowth / 100, n) * (1 - S.petSub / 100 * prog(t));
+    const og = Math.pow(1 + S.other / 100, n);
+    const o = { road_passenger:cars, road_goods:trucks, aviation:av, navigation:nav, rail:U('rail') * (1 - Et) / (1 - E0t), industry:U('industry') * og, nonenergy:ne, residential:U('residential') * og, other:U('other') * og };
+    const fin = Object.values(o).reduce((q, v) => q + v, 0); o.nonfinal = fin * nf0; o.total = fin + o.nonfinal; o.EVc = Ec; o.EVt = Et; out[t] = o;
+  }
+  return out;
+}
+const WI_YEARS = d3.range(2000, 2061);
+function wiDraw(){
+  const S = {}; WI_LEVERS.forEach(l => S[l.id] = wiVal(l, WIS.target));
+  const run = wiRun(S, WIT), base = wiRun((() => { const b = {}; WI_LEVERS.forEach(l => b[l.id] = l.def != null ? l.def : l.base(WIS.target)); return b; })(), {});
+  const tg = S.target, series = CATS.map(c => ({ key:c.k, label:c.label, color:c.color, vals:WI_YEARS.map(y => y <= 2026 ? useVal(c.k, y) : run[y][c.k]) }));
+  const totS = WI_YEARS.map(y => y <= 2026 ? tot(y) : run[y].total), totB = WI_YEARS.map(y => y <= 2026 ? tot(y) : base[y].total);
+  stackedArea(document.getElementById('wi-chart'), WI_YEARS, series, { h:440, est:yy => yy > 2026, overlay:{ vals:totB, label:'Current trends', color:'#111827' }, mark:[[2026, 'Today'], [tg, 'Target ' + tg]],
+    tip:(r, ss) => `<b>${r.year}</b> ${r.year > 2026 ? '<span class="est">scenario</span>' : r.year >= 2020 ? '<span class="est">estimate</span>' : ''}<div class="r"><span>Scenario total</span><b>${fmt1(totS[r.i])} mb/d</b></div>${r.year > 2026 ? `<div class="r"><span>Current trends</span><b>${fmt1(totB[r.i])} mb/d</b></div><div class="r"><span>Difference</span><b class="${totS[r.i] <= totB[r.i] ? 'wi-dn' : 'wi-up'}">${totS[r.i] - totB[r.i] >= 0 ? '+' : ''}${fmt1(totS[r.i] - totB[r.i])} mb/d</b></div>` : ''}${tipRows(r, ss, false)}` });
+  // KPIs
+  const t25 = tot(2025), vT = run[tg].total, vB = base[tg].total;
+  const yrs = d3.range(2026, 2061); const peak = yrs.reduce((m, y) => run[y].total > run[m].total ? y : m, 2026), peakB = yrs.reduce((m, y) => base[y].total > base[m].total ? y : m, 2026);
+  const trK = ['road_passenger', 'road_goods', 'aviation', 'navigation', 'rail'], trS = trK.reduce((q, k) => q + run[tg][k], 0);
+  const d = (a, b) => `<span class="${a <= b ? 'wi-dn' : 'wi-up'}">${a - b >= 0 ? '+' : ''}${fmt1(a - b)} mb/d</span>`;
+  document.getElementById('wi-kpis').innerHTML = [
+    ['#0a80d0', `${fmt1(vT)} mb/d`, `World oil use in ${tg} (${(100 * (vT / t25 - 1)).toFixed(0)}% vs 2025's ${fmt1(t25)})`],
+    ['#2fae4e', d(vT, vB), `vs current trends in ${tg} (${fmt1(vB)} mb/d)`],
+    ['#22d3ee', peak === 2026 && run[2026].total >= run[2027].total ? '2026 or earlier' : peak, `Year oil demand peaks (current trends: ${peakB === 2026 ? 'about now' : peakB})`],
+    ['#0b3a82', `${(100 * trS / vT).toFixed(0)}%`, `Transport share of oil in ${tg} (2024: ${(100 * trans(2024) / tot(2024)).toFixed(0)}%)`],
+    ['#8b5cf6', `${(100 * run[tg].EVc).toFixed(0)}% / ${(100 * run[tg].EVt).toFixed(0)}%`, `Share of the car fleet / truck fleet that is electric in ${tg}`]
+  ].map(([c, v, l]) => `<div class="wi-kpi" style="--c:${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  document.getElementById('wi-fsum').textContent = (Object.values(WIT).some(Boolean) ? 'custom scenario' : 'current trends') + ' · target ' + tg;
+  const names = Object.fromEntries(CATS.map(c => [c.k, c.label]));
+  const diffs = CATS.map(c => [c.label, run[tg][c.k], base[tg][c.k]]).filter(x => Math.abs(x[1] - x[2]) >= 0.15).sort((a, b) => Math.abs(b[1] - b[2]) - Math.abs(a[1] - a[2]));
+  document.getElementById('wi-story').innerHTML = diffs.length
+    ? `<li><b>In ${tg}, compared with current trends:</b></li>` + diffs.map(([l, a, b]) => `<li>${l}: ${fmt1(a)} mb/d (<span class="${a <= b ? 'wi-dn' : 'wi-up'}">${a - b >= 0 ? '+' : '−'}${fmt1(Math.abs(a - b))}</span> mb/d) — ${Math.abs(100 * (a / b - 1)) < 1 ? 'almost unchanged' : (a < b ? '' : '+') + (100 * (a / b - 1)).toFixed(0) + '%'}</li>`).join('') + `<li>Total: ${fmt1(vT)} mb/d against ${fmt1(vB)}: <b class="${vT <= vB ? 'wi-dn' : 'wi-up'}">${vT - vB >= 0 ? '+' : '−'}${fmt1(Math.abs(vT - vB))} mb/d (${(100 * (vT / vB - 1)).toFixed(0)}%)</b>, about ${fmt0(Math.abs(vT - vB) / 103 * 100)}% of today's world oil use.</li>`
+    : '<li>Every lever is at its default, so the scenario equals current trends. Pick a preset or move a lever.</li>';
+}
+function wiBuild(){
+  const host = document.getElementById('wi-levers'), groups = [...new Set(WI_LEVERS.map(l => l.grp))];
+  host.innerHTML = groups.map(g => `<div class="wi-grp"><h4>${g}</h4>${WI_LEVERS.filter(l => l.grp === g).map(l => `<label class="wi-lv"><span>${l.label}</span><span class="row"><input type="range" data-id="${l.id}" min="${l.min}" max="${l.max}" step="${l.step}" value="${wiVal(l, WIS.target)}"><span class="val" id="wv-${l.id}"></span></span><span class="hint" id="wh-${l.id}"></span></label>`).join('')}</div>`).join('');
+  host.addEventListener('input', e => { const el = e.target; if(el.type !== 'range') return; const id = el.dataset.id; WIS[id] = +el.value; WIT[id] = true; wiSync(); });
+  wiSync();
+}
+function wiSync(){
+  WI_LEVERS.forEach(l => {
+    const v = wiVal(l, WIS.target), inp = document.querySelector(`#wi-levers [data-id="${l.id}"]`);
+    if(!WIT[l.id] && l.def == null) inp.value = Math.round(v);
+    const val = document.getElementById('wv-' + l.id); val.textContent = (l.fmt ? l.fmt(v) : (l.step < 1 ? (+v).toFixed(1) : Math.round(v)) + (l.unit ? ' ' + l.unit : '')); val.classList.toggle('on', WIT[l.id]);
+    document.getElementById('wh-' + l.id).textContent = l.id === 'target' ? '' : l.base ? `current trends: ${Math.round(l.base(WIS.target))}${l.unit} at ${WIS.target}${WIT[l.id] ? ' · yours: ' + Math.round(WIS[l.id]) + l.unit : ''}` : `current trends: ${l.def}${l.unit ? ' ' + l.unit : ''}${WIT[l.id] ? ' · yours: ' + (+WIS[l.id]).toFixed(l.step < 1 ? 1 : 0) + (l.unit ? ' ' + l.unit : '') : ''}`;
+  });
+  wiDraw();
+}
+const WI_PRESETS = [
+  ['Current trends', {}],
+  ['100% electric new cars by 2035', { target:2035, car:100 }],
+  ['100% electric new cars and trucks by 2040', { target:2040, car:100, truck:100 }],
+  ['50% of new trucks electric by 2040', { target:2040, truck:50 }],
+  ['Planes 50% more efficient by 2045', { target:2045, avEff:50 }],
+  ['Cleaner ships: 60% non-oil by 2050', { target:2050, navNon:60 }],
+  ['Plastics boom: +4% a year', { petGrowth:4 }],
+  ['Everything at once', { target:2040, car:100, truck:100, avEff:50, avNon:30, navNon:60, petSub:30, carEff:25, truckEff:25 }]
+];
+(function initWhatIf(){
+  const ph = document.getElementById('wi-presets');
+  ph.innerHTML = WI_PRESETS.map(([n], i) => `<button type="button" class="wo-chip" data-i="${i}">${n}</button>`).join('') + '<button type="button" class="wo-mini" id="wi-reset">Reset</button>';
+  const apply = (obj) => { WI_LEVERS.forEach(l => { WIT[l.id] = false; WIS[l.id] = l.def != null ? l.def : l.base(2040); });
+    Object.entries(obj).forEach(([k, v]) => { WIS[k] = v; WIT[k] = k !== 'target' || true; });
+    if(!('target' in obj)){ WIS.target = 2040; WIT.target = false; }
+    document.querySelectorAll('#wi-levers input').forEach(i => { i.value = WIS[i.dataset.id]; }); wiSync(); };
+  ph.addEventListener('click', e => { const b = e.target.closest('.wo-chip'); if(b) apply(WI_PRESETS[+b.dataset.i][1]); });
+  document.getElementById('wi-reset').onclick = () => apply({});
+  wiBuild();
+})();
+
+// ---------- 5. US (EIA) ----------
+let usMode = 'sector', usUnit = 'abs';
 function drawUS(){
   const U = O.us, yrs = U.years;
   const S = usMode === 'sector'
     ? [['transport', 'Transport', '#0a80d0'], ['industrial', 'Industry', '#8b5cf6'], ['residential', 'Homes', '#f59e0b'], ['commercial', 'Commercial', '#d97706'], ['power', 'Power plants', '#9ca3af']]
     : [['gasoline', 'Gasoline (cars)', '#0a80d0'], ['distillate', 'Diesel (trucks, rail, ships)', '#0b3a82'], ['jet', 'Jet fuel', '#22d3ee'], ['residual', 'Residual fuel (ships)', '#0d9488']];
-  document.getElementById('us-fsum').textContent = usMode === 'sector' ? 'by sector' : 'transport by fuel';
-  stackedArea(document.getElementById('us-chart'), yrs, S.map(([k, l, c]) => ({ key:k, label:l, color:c, vals:U[k] })), { h:320,
-    tip:(r, ss) => `<b>${r.year}</b> <span style="color:var(--text-muted)">EIA</span><div class="r"><span>Transport share</span><b>${(100 * U.transport[r.i] / (U.transport[r.i] + U.industrial[r.i] + U.residential[r.i] + U.commercial[r.i] + U.power[r.i])).toFixed(0)}%</b></div>${tipRows(r, ss, false)}` });
+  document.getElementById('us-fsum').textContent = (usMode === 'sector' ? 'by sector' : 'transport by fuel') + ' · ' + (usUnit === 'abs' ? 'mb/d' : '% of US oil');
+  stackedArea(document.getElementById('us-chart'), yrs, S.map(([k, l, c]) => ({ key:k, label:l, color:c, vals:U[k] })), { h:320, pct:usUnit === 'pct',
+    tip:(r, ss) => `<b>${r.year}</b> <span style="color:var(--text-muted)">EIA</span><div class="r"><span>Transport share</span><b>${(100 * U.transport[r.i] / (U.transport[r.i] + U.industrial[r.i] + U.residential[r.i] + U.commercial[r.i] + U.power[r.i])).toFixed(0)}%</b></div>${tipRows(r, ss, usUnit === 'pct')}` });
 }
-(function initUS(){ seg('us-mode', v => { usMode = v; drawUS(); }); drawUS(); })();
+(function initUS(){ seg('us-mode', v => { usMode = v; drawUS(); }); seg('us-unit', v => { usUnit = v; drawUS(); }); drawUS(); })();
 
 // ---------- 4. production ----------
 const COUNTRIES = Object.entries(O.countries).map(([n, c]) => ({ n, region:c.region, mbd:c.mbd })).sort((a, b) => b.mbd[b.mbd.length - 1] - a.mbd[a.mbd.length - 1] || d3.max(b.mbd) - d3.max(a.mbd));

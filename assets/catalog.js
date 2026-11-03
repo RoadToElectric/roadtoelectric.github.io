@@ -47,7 +47,7 @@ const STATS_CATALOG = [
     title: "World Oil Consumption",
     subject: "World · Oil use and production",
     keywords: ["oil", "petroleum", "crude", "barrels", "consumption", "production", "transport", "cars", "trucks", "aviation", "shipping", "plastics", "petrochemicals", "opec", "saudi", "russia", "mb/d", "iea", "eia", "pie"],
-    description: "How much oil the world burns each day since 1950 and for what — cars, trucks, planes, ships, plastics, industry, homes — with three pies to compare any years, and who pumps it, country by country since 1960.",
+    description: "How much oil the world burns each day since 1950 and for what — cars, trucks, planes, ships, plastics, industry, homes — with three pies to compare any years, a what-if lab (what if every new car were electric?), and who pumps it, country by country since 1960.",
     tag: "1950–2026",
     url: "world-oil.html"
   },
@@ -79,6 +79,7 @@ const QUESTIONS_CATALOG = [
   { q: "Which markets are growing electric-car sales fastest?", fact: "Ranked by year-over-year growth, month-over-month change and the raw number of extra electric cars.", url: "biggest-movers.html", keywords: ["growth", "fastest", "movers", "bev"] },
   { q: "Are electric trucks finally taking off?", fact: "About 440,000 electric trucks were sold worldwide in 2025 — roughly 9% of truck sales, around 400,000 of them in China.", url: "ev-trucking.html", keywords: ["electric trucks", "china", "freight", "diesel"] },
   { q: "Where can I charge — and how fast?", fact: "Charging ports per 100,000 people and per electric car, slow versus ultra-fast, by country and by network.", url: "charging-stations.html", keywords: ["charging", "fast", "ports", "network", "supercharger"] },
+  { q: "What would happen to world oil if every new car were electric?", fact: "Build your own scenario: electric cars and trucks, aircraft efficiency, shipping fuels, plastics — and see world oil demand to 2060.", url: "world-oil.html#wi-card", keywords: ["what if", "scenario", "electric cars", "oil demand", "2040", "aviation", "efficiency"] },
   { q: "Who pumps the most oil?", fact: "The United States (17.9 million barrels a day in 2025), then Saudi Arabia (10.8) and Russia (10.5).", url: "world-oil.html#pr-card", keywords: ["oil production", "saudi", "russia", "united states", "opec"] },
   { q: "Which countries own the most cars per person?", fact: "Cars per person, new-car sales per person and oil per person, side by side for every country.", url: "population-energy.html", keywords: ["car ownership", "per capita", "population", "fleet"] }
 ];
