@@ -25,5 +25,13 @@ const STATS_CATALOG = [
     description: "How many electric trucks, vans and buses each country sells and keeps on the road, share of new sales 2012-2025, an animated race, trucks vs cars, and what electric trucks keep out of the diesel tank.",
     tag: "2012–2025",
     url: "ev-trucking.html"
+  },
+  {
+    title: "World Oil Consumption",
+    subject: "World · Oil use by purpose and production by country",
+    keywords: ["oil", "petroleum", "crude", "barrels", "consumption", "production", "transport", "cars", "trucks", "aviation", "shipping", "plastics", "petrochemicals", "opec", "saudi", "russia", "mb/d", "iea", "eia"],
+    description: "How much oil the world burns each day since 1950, split by purpose (cars, trucks, planes, ships, plastics, industry, homes), how much goes to transport, and who produces it, country by country since 1960.",
+    tag: "1950–2026",
+    url: "world-oil.html"
   }
 ];

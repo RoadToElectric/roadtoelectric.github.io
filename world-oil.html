@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Oil Consumption — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .wo-page{ --wo-a:#0a80d0; --wo-b:#0b3a82; --wo-c:#22d3ee; --wo-g:#2fae4e; }
+  /* hero */
+  .wo-hero{ position:relative; overflow:hidden; border-radius:22px; padding:28px 30px 24px; margin:6px 0 18px; color:#fff;
+    background:radial-gradient(1100px 420px at 88% -10%, rgba(47,174,78,.45), transparent 60%), radial-gradient(900px 500px at -8% 110%, rgba(10,128,208,.55), transparent 60%), linear-gradient(135deg,#031a36,#06264d 55%,#073a63);
+    display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:26px; box-shadow:0 18px 44px rgba(2,16,40,.35); }
+  .wo-eyebrow{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#7be0ff; }
+  .wo-big{ font-size:clamp(54px,9vw,104px); font-weight:900; letter-spacing:-.04em; line-height:1; margin:8px 0 6px; font-variant-numeric:tabular-nums;
+    background:linear-gradient(90deg,#7be0ff,#22d3ee 45%,#6fe14a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .wo-hero-sub{ font-size:15px; color:#cfe3f5; max-width:540px; line-height:1.5; }
+  .wo-hero-sub b{ color:#fff; }
+  .wo-kpis{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:center; }
+  .wo-kpi{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:13px 15px; border-left:4px solid var(--c, #22d3ee); }
+  .wo-kpi .v{ font-size:28px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .wo-kpi .v small{ font-size:13px; font-weight:700; color:#a9c7e0; margin-left:4px; }
+  .wo-kpi .l{ font-size:12.5px; color:#cfe3f5; line-height:1.4; margin-top:2px; }
+  @media (max-width:900px){ .wo-hero{ grid-template-columns:1fr; padding:22px 18px; } }
+  /* insight tiles */
+  .wo-ins{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:0 0 18px; }
+  .wo-in{ border:1px solid var(--border); background:var(--surface); border-radius:16px; padding:14px 16px; border-left:4px solid var(--c, var(--accent)); }
+  .wo-in .t{ font-size:13px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; }
+  .wo-in .v{ font-size:26px; font-weight:900; letter-spacing:-.02em; margin:3px 0; }
+  .wo-in p{ margin:0; font-size:13px; color:var(--text-muted); line-height:1.45; }
+  /* collapsible filters */
+  .wo-filters{ border:1px solid var(--border); background:var(--surface); border-radius:14px; margin:0 0 12px; overflow:hidden; }
+  .wo-ftoggle{ appearance:none; width:100%; display:flex; align-items:center; gap:10px; padding:10px 14px; border:0; background:transparent; color:var(--text); font:inherit; font-size:13px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
+  .wo-ftoggle:hover{ background:var(--surface-alt); }
+  .wo-ftoggle .wo-fsum{ margin-left:auto; font-size:12px; font-weight:700; text-transform:none; letter-spacing:0; color:var(--text-muted); }
+  .wo-ftoggle .wo-car{ transition:transform .3s ease; font-style:normal; }
+  .wo-filters.closed .wo-car{ transform:rotate(-90deg); }
+  .wo-fbody{ max-height:900px; opacity:1; transition:max-height .4s ease, opacity .25s ease, padding .3s ease; padding:4px 14px 14px; overflow:hidden; }
+  .wo-filters.closed .wo-fbody{ max-height:0; opacity:0; padding-top:0; padding-bottom:0; }
+  .wo-frow{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-top:10px; }
+  .wo-frow > label.wo-fl{ font-size:11.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; min-width:84px; }
+  .wo-seg{ display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .wo-seg button{ appearance:none; border:0; background:var(--surface); color:var(--text-muted); font:inherit; font-size:12.5px; font-weight:800; padding:6px 12px; cursor:pointer; }
+  .wo-seg button + button{ border-left:1px solid var(--border); }
+  .wo-seg button.active{ background:var(--accent); color:#fff; }
+  .wo-chip{ appearance:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:4px 11px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .wo-chip i{ width:11px; height:11px; border-radius:3px; background:var(--c, #999); display:inline-block; }
+  .wo-chip.off{ opacity:.42; text-decoration:line-through; }
+  .wo-chip:hover{ border-color:var(--accent); }
+  .wo-range{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-muted); }
+  .wo-range input[type=range]{ width:170px; accent-color:var(--accent); }
+  .wo-list{ display:grid; grid-template-columns:repeat(auto-fill,minmax(172px,1fr)); gap:3px 12px; max-height:200px; overflow:auto; border:1px solid var(--border); border-radius:10px; padding:8px 10px; width:100%; background:var(--surface); }
+  .wo-list label{ display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wo-list label i{ width:9px; height:9px; border-radius:2px; flex:none; }
+  .wo-search{ border:1px solid var(--border); border-radius:10px; padding:6px 10px; font:inherit; font-size:13px; background:var(--surface); color:var(--text); min-width:200px; }
+  .wo-mini{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:9px; padding:5px 10px; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+  .wo-mini:hover{ border-color:var(--accent); color:var(--accent); }
+  /* charts */
+  .wo-chart{ position:relative; width:100%; }
+  .wo-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .wo-chart text{ fill:var(--text-muted); font-size:11px; }
+  .wo-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
+  .wo-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.55; min-width:210px; max-width:300px; transition:opacity .08s; }
+  .wo-tip b{ font-weight:800; }
+  .wo-tip .r{ display:flex; justify-content:space-between; gap:14px; }
+  .wo-tip .r i{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
+  .wo-tip .est{ color:#b45309; font-weight:800; font-size:11px; }
+  .wo-legend{ display:flex; flex-wrap:wrap; gap:6px 8px; margin:8px 0 4px; }
+  .wo-bars{ display:grid; gap:7px; margin-top:6px; }
+  .wo-brow{ display:grid; grid-template-columns:150px 1fr 74px; align-items:center; gap:10px; font-size:12.5px; }
+  .wo-brow .n{ font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wo-brow .t{ position:relative; height:16px; border-radius:6px; background:var(--surface-alt); overflow:hidden; }
+  .wo-brow .t i{ position:absolute; left:0; top:0; bottom:0; border-radius:6px; transition:width .45s ease; }
+  .wo-brow .v{ text-align:right; font-variant-numeric:tabular-nums; font-weight:800; }
+  .wo-stack{ display:grid; gap:8px; margin-top:8px; }
+  .wo-srow{ display:grid; grid-template-columns:54px 1fr 92px; align-items:center; gap:10px; font-size:12.5px; }
+  .wo-srow .bar{ display:flex; height:26px; border-radius:8px; overflow:hidden; }
+  .wo-srow .bar i{ display:block; height:100%; }
+  .wo-srow .y{ font-weight:900; }
+  .wo-srow .tot{ text-align:right; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+  .wo-play{ appearance:none; border:0; cursor:pointer; width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; font-weight:900; }
+  .wo-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; }
+  .wo-method summary{ cursor:pointer; font-weight:800; font-size:14px; }
+  .wo-method li{ margin:5px 0; }
+  .wo-method table{ border-collapse:collapse; width:100%; font-size:12px; margin-top:8px; }
+  .wo-method th, .wo-method td{ border-bottom:1px solid var(--border); padding:4px 8px; text-align:right; }
+  .wo-method th:first-child, .wo-method td:first-child{ text-align:left; }
+  .wo-note{ font-size:12.5px; color:var(--text-muted); line-height:1.5; margin:4px 0 8px; }
+  .wo-two{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; }
+  @media (max-width:1000px){ .wo-two{ grid-template-columns:1fr; } .wo-brow{ grid-template-columns:110px 1fr 62px; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+
+      <div class="nav-heading">Powertrain</div>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="world-oil.html" aria-current="page"><span class="dot"></span>World Oil</a>
+
+      <div class="nav-heading">Rankings</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
+
+      <div class="nav-heading">Archive</div>
+      <a href="powertrain-mix-by-country-copy.html"><span class="dot"></span>Mix by Country (copy)</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page wo-page">
+      <header class="page-header">
+        <div class="eyebrow">Markets · World Oil</div>
+        <h1>Where the world's oil goes</h1>
+        <p class="subtitle">How much oil the world burns each day, what it is used for since 1950, how much of it moves people and goods, and who pumps it. Open or fold the filters of each chart to give it more room.</p>
+      </header>
+
+      <section class="wo-hero" id="hero">
+        <div>
+          <div class="wo-eyebrow">Share of all oil used for transport · <span id="hero-year">2024</span></div>
+          <div class="wo-big" id="hero-big">–</div>
+          <div class="wo-hero-sub" id="hero-sub"></div>
+        </div>
+        <div class="wo-kpis" id="hero-kpis"></div>
+      </section>
+
+      <div class="wo-ins" id="insights"></div>
+
+      <!-- 1. usage -->
+      <div class="card chart-card" id="use-card">
+        <h2>1 · World oil use by purpose, 1950–2026</h2>
+        <p class="wo-note" id="use-note"></p>
+        <div class="wo-filters" id="use-f">
+          <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="use-fsum"></span><i class="wo-car">▾</i></button>
+          <div class="wo-fbody">
+            <div class="wo-frow"><label class="wo-fl">Show</label>
+              <div class="wo-seg" id="use-mode"><button type="button" data-v="abs" class="active">Million barrels / day</button><button type="button" data-v="pct">% of all oil</button></div>
+              <div class="wo-seg" id="use-group"><button type="button" data-v="all" class="active">All purposes</button><button type="button" data-v="transport">Transport only</button></div>
+            </div>
+            <div class="wo-frow"><label class="wo-fl">Purposes</label><div class="wo-legend" id="use-legend" style="margin:0"></div>
+              <button type="button" class="wo-mini" id="use-all">All</button><button type="button" class="wo-mini" id="use-none">None</button></div>
+            <div class="wo-frow"><label class="wo-fl">Years</label>
+              <div class="wo-range"><span id="use-y0l">1950</span><input type="range" id="use-y0" min="1950" max="2000" value="1950"></div>
+              <div class="wo-range"><input type="range" id="use-y1" min="2001" max="2026" value="2026"><span id="use-y1l">2026</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="wo-chart" id="use-chart"></div>
+      </div>
+
+      <!-- 2. transport -->
+      <div class="card chart-card" id="tr-card">
+        <h2>2 · The transport slice: cars vs trucks vs planes vs ships</h2>
+        <p class="wo-note" id="tr-note"></p>
+        <div class="wo-filters" id="tr-f">
+          <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="tr-fsum"></span><i class="wo-car">▾</i></button>
+          <div class="wo-fbody">
+            <div class="wo-frow"><label class="wo-fl">Years shown</label><div class="wo-legend" id="tr-years" style="margin:0"></div></div>
+          </div>
+        </div>
+        <div class="wo-two">
+          <div><div class="wo-label" style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Transport oil (mb/d) — passenger vs goods</div><div class="wo-chart" id="tr-chart"></div></div>
+          <div><div class="wo-label" style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">What transport oil is used for (% of transport oil)</div><div class="wo-stack" id="tr-stack"></div></div>
+        </div>
+      </div>
+
+      <!-- 3. US reality check -->
+      <div class="card chart-card" id="us-card">
+        <h2>3 · Reality check: the United States, measured by sector (EIA)</h2>
+        <p class="wo-note">The only country where oil use is published by sector for every year since 1949. Real data, not an estimate: transport takes about 70% of US petroleum, industry and homes the rest.</p>
+        <div class="wo-filters closed" id="us-f">
+          <button type="button" class="wo-ftoggle" aria-expanded="false"><span>Filters</span><span class="wo-fsum" id="us-fsum"></span><i class="wo-car">▾</i></button>
+          <div class="wo-fbody"><div class="wo-frow"><label class="wo-fl">Show</label><div class="wo-seg" id="us-mode"><button type="button" data-v="sector" class="active">By sector</button><button type="button" data-v="product">Transport by fuel</button></div></div></div>
+        </div>
+        <div class="wo-chart" id="us-chart"></div>
+      </div>
+
+      <!-- 4. production -->
+      <div class="card chart-card" id="pr-card">
+        <h2>4 · Oil produced by country, 1960–2025</h2>
+        <p class="wo-note" id="pr-note"></p>
+        <div class="wo-filters" id="pr-f">
+          <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="pr-fsum"></span><i class="wo-car">▾</i></button>
+          <div class="wo-fbody">
+            <div class="wo-frow"><label class="wo-fl">Show</label>
+              <div class="wo-seg" id="pr-mode"><button type="button" data-v="abs" class="active">Million barrels / day</button><button type="button" data-v="pct">% of world</button></div>
+              <label class="wo-chip" style="cursor:pointer"><input type="checkbox" id="pr-others" checked> Show “all other producers”</label>
+            </div>
+            <div class="wo-frow"><label class="wo-fl">Regions</label><div class="wo-legend" id="pr-regions" style="margin:0"></div></div>
+            <div class="wo-frow"><label class="wo-fl">Countries</label>
+              <input type="search" class="wo-search" id="pr-search" placeholder="Search a country…">
+              <button type="button" class="wo-mini" data-top="5">Top 5</button><button type="button" class="wo-mini" data-top="12">Top 12</button><button type="button" class="wo-mini" data-top="25">Top 25</button><button type="button" class="wo-mini" id="pr-none">None</button><button type="button" class="wo-mini" id="pr-all">All</button>
+              <div class="wo-list" id="pr-list"></div>
+            </div>
+            <div class="wo-frow"><label class="wo-fl">Years</label>
+              <div class="wo-range"><span id="pr-y0l">1960</span><input type="range" id="pr-y0" min="1960" max="2015" value="1960"></div>
+              <div class="wo-range"><input type="range" id="pr-y1" min="1970" max="2025" value="2025"><span id="pr-y1l">2025</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="wo-chart" id="pr-chart"></div>
+      </div>
+
+      <div class="card chart-card" id="rk-card">
+        <h2>5 · Who pumped the most, year by year</h2>
+        <p class="wo-note">Top producers of the selected year (regions as ticked above). Press play to watch the ranking change from 1960.</p>
+        <div class="wo-frow" style="margin:0 0 6px"><button type="button" class="wo-play" id="rk-play" aria-label="Play">▶</button>
+          <div class="wo-range"><input type="range" id="rk-year" min="1960" max="2025" value="2025" style="width:300px"><b id="rk-yl" style="font-size:20px;color:var(--text)">2025</b></div>
+        </div>
+        <div class="wo-two">
+          <div class="wo-bars" id="rk-bars"></div>
+          <div><div style="font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Who burns it — top consumers</div><div class="wo-bars" id="cons-bars"></div></div>
+        </div>
+      </div>
+
+      <details class="wo-method" id="method" open>
+        <summary>How these numbers are built — read before quoting them</summary>
+        <ol>
+          <li><b>Total oil consumed</b>, 1950–2025: Energy Institute Statistical Review (via Our World in Data), converted from TWh at 579 TWh per million barrels a day. It is the volume of oil burned or used as raw material, including shipping and aviation fuel. The International Energy Agency (IEA) counts about 8% more (103 mb/d in 2024) because it adds biofuels and all natural-gas liquids. 2026 = 2025 grown by the IEA's 2026 forecast (+0.7%).</li>
+          <li><b>Purposes 1971–2019 are IEA data.</b> The IEA's Key World Energy Statistics 2021 publishes a chart of oil final consumption by sector (road, aviation, navigation, rail, industry, homes, non-energy use, other). We read the values straight from the chart's vector drawing; they reproduce the printed 1973 and 2019 shares to the decimal (for instance road 30.8% then 49.2%, 94 then 169 EJ). Energy is turned into barrels at 2.1 EJ per mb/d.</li>
+          <li><b>Cars vs trucks is an estimate.</b> The IEA does not split road oil. We anchor it on the IEA 2017 truck study (trucks use about 17 mb/d, roughly 44% of road oil) and assume trucks, vans and buses were 25% of road oil in 1971, rising evenly to 44% in 2017. Cars, SUVs and motorbikes are the rest. IEA and other estimates put cars at 21–24 mb/d, the same range as our 22.</li>
+          <li><b>1950–1970 are estimates:</b> the IEA series starts in 1971, so we keep the 1971 shares and the 1971 ratio between final consumption and total oil. In reality transport was probably smaller and fuel oil for heat and industry larger. <b>2020–2026 are estimates too:</b> each sector follows the IEA Oil 2025 forecast of the fuel it burns (gasoline for cars, diesel for trucks, jet fuel for planes, fuel oil for ships, LPG and naphtha for chemicals). Hatched bands mark these years in the first chart.</li>
+          <li><b>“Power plants, refineries &amp; other conversion”</b> is what remains of total oil after the IEA's final-consumption sectors: oil burnt for electricity, refinery fuel, losses and the definition gap between the two sources.</li>
+          <li><b>Production by country, 1960–2025:</b> Energy Institute / Our World in Data, crude oil and condensate. Russia includes the Soviet Union before 1985 (the data only splits the republics from 1985). The United States figures of chart 3 come from the US Energy Information Administration (Monthly Energy Review).</li>
+        </ol>
+        <div id="method-table"></div>
+      </details>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="assets/world-oil-data.js"></script>
+<script>
+const O = WORLD_OIL, Y = O.years, NY = Y.length, EST = O.kind.map(k => k !== 'iea');
+const fmt1 = d3.format(',.1f'), fmt0 = d3.format(',.0f');
+const CATS = [
+  { k:'road_passenger', label:'Cars, SUVs & motorbikes', tr:true, color:'#0a80d0' },
+  { k:'road_goods', label:'Trucks, vans & buses', tr:true, color:'#0b3a82' },
+  { k:'aviation', label:'Aviation', tr:true, color:'#22d3ee' },
+  { k:'navigation', label:'Shipping', tr:true, color:'#0d9488' },
+  { k:'rail', label:'Rail', tr:true, color:'#7c93b0' },
+  { k:'nonenergy', label:'Plastics, chemicals & asphalt', tr:false, color:'#2fae4e' },
+  { k:'industry', label:'Industry (fuel)', tr:false, color:'#8b5cf6' },
+  { k:'residential', label:'Homes (heating, cooking)', tr:false, color:'#f59e0b' },
+  { k:'other', label:'Farms, services & other', tr:false, color:'#d97706' },
+  { k:'nonfinal', label:'Power plants, refineries & conversion', tr:false, color:'#9ca3af' }
+];
+const iy = y => Y.indexOf(y);
+const useVal = (k, y) => O.use[k][iy(y)];
+const trKeys = CATS.filter(c => c.tr).map(c => c.k);
+const trans = y => trKeys.reduce((s, k) => s + useVal(k, y), 0);
+const tot = y => O.total[iy(y)];
+
+// ---------- generic stacked area ----------
+function stackedArea(host, years, series, o){
+  host.innerHTML = '';
+  const W = Math.max(520, host.clientWidth || 900), H = o.h || 400, m = { t:14, r:14, b:28, l:46 };
+  const tip = document.createElement('div'); tip.className = 'wo-tip';
+  const svg = d3.select(host).append('svg').attr('viewBox', `0 0 ${W} ${H}`);
+  if(!series.length || years.length < 2){ svg.append('text').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text('Nothing selected'); host.appendChild(tip); return; }
+  const rows = years.map((y, i) => { const r = { year:y, i }; series.forEach(s => r[s.key] = s.vals[i] || 0); return r; });
+  const stack = d3.stack().keys(series.map(s => s.key)).offset(o.pct ? d3.stackOffsetExpand : d3.stackOffsetNone)(rows);
+  const x = d3.scaleLinear().domain([years[0], years[years.length - 1]]).range([m.l, W - m.r]);
+  const ymax = o.pct ? 1 : d3.max(stack[stack.length - 1], d => d[1]) * 1.05;
+  const y = d3.scaleLinear().domain([0, ymax]).nice().range([H - m.b, m.t]);
+  const g = svg.append('g');
+  y.ticks(5).forEach(t => { g.append('line').attr('class', 'gl').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)); g.append('text').attr('x', m.l - 6).attr('y', y(t) + 4).attr('text-anchor', 'end').text(o.pct ? Math.round(t * 100) + '%' : o.unit ? t + '' : t); });
+  const area = d3.area().x(d => x(d.data.year)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveMonotoneX);
+  stack.forEach((s, i) => g.append('path').attr('d', area(s)).attr('fill', series[i].color).attr('fill-opacity', .92));
+  // hatched estimate years
+  if(o.est){ const id = 'h' + Math.random().toString(36).slice(2, 7);
+    svg.append('defs').append('pattern').attr('id', id).attr('width', 7).attr('height', 7).attr('patternUnits', 'userSpaceOnUse').attr('patternTransform', 'rotate(45)').html('<rect width="7" height="7" fill="rgba(255,255,255,.28)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,255,255,.75)" stroke-width="2"/>');
+    let a = null; years.forEach((yy, i) => { const e = o.est(yy); if(e && a == null) a = yy; if((!e || i === years.length - 1) && a != null){ const b = e ? yy : years[i - 1] + 0.0; g.append('rect').attr('x', x(a)).attr('width', Math.max(2, x(Math.max(b, a)) - x(a))).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', `url(#${id})`).style('pointer-events', 'none'); a = null; } }); }
+  const ticks = d3.range(Math.ceil(years[0] / 10) * 10, years[years.length - 1] + 1, 10);
+  g.append('g').selectAll('text').data(ticks).join('text').attr('x', d => x(d)).attr('y', H - 8).attr('text-anchor', 'middle').text(d => d);
+  const rule = g.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--text)').attr('stroke-opacity', .5).style('opacity', 0);
+  svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent').style('cursor', 'crosshair')
+    .on('mousemove', e => {
+      const [px] = d3.pointer(e); const yr = Math.round(x.invert(px)); const i = Math.max(0, Math.min(years.length - 1, yr - years[0])); const r = rows[i];
+      rule.attr('x1', x(r.year)).attr('x2', x(r.year)).style('opacity', 1);
+      tip.innerHTML = o.tip(r, series); tip.style.opacity = 1;
+      const hr = host.getBoundingClientRect(); const px2 = e.clientX - hr.left; tip.style.left = Math.max(0, Math.min(hr.width - tip.offsetWidth, px2 + 14)) + 'px'; tip.style.top = '8px';
+    }).on('mouseleave', () => { rule.style('opacity', 0); tip.style.opacity = 0; });
+  host.appendChild(tip);
+}
+const tipRows = (r, series, pct) => series.slice().reverse().map(s => `<div class="r"><span><i style="background:${s.color}"></i>${s.label}</span><b>${pct ? (100 * s.vals[r.i] / series.reduce((a, q) => a + (q.vals[r.i] || 0), 0)).toFixed(1) + '%' : fmt1(s.vals[r.i]) + ' mb/d'}</b></div>`).join('');
+
+// ---------- collapsible filters ----------
+document.querySelectorAll('.wo-filters').forEach(f => {
+  const b = f.querySelector('.wo-ftoggle'); b.addEventListener('click', () => { f.classList.toggle('closed'); b.setAttribute('aria-expanded', !f.classList.contains('closed')); try { localStorage.setItem('wo-f:' + f.id, f.classList.contains('closed') ? '1' : '0'); } catch(e){} });
+  try { const v = localStorage.getItem('wo-f:' + f.id); if(v != null){ f.classList.toggle('closed', v === '1'); b.setAttribute('aria-expanded', v !== '1'); } } catch(e){}
+});
+function seg(id, cb){ const el = document.getElementById(id); el.addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; el.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); cb(b.dataset.v); }); return () => el.querySelector('.active').dataset.v; }
+
+// ---------- hero + insights ----------
+(function hero(){
+  const y = 2024, T = tot(y), tr = trans(y), pct = 100 * tr / T;
+  document.getElementById('hero-big').textContent = Math.round(pct) + '%';
+  document.getElementById('hero-year').textContent = y;
+  const finalTr = ['road_passenger', 'road_goods', 'aviation', 'navigation', 'rail'].reduce((s, k) => s + useVal(k, 2019), 0) / ['road_passenger', 'road_goods', 'aviation', 'navigation', 'rail', 'industry', 'nonenergy', 'residential', 'other'].reduce((s, k) => s + useVal(k, 2019), 0);
+  document.getElementById('hero-sub').innerHTML = `Of the <b>${fmt1(T)} million barrels</b> burned every day in ${y}, about <b>${fmt1(tr)} million</b> power vehicles, planes and ships. Counted only on oil that reaches final users, the IEA puts transport at <b>${(100 * finalTr).toFixed(0)}%</b> in 2019. Cars use about ${fmt1(useVal('road_passenger', y))} mb/d, trucks, vans and buses about ${fmt1(useVal('road_goods', y))} mb/d.`;
+  const K = [['road_passenger', 'Cars, SUVs & motorbikes', '#38bdf8'], ['road_goods', 'Trucks, vans & buses', '#60a5fa'], ['aviation', 'Aviation', '#22d3ee'], ['navigation', 'Shipping', '#2dd4bf'], ['nonenergy', 'Plastics, chemicals & asphalt', '#6fe14a'], ['nonfinal', 'Power plants, refineries & conversion', '#cbd5e1']];
+  document.getElementById('hero-kpis').innerHTML = K.map(([k, l, c]) => `<div class="wo-kpi" style="--c:${c}"><div class="v">${fmt1(useVal(k, y))}<small>mb/d</small></div><div class="l">${l} · ${(100 * useVal(k, y) / T).toFixed(0)}% of oil</div></div>`).join('');
+  const i50 = tot(1950), i73 = tot(1973), p = O.prodYears.length - 1;
+  const top = Object.entries(O.countries).map(([n, c]) => [n, c.mbd[p]]).sort((a, b) => b[1] - a[1]);
+  const ins = [
+    ['#0a80d0', 'Growth since 1950', fmt0(tot(2025) / tot(1950)) + '×', `World oil use went from ${fmt1(tot(1950))} mb/d in 1950 to ${fmt1(tot(2025))} mb/d in 2025. It fell only twice by more than 4%: after the 1979–80 shocks and in 2020.`],
+    ['#22d3ee', 'Transport share, 1973 → 2019', '31% → 49%', 'Road alone, as a share of the oil that reaches final users (IEA). Industry fell from 20% to 7% as oil left factories and power plants after the 1973 shock.'],
+    ['#2fae4e', 'Plastics and chemicals', fmt1(useVal('nonenergy', 2024)) + ' mb/d', `Oil used as raw material — about ${(100 * useVal('nonenergy', 2024) / tot(2024)).toFixed(0)}% of all oil in 2024 and the fastest-growing use since 2000.`],
+    ['#0b3a82', 'Biggest producer, 2025', top[0][0], `${fmt1(top[0][1])} mb/d, then ${top[1][0]} (${fmt1(top[1][1])}) and ${top[2][0].replace(' (USSR before 1985)', '')} (${fmt1(top[2][1])}).`]
+  ];
+  document.getElementById('insights').innerHTML = ins.map(([c, t, v, p2]) => `<div class="wo-in" style="--c:${c}"><div class="t">${t}</div><div class="v">${v}</div><p>${p2}</p></div>`).join('');
+})();
+
+// ---------- 1. usage ----------
+const useOn = new Set(CATS.map(c => c.k));
+let useMode = 'abs', useGroup = 'all', useY0 = 1950, useY1 = 2026;
+function drawUse(){
+  const idx0 = iy(useY0), idx1 = iy(useY1);
+  const yrs = Y.slice(idx0, idx1 + 1);
+  let cats = CATS.filter(c => useOn.has(c.k) && (useGroup === 'all' || c.tr));
+  const series = cats.map(c => ({ key:c.k, label:c.label, color:c.color, vals:O.use[c.k].slice(idx0, idx1 + 1) }));
+  document.getElementById('use-fsum').textContent = `${useMode === 'abs' ? 'mb/d' : '% of oil'} · ${cats.length} purposes · ${useY0}–${useY1}`;
+  stackedArea(document.getElementById('use-chart'), yrs, series, { pct:useMode === 'pct', h:430, est:yy => EST[iy(yy)],
+    tip:(r, ss) => `<b>${r.year}</b> ${EST[iy(r.year)] ? '<span class="est">estimate</span>' : '<span style="color:var(--text-muted)">IEA data</span>'}<div class="r" style="margin:3px 0"><span>All oil</span><b>${fmt1(tot(r.year))} mb/d</b></div>${tipRows(r, ss, useMode === 'pct')}` });
+  document.getElementById('use-note').innerHTML = `Million barrels a day burned or used as raw material. Solid areas 1971–2019 are IEA data; <b>hatched years (1950–70 and 2020–26) are estimates</b>. Hover for the numbers of one year.`;
+}
+(function initUse(){
+  const lg = document.getElementById('use-legend');
+  lg.innerHTML = CATS.map(c => `<button type="button" class="wo-chip" data-k="${c.k}" style="--c:${c.color}"><i></i>${c.label}</button>`).join('');
+  lg.addEventListener('click', e => { const b = e.target.closest('.wo-chip'); if(!b) return; const k = b.dataset.k; if(useOn.has(k)) useOn.delete(k); else useOn.add(k); b.classList.toggle('off', !useOn.has(k)); drawUse(); });
+  document.getElementById('use-all').onclick = () => { CATS.forEach(c => useOn.add(c.k)); lg.querySelectorAll('.wo-chip').forEach(b => b.classList.remove('off')); drawUse(); };
+  document.getElementById('use-none').onclick = () => { useOn.clear(); lg.querySelectorAll('.wo-chip').forEach(b => b.classList.add('off')); drawUse(); };
+  seg('use-mode', v => { useMode = v; drawUse(); }); seg('use-group', v => { useGroup = v; drawUse(); });
+  const a = document.getElementById('use-y0'), b = document.getElementById('use-y1');
+  a.oninput = () => { useY0 = +a.value; document.getElementById('use-y0l').textContent = useY0; drawUse(); };
+  b.oninput = () => { useY1 = +b.value; document.getElementById('use-y1l').textContent = useY1; drawUse(); };
+  drawUse();
+})();
+
+// ---------- 2. transport ----------
+const TRY = [1973, 1990, 2000, 2010, 2019, 2024, 2026];
+let trYears = new Set(TRY);
+function drawTransport(){
+  const yrs = Y.filter(y => y >= 1950);
+  const cats = CATS.filter(c => c.tr);
+  stackedArea(document.getElementById('tr-chart'), yrs, cats.map(c => ({ key:c.k, label:c.label, color:c.color, vals:O.use[c.k] })), { h:340, est:yy => EST[iy(yy)],
+    tip:(r, ss) => `<b>${r.year}</b> ${EST[iy(r.year)] ? '<span class="est">estimate</span>' : ''}<div class="r"><span>Transport total</span><b>${fmt1(trans(r.year))} mb/d</b></div><div class="r"><span>Share of all oil</span><b>${(100 * trans(r.year) / tot(r.year)).toFixed(0)}%</b></div>${tipRows(r, ss, false)}<div class="r"><span>Goods share of road oil</span><b>${(100 * O.goodsShare[iy(r.year)]).toFixed(0)}%</b></div>` });
+  const ys = [...trYears].sort();
+  document.getElementById('tr-fsum').textContent = ys.length + ' years in the bars';
+  document.getElementById('tr-stack').innerHTML = ys.map(y => { const t = trans(y); return `<div class="wo-srow"><span class="y">${y}</span><div class="bar">${cats.map(c => `<i style="width:${100 * useVal(c.k, y) / t}%;background:${c.color}" title="${c.label}: ${fmt1(useVal(c.k, y))} mb/d (${(100 * useVal(c.k, y) / t).toFixed(0)}%)"></i>`).join('')}</div><span class="tot">${fmt1(t)} mb/d</span></div>`; }).join('') + `<div class="wo-legend">${cats.map(c => `<span class="wo-chip" style="--c:${c.color};cursor:default"><i></i>${c.label}</span>`).join('')}</div>`;
+  const y = 2019;
+  document.getElementById('tr-note').innerHTML = `In ${y}, of ${fmt1(trans(y))} mb/d used for transport, <b>${fmt1(useVal('road_passenger', y))} mb/d went to cars and motorbikes (passenger)</b> and <b>${fmt1(useVal('road_goods', y))} mb/d to trucks, vans and buses (goods)</b>. Planes took ${fmt1(useVal('aviation', y))}, ships ${fmt1(useVal('navigation', y))}, rail ${fmt1(useVal('rail', y))}. Road is IEA data; the passenger / goods split of road oil is our estimate (see the method below). Aviation fell to ${fmt1(useVal('aviation', 2020))} mb/d in 2020 and has not fully recovered.`;
+}
+(function initTr(){
+  const el = document.getElementById('tr-years');
+  const yrs = [1950, 1960, 1973, 1980, 1990, 2000, 2010, 2019, 2024, 2026];
+  el.innerHTML = yrs.map(y => `<button type="button" class="wo-chip${trYears.has(y) ? '' : ' off'}" data-y="${y}">${y}</button>`).join('');
+  el.addEventListener('click', e => { const b = e.target.closest('.wo-chip'); if(!b) return; const y = +b.dataset.y; if(trYears.has(y)) trYears.delete(y); else trYears.add(y); b.classList.toggle('off', !trYears.has(y)); drawTransport(); });
+  trYears = new Set([1973, 1990, 2000, 2010, 2019, 2024, 2026]); el.querySelectorAll('.wo-chip').forEach(b => b.classList.toggle('off', !trYears.has(+b.dataset.y)));
+  drawTransport();
+})();
+
+// ---------- 3. US (EIA) ----------
+let usMode = 'sector';
+function drawUS(){
+  const U = O.us, yrs = U.years;
+  const S = usMode === 'sector'
+    ? [['transport', 'Transport', '#0a80d0'], ['industrial', 'Industry', '#8b5cf6'], ['residential', 'Homes', '#f59e0b'], ['commercial', 'Commercial', '#d97706'], ['power', 'Power plants', '#9ca3af']]
+    : [['gasoline', 'Gasoline (cars)', '#0a80d0'], ['distillate', 'Diesel (trucks, rail, ships)', '#0b3a82'], ['jet', 'Jet fuel', '#22d3ee'], ['residual', 'Residual fuel (ships)', '#0d9488']];
+  document.getElementById('us-fsum').textContent = usMode === 'sector' ? 'by sector' : 'transport by fuel';
+  stackedArea(document.getElementById('us-chart'), yrs, S.map(([k, l, c]) => ({ key:k, label:l, color:c, vals:U[k] })), { h:320,
+    tip:(r, ss) => `<b>${r.year}</b> <span style="color:var(--text-muted)">EIA</span><div class="r"><span>Transport share</span><b>${(100 * U.transport[r.i] / (U.transport[r.i] + U.industrial[r.i] + U.residential[r.i] + U.commercial[r.i] + U.power[r.i])).toFixed(0)}%</b></div>${tipRows(r, ss, false)}` });
+}
+(function initUS(){ seg('us-mode', v => { usMode = v; drawUS(); }); drawUS(); })();
+
+// ---------- 4. production ----------
+const COUNTRIES = Object.entries(O.countries).map(([n, c]) => ({ n, region:c.region, mbd:c.mbd })).sort((a, b) => b.mbd[b.mbd.length - 1] - a.mbd[a.mbd.length - 1] || d3.max(b.mbd) - d3.max(a.mbd));
+const PAL = d3.schemeTableau10.concat(['#a3e635', '#14b8a6', '#f472b6', '#818cf8', '#fb923c', '#84cc16', '#06b6d4', '#c026d3', '#ca8a04', '#64748b', '#dc2626', '#0ea5e9', '#16a34a', '#9333ea']);
+COUNTRIES.forEach((c, i) => c.color = PAL[i % PAL.length]);
+const REGIONS = [...new Set(COUNTRIES.map(c => c.region))];
+const prSel = new Set(COUNTRIES.slice(0, 12).map(c => c.n)), regOn = new Set(REGIONS);
+let prMode = 'abs', prY0 = 1960, prY1 = 2025, prOthers = true, prQuery = '';
+const PY = O.prodYears;
+function drawProd(){
+  const i0 = PY.indexOf(prY0), i1 = PY.indexOf(prY1), yrs = PY.slice(i0, i1 + 1);
+  const chosen = COUNTRIES.filter(c => prSel.has(c.n) && regOn.has(c.region));
+  const series = chosen.map(c => ({ key:c.n, label:c.n.replace(' (USSR before 1985)', '*'), color:c.color, vals:c.mbd.slice(i0, i1 + 1) }));
+  if(prOthers){ const others = yrs.map((_, i) => Math.max(0, O.worldProd[i0 + i] - chosen.reduce((s, c) => s + c.mbd[i0 + i], 0))); series.push({ key:'__others', label:'All other producers', color:'#cbd5e1', vals:others }); }
+  document.getElementById('pr-fsum').textContent = `${chosen.length} countries · ${prMode === 'abs' ? 'mb/d' : '% of world'} · ${prY0}–${prY1}`;
+  stackedArea(document.getElementById('pr-chart'), yrs, series, { pct:prMode === 'pct', h:430,
+    tip:(r, ss) => `<b>${r.year}</b><div class="r"><span>World production</span><b>${fmt1(O.worldProd[i0 + r.i])} mb/d</b></div>${tipRows(r, ss.filter(s => s.vals[r.i] > 0.0005), prMode === 'pct')}` });
+  document.getElementById('pr-note').innerHTML = `Crude oil and condensate produced, million barrels a day. Tick or untick countries and regions in the filters; “all other producers” keeps the stack equal to world production. *Russia includes the Soviet Union before 1985. World production reached ${fmt1(O.worldProd[PY.length - 1])} mb/d in 2025 (${fmt1(O.worldProd[0])} in 1960).`;
+  drawRanking();
+}
+function drawList(){
+  const q = prQuery.toLowerCase();
+  document.getElementById('pr-list').innerHTML = COUNTRIES.filter(c => c.n.toLowerCase().includes(q)).map(c => `<label title="${c.region}"><input type="checkbox" data-n="${c.n.replace(/"/g, '&quot;')}" ${prSel.has(c.n) ? 'checked' : ''}><i style="background:${c.color}"></i>${c.n.replace(' (USSR before 1985)', '*')}</label>`).join('');
+}
+(function initProd(){
+  const rg = document.getElementById('pr-regions');
+  rg.innerHTML = REGIONS.map(r => `<button type="button" class="wo-chip" data-r="${r}"><i style="background:var(--accent)"></i>${r}</button>`).join('');
+  rg.addEventListener('click', e => { const b = e.target.closest('.wo-chip'); if(!b) return; const r = b.dataset.r;
+    if(e.shiftKey || e.altKey){ if(regOn.has(r)) regOn.delete(r); else regOn.add(r); }
+    else { const all = COUNTRIES.filter(c => c.region === r); const allOn = all.every(c => prSel.has(c.n)); all.forEach(c => allOn ? prSel.delete(c.n) : prSel.add(c.n)); regOn.add(r); }
+    rg.querySelectorAll('.wo-chip').forEach(x => x.classList.toggle('off', !regOn.has(x.dataset.r))); drawList(); drawProd(); });
+  rg.title = 'Click: add / remove all the countries of a region. Shift-click: hide / show the region.';
+  document.getElementById('pr-list').addEventListener('change', e => { const cb = e.target; if(cb.type !== 'checkbox') return; if(cb.checked) prSel.add(cb.dataset.n); else prSel.delete(cb.dataset.n); drawProd(); });
+  document.getElementById('pr-search').addEventListener('input', e => { prQuery = e.target.value; drawList(); });
+  document.querySelectorAll('[data-top]').forEach(b => b.onclick = () => { prSel.clear(); COUNTRIES.slice(0, +b.dataset.top).forEach(c => prSel.add(c.n)); drawList(); drawProd(); });
+  document.getElementById('pr-none').onclick = () => { prSel.clear(); drawList(); drawProd(); };
+  document.getElementById('pr-all').onclick = () => { COUNTRIES.forEach(c => prSel.add(c.n)); drawList(); drawProd(); };
+  document.getElementById('pr-others').onchange = e => { prOthers = e.target.checked; drawProd(); };
+  seg('pr-mode', v => { prMode = v; drawProd(); });
+  const a = document.getElementById('pr-y0'), b = document.getElementById('pr-y1');
+  a.oninput = () => { prY0 = +a.value; document.getElementById('pr-y0l').textContent = prY0; drawProd(); };
+  b.oninput = () => { prY1 = +b.value; document.getElementById('pr-y1l').textContent = prY1; drawProd(); };
+  drawList(); drawProd();
+})();
+
+// ---------- 5. ranking + consumers ----------
+let rkTimer = null;
+function drawRanking(){
+  const yr = +document.getElementById('rk-year').value, i = PY.indexOf(yr);
+  document.getElementById('rk-yl').textContent = yr;
+  const rows = COUNTRIES.filter(c => regOn.has(c.region)).map(c => ({ n:c.n.replace(' (USSR before 1985)', '*'), v:c.mbd[i], color:c.color })).filter(r => r.v > 0.001).sort((a, b) => b.v - a.v).slice(0, 15);
+  const mx = rows.length ? rows[0].v : 1, W = O.worldProd[i];
+  document.getElementById('rk-bars').innerHTML = rows.map((r, k) => `<div class="wo-brow"><span class="n">${k + 1}. ${r.n}</span><span class="t"><i style="width:${100 * r.v / mx}%;background:${r.color}"></i></span><span class="v">${fmt1(r.v)}<small style="color:var(--text-muted);font-weight:600"> ${(100 * r.v / W).toFixed(0)}%</small></span></div>`).join('') + `<div class="wo-note">World: ${fmt1(W)} mb/d in ${yr}.</div>`;
+}
+(function initRank(){
+  const sl = document.getElementById('rk-year'); sl.oninput = () => { stopRk(); drawRanking(); };
+  const pb = document.getElementById('rk-play');
+  function stopRk(){ if(rkTimer){ clearInterval(rkTimer); rkTimer = null; } pb.textContent = '▶'; }
+  pb.onclick = () => { if(rkTimer){ stopRk(); return; } if(+sl.value >= 2025) sl.value = 1960; pb.textContent = '❚❚'; rkTimer = setInterval(() => { sl.value = +sl.value + 1; drawRanking(); if(+sl.value >= 2025) stopRk(); }, 260); };
+  const C = Object.entries(O.consumption).map(([n, v]) => ({ n, v:v['2025'], v0:v['2000'] })).filter(r => r.v).sort((a, b) => b.v - a.v).slice(0, 12), mx = C[0].v;
+  document.getElementById('cons-bars').innerHTML = C.map((r, k) => `<div class="wo-brow"><span class="n">${k + 1}. ${r.n}</span><span class="t"><i style="width:${100 * r.v / mx}%;background:var(--accent)"></i></span><span class="v">${fmt1(r.v)}<small style="color:${r.v0 && r.v > r.v0 ? '#16a34a' : '#dc2626'};font-weight:700"> ${r.v0 ? (r.v > r.v0 ? '+' : '') + Math.round(100 * (r.v / r.v0 - 1)) + '%' : ''}</small></span></div>`).join('') + `<div class="wo-note">Million barrels a day consumed in 2025 (change vs 2000). Energy Institute.</div>`;
+  drawRanking();
+})();
+
+// ---------- method table ----------
+document.getElementById('method-table').innerHTML = `<table><thead><tr><th>Year</th><th>Total oil (mb/d)</th><th>Transport (mb/d)</th><th>% of all oil</th><th>Cars</th><th>Trucks, vans, buses</th><th>Aviation</th><th>Shipping</th><th>Plastics &amp; chemicals</th><th>Basis</th></tr></thead><tbody>${[1950, 1973, 1990, 2000, 2010, 2019, 2024, 2026].map(y => `<tr><td>${y}</td><td>${fmt1(tot(y))}</td><td>${fmt1(trans(y))}</td><td>${Math.round(100 * trans(y) / tot(y))}%</td><td>${fmt1(useVal('road_passenger', y))}</td><td>${fmt1(useVal('road_goods', y))}</td><td>${fmt1(useVal('aviation', y))}</td><td>${fmt1(useVal('navigation', y))}</td><td>${fmt1(useVal('nonenergy', y))}</td><td>${EST[iy(y)] ? 'estimate' : 'IEA'}</td></tr>`).join('')}</tbody></table>`;
+let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { drawUse(); drawTransport(); drawUS(); drawProd(); }, 150); });
+</script>
+</body>
+</html>
