@@ -60,6 +60,14 @@ const STATS_CATALOG = [
     url: "population-energy.html"
   },
   {
+    title: "World Population",
+    subject: "World · Age structure & future drivers",
+    keywords: ["population", "age", "children", "adults", "elderly", "over 80", "65+", "drivers", "potential drivers", "projection", "un", "united nations", "growth", "ranking", "india", "china", "africa", "ageing", "demographics"],
+    description: "Every country's population by single year of age, 1950 to 2050 (UN World Population Prospects 2024): under 16, 16–64 and 65+, the fastest-growing populations, rankings by year, and who will gain the most adults and the most over-80s — a gauge of how many new potential drivers each region will add.",
+    tag: "1950–2050",
+    url: "world-population.html#dr-card"
+  },
+  {
     title: "Biggest Movers",
     subject: "World · Rankings",
     keywords: ["growth", "fastest", "movers", "ranking", "year over year", "month over month", "bev", "ev sales", "increase", "country"],
@@ -81,5 +89,6 @@ const QUESTIONS_CATALOG = [
   { q: "Where can I charge — and how fast?", fact: "Charging ports per 100,000 people and per electric car, slow versus ultra-fast, by country and by network.", url: "charging-stations.html#map-card", keywords: ["charging", "fast", "ports", "network", "supercharger"] },
   { q: "What would happen to world oil if every new car were electric?", fact: "Build your own scenario: electric cars and trucks, aircraft efficiency, shipping fuels, plastics — and see world oil demand to 2060.", url: "world-oil.html#wi-card", keywords: ["what if", "scenario", "electric cars", "oil demand", "2040", "aviation", "efficiency"] },
   { q: "Who pumps the most oil?", fact: "The United States (17.9 million barrels a day in 2025), then Saudi Arabia (10.8) and Russia (10.5).", url: "world-oil.html#pr-card", keywords: ["oil production", "saudi", "russia", "united states", "opec"] },
+  { q: "How many new potential drivers will the world gain by 2036?", fact: "About 1.36 billion people turn 18 between 2027 and 2036. Asia adds the most adults (+376 million net), India the most of any country (+140 million) — and 43 countries end up with fewer adults than today.", url: "world-population.html#dr-card", keywords: ["population", "potential drivers", "adults", "age 18", "india", "africa", "projection"] },
   { q: "Which countries own the most cars per person?", fact: "Cars per person, new-car sales per person and oil per person, side by side for every country.", url: "population-energy.html", keywords: ["car ownership", "per capita", "population", "fleet"] }
 ];
