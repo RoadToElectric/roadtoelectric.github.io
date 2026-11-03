@@ -126,8 +126,11 @@
   .gr-chart .gr-hit{ fill:transparent; cursor:pointer; }
   .gr-chart .gr-hit:hover{ fill:rgba(99,102,241,.10); }
   .gr-chart .gr-axis-t{ font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
-  #gr-fuel .mode-btn[data-gf="bev"].active{ background:linear-gradient(135deg,#15803d,#1e8f5f); color:#fff; }
-  #gr-fuel .mode-btn[data-gf="ice"].active{ background:linear-gradient(135deg,#6b7280,#8a8f98); color:#fff; }
+  #gr-fuel{ border-color:#15803d; }
+  #gr-fuel .mode-btn + .mode-btn{ border-left-color:rgba(21,128,61,.35); }
+  #gr-fuel .mode-btn{ color:#15803d; font-weight:800; }
+  #gr-fuel .mode-btn:hover:not(.active){ background:rgba(21,128,61,.10); color:#166534; }
+  #gr-fuel .mode-btn.active{ background:linear-gradient(135deg,#15803d,#1e8f5f); color:#fff; }
   .rank-rows.wrap-labels .rank-row .country-label{ width:170px; white-space:normal; text-overflow:clip; line-height:1.15; }
   .rank-rows.wrap-labels .rank-row .total-label{ width:84px; color:var(--text); font-weight:700; font-size:12px; }
   .rank-row[data-hov] .country-label, .rank-row[data-hov] .bar-track{ cursor:help; }
