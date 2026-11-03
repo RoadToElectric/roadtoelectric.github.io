@@ -1,13 +1,14 @@
 :root{
-  --bg:#f7f1e8;
+  --bg:#eef4fa;
   --surface:#ffffff;
-  --surface-alt:#efe4d5;
-  --text:#2b2018;
-  --text-muted:#7d6f60;
-  --accent:#c1621f;
+  --surface-alt:#dde9f4;
+  --text:#06182e;
+  --text-muted:#52677d;
+  --accent:#0a80d0;
+  --accent-2:#2fae4e;
   --accent-strong:#b3261e;
-  --border:#e3d5c1;
-  --shadow: 0 1px 2px rgba(43,32,24,0.08);
+  --border:#cddcea;
+  --shadow: 0 1px 2px rgba(0,24,48,0.10);
   /* the .tooltip background is var(--text) (inverted vs. the page), so these need the
      opposite light/dark pairing from every other token here: bright in light mode
      (tooltip is dark), deeper/richer in dark mode (tooltip is light) -- see below.
@@ -35,18 +36,19 @@
      --surface-alt, because --surface-alt is near-black in dark mode and made this tier
      unreadable (blending into the map's dark background); darker tan in light mode so
      it reads as a deliberate fill rather than empty page background */
-  --map-not-researched:#ddd0ba;
+  --map-not-researched:#cbd9e6;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#15110e;
-    --surface:#1c1815;
-    --surface-alt:#241d17;
-    --text:#f2ece5;
-    --text-muted:#a89a8b;
-    --accent:#e2833f;
+    --bg:#020e1f;
+    --surface:#071a33;
+    --surface-alt:#0b2444;
+    --text:#e6f0fa;
+    --text-muted:#8ea6bf;
+    --accent:#2cc4ff;
+    --accent-2:#6fe14a;
     --accent-strong:#e2564a;
-    --border:#362e26;
+    --border:#143358;
     --shadow: 0 1px 2px rgba(0,0,0,0.4);
     --dq-tooltip-b:#8a6a00;
     --dq-tooltip-c:#8a4300;
@@ -60,14 +62,15 @@
   }
 }
 :root[data-theme="dark"]{
-  --bg:#15110e;
-  --surface:#1c1815;
-  --surface-alt:#241d17;
-  --text:#f2ece5;
-  --text-muted:#a89a8b;
-  --accent:#e2833f;
+  --bg:#020e1f;
+  --surface:#071a33;
+  --surface-alt:#0b2444;
+  --text:#e6f0fa;
+  --text-muted:#8ea6bf;
+  --accent:#2cc4ff;
+    --accent-2:#6fe14a;
   --accent-strong:#e2564a;
-  --border:#362e26;
+  --border:#143358;
   --shadow: 0 1px 2px rgba(0,0,0,0.4);
   --dq-tooltip-b:#8a6a00;
   --dq-tooltip-c:#8a4300;
@@ -95,10 +98,12 @@ body{
   min-height:100vh;
 }
 .sidebar{
+  --text:#e6f0fa; --text-muted:#9db4cc; --surface-alt:rgba(255,255,255,.08); --border:#16345c; --accent:#2cc4ff;
   width:240px;
   flex-shrink:0;
-  background:var(--surface);
-  border-right:1px solid var(--border);
+  background:#021129;
+  color:var(--text);
+  border-right:1px solid #0e2a50;
   padding:28px 18px;
   display:flex;
   flex-direction:column;
@@ -119,6 +124,8 @@ body{
   color:inherit;
 }
 .sidebar-logo svg{ width:76px; height:76px; }
+.sidebar-logo img{ display:block; width:100%; max-width:204px; height:auto; border-radius:10px; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .sidebar-logo .wordmark{ line-height:1.15; }
 .sidebar-logo .wordmark .brand{
   display:block;
@@ -507,7 +514,7 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
 .elec-play{
   appearance:none; border:none; cursor:pointer; flex:none; width:40px; height:40px; border-radius:50%;
   font-size:15px; font-weight:900; color:#fff; line-height:1;
-  background:linear-gradient(135deg, var(--accent), var(--accent-strong));
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
   box-shadow:0 5px 14px color-mix(in srgb, var(--accent) 38%, transparent);
   transition:transform .12s ease, filter .12s ease;
 }
@@ -1253,6 +1260,7 @@ nav.sidebar-nav a.nav-link-alert:hover{
   }
   .sidebar-logo{ flex-direction:row; text-align:left; }
   .sidebar-logo svg{ width:38px; height:38px; }
+  .sidebar-logo img{ width:auto; max-width:none; height:44px; }
   .sidebar-logo .wordmark .brand{ font-size:14px; }
   .sidebar-logo .wordmark .sub{ font-size:9px; }
   nav.sidebar-nav{ flex-direction:row; gap:4px; overflow-x:auto; align-items:center; }
