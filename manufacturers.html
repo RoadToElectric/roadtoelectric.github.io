@@ -518,6 +518,7 @@
 <script src="assets/world-car-sales-data.js"></script>
 <script src="assets/manufacturer-world-history.js"></script>
 <script src="assets/tesla-world-estimates.js"></script>
+<script src="assets/country-yearly-data.js"></script>
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
@@ -2224,7 +2225,7 @@ function modelRowsOf(countries, brandTest, n){     // models over the given coun
 function listRowsHTML(items, hov, pctBase){
   const denom = Math.max(1, ...items.map(x => x.total));
   return items.map((x, i) => {
-    const seg = segmentsHTML([{ value:x.bev, color:COLORS.bev, label:`BEV: ${fmt(x.bev)}` }, { value:x.phev, color:COLORS.phev, label:`PHEV: ${fmt(x.phev)}` }, { value:x.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(x.other)}` }], denom);
+    const seg = segmentsHTML([{ value:x.bev, color:COLORS.bev, label:`BEV: ${fmt(x.bev)}` }, { value:x.phev, color:COLORS.phev, label:`PHEV: ${fmt(x.phev)}` }, { value:x.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(x.other)}` }].concat(x.gap > 0 ? [{ value:x.gap, color:HATCH, label:`Not broken down by brand: ${fmt(x.gap)} (country market total minus the brands tracked here)` }] : []), denom);
     return `<div class="rank-row${x.sel ? ' is-sel' : ''}" data-hov="${hov}" data-key="${esc(x.key || x.name)}" data-total="${Math.round(x.total)}">${brandRankBadgeHTML(i + 1, x.name, `#${i + 1}`)}` +
       `<span class="country-label">${esc(x.name)}${estMark(x)}${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</span><span class="pct-of-total">${pctBase ? (100 * x.total / pctBase).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(x.total)}</span></div>`;
   }).join('');
@@ -2317,12 +2318,36 @@ function renderWorldModels(){
   host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + listRowsHTML(items, 'model', base);
   note.textContent = `The 50 best-selling models of ${periodLabel(period)} in the ${cs.length} countries with model-level data (${fmt(base)} units, all models). The % is the share of those sales. Hover a model for its last 10 years and the countries it sells in.`;
 }
+// the country-level market total (assets/country-yearly-data.js, the Mix page's series) for the period, when the brand rows do not cover all of it
+function countryMarketTotal(c, p){
+  if(typeof COUNTRY_YEARLY === 'undefined' || !p || p.type !== 'year') return null;
+  const t = p.projected ? 'PROJECTED' : (p.year === CUR_YEAR ? 'YTD' : 'ANNUAL');
+  const r = (COUNTRY_YEARLY[c] || []).find(x => x.year === p.year && x.period_type === t);
+  return r ? r.total : null;
+}
+function chinaNoteHTML(brandSum, market){
+  const cov = market ? Math.round(100 * brandSum / market) : null;
+  return `<details class="tesla-method" open style="margin:12px 0 4px;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2, rgba(0,0,0,.03));font-size:12.5px;line-height:1.5">
+    <summary style="cursor:pointer;font-weight:800;font-size:13.5px">Why is China not above 30 million here? (China vs the United States)</summary>
+    <ul style="margin:8px 0 4px 18px;padding:0">
+      <li><b>The 30+ million headline is not the domestic car market.</b> CAAM reports 34.40 M vehicles sold by Chinese makers in 2025 (<a href="https://www.steelorbis.com/steel-news/latest-news/caam-chinas-auto-vehicle-sales-up-94-percent-in-2025-1429709.htm" target="_blank" rel="noopener">CAAM, 2025</a>): 30.10 M passenger vehicles + about 4.3 M commercial vehicles (trucks, buses). It is a wholesale figure that includes <b>7.10 M exports</b> (6.04 M passenger cars, 1.06 M commercial).</li>
+      <li><b>What this site counts:</b> new passenger cars and light vehicles sold <b>inside</b> the country. For China that is 30.10 M − 6.04 M exports ≈ 24 M, in line with the CPCA domestic retail count of 23.74 M for 2025. The United States (16.2 M) counts cars, SUVs, pickups and light vans.</li>
+      <li><b>So China is still the largest market</b> — roughly 23.7 M against 16.2 M for the United States in 2025. The exports are Chinese-built cars sold in other countries, so they appear in those countries' sales (and in BYD, Chery, Geely… world totals), not in China's.</li>
+      <li><b>Why the bar can look short:</b> our China brand rows come from Gasgoo group wholesale figures with exports taken out (BYD, Chery, Geely, Great Wall, Changan) and do not list every brand. They add up to ${cov ? cov + '% of China\'s market total' : 'less than the market total'} (${fmt(brandSum)} of ${market ? fmt(market) : 'n/a'}). The rest is drawn as the hatched <b>"Not broken down by brand"</b> part of the bar, so China is ranked on its market total, not on the brands we could list.</li>
+    </ul>
+  </details>`;
+}
 function renderWorldCountries(){
   const host = document.getElementById('wc-rows'), note = document.getElementById('wc-note');
-  const items = Object.entries(byCountry).map(([c, d]) => ({ name:c, key:c, ...d.list.reduce((s, a) => ({ bev:s.bev + a.bev, phev:s.phev + a.phev, other:s.other + a.other, total:s.total + a.total }), { bev:0, phev:0, other:0, total:0 }) })).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
-  const base = items.reduce((s, x) => s + x.total, 0);
-  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + listRowsHTML(items, 'country', base);
-  note.textContent = `Total new-vehicle sales of ${periodLabel(period)} in the ${items.length} countries with brand data (${fmt(base)} units): the market of each country, every brand together. The % is the share of these tracked sales. Hover a country for its last 10 years and its best-selling ${groupMode === 'group' ? 'groups' : 'brands'}; click its name to focus the page on it.`;
+  const useMarket = kind === 'brand' && !filtersActive();
+  const items = Object.entries(byCountry).map(([c, d]) => {
+    const s0 = d.list.reduce((s, a) => ({ bev:s.bev + a.bev, phev:s.phev + a.phev, other:s.other + a.other, total:s.total + a.total, est:s.est + (a.est || 0) }), { bev:0, phev:0, other:0, total:0, est:0 });
+    const mk = useMarket ? countryMarketTotal(c, period) : null, gap = mk && mk > s0.total * 1.03 ? mk - s0.total : 0;
+    return { name:c, key:c, bev:s0.bev, phev:s0.phev, other:s0.other, brandTotal:s0.total, gap, total:s0.total + gap, est:s0.est >= 0.02 * s0.total ? s0.est : 0 };     // est mark only when the estimated part is material (>= 2%)
+  }).filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  const base = items.reduce((s, x) => s + x.total, 0), china = items.find(x => x.name === 'China');
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}${items.some(x => x.gap) ? `<span><i class="sw" style="background:${HATCH}"></i>Not broken down by brand</span>` : ''}</span></div>` + listRowsHTML(items, 'country', base) + (china ? chinaNoteHTML(china.brandTotal, china.gap ? china.total : null) : '');
+  note.textContent = `Total new-vehicle sales of ${periodLabel(period)} in the ${items.length} countries with brand data (${fmt(base)} units): the market of each country, every brand together${items.some(x => x.gap) ? '; where the brand rows do not cover the whole market (China mostly) the hatched part is the rest of the country total' : ''}. The % is the share of these tracked sales. Hover a country for its last 10 years and its best-selling ${groupMode === 'group' ? 'groups' : 'brands'}; click its name to focus the page on it.`;
 }
 function selectedGroups(){
   const yr = periodYear(period), out = [];
