@@ -63,6 +63,7 @@
   .bw-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
   .bw-chart .hit{ fill:transparent; cursor:crosshair; }
   .bw-chart .hit:hover{ fill:rgba(99,102,241,.10); }
+  .est-mark{ margin-left:4px; font-size:9.5px; font-weight:800; color:#b45309; cursor:help; text-transform:uppercase; letter-spacing:.02em; }
   .bw-tip{ position:absolute; z-index:5; opacity:0; pointer-events:none; background:var(--card, #fff); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.18); padding:8px 11px; font-size:12px; line-height:1.5; max-width:290px; transition:opacity .08s; }
   .bw-tip .bw-big{ font-size:15px; font-weight:800; }
   .bw-tip .up{ color:#16a34a; } .bw-tip .dn{ color:#dc2626; }
@@ -716,6 +717,7 @@ function aggregateBrands(country, p, raw){
     const bev = u.bev, phev = u.phev;
     a.bev += bev; a.phev += phev; a.total += u.total;
     a.other = a.total - a.bev - a.phev;
+    if(r.est) a.est = (a.est || 0) + (u.total || 0);
     out.set(k, a);
   }
   // "Projected" period: scale the year-to-date rows just loaded up to a full-year run-rate
@@ -775,6 +777,7 @@ function aggregateModels(country, p, raw){
     const name = MODEL_LABEL[modelKey(r.brand, r.model)];
     const a = out.get(name) || { name, bev:0, phev:0, other:0, total:0 };
     a.bev += u.bev; a.phev += u.phev; a.total += u.total; a.other = a.total - a.bev - a.phev;
+    if(r.est) a.est = (a.est || 0) + (u.total || 0);
     out.set(name, a);
   }
   if(p.projected){
@@ -813,6 +816,8 @@ function originOf(name){
   return k ? (BRAND_ORIGIN[k] || EXTRA_ORIGIN[k] || null) : null;
 }
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+// rows flagged "est" in the data files (Tesla: Tesla publishes no country / model split) get a visible mark
+const estMark = x => x && x.est > 0 ? '<sup class="est-mark" title="Estimated: this figure contains estimated rows (Tesla publishes no country or model split). Pick Tesla in the filters for the method and the table of sources.">est.</sup>' : '';
 // Manufacturer dropdown: Top 30 by world volume (A-Z) first, then everything by origin -- US, Japan, Europe, China, rest --
 // each as "US – Chrysler"; inside a section alphabetical (Europe and the rest by country, then brand)
 function groupedOptions(tot, names){
@@ -1586,7 +1591,7 @@ function historyHTML(country, scope){
 }
 function rowHTML(rk, a, max, sel){
   const w = v => (max ? 100 * v / max : 0).toFixed(2) + '%';
-  return `<div class="mfr-row${sel ? ' sel' : ''}"><span class="rk">${rk}</span><span class="nm" title="${a.name}">${a.name}</span>` +
+  return `<div class="mfr-row${sel ? ' sel' : ''}"><span class="rk">${rk}</span><span class="nm" title="${a.name}">${a.name}${estMark(a)}</span>` +
     `<span class="bar"><i style="width:${w(a.bev)};background:${COLORS.bev}"></i><i style="width:${w(a.phev)};background:${COLORS.phev}"></i><i style="width:${w(a.other)};background:${COLORS.other}"></i></span>` +
     `<span class="val">${fmt(a.total)}</span></div>`;
 }
@@ -1814,7 +1819,7 @@ function brandRowHTML(e, widthDenom){
   const pctOfTotal = e.pctOfWorld != null ? `<span class="pct-of-total" title="Share of ${esc(mfr)}'s world total shown in this chart">${e.pctOfWorld.toFixed(1)}%</span>` : '';
   return `<div class="rank-row${e.cls ? ' ' + e.cls : ''}" data-scope="${e.scope}" data-key="${esc(e.key)}">
       ${rankBadge}
-      <span class="country-label">${e.labelHTML || esc(e.country)}</span>
+      <span class="country-label">${e.labelHTML || esc(e.country)}${estMark(e)}</span>
       ${pctOfTotal}
       <span class="bar-track">${bar.replace(/ title="[^"]*"/g, '')}${outside}</span>
       <span class="total-label" title="Total sales, all motorizations">${fmt(total)}</span>
@@ -1916,7 +1921,7 @@ function renderContinentBars(){
     Object.values(view()).forEach(d => d.list.forEach(a => {
       if(isOtherName(a.name)) return;
       const e = world.get(a.name) || { bev:0, phev:0, other:0, total:0 };
-      e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total;
+      e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total; if(a.est) e.est = (e.est || 0) + a.est;
       world.set(a.name, e);
     }));
     // sales the source does not attribute to a brand: shown at the bottom, never ranked, but part of the market the shares are taken from
@@ -1947,7 +1952,7 @@ function renderContinentBars(){
       const totalTip = gap > 0 ? `Reported worldwide ${fmt(f.units)} = tracked countries ${fmt(e.total)} + all other countries ${fmt(gap)}` : `Total sales in the tracked countries`;
       return `<div class="rank-row${pickNames.includes(name) ? ' is-sel' : ''}" data-hov="brand" data-key="${esc(name)}" data-total="${Math.round(eff)}"${f ? ` title="${esc(finTip(f))}"` : ''}>
         ${brandRankBadgeHTML(rank, name, `${esc(name)}: #${rank} in this ranking`)}
-        <span class="country-label">${esc(name)}</span>
+        <span class="country-label">${esc(name)}${estMark(e)}</span>
         ${pct}
         <span class="bar-track">${bar}${outside}</span>
         <span class="total-label" title="${esc(totalTip)}">${fmt(eff)}</span>
@@ -2037,7 +2042,7 @@ function renderCountryBars(){
       .sort((a, b) => b.total - a.total);
     const denomWorld = f ? f.units : worldTotal;
     built = all.map(x => ({
-      country:x.country, scope:'country', key:x.country,
+      country:x.country, scope:'country', key:x.country, est:x.sel && x.sel.est,
       brandRank: cmpMode === 'all' ? x.rank : fieldRank(x.list, mfr, cmpMode === 'bev' ? (a => a.bev) : (a => a.total - a.bev)),
       pctOfWorld: denomWorld ? 100 * x.total / denomWorld : null,
       yoyHTML: yoyLabelHTML(yoyProjected(x.country, mfr)),
@@ -2200,7 +2205,7 @@ function brandRowsOf(group, countries){       // the brands of one parent group 
   const yr = periodYear(period), acc = new Map();
   countries.forEach(c => withGroupMode('brand', () => aggregateBrands(c, period)).forEach((a, b) => {
     if(isOtherName(b) || groupOfBrand(b, yr) !== group) return;
-    const e = acc.get(b) || { name:b, bev:0, phev:0, other:0, total:0 }; e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total; acc.set(b, e);
+    const e = acc.get(b) || { name:b, bev:0, phev:0, other:0, total:0 }; e.bev += a.bev; e.phev += a.phev; e.other += a.other; e.total += a.total; if(a.est) e.est = (e.est || 0) + a.est; acc.set(b, e);
   }));
   return [...acc.values()].sort((x, y) => y.total - x.total);
 }
@@ -2212,7 +2217,7 @@ function modelRowsOf(countries, brandTest, n){     // models over the given coun
     const u = rowUnits(r); if(motSel.size && u.total <= 0) return;
     const label = MODEL_LABEL ? (MODEL_LABEL[modelKey(r.brand, r.model)] || mfrModelLabel(r.brand, r.model)) : mfrModelLabel(r.brand, r.model);
     const e = agg.get(label) || { name:label, brand:canonicalBrand(r.brand), bev:0, phev:0, other:0, total:0 };
-    e.bev += u.bev * f; e.phev += u.phev * f; e.total += u.total * f; e.other = e.total - e.bev - e.phev; agg.set(label, e);
+    e.bev += u.bev * f; e.phev += u.phev * f; e.total += u.total * f; e.other = e.total - e.bev - e.phev; if(r.est) e.est = (e.est || 0) + u.total * f; agg.set(label, e);
   }));
   return [...agg.values()].sort((a, b) => b.total - a.total).slice(0, n);
 }
@@ -2221,7 +2226,7 @@ function listRowsHTML(items, hov, pctBase){
   return items.map((x, i) => {
     const seg = segmentsHTML([{ value:x.bev, color:COLORS.bev, label:`BEV: ${fmt(x.bev)}` }, { value:x.phev, color:COLORS.phev, label:`PHEV: ${fmt(x.phev)}` }, { value:x.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(x.other)}` }], denom);
     return `<div class="rank-row${x.sel ? ' is-sel' : ''}" data-hov="${hov}" data-key="${esc(x.key || x.name)}" data-total="${Math.round(x.total)}">${brandRankBadgeHTML(i + 1, x.name, `#${i + 1}`)}` +
-      `<span class="country-label">${esc(x.name)}${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</span><span class="pct-of-total">${pctBase ? (100 * x.total / pctBase).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(x.total)}</span></div>`;
+      `<span class="country-label">${esc(x.name)}${estMark(x)}${x.sub ? `<small>${esc(x.sub)}</small>` : ''}</span><span class="pct-of-total">${pctBase ? (100 * x.total / pctBase).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(x.total)}</span></div>`;
   }).join('');
 }
 const legendLite = () => `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
