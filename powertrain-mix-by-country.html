@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/mix-filter-layout.css">
 </head>
 <body>
+<script>window.__wantHash = location.hash;</script>
 
 <div class="shell">
   <aside class="sidebar">
@@ -232,7 +233,7 @@
           <div class="tooltip" id="continent-tooltip"></div>
         </div>
 
-        <div class="card chart-card">
+        <div class="card chart-card" id="elec-share-card" style="scroll-margin-top:72px">
           <div class="chart-header-row">
             <h2>Electrified Share by Country</h2>
             <div class="chart-mode-toggle" role="group" aria-label="Sort order">
@@ -5412,7 +5413,8 @@ function updateURL(){
 function applyURLState(){
   const params = new URLSearchParams(window.location.search);
   const period = params.get('period');
-  if(period && MONTHLY_DATA[period]) selectedMonths = new Set([period]);
+  if(period === 'latest') selectedMonths = new Set([DEFAULT_MONTH]);          // ?period=latest = the last fully loaded month (DEFAULT_MONTH)
+  else if(period && MONTHLY_DATA[period]) selectedMonths = new Set([period]);
   const country = params.get('country');
   if(country && COUNTRIES_WITH_TREND.has(country)) focusedCountry = country;
   const fuels = params.get('fuels');
@@ -7127,5 +7129,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 </script>
 <script src="assets/notes-toggle.js"></script>
 <script src="assets/mix-filter-layout.js"></script>
+<script>
+// a link such as index.html's first card (…?period=latest#elec-share-card): scroll to the section once the page has drawn (the URL is rewritten by the state code, so the hash is read from the early copy)
+(function(){ const id = (window.__wantHash || '').replace('#', ''); if(!id) return; const go = () => { const el = document.getElementById(id); if(el) el.scrollIntoView({ block:'start' }); };
+  window.addEventListener('load', () => { go(); setTimeout(go, 600); setTimeout(go, 1600); }); })();
+</script>
 </body>
 </html>

@@ -6,6 +6,7 @@
 <title>EV Charging — Stations &amp; Ports by Country</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
+<script src="assets/deeplink.js"></script>
 <style>
   .ch-page{ --ch-a:#0ea5a4; --ch-b:#6366f1; }
   .ch-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 10px; }
@@ -188,7 +189,7 @@
 
       <div class="ch-metrics" id="metric-btns" role="group" aria-label="Metric"></div>
 
-      <div class="card chart-card">
+      <div class="card chart-card" id="map-card">
         <h2 id="map-title">Public charging ports</h2>
         <p class="note" id="map-note" style="display:block"></p>
         <div class="ch-maptools">

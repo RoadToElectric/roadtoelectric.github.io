@@ -6,6 +6,7 @@
 <title>Manufacturers — Who Sells What, Country by Country</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
+<script src="assets/deeplink.js"></script>
 <style>
   /* ---------- filter panel: aurora gradient, two lanes (manufacturer / model), "VS" badges, slim sticky selection bar ---------- */
   .fx-panel{ position:relative; margin:4px 0 0; padding:20px 22px 16px; border-radius:22px; color:#e9edff; overflow:visible;
@@ -397,7 +398,7 @@
         <p class="note" style="display:block" id="world-note"></p>
       </div>
 
-      <div class="card chart-card">
+      <div class="card chart-card" id="map-card">
         <p class="note" id="map-note"></p>
         <div class="map-wrap" id="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by manufacturer sales"></svg>
