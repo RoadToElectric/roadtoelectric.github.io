@@ -426,6 +426,18 @@
         </div>
       </div>
 
+      <div class="card chart-card" id="gr-card">
+        <div class="chart-header-row">
+          <h2 id="gr-title">Growth by country</h2>
+          <div class="chart-mode-toggle" role="group" aria-label="Variation shown" id="gr-toggle">
+            <button type="button" class="mode-btn active" data-gr="pct" title="Change in % vs the previous period">% variation</button>
+            <button type="button" class="mode-btn" data-gr="units" title="Change in number of units vs the previous period"># of units</button>
+          </div>
+        </div>
+        <p class="note" id="gr-note" style="display:block"></p>
+        <div id="gr-chart" class="gr-chart"></div>
+      </div>
+
       <div class="card chart-card hidden" id="gb-card">
         <h2 id="gb-title">Sales by group brand</h2>
         <p class="note" id="gb-note" style="display:block"></p>
@@ -471,18 +483,6 @@
         <h2>World sales by country</h2>
         <p class="note" id="wc-note" style="display:block"></p>
         <div class="rank-rows wrap-labels" id="wc-rows"></div>
-      </div>
-
-      <div class="card chart-card" id="gr-card">
-        <div class="chart-header-row">
-          <h2 id="gr-title">Growth by country</h2>
-          <div class="chart-mode-toggle" role="group" aria-label="Variation shown" id="gr-toggle">
-            <button type="button" class="mode-btn active" data-gr="pct" title="Change in % vs the previous period">% variation</button>
-            <button type="button" class="mode-btn" data-gr="units" title="Change in number of units vs the previous period"># of units</button>
-          </div>
-        </div>
-        <p class="note" id="gr-note" style="display:block"></p>
-        <div id="gr-chart" class="gr-chart"></div>
       </div>
 
       <div class="card chart-card" id="bars-card">
@@ -2232,6 +2232,16 @@ function listRowsHTML(items, hov, pctBase){
 }
 const legendLite = () => `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>`;
 
+// country -> ISO 3166-1 alpha-2 code for the small flags (flagcdn.com), same list as the Mix page + the Gulf / Latin-American additions
+const FLAG_ISO = {Iran:"ir",Pakistan:"pk","Saudi Arabia":"sa",UAE:"ae",Guatemala:"gt",Qatar:"qa",Jordan:"jo",Iraq:"iq",Bahrain:"bh",Kuwait:"kw",Venezuela:"ve",Egypt:"eg",Panama:"pa",
+  "Austria":"at","Belgium":"be","Bulgaria":"bg","Croatia":"hr","Cyprus":"cy","Czechia":"cz","Denmark":"dk",
+  "Estonia":"ee","Finland":"fi","France":"fr","Germany":"de","Greece":"gr","Hungary":"hu","Iceland":"is",
+  "Ireland":"ie","Italy":"it","Latvia":"lv","Lithuania":"lt","Luxembourg":"lu","Malta":"mt","Netherlands":"nl",
+  "Norway":"no","Poland":"pl","Portugal":"pt","Romania":"ro","Slovakia":"sk","Slovenia":"si","Spain":"es",
+  "Sweden":"se","Switzerland":"ch","United Kingdom":"gb","Canada":"ca",
+  "United States":"us","China":"cn","India":"in","Mexico":"mx","South Africa":"za","Japan":"jp","Australia":"au","Brazil":"br","South Korea":"kr","Indonesia":"id","Thailand":"th","Argentina":"ar","Turkey":"tr","Philippines":"ph","Chile":"cl","Morocco":"ma","New Zealand":"nz","Malaysia":"my","Taiwan":"tw","Singapore":"sg","Colombia":"co","Vietnam":"vn","Nepal":"np"
+,"Israel":"il","Kazakhstan":"kz","Peru":"pe","Uzbekistan":"uz","Uruguay":"uy","Ecuador":"ec","Ukraine":"ua","Albania":"al","Paraguay":"py","Tunisia":"tn","France - Guadeloupe":"gp","France - Martinique":"mq","France - Guyane":"gf","France - Reunion":"re","France - Mayotte":"yt","Costa Rica":"cr","Mauritius":"mu","Russian Federation":"ru","Georgia":"ge","Montenegro":"me","Belarus":"by","Kosovo":"xk","North Macedonia":"mk","Serbia":"rs","Hong Kong":"hk"};
+const flagUrl = c => FLAG_ISO[c] ? `https://flagcdn.com/24x18/${FLAG_ISO[c]}.png` : null;
 // ---- Growth by country: change vs the previous comparable period, zero in the middle ----
 let growthMode = 'pct';
 const grCache = { sig:'', m:new Map() };
@@ -2290,7 +2300,8 @@ function renderGrowth(){
       g += `<rect x="${x}" y="${Math.min(top, y0)}" width="${Math.max(1.5, w - 1)}" height="${Math.max(1, Math.abs(top - y0))}" rx="1.5" fill="${col}" fill-opacity="${k === 0 ? 1 : .45}" stroke="${col}" stroke-width="${k === 0 ? 0 : 1}"/>`;
       if(Math.abs(v) > cap) g += `<text x="${x + w / 2}" y="${v > 0 ? m.t - 1 : H - m.b + 1}" text-anchor="middle" style="font-size:9px;font-weight:800;fill:${col}">${v > 0 ? '▲' : '▼'}</text>`;
     });
-    g += `<text transform="translate(${x0 + bw / 2},${H - m.b + 16}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
+    { const fu = flagUrl(r.country), fw = Math.min(16, bw - 2); if(fu) g += `<image href="${fu}" x="${x0 + (bw - fw) / 2}" y="${H - m.b + 3}" width="${fw}" height="${fw * .75}" preserveAspectRatio="xMidYMid meet"><title>${esc(r.country)}</title></image>`; }
+    g += `<text transform="translate(${x0 + bw / 2},${H - m.b + 19}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
     const tip = `${r.country}: ` + r.per.map((q, k) => q ? `${series[k] ? series[k] + ' ' : ''}${fmt(q.prev)} → ${fmt(q.cur)} (${q.pct >= 0 ? '+' : ''}${q.pct.toFixed(1)}%, ${q.d >= 0 ? '+' : '−'}${fmt(Math.abs(q.d))} units)` : `${series[k] ? series[k] + ': ' : ''}no data in both periods`).join(' · ');
     g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotH}"><title>${esc(tip)}</title></rect>`;
   });
