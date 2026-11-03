@@ -6,6 +6,14 @@
 <title>Road to Electric — analyzing the current shift to EVs</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
+<style>
+  .hero-logo{ width:min(320px,100%); height:auto; border-radius:14px; flex:none; display:block; box-shadow:0 10px 30px rgba(0,16,40,.28); }
+  .q-card{ border-left:4px solid var(--accent-2); }
+  .q-card .subject{ color:var(--accent-2); }
+  .q-card h3{ font-size:17.5px; line-height:1.3; }
+  .q-card .fact{ margin:0; color:var(--text); font-size:13.5px; line-height:1.5; background:var(--surface-alt); border-radius:10px; padding:8px 10px; }
+  .q-card .cta{ color:var(--accent-2); }
+</style>
 </head>
 <body>
 
@@ -49,17 +57,11 @@
   <main class="main">
     <div class="page">
       <div class="card hero">
-        <svg class="hero-crest" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="46" fill="var(--surface)" stroke="var(--accent)" stroke-width="4"/>
-          <path d="M20 58 L26 40 C28 35 32 32 38 32 L62 32 C68 32 72 35 74 40 L80 58 L80 66 C80 69 78 71 75 71 L71 71 C68 71 66 69 66 66 L66 64 L34 64 L34 66 C34 69 32 71 29 71 L25 71 C22 71 20 69 20 66 Z" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
-          <circle cx="32" cy="64" r="6" fill="var(--text)"/>
-          <circle cx="68" cy="64" r="6" fill="var(--text)"/>
-          <line x1="30" y1="45" x2="70" y2="45" stroke="var(--accent)" stroke-width="3" opacity="0.5"/>
-        </svg>
+        <img class="hero-logo" src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="320" height="143">
         <div class="hero-text">
           <div class="eyebrow">Road to Electric</div>
-          <h1>Worldwide car sales, by powertrain and by country.</h1>
-          <p>Monthly-updated charts and tables tracking petrol, diesel, hybrid and electric vehicle registrations across world markets — built for clips, posts, and arguments with your group chat.</p>
+          <h1>Analyzing the current shift to electric vehicles.</h1>
+          <p>Car sales by powertrain, brand and country, electric trucks and charging networks, and the oil they replace — monthly-updated charts and tables built from national registries and industry data, for clips, posts, and arguments with your group chat.</p>
         </div>
       </div>
 
@@ -77,6 +79,14 @@
         </div>
       </div>
 
+      <div id="ask-section">
+        <div class="browse-heading">
+          <div class="eyebrow" id="ask-title">Ask the data</div>
+          <div class="count" id="ask-count"></div>
+        </div>
+        <div class="link-grid" id="ask-grid"></div>
+      </div>
+
       <div>
         <div class="browse-heading">
           <div class="eyebrow" id="browse-title">Browse</div>
@@ -86,7 +96,7 @@
       </div>
 
       <footer class="page-footer">
-        Data sourced from the World_auto_sales Supabase project · ACEA (Europe), updated monthly
+        Data: national registries and industry associations, ACEA, IEA, EIA and the Energy Institute · updated monthly · some figures are estimates and flagged as such on each page
       </footer>
     </div>
   </main>
@@ -111,6 +121,16 @@ function cardHTML(stat){
     </a>`;
 }
 
+function questionHTML(x){
+  return `
+    <a class="link-card card q-card" href="${x.url}">
+      <div class="subject">Question</div>
+      <h3>${x.q}</h3>
+      <p class="fact">${x.fact}</p>
+      <div class="cta">See the answer →</div>
+    </a>`;
+}
+
 function comingSoonHTML(){
   return `
     <div class="link-card card coming-soon">
@@ -125,9 +145,20 @@ function matches(stat, query){
   return query.split(/\s+/).filter(Boolean).every(term => haystack.includes(term));
 }
 
+const askGrid = document.getElementById('ask-grid'), askSection = document.getElementById('ask-section'), askCount = document.getElementById('ask-count'), askTitle = document.getElementById('ask-title');
+function qMatches(x, query){
+  const haystack = [x.q, x.fact, ...x.keywords].join(' ').toLowerCase();
+  return query.split(/\s+/).filter(Boolean).every(term => haystack.includes(term));
+}
+
 function render(){
   const query = input.value.trim().toLowerCase();
   searchBox.classList.toggle('has-query', query.length > 0);
+  const qs = query ? QUESTIONS_CATALOG.filter(x => qMatches(x, query)) : QUESTIONS_CATALOG;
+  askSection.style.display = qs.length ? '' : 'none';
+  askTitle.textContent = query ? 'Questions that match' : 'Ask the data';
+  askCount.textContent = query ? qs.length + (qs.length === 1 ? ' question' : ' questions') : 'Questions this site can answer';
+  askGrid.innerHTML = qs.map(questionHTML).join('');
 
   if(!query){
     browseTitle.textContent = 'Browse';
