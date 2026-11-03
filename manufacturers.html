@@ -516,6 +516,7 @@
 <script src="assets/manufacturer-fin-report-sales.js"></script>
 <script src="assets/world-car-sales-data.js"></script>
 <script src="assets/manufacturer-world-history.js"></script>
+<script src="assets/tesla-world-estimates.js"></script>
 <script>
 (function(){
 const COLORS = { bev:'#1e8f5f', phev:'#e0a21a', other:'#8a8f98' };
@@ -2498,11 +2499,33 @@ const worldGrowth = () => { const a = WORLD_PW.find(r => r.y === 2025), b = WORL
 // the projected year of a group: its last full year x the world market trend (never a company forecast)
 function groupProjection(group){ const g = worldGrowth(), last = group.s[2025]; return g && last ? Math.round(last * g) : null; }
 // manufacturer group -> sales per year: the world market when nothing is selected, otherwise the parent group of the selected manufacturer(s)
+// Tesla Model Y / Model 3: no published per-model world figure -- estimate = tracked countries (real rows + flagged estimates) scaled to Tesla's reported deliveries
+function renderTeslaWorld(host, title, note, models){
+  const T = TESLA_WORLD_EST, pal = { 'Model Y':'#e11d48', 'Model 3':'#0ea5e9' };
+  host.innerHTML = '';
+  models.forEach(m => {
+    const rows = Object.keys(T.years).sort().map(y => {
+      const d = T.years[y], est = d[m], ytd = est == null;
+      const v = ytd ? d['tracked' + m] : est, tp = m === 'Model Y' ? T.third_party['Model Y'][y] : '';
+      return { y:+y, v, kind:ytd ? 'p' : 'e', bk:'te', basis:ytd ? 'year to date, tracked countries only (not scaled)' : "estimate: tracked countries scaled to Tesla's reported deliveries",
+        extra:(ytd ? '' : `Tracked countries: ${fmt(d['tracked' + m])} × ${d.scale} (Tesla reported ${fmt(d.reported)} vs ${fmt(d.brand_total)} in the tracked markets).`) + (tp ? ` Third-party: ${tp}.` : '') };
+    });
+    const sub = document.createElement('div'); sub.className = 'bw-sub'; sub.innerHTML = `Tesla ${m}<small>world estimate, ${rows[0].y}–${rows[rows.length - 1].y}</small>`; host.appendChild(sub);
+    const box = document.createElement('div'); box.className = 'bw-chart'; host.appendChild(box);
+    bwChart(box, rows, pal[m] || '#6366f1');
+  });
+  title.textContent = models.length > 1 ? 'World sales · Tesla Model Y and Model 3 (estimate)' : `World sales · Tesla ${models[0]} (estimate)`;
+  note.innerHTML = "Tesla only publishes Model 3 + Model Y + S/X + Cybertruck together, so these bars are an <b>estimate</b>: the sum of the countries on this site (real model rows where we have them; where we do not, mainly the United States and a few small markets, the split follows Cox / Kelley Blue Book, Troy Teslike and Motor Intelligence estimates or, elsewhere, the Model Y vs Model 3 ratio of the countries with real rows), scaled up to Tesla's reported deliveries to cover the untracked markets. 2026 is year to date and not scaled. Hover a bar for the detail and the third-party Model Y figures (JATO, Statista, CleanTechnica, Focus2Move).";
+}
 function renderWorldBars(){
   const card = document.getElementById('world-card'), host = document.getElementById('world-bars'), title = document.getElementById('world-title'), note = document.getElementById('world-note');
   if(!WORLD_PW.length){ card.style.display = 'none'; return; }
   card.style.display = '';
   if(ctry){ renderCountryYears(host, title, note); return; }      // a country is picked: this chart is that country's sales per year
+  if(kind === 'model' && typeof TESLA_WORLD_EST !== 'undefined'){
+    const tm = [mfr, mfr2].filter(Boolean).map(n => (/^(tesla\s*)?model\s*(3|y)$/i.exec(String(n).trim()) || [])[2]).filter(Boolean).map(x => x.toUpperCase() === 'Y' ? 'Model Y' : 'Model 3');
+    if(tm.length){ renderTeslaWorld(host, title, note, [...new Set(tm)]); return; }
+  }
   const names = kind === 'brand' ? [mfr, mfr2].filter(Boolean) : [];
   const groups = new Map(), missing = [];
   names.forEach(n => { const h = histFor(n); if(!h){ missing.push(n); return; } const e = groups.get(h.key) || { h, names:[] }; e.names.push(n); groups.set(h.key, e); });
