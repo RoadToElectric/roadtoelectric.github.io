@@ -421,9 +421,17 @@
       <div class="card chart-card" id="gr-card">
         <div class="chart-header-row">
           <h2 id="gr-title">Growth by country</h2>
-          <div class="chart-mode-toggle" role="group" aria-label="Variation shown" id="gr-toggle">
-            <button type="button" class="mode-btn active" data-gr="pct" title="Change in % vs the previous period">% variation</button>
-            <button type="button" class="mode-btn" data-gr="units" title="Change in number of units vs the previous period"># of units</button>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end">
+            <div class="chart-mode-toggle" role="group" aria-label="Compared with" id="gr-span">
+              <button type="button" class="mode-btn" data-gs="mom" title="Compared with the previous month" hidden>vs prev. month</button>
+              <button type="button" class="mode-btn active" data-gs="1" title="Compared with one year earlier">1 YoY</button>
+              <button type="button" class="mode-btn" data-gs="3" title="Compared with three years earlier (total change over the three years)">3 YoY</button>
+              <button type="button" class="mode-btn" data-gs="5" title="Compared with five years earlier (total change over the five years)">5 YoY</button>
+            </div>
+            <div class="chart-mode-toggle" role="group" aria-label="Variation shown" id="gr-toggle">
+              <button type="button" class="mode-btn active" data-gr="pct" title="Change in % vs the comparison period">% variation</button>
+              <button type="button" class="mode-btn" data-gr="units" title="Change in number of units vs the comparison period"># of units</button>
+            </div>
           </div>
         </div>
         <p class="note" id="gr-note" style="display:block"></p>
@@ -2236,15 +2244,25 @@ const FLAG_ISO = {Iran:"ir",Pakistan:"pk","Saudi Arabia":"sa",UAE:"ae",Guatemala
 const flagUrl = c => FLAG_ISO[c] ? `https://flagcdn.com/24x18/${FLAG_ISO[c]}.png` : null;
 // ---- Growth by country: change vs the previous comparable period, zero in the middle ----
 let growthMode = 'pct';
+let growthSpan = null;                      // null = default (month view: previous month, year view: 1 YoY); otherwise 'mom', 1, 3 or 5
 const grCache = { sig:'', m:new Map() };
+function effSpan(){
+  if(period.type === 'month') return growthSpan == null ? 'mom' : growthSpan;
+  return growthSpan == null || growthSpan === 'mom' ? 1 : growthSpan;
+}
 function growthPeriods(){
-  const p = period;
+  const p = period, gs = effSpan();
   if(p.type === 'month'){
-    const [y, m] = p.ym.split('-').map(Number), pm = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`, prev = { type:'month', ym:pm };
-    return { cur:p, prev, label:`${periodLabel(p)} vs ${periodLabel(prev)} (month on month)` };
+    const [y, m] = p.ym.split('-').map(Number);
+    if(gs === 'mom'){
+      const pm = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`, prev = { type:'month', ym:pm };
+      return { cur:p, prev, n:0, label:`${periodLabel(p)} vs ${periodLabel(prev)} (month on month)` };
+    }
+    const prev = { type:'month', ym:`${y - gs}-${String(m).padStart(2, '0')}` };
+    return { cur:p, prev, n:gs, label:`${periodLabel(p)} vs ${periodLabel(prev)} (${gs} year${gs > 1 ? 's' : ''} earlier)` };
   }
-  const y = p.year, cur = y === CUR_YEAR ? { type:'year', year:y, projected:true } : p, prev = { type:'year', year:y - 1 };
-  return { cur, prev, label:`${y === CUR_YEAR ? `${y} projected (year to date x 12 / ${CUR_YEAR_MONTHS_ELAPSED})` : y} vs ${y - 1}` };
+  const y = p.year, n = gs, cur = y === CUR_YEAR ? { type:'year', year:y, projected:true } : p, prev = { type:'year', year:y - n };
+  return { cur, prev, n, label:`${y === CUR_YEAR ? `${y} projected (year to date x 12 / ${CUR_YEAR_MONTHS_ELAPSED})` : y} vs ${y - n}${n > 1 ? ` (${n} years earlier)` : ''}` };
 }
 function growthVal(c, p, name){
   const sig = [groupMode, kind, [...clsSel].sort().join(), [...motSel].sort().join(), MODEL_LABEL ? 1 : 0].join('|');
@@ -2262,9 +2280,10 @@ function renderGrowth(){
   const names = [mfr, mfr2].filter(Boolean), series = names.length ? names : [null], pr = growthPeriods(), mk = growthMode === 'pct' ? 'pct' : 'd';
   title.textContent = names.length ? `Growth by country — ${names.join(' vs. ')}` : 'Growth by country — total market';
   document.querySelectorAll('#gr-toggle [data-gr]').forEach(b => b.classList.toggle('active', b.dataset.gr === growthMode));
+  document.querySelectorAll('#gr-span [data-gs]').forEach(b => { b.hidden = b.dataset.gs === 'mom' && period.type !== 'month'; b.classList.toggle('active', b.dataset.gs === String(effSpan())); });
   const rows = [];
   COUNTRIES.forEach(c => {
-    const per = series.map(n => { const cur = growthVal(c, pr.cur, n), prev = growthVal(c, pr.prev, n); if(cur == null || prev == null || !(prev > 0)) return null; return { cur, prev, pct:100 * (cur / prev - 1), d:cur - prev }; });
+    const per = series.map(n => { const cur = growthVal(c, pr.cur, n), prev = growthVal(c, pr.prev, n); if(cur == null || prev == null || !(prev > 0)) return null; return { cur, prev, pct:100 * (cur / prev - 1), d:cur - prev, cagr:pr.n > 1 ? 100 * (Math.pow(cur / prev, 1 / pr.n) - 1) : null }; });
     if(per.some(Boolean)) rows.push({ country:c, per });
   });
   rows.sort((a, b) => {                                                                                  // biggest growth first; in a matchup by the first brand, countries without it last (ordered by the second)
@@ -2304,7 +2323,7 @@ function renderGrowth(){
     });
     { const fu = flagUrl(r.country), fw = Math.min(16, bw - 2); if(fu) g += `<image href="${fu}" x="${x0 + (bw - fw) / 2}" y="${plotBottom + 3}" width="${fw}" height="${fw * .75}" preserveAspectRatio="xMidYMid meet"><title>${esc(r.country)}</title></image>`; }
     g += `<text transform="translate(${x0 + bw / 2},${plotBottom + 19}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
-    const tip = `${r.country}: ` + r.per.map((q, k) => q ? `${series[k] ? series[k] + ' ' : ''}${fmt(q.prev)} → ${fmt(q.cur)} (${q.pct >= 0 ? '+' : ''}${q.pct.toFixed(1)}%, ${q.d >= 0 ? '+' : '−'}${fmt(Math.abs(q.d))} units)` : `${series[k] ? series[k] + ': ' : ''}no data in both periods`).join(' · ');
+    const tip = `${r.country}: ` + r.per.map((q, k) => q ? `${series[k] ? series[k] + ' ' : ''}${fmt(q.prev)} → ${fmt(q.cur)} (${q.pct >= 0 ? '+' : ''}${q.pct.toFixed(1)}%${q.cagr != null ? `, ${q.cagr >= 0 ? '+' : ''}${q.cagr.toFixed(1)}% a year` : ''}, ${q.d >= 0 ? '+' : '−'}${fmt(Math.abs(q.d))} units)` : `${series[k] ? series[k] + ': ' : ''}no data in both periods`).join(' · ');
     g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotBottom - m.t}"><title>${esc(tip)}</title></rect>`;
   });
   const lg = n > 1 ? `<div class="bw-lg">${series.map((s, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
@@ -2312,6 +2331,7 @@ function renderGrowth(){
   note.textContent = `${pr.label}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the growth side of the scale stops at +${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
 }
 document.getElementById('gr-toggle').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if(!b) return; growthMode = b.dataset.gr; renderGrowth(); });
+document.getElementById('gr-span').addEventListener('click', e => { const b = e.target.closest('[data-gs]'); if(!b) return; growthSpan = b.dataset.gs === 'mom' ? 'mom' : +b.dataset.gs; renderGrowth(); });
 document.getElementById('gr-chart').addEventListener('click', e => { const r = e.target.closest('.gr-hit'); if(r) setCountry(r.dataset.country); });
 
 // ---- the four sections ----
