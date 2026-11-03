@@ -345,7 +345,7 @@ function drawUse(){
   const series = cats.map(c => ({ key:c.k, label:c.label, color:c.color, vals:O.use[c.k].slice(idx0, idx1 + 1) }));
   document.getElementById('use-fsum').textContent = `${useMode === 'abs' ? 'mb/d' : '% of oil'} · ${cats.length} purposes · ${useY0}–${useY1}`;
   stackedArea(document.getElementById('use-chart'), yrs, series, { pct:useMode === 'pct', h:430, est:yy => EST[iy(yy)],
-    tip:(r, ss) => `<b>${r.year}</b> ${EST[iy(r.year)] ? '<span class="est">estimate</span>' : '<span style="color:var(--text-muted)">IEA data</span>'}<div class="r" style="margin:3px 0"><span>All oil</span><b>${fmt1(tot(r.year))} mb/d</b></div>${tipRows(r, ss, useMode === 'pct')}` });
+    tip:(r, ss) => `<b>${r.year}</b> ${EST[iy(r.year)] ? '<span class="est">estimate</span>' : '<span style="color:var(--text-muted)">IEA data</span>'}<div class="r" style="margin:3px 0"><span>All oil</span><b>${fmt1(tot(r.year))} mb/d</b></div>${tipRows(r, ss, useMode === 'pct')}${ss.length > 1 ? (() => { const sel = ss.reduce((q, z) => q + z.vals[r.i], 0); return `<div class="r" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span><b>Selected total</b> (${ss.length} purposes)</span><b>${fmt1(sel)} mb/d · ${(100 * sel / tot(r.year)).toFixed(0)}%</b></div>`; })() : ''}` });
   document.getElementById('use-note').innerHTML = `Million barrels a day burned or used as raw material. Solid areas 1971–2019 are IEA data; <b>hatched years (1950–70 and 2020–26) are estimates</b>. Hover for the numbers of one year.`;
 }
 (function initUse(){
