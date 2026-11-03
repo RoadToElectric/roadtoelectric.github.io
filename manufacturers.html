@@ -2275,13 +2275,23 @@ function renderGrowth(){
   if(rows.length < 2){ host.innerHTML = '<p class="note" style="display:block">Not enough countries with data for both periods to draw the variation.</p>'; note.textContent = pr.label; return; }
   const vals = rows.flatMap(r => r.per.filter(Boolean).map(q => q[mk])), abs = vals.map(Math.abs).sort((a, b) => a - b);
   const maxAbs = abs[abs.length - 1] || 1, p90 = abs[Math.floor(abs.length * 0.9)] || maxAbs;
-  const cap = mk === 'pct' ? Math.max(50, Math.min(maxAbs, p90 * 1.5)) : maxAbs;                    // % mode: a few outliers do not flatten everything else
-  const n = series.length, H = 400, m = { t:22, r:10, b:104, l:58 }, plotH = H - m.t - m.b, y0 = m.t + plotH / 2, half = plotH / 2;
+  const cap = mk === 'pct' ? Math.max(50, Math.min(maxAbs, p90 * 1.5)) : maxAbs;                    // growth side: in % mode a few outliers do not flatten everything else
+  const maxNeg = Math.max(0, ...vals.filter(v => v < 0).map(v => -v));
+  const niceUp = v => { const pw = Math.pow(10, Math.floor(Math.log10(v))), f = v / pw; return pw * ([1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 10].find(s => f <= s + 1e-9) || 10); };
+  const capN = maxNeg > 0 ? Math.min(cap, niceUp(maxNeg)) : cap * 0.1;                               // decline side: only as deep as the biggest decline (a % decline cannot pass -100%), so the flags sit close to the last red bar
+  const n = series.length, m = { t:22, r:10, b:104, l:58 }, posPx = 137, negPx = Math.max(24, capN / cap * posPx), y0 = m.t + posPx, yB = y0 + negPx, plotBottom = yB + 16, H = plotBottom + m.b;   // 16 px under the decline side hold the "decline" label
   const bw = Math.max(n * 9 + 6, ((host.clientWidth || 900) - m.l - m.r) / rows.length), W = Math.round(m.l + m.r + bw * rows.length);      // real pixels, so the country names stay readable; a narrow column scrolls sideways
-  const yv = v => y0 - Math.max(-cap, Math.min(cap, v)) / cap * half, fmtT = v => mk === 'pct' ? (v > 0 ? '+' : '') + Math.round(v) + '%' : (v > 0 ? '+' : v < 0 ? '−' : '') + compactN(Math.abs(v));
-  let g = '';
-  [-1, -.5, 0, .5, 1].forEach(f => { const v = f * cap, yy = y0 - f * half; g += `<line class="${f === 0 ? 'gr-zero' : 'gr-grid'}" x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}"/><text x="${m.l - 6}" y="${yy + 3.5}" text-anchor="end">${f === 0 ? '0' : fmtT(v)}</text>`; });
-  g += `<text class="gr-axis-t" x="${m.l + 6}" y="${m.t + 10}" style="fill:#16a34a">▲ growth</text><text class="gr-axis-t" x="${m.l + 6}" y="${H - m.b - 5}" style="fill:#dc2626">▼ decline</text>`;
+  const sP = posPx / cap, sN = negPx / capN;
+  const yv = v => v >= 0 ? y0 - Math.min(v, cap) * sP : y0 + Math.min(-v, capN) * sN, fmtT = v => mk === 'pct' ? (v > 0 ? '+' : '') + Math.round(v) + '%' : (v > 0 ? '+' : v < 0 ? '−' : '') + compactN(Math.abs(v));
+  const gl = (v, yy) => `<line class="${v === 0 ? 'gr-zero' : 'gr-grid'}" x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}"/><text x="${m.l - 6}" y="${yy + 3.5}" text-anchor="end">${v === 0 ? '0' : fmtT(v)}</text>`;
+  let g = gl(cap, m.t) + gl(cap / 2, y0 - posPx / 2) + gl(0, y0) + gl(-capN / 2, y0 + negPx / 2) + gl(-capN, yB);
+  // "growth" sits top right, shifted left only if a tall green bar would run under it; "decline" sits bottom right, under the red bars
+  const colTop = i => rows[i] ? Math.min(...rows[i].per.map(q => q && q[mk] > 0 ? yv(q[mk]) : Infinity)) : Infinity;
+  const span = Math.ceil(66 / bw) + 1;
+  let gs = Math.max(0, rows.length - span);
+  while(gs > 0 && Array.from({ length:span }, (_, j) => colTop(gs + j)).some(tp => tp < m.t + 18)) gs--;
+  const gx = m.l + Math.min(rows.length, gs + span) * bw - 6;
+  g += `<text class="gr-axis-t" x="${gx}" y="${m.t + 11}" text-anchor="end" style="fill:#16a34a">▲ growth</text><text class="gr-axis-t" x="${W - m.r - 6}" y="${yB + 12}" text-anchor="end" style="fill:#dc2626">▼ decline</text>`;
   const w = Math.max(2, (bw - 3) / n);
   rows.forEach((r, i) => {
     const x0 = m.l + i * bw;
@@ -2289,16 +2299,16 @@ function renderGrowth(){
       if(!q) return;
       const v = q[mk], top = yv(v), x = x0 + 1.5 + k * w, col = v >= 0 ? '#16a34a' : '#dc2626';
       g += `<rect x="${x}" y="${Math.min(top, y0)}" width="${Math.max(1.5, w - 1)}" height="${Math.max(1, Math.abs(top - y0))}" rx="1.5" fill="${col}" fill-opacity="${k === 0 ? 1 : .45}" stroke="${col}" stroke-width="${k === 0 ? 0 : 1}"/>`;
-      if(Math.abs(v) > cap) g += `<text x="${x + w / 2}" y="${v > 0 ? m.t - 1 : H - m.b + 1}" text-anchor="middle" style="font-size:9px;font-weight:800;fill:${col}">${v > 0 ? '▲' : '▼'}</text>`;
+      if(v > 0 ? v > cap : -v > capN) g += `<text x="${x + w / 2}" y="${v > 0 ? m.t - 1 : yB + 9}" text-anchor="middle" style="font-size:9px;font-weight:800;fill:${col}">${v > 0 ? '▲' : '▼'}</text>`;
     });
-    { const fu = flagUrl(r.country), fw = Math.min(16, bw - 2); if(fu) g += `<image href="${fu}" x="${x0 + (bw - fw) / 2}" y="${H - m.b + 3}" width="${fw}" height="${fw * .75}" preserveAspectRatio="xMidYMid meet"><title>${esc(r.country)}</title></image>`; }
-    g += `<text transform="translate(${x0 + bw / 2},${H - m.b + 19}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
+    { const fu = flagUrl(r.country), fw = Math.min(16, bw - 2); if(fu) g += `<image href="${fu}" x="${x0 + (bw - fw) / 2}" y="${plotBottom + 3}" width="${fw}" height="${fw * .75}" preserveAspectRatio="xMidYMid meet"><title>${esc(r.country)}</title></image>`; }
+    g += `<text transform="translate(${x0 + bw / 2},${plotBottom + 19}) rotate(60)" text-anchor="start">${esc(r.country)}</text>`;
     const tip = `${r.country}: ` + r.per.map((q, k) => q ? `${series[k] ? series[k] + ' ' : ''}${fmt(q.prev)} → ${fmt(q.cur)} (${q.pct >= 0 ? '+' : ''}${q.pct.toFixed(1)}%, ${q.d >= 0 ? '+' : '−'}${fmt(Math.abs(q.d))} units)` : `${series[k] ? series[k] + ': ' : ''}no data in both periods`).join(' · ');
-    g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotH}"><title>${esc(tip)}</title></rect>`;
+    g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotBottom - m.t}"><title>${esc(tip)}</title></rect>`;
   });
   const lg = n > 1 ? `<div class="bw-lg">${series.map((s, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
   host.innerHTML = `${lg}<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Growth by country">${g}</svg>`;
-  note.textContent = `${pr.label}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the scale stops at ±${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
+  note.textContent = `${pr.label}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the growth side of the scale stops at +${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
 }
 document.getElementById('gr-toggle').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if(!b) return; growthMode = b.dataset.gr; renderGrowth(); });
 document.getElementById('gr-chart').addEventListener('click', e => { const r = e.target.closest('.gr-hit'); if(r) setCountry(r.dataset.country); });
