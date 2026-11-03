@@ -148,6 +148,7 @@
         <div class="card chart-card" id="map-card">
           <h2>BEV Share Map</h2>
           <p class="note">Darker green = higher battery-electric share. Scroll/pinch or use the buttons to zoom, drag to pan. Hover a country for exact figures — a country with no data for the selected period still shows its last available period if one exists. Darker gray means we've researched that country and confirmed no fuel-type breakdown exists (still worth a hover, to see why); lighter gray means it hasn't been looked at yet. Click any colored or gray-but-tracked country to focus every chart on this page on it.</p>
+          <a href="#" id="map-clear-top" class="map-clear-btn hidden" style="position:static;display:inline-flex;margin:2px 0 10px" title="Back to all countries">✕ Clear Selection</a>
           <div class="map-wrap">
             <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by battery-electric vehicle share"></svg>
             <div class="map-zoom-controls">
@@ -3332,6 +3333,7 @@ function rankWithin(list, country, key){
 function renderFocusStats(){
   const card = document.getElementById('focus-stats-card');
   document.getElementById('map-clear').classList.toggle('hidden', !focusedCountry);
+  document.getElementById('map-clear-top').classList.toggle('hidden', !focusedCountry);
   if(!focusedCountry){ card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
 
@@ -3851,12 +3853,11 @@ trendsClearBtn.addEventListener('click', (e) => {
   recompute();
 });
 
-const mapClearBtn = document.getElementById('map-clear');
-mapClearBtn.addEventListener('click', (e) => {
+[document.getElementById('map-clear'), document.getElementById('map-clear-top')].forEach(btn => btn.addEventListener('click', (e) => {
   e.preventDefault();
   clearSelection();
   recompute();
-});
+}));
 
 const FUEL_TOTAL_KEYS = ['bev','phev','hev','petrol','diesel','others','total'];
 
