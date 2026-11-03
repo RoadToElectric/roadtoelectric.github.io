@@ -87,6 +87,19 @@
   .wo-method th, .wo-method td{ border-bottom:1px solid var(--border); padding:4px 8px; text-align:right; }
   .wo-method th:first-child, .wo-method td:first-child{ text-align:left; }
   .wo-note{ font-size:12.5px; color:var(--text-muted); line-height:1.5; margin:4px 0 8px; }
+  .wo-pies{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin-top:6px; }
+  .wo-pie{ border:1px solid var(--border); border-radius:16px; padding:12px 12px 14px; background:var(--surface); text-align:center; }
+  .wo-pie .hd{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:6px; }
+  .wo-pie select{ font:inherit; font-size:20px; font-weight:900; color:var(--text); background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:4px 10px; cursor:pointer; }
+  .wo-pie .badge{ font-size:11px; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:.05em; min-width:56px; text-align:left; }
+  .wo-pie .badge.ok{ color:var(--text-muted); }
+  .wo-pie svg{ width:100%; height:auto; display:block; max-width:420px; margin:0 auto; }
+  .wo-pie svg path{ stroke:var(--surface); stroke-width:1.5; transition:transform .15s ease; transform-origin:0 0; cursor:pointer; }
+  .wo-pie svg path:hover{ transform:scale(1.035); }
+  .wo-pie svg text{ font-size:13px; font-weight:800; fill:#fff; pointer-events:none; paint-order:stroke; stroke:rgba(0,0,0,.28); stroke-width:2px; }
+  .wo-pie .sum{ font-size:13px; color:var(--text-muted); line-height:1.5; margin-top:6px; }
+  .wo-pie .sum b{ color:var(--text); }
+  @media (max-width:900px){ .wo-pies{ grid-template-columns:1fr; } }
   .wo-two{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; }
   @media (max-width:1000px){ .wo-two{ grid-template-columns:1fr; } .wo-brow{ grid-template-columns:110px 1fr 62px; } }
 </style>
@@ -170,9 +183,17 @@
         <div class="wo-chart" id="use-chart"></div>
       </div>
 
-      <!-- 2. transport -->
+      <!-- 2. three pies -->
+      <div class="card chart-card" id="pie-card">
+        <h2>2 · Three moments, three pies: the share of each purpose</h2>
+        <p class="wo-note" id="pie-note">Share of all the oil burned in the chosen year, by purpose. Pick any year above each pie to compare — the colours are the same as in the chart above. 2026 is an estimate.</p>
+        <div class="wo-pies" id="pies"></div>
+        <div class="wo-legend" id="pie-legend"></div>
+      </div>
+
+      <!-- 3. transport -->
       <div class="card chart-card" id="tr-card">
-        <h2>2 · The transport slice: cars vs trucks vs planes vs ships</h2>
+        <h2>3 · The transport slice: cars vs trucks vs planes vs ships</h2>
         <p class="wo-note" id="tr-note"></p>
         <div class="wo-filters" id="tr-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="tr-fsum"></span><i class="wo-car">▾</i></button>
@@ -188,7 +209,7 @@
 
       <!-- 3. US reality check -->
       <div class="card chart-card" id="us-card">
-        <h2>3 · Reality check: the United States, measured by sector (EIA)</h2>
+        <h2>4 · Reality check: the United States, measured by sector (EIA)</h2>
         <p class="wo-note">The only country where oil use is published by sector for every year since 1949. Real data, not an estimate: transport takes about 70% of US petroleum, industry and homes the rest.</p>
         <div class="wo-filters closed" id="us-f">
           <button type="button" class="wo-ftoggle" aria-expanded="false"><span>Filters</span><span class="wo-fsum" id="us-fsum"></span><i class="wo-car">▾</i></button>
@@ -199,7 +220,7 @@
 
       <!-- 4. production -->
       <div class="card chart-card" id="pr-card">
-        <h2>4 · Oil produced by country, 1960–2025</h2>
+        <h2>5 · Oil produced by country, 1960–2025</h2>
         <p class="wo-note" id="pr-note"></p>
         <div class="wo-filters" id="pr-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="pr-fsum"></span><i class="wo-car">▾</i></button>
@@ -224,7 +245,7 @@
       </div>
 
       <div class="card chart-card" id="rk-card">
-        <h2>5 · Who pumped the most, year by year</h2>
+        <h2>6 · Who pumped the most, year by year</h2>
         <p class="wo-note">Top producers of the selected year (regions as ticked above). Press play to watch the ranking change from 1960.</p>
         <div class="wo-frow" style="margin:0 0 6px"><button type="button" class="wo-play" id="rk-play" aria-label="Play">▶</button>
           <div class="wo-range"><input type="range" id="rk-year" min="1960" max="2025" value="2025" style="width:300px"><b id="rk-yl" style="font-size:20px;color:var(--text)">2025</b></div>
@@ -361,7 +382,34 @@ function drawUse(){
   drawUse();
 })();
 
-// ---------- 2. transport ----------
+// ---------- 2. three pies ----------
+const PIE_YEARS = [1975, 2000, 2026];
+function drawPie(n){
+  const yr = PIE_YEARS[n], i = iy(yr), T = tot(yr);
+  const box = document.getElementById('pie' + n); const sv = box.querySelector('.psv'), tip = box.querySelector('.wo-tip');
+  const data = CATS.map(c => ({ c, v:useVal(c.k, yr) }));
+  const R = 168, arc = d3.arc().innerRadius(0).outerRadius(R), arcL = d3.arc().innerRadius(R * .64).outerRadius(R * .64);
+  const pie = d3.pie().sort(null).value(d => d.v)(data);
+  const svg = d3.select(sv); svg.selectAll('*').remove();
+  const g = svg.append('g').attr('transform', 'translate(190,190)');
+  g.selectAll('path').data(pie).join('path').attr('d', arc).attr('fill', d => d.data.c.color)
+    .on('mousemove', (e, d) => { tip.innerHTML = `<b>${d.data.c.label}</b><div class="r"><span>Share of all oil</span><b>${(100 * d.data.v / T).toFixed(1)}%</b></div><div class="r"><span>Volume</span><b>${fmt1(d.data.v)} mb/d</b></div>`; tip.style.opacity = 1;
+      const hr = box.getBoundingClientRect(); tip.style.left = Math.max(0, Math.min(hr.width - tip.offsetWidth, e.clientX - hr.left + 12)) + 'px'; tip.style.top = Math.max(0, e.clientY - hr.top - 70) + 'px'; })
+    .on('mouseleave', () => { tip.style.opacity = 0; });
+  g.selectAll('text').data(pie.filter(d => d.data.v / T >= 0.04)).join('text').attr('transform', d => `translate(${arcL.centroid(d)})`).attr('text-anchor', 'middle').attr('dy', '.35em').text(d => Math.round(100 * d.data.v / T) + '%');
+  const t = trans(yr);
+  box.querySelector('.sum').innerHTML = `<b>${fmt1(T)} mb/d</b> burned in ${yr}<br>Transport <b>${(100 * t / T).toFixed(0)}%</b> (${fmt1(t)} mb/d): cars ${(100 * useVal('road_passenger', yr) / T).toFixed(0)}%, trucks ${(100 * useVal('road_goods', yr) / T).toFixed(0)}%, planes ${(100 * useVal('aviation', yr) / T).toFixed(0)}%, ships ${(100 * useVal('navigation', yr) / T).toFixed(0)}%<br>Plastics &amp; chemicals <b>${(100 * useVal('nonenergy', yr) / T).toFixed(0)}%</b>`;
+  const bd = box.querySelector('.badge'); bd.textContent = EST[i] ? 'Estimate' : 'IEA data'; bd.classList.toggle('ok', !EST[i]);
+}
+(function initPies(){
+  const host = document.getElementById('pies');
+  host.innerHTML = PIE_YEARS.map((y, n) => `<div class="wo-pie" id="pie${n}" style="position:relative"><div class="hd"><select aria-label="Year of pie ${n + 1}">${Y.slice().reverse().map(v => `<option value="${v}"${v === y ? ' selected' : ''}>${v}</option>`).join('')}</select><span class="badge"></span></div><svg class="psv" viewBox="0 0 380 380" role="img" aria-label="Share of oil by purpose"></svg><div class="wo-tip"></div><div class="sum"></div></div>`).join('');
+  host.querySelectorAll('select').forEach((sel, n) => sel.addEventListener('change', () => { PIE_YEARS[n] = +sel.value; drawPie(n); }));
+  document.getElementById('pie-legend').innerHTML = CATS.map(c => `<span class="wo-chip" style="--c:${c.color};cursor:default"><i></i>${c.label}</span>`).join('');
+  PIE_YEARS.forEach((_, n) => drawPie(n));
+})();
+
+// ---------- 3. transport ----------
 const TRY = [1973, 1990, 2000, 2010, 2019, 2024, 2026];
 let trYears = new Set(TRY);
 function drawTransport(){
