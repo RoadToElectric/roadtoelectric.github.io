@@ -1,4 +1,4 @@
-# World Auto Sales
+# Road to Electric — analyzing the current shift to EVs
 
 Worldwide car sales stats — powertrain mix (EV/hybrid/petrol/diesel) and country comparisons, updated monthly.
 
