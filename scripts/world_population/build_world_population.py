@@ -10,6 +10,9 @@ Outputs:
   assets/world-population-data.js      WORLD_POP summary for every location, 1950-2050 (the page's horizon): total + the number of
                                        people aged >= 15..22, >= 65 and >= 80 (everything the page needs is derived from these:
                                        under 16 = total - ge16, 16-64 = ge16 - ge65, people reaching age N in a year = geN - ge(N+1))
+  assets/world-population-older.js     WORLD_POP_OLDER: people at every single year of age 60..100+ for every location, 1950-2050, loaded on demand by the
+                                       "stop driving at" slider of the potential-drivers card (ge60..ge100 are built from it). Values are persons / s, with s a power of
+                                       ten chosen per location so that the largest cell stays under 20,000 (about 5 significant digits for the big cells)
   assets/population/<LocID>.json       every single year of age (0..100+) x every year 1950-2050 for one location, loaded on demand
   .scratch/pop/world_population_full.npz   the full 1950-2100 array, read by load_to_supabase.py
 
@@ -25,7 +28,8 @@ FILES = ['est_1950_2023.csv.gz', 'proj_2024_2100.csv.gz']
 Y0, Y1, PAGE_Y1 = 1950, 2100, 2050          # full data / the page's horizon
 PROJ_FROM = 2024                             # first projected year in WPP 2024
 REGIONS = {903: 'Africa', 935: 'Asia', 908: 'Europe', 904: 'Latin America and the Caribbean', 905: 'Northern America', 909: 'Oceania'}
-GE = [15, 16, 17, 18, 19, 20, 21, 22, 65, 80]  # "aged >= N" series kept for the page
+GE = [15, 16, 17, 18, 19, 20, 21, 22, 65, 80, 81]  # "aged >= N" series kept for the page (81 = people leaving at the default stop-driving age of 80)
+OLD_A0, OLD_A1 = 60, 100                     # single-year ages kept in the lazy 'older' asset
 # UN names -> the names the rest of this site uses
 RENAME = {
     'United States of America': 'United States', 'Türkiye': 'Turkey', 'Republic of Korea': 'South Korea',
@@ -120,6 +124,18 @@ def main():
     p = os.path.join(ROOT, 'assets', 'world-population-data.js')
     open(p, 'w', encoding='utf-8', newline='\n').write('const WORLD_POP = ' + json.dumps(summary, separators=(',', ':'), ensure_ascii=False) + ';\n')
     print(f'wrote assets/world-population-data.js  {os.path.getsize(p) / 1e6:.2f} MB  ({len(out_locs)} locations)')
+
+    # ---- single-year ages 60..100+ for the 'stop driving at' slider (lazy asset)
+    older = {}
+    for loc in ids:
+        blk = data[loc][:ny, OLD_A0:OLD_A1 + 1]               # years x ages
+        step = 1
+        while blk.max() / step > 20000:
+            step *= 10
+        older[str(loc)] = dict(s=step, d=[int(round(v / step)) for v in blk.T.reshape(-1)])   # age-major, year-minor
+    op = os.path.join(ROOT, 'assets', 'world-population-older.js')
+    open(op, 'w', encoding='utf-8', newline='\n').write('const WORLD_POP_OLDER = ' + json.dumps(dict(a0=OLD_A0, a1=OLD_A1, y0=Y0, y1=PAGE_Y1, locs=older), separators=(',', ':')) + ';\n')
+    print(f'wrote assets/world-population-older.js  {os.path.getsize(op) / 1e6:.2f} MB')
 
     # ---- per-location exact-age files (1950..2050)
     odir = os.path.join(ROOT, 'assets', 'population'); os.makedirs(odir, exist_ok=True)

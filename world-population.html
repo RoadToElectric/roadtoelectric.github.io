@@ -249,12 +249,14 @@
         <div class="wp-filters" id="dr-f">
           <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="dr-fsum"></span><i class="wp-car">▾</i></button>
           <div class="wp-fbody">
-            <div class="wp-frow"><label class="wp-fl" for="dr-age">Adult from age</label>
-              <select class="wp-sel" id="dr-age"><option>16</option><option>17</option><option selected>18</option><option>19</option><option>20</option><option>21</option></select>
-              <label class="wp-fl" for="dr-base" style="min-width:0">Starting in</label><select class="wp-sel" id="dr-base"></select>
+            <div class="wp-frow"><span style="display:inline-flex;align-items:center;gap:8px 14px;flex-wrap:wrap"><label class="wp-fl" for="dr-age" style="font-size:11.5px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;min-width:112px">Start driving at</label>
+              <span class="wp-range"><input type="range" id="dr-age" min="16" max="21" value="18"><b id="dr-agel">18</b></span></span>
+              <span style="display:inline-flex;align-items:center;gap:8px 14px;flex-wrap:wrap"><label class="wp-fl" for="dr-stop" style="font-size:11.5px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;min-width:112px">Stop driving at</label>
+              <span class="wp-range"><input type="range" id="dr-stop" min="60" max="99" value="80"><b id="dr-stopl">80</b></span></span></div>
+            <div class="wp-frow"><label class="wp-fl" for="dr-base">Starting in</label><select class="wp-sel" id="dr-base"></select>
               <div class="wp-range"><span>over</span><input type="range" id="dr-x" min="1" max="24" value="10"><b id="dr-xl">10</b><span>years</span></div></div>
             <div class="wp-frow"><label class="wp-fl">Rank by</label>
-              <div class="wp-seg" id="dr-measure"><button type="button" data-v="net" class="active">Net gain (people)</button><button type="button" data-v="pct">% growth</button><button type="button" data-v="ent">People reaching that age</button></div>
+              <div class="wp-seg" id="dr-measure"><button type="button" data-v="net" class="active">Net gain (people)</button><button type="button" data-v="pct">% growth</button><button type="button" data-v="ent">New drivers</button><button type="button" data-v="out">Drivers lost</button></div>
               <div class="wp-seg" id="dr-dir"><button type="button" data-v="up" class="active">Biggest gains</button><button type="button" data-v="down">Biggest losses</button></div></div>
             <div class="wp-frow"><label class="wp-fl">Regions as</label>
               <div class="wp-seg" id="dr-lvl"><button type="button" data-v="region" class="active">6 regions</button><button type="button" data-v="sub">22 subregions</button></div>
@@ -298,9 +300,9 @@
         <summary>How these numbers are built — read before quoting them</summary>
         <ol>
           <li><b>Source:</b> United Nations, Department of Economic and Social Affairs, Population Division — <em>World Population Prospects 2024</em>, medium variant, population by single year of age (both sexes, 1 July), 237 countries and areas plus the UN's own regions. <b>1950–2023 are UN estimates; 2024 onward (hatched on the charts) are projections</b> — so today's figures for 2024–2026 are projected too. Revised by the UN every two years.</li>
-          <li><b>Age groups:</b> under 16 = ages 0–15, 16–64, 65+ (these three never overlap and add up to the total). “Adults” / potential drivers = everyone aged 16, 17, 18, 19, 20 or 21 and over, as chosen — driving ages differ by country, so the threshold is a setting, not a fact.</li>
+          <li><b>Age groups:</b> under 16 = ages 0–15, 16–64, 65+ (these three never overlap and add up to the total). “Adults” / potential drivers = everyone from the start-driving age (16 to 21, default 18) up to the stop-driving age (60 to 99, default 80) — driving ages differ by country and by person, so both thresholds are settings, not facts. The hero and the “adults” figures elsewhere count everyone 18 and over, with no upper limit.</li>
           <li><b>Potential drivers are an upper bound, not licensed drivers.</b> The number counts people who are old enough; how many actually hold a licence or own a car depends on income, cities and culture. Use it to size the pool of people entering the driving market, not the number of cars.</li>
-          <li><b>Net gain vs people reaching the age:</b> net gain is the change in the number of people aged N or more between two years (births, deaths and migration included — it is what the UN model projects). “People reaching that age” adds up, for each year after the start, the people who are exactly N that year — the gross number of new potential drivers, before the older ones leave the pool.</li>
+          <li><b>Net gain vs people reaching the age:</b> net gain is the change in the number of people aged N or more between two years (births, deaths and migration included — it is what the UN model projects). “People reaching that age” adds up, for each year after the start, the people who are exactly N that year — the gross number of new potential drivers, before the older ones leave the pool. In the potential-drivers card the pool is people aged N to S−1 (S = the stop-driving age), so <b>net gain = new drivers − drivers lost</b>: new drivers are the people turning N, those who reach S leave the pool for old age, and the rest of the loss (deaths plus net migration among people aged N to S−1) is what is left over once the other two are known — the UN data has no separate death count by age, so it is not a death statistic on its own, and where more people arrive than die it turns into a gain. Ages 60 to 100+ come from a separate single-year file, loaded the first time the stop-driving slider leaves its default.</li>
           <li><b>Regions</b> are the UN's six continental regions (Africa, Asia, Europe, Latin America and the Caribbean, Northern America, Oceania) and 22 subregions (the UN's 21 plus Northern America, which has no subregions of its own). Every country and region figure is the UN's own series; the totals add up (regions equal the sum of their countries to within rounding). Country names follow the rest of this site (e.g. United States, Turkey, South Korea).</li>
           <li><b>% growth rankings</b> ignore very small areas (default: under 1 million people at the start) because a tiny population can post a huge percentage on a few thousand people.</li>
           <li><b>Stored in the database:</b> table <code>world_population_by_age</code> — one row per area and year, one column per exact age (<code>age_0</code> … <code>age_100</code>, the last meaning 100 and over), 1950–2100, with a flag for projected years; view <code>world_population_age_groups</code> gives under 16 / 16–64 / 65+ / 18+ / 80+. Rebuild with <code>scripts/world_population/build_world_population.py</code> and <code>load_to_supabase.py</code>.</li>
@@ -336,6 +338,23 @@ function S(l, key){                       // per-year series (index 0 = 1950) of
   else if (key === 'w1664') v = l.g[geIdx(16)].map((x, i) => x - l.g[geIdx(65)][i]);
   else v = l.g[geIdx(+key.slice(2))];     // 'ge18' = people aged 18 and over
   cache.set(ck, v); return v;
+}
+let OLDER_P = null; const olderCache = new Map();
+function loadOlder(){                    // assets/world-population-older.js: people at every single year of age 60..100+ (WORLD_POP_OLDER), fetched the first time a stop-driving age needs it
+  if (!OLDER_P) OLDER_P = new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'assets/world-population-older.js'; sc.onload = ok; sc.onerror = () => { OLDER_P = null; no(new Error('older ages file not loaded')); }; document.head.appendChild(sc); });
+  return OLDER_P;
+}
+function geAt(l, n){                      // people aged >= n per year (index 0 = 1950): the kept series when there is one, otherwise built from the single-year ages 60..100+
+  const k = geIdx(n); if (k >= 0) return l.g[k];
+  if (typeof WORLD_POP_OLDER === 'undefined') return null;
+  const O = WORLD_POP_OLDER; if (n < O.a0 || n > O.a1 + 1) return null;
+  let ge = olderCache.get(l.id);
+  if (!ge) {
+    const rec = O.locs[l.id], na = O.a1 - O.a0 + 1; ge = new Array(na + 1); ge[na] = new Float64Array(NY);     // aged >= 101 = nobody
+    for (let i = na - 1; i >= 0; i--) { const g = new Float64Array(NY), up = ge[i + 1]; for (let y = 0; y < NY; y++) g[y] = up[y] + rec.d[i * NY + y] * rec.s; ge[i] = g; }
+    olderCache.set(l.id, ge);
+  }
+  return ge[n - O.a0];
 }
 const MEASURE_LABEL = { total: 'everyone', u16: 'people under 16', w1664: 'people aged 16–64', ge65: 'people aged 65+', ge18: 'people aged 18+', ge80: 'people aged 80+' };
 
@@ -586,52 +605,69 @@ function renderRankChart(){
 
 // ---------- 5 / 6 · who gains the most adults / over-80s ----------
 function gainCard(p, cfg){
-  const s = { age: cfg.age, base: 2026, x: 10, measure: 'net', dir: 'up', lvl: 'region', n: 15, min: 1e6 };
+  const s = { age: cfg.age, stop: cfg.stop || null, base: 2026, x: 10, measure: 'net', dir: 'up', lvl: 'region', n: 15, min: 1e6 };
   const el = id => $(p + '-' + id);
   periodOpts(el('base'), 1960, 2045, s.base);
   const capX = () => { const mx = Math.min(24, Y1 - s.base); el('x').max = mx; if (s.x > mx) s.x = mx; el('x').value = s.x; el('xl').textContent = s.x; };
-  const compute = l => { const g = S(l, 'ge' + s.age), a = g[yi(s.base)], b = g[yi(s.base + s.x)];
-    let ent = null; if (cfg.entrants && geIdx(s.age + 1) >= 0) { const g1 = S(l, 'ge' + (s.age + 1)); ent = 0; for (let y = s.base + 1; y <= s.base + s.x; y++) ent += g[yi(y)] - g1[yi(y)]; }
-    return { l, a, b, d: b - a, pc: a > 0 ? (b - a) / a * 100 : null, ent }; };
+  const stopReady = () => !s.stop || (geAt(WORLD, s.stop) && geAt(WORLD, s.stop + 1));
+  const calc = (l, noStop) => {           // pool = people aged age..stop-1 (no upper limit when noStop); new = people turning `age`; out = people reaching `stop`; died = the rest of the losses (deaths and net migration)
+    const g = geAt(l, s.age), g1 = geAt(l, s.age + 1), gs = s.stop && !noStop ? geAt(l, s.stop) : null, gs1 = gs ? geAt(l, s.stop + 1) : null;
+    const y0 = yi(s.base), y1 = yi(s.base + s.x), pool = y => g[y] - (gs ? gs[y] : 0), a = pool(y0), b = pool(y1), d = b - a;
+    let ent = null, out = null;
+    if (cfg.entrants && g1) { ent = 0; out = gs ? 0 : null; for (let y = y0 + 1; y <= y1; y++) { ent += g[y] - g1[y]; if (gs) out += gs[y] - gs1[y]; } }
+    const lost = ent !== null ? ent - d : null;
+    return { l, a, b, d, pc: a > 0 ? d / a * 100 : null, ent, out, lost, died: lost !== null && out !== null ? lost - out : null };
+  };
+  const compute = l => calc(l, false), computeFull = l => calc(l, true);
   const render = () => {
     capX();
+    if (el('agel')) el('agel').textContent = s.age; if (el('stopl')) el('stopl').textContent = s.stop;
+    if (!stopReady()) { el('fsum').textContent = 'loading single-year ages…'; loadOlder().then(render, () => { el('fsum').textContent = 'could not load the single-year ages file'; }); return; }
     const dirEl = $(p + '-dir');
     if (dirEl) {                                         // people reaching an age can only grow, so "biggest losses" does not apply to that measure
-      if (s.measure === 'ent') { s.dir = 'up'; dirEl.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.v === 'up')); }
-      dirEl.querySelectorAll('button[data-v="down"]').forEach(b => { b.disabled = s.measure === 'ent'; b.title = b.disabled ? 'Not available for "people reaching the age"' : ''; });
+      const flow = s.measure === 'ent' || s.measure === 'out';
+      if (flow) { s.dir = 'up'; dirEl.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.v === 'up')); }
+      dirEl.querySelectorAll('button[data-v="down"]').forEach(b => { b.disabled = flow; b.title = b.disabled ? 'Not available for new or lost drivers' : ''; });
     }
     const up = s.dir === 'up', end = s.base + s.x;
-    const val = r => s.measure === 'pct' ? r.pc : s.measure === 'ent' ? r.ent : r.d;
+    const val = r => s.measure === 'pct' ? r.pc : s.measure === 'ent' ? r.ent : s.measure === 'out' ? r.lost : r.d;
     const sortRows = rows => rows.filter(r => val(r) !== null).sort((a, b) => up ? val(b) - val(a) : val(a) - val(b));
     const w = compute(WORLD);
     const regs = sortRows((s.lvl === 'region' ? REGIONS : SUBS).map(compute));
     const ctys = sortRows(COUNTRIES.map(compute).filter(r => s.measure !== 'pct' || r.a >= s.min)).slice(0, s.n);
-    const label = r => s.measure === 'pct' ? fmtP(r.pc) : s.measure === 'ent' ? fmtN(r.ent) : fmtS(r.d);
-    const sub = r => s.measure === 'ent' ? `net ${fmtS(r.d)}` : `${fmtN(r.a)} → ${fmtN(r.b)}${cfg.entrants && r.ent !== null && s.measure !== 'ent' ? ` · ${fmtN(r.ent)} reach ${s.age}` : ''}`;
-    const col = r => (val(r) >= 0 ? cfg.color : 'var(--wp-dn)');
+    const label = r => s.measure === 'pct' ? fmtP(r.pc) : s.measure === 'ent' ? fmtN(r.ent) : s.measure === 'out' ? fmtN(r.lost) : fmtS(r.d);
+    const sub = r => s.stop && r.ent !== null
+      ? (s.measure === 'ent' ? `net ${fmtS(r.d)} · ${fmtN(r.lost)} lost` : s.measure === 'out' ? `${fmtN(r.out)} reach ${s.stop} · ${fmtN(r.died)} deaths and net migration` : `${fmtN(r.a)} → ${fmtN(r.b)} · +${fmtN(r.ent)} new · −${fmtN(r.lost)} lost`)
+      : s.measure === 'ent' ? `net ${fmtS(r.d)}` : `${fmtN(r.a)} → ${fmtN(r.b)}${cfg.entrants && r.ent !== null && s.measure !== 'ent' ? ` · ${fmtN(r.ent)} reach ${s.age}` : ''}`;
+    const col = r => (s.measure === 'out' ? 'var(--wp-dn)' : val(r) >= 0 ? cfg.color : 'var(--wp-dn)');
     const mk = (rows, id, click) => { const max = d3.max(rows, r => Math.abs(val(r))) || 1; rows.forEach(r => r.bar = val(r)); barRows(el(id), rows, { max, color: col, label, sub, click }); };
     mk(regs, 'reg'); mk(ctys, 'cty', openAge);
     const topC = [...COUNTRIES.map(compute)].sort((a, b) => b.d - a.d), topR = [...REGIONS.map(compute)].sort((a, b) => b.d - a.d)[0];
     const top10 = d3.sum(topC.slice(0, 10), r => r.d);
     const kp = (c, v, l, sx) => `<div class="wp-stat" style="--c:${c}"><div class="s">${sx || ''}</div><div class="v">${v}</div><div class="l">${l}</div></div>`;
     el('kpis').innerHTML = kp(cfg.color, fmtN(w.a), `${cfg.what(s)} in ${s.base}`, 'World') + kp(cfg.color, fmtN(w.b), `${cfg.what(s)} in ${end}${end >= PROJ ? ' (UN projection)' : ''}`, 'World') +
-      kp(cfg.color, `${fmtS(w.d)} <small style="font-size:13px;color:var(--text-muted)">${fmtP(w.pc)}</small>`, `net change ${s.base} → ${end}`, 'World') +
-      (w.ent !== null && cfg.entrants ? kp(cfg.color, fmtN(w.ent), `people reaching age ${s.age} over those ${s.x} years — the gross number of new potential drivers`, 'World') : '') +
+      kp(cfg.color, `${fmtS(w.d)} <small style="font-size:13px;color:var(--text-muted)">${fmtP(w.pc)}</small>`, s.stop ? `net change ${s.base} → ${end} = new drivers − drivers lost` : `net change ${s.base} → ${end}`, 'World') +
+      (w.ent !== null && cfg.entrants ? (s.stop
+        ? kp(cfg.color, `+${fmtN(w.ent)}`, `new drivers: people turning ${s.age} over those ${s.x} years`, 'World') +
+          kp('var(--wp-dn)', `−${fmtN(w.out)}`, `drivers lost to age: people reaching ${s.stop}, who stop driving`, 'World') +
+          kp('var(--wp-dn)', `${w.died >= 0 ? '−' : '+'}${fmtN(Math.abs(w.died))}`, `drivers lost to death${w.died >= 0 ? '' : ' (net migration gain larger)'}: deaths and net migration while aged ${s.age}–${s.stop - 1}`, 'World')
+        : kp(cfg.color, fmtN(w.ent), `people reaching age ${s.age} over those ${s.x} years — the gross number of new potential drivers`, 'World')) : '') +
       kp('#64748b', `${topR.l.n} <small style="font-size:13px;color:var(--text-muted)">${(topR.d / w.d * 100).toFixed(0)}% of the world's gain</small>`, `biggest region: ${fmtS(topR.d)}`, 'Biggest region') +
       kp('#64748b', `${topC[0].l.n} <small style="font-size:13px;color:var(--text-muted)">${fmtS(topC[0].d)}</small>`, `top 10 countries add ${fmtN(top10)} (${(top10 / w.d * 100).toFixed(0)}% of the world's net gain)`, 'Biggest country');
     el('note').innerHTML = cfg.note(s, end);
-    el('h-reg').textContent = `${s.lvl === 'region' ? 'Regions' : 'Subregions'} — ${up ? 'biggest gains' : 'biggest losses'}`;
+    el('h-reg').textContent = `${s.lvl === 'region' ? 'Regions' : 'Subregions'} — ${s.measure === 'out' ? 'most drivers lost' : up ? 'biggest gains' : 'biggest losses'}`;
     el('h-cty').textContent = `Countries — top ${s.n}`;
-    el('fsum').textContent = `${s.age}+ · ${s.base}→${end}`;
+    el('fsum').textContent = `${s.age}${s.stop ? '–' + (s.stop - 1) : '+'} · ${s.base}→${end}`;
   };
-  [['age', v => s.age = +v], ['base', v => { s.base = +v; }], ['n', v => s.n = +v], ['min', v => s.min = +v]].forEach(([k, f]) => el(k).addEventListener('change', e => { f(e.target.value); render(); }));
+  [['age', v => s.age = +v], ['base', v => { s.base = +v; }], ['n', v => s.n = +v], ['min', v => s.min = +v]].forEach(([k, f]) => el(k).addEventListener(el(k).type === 'range' ? 'input' : 'change', e => { f(e.target.value); render(); }));
+  if (cfg.stop) el('stop').addEventListener('input', e => { s.stop = +e.target.value; render(); });
   el('x').addEventListener('input', e => { s.x = +e.target.value; render(); });
   seg(p + '-measure', v => { s.measure = v; render(); }); seg(p + '-lvl', v => { s.lvl = v; render(); });
   if ($(p + '-dir')) seg(p + '-dir', v => { s.dir = v; render(); });
-  render(); return { s, render, compute };
+  render(); return { s, render, compute, computeFull };
 }
-const DR = gainCard('dr', { age: 18, color: 'var(--wp-w)', entrants: true, what: s => `people aged ${s.age}+ (potential drivers)`,
-  note: (s, end) => `People old enough to drive (aged <b>${s.age} or more</b>) in ${s.base} and in <b>${end}</b>${end >= PROJ ? ' (UN projection)' : ''}. <b>Net gain</b> is the change in that pool; <b>people reaching age ${s.age}</b> counts everyone who turns ${s.age} during those ${s.x} years (the gross new potential drivers, before older people leave the pool). The pool is an upper bound: it counts who is old enough, not who holds a licence. Click a country to open its age structure.` });
+const DR = gainCard('dr', { age: 18, stop: 80, color: 'var(--wp-w)', entrants: true, what: s => `people aged ${s.age}–${s.stop - 1} (potential drivers)`,
+  note: (s, end) => `Potential drivers = people aged <b>${s.age} to ${s.stop - 1}</b> in ${s.base} and in <b>${end}</b>${end >= PROJ ? ' (UN projection)' : ''}. <b>New drivers</b> are everyone who turns ${s.age} during those ${s.x} years. <b>Drivers lost</b> are the people who reach ${s.stop} (assumed to stop driving) plus those who die — or leave the country, net of newcomers — while aged ${s.age}–${s.stop - 1}. <b>Net gain = new drivers − drivers lost</b>, the change in the pool. Slide <b>Start driving at</b> and <b>Stop driving at</b> to change when people enter and leave the driving market. The pool is an upper bound: it counts who is old enough, not who holds a licence. Click a country to open its age structure.` });
 const OLD = gainCard('old', { age: 80, color: 'var(--wp-o)', entrants: false, what: s => `people aged ${s.age}+`,
   note: (s, end) => `People aged <b>${s.age} or more</b> in ${s.base} and in <b>${end}</b>${end >= PROJ ? ' (UN projection)' : ''}. Very old drivers are a small and declining part of the driving market, but the over-80s are where ageing societies grow fastest — and where mobility and licence rules change. Click a country to open its age structure.` });
 
@@ -641,7 +677,7 @@ function renderHero(){
   let ent = 0; for (let y = 2027; y <= 2036; y++) ent += g18[yi(y)] - g19[yi(y)];
   $('hero-per').textContent = '2027–2036'; $('hero-big').textContent = fmtN(ent);
   $('hero-sub').innerHTML = `people will turn <b>18</b> in the next ten years — about <b>${fmtN(ent / 10)} a year</b>. The world's pool of people aged 18+ grows from <b>${fmtN(g18[i])}</b> in 2026 to <b>${fmtN(g18[j])}</b> in 2036 (UN medium projection). It is a ceiling on new drivers, not a forecast of licences.`;
-  const dr = DR.compute, topC = COUNTRIES.map(dr).sort((a, b) => b.d - a.d), regs = REGIONS.map(dr).sort((a, b) => b.d - a.d);
+  const dr = DR.computeFull, topC = COUNTRIES.map(dr).sort((a, b) => b.d - a.d), regs = REGIONS.map(dr).sort((a, b) => b.d - a.d);
   const k = (c, v, l) => `<div class="wp-kpi" style="--c:${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   $('hero-kpis').innerHTML = k('#6fe14a', fmtN(WORLD.p[yi(2026)]), 'people on Earth in 2026') + k('#22d3ee', fmtN(g18[i]), 'aged 18 or more in 2026') +
     k('#fcd34d', `${regs[0].l.n}`, `adds the most adults by 2036: ${fmtS(regs[0].d)}`) + k('#fcd34d', `${topC[0].l.n}`, `adds the most adults by 2036: ${fmtS(topC[0].d)}`);
