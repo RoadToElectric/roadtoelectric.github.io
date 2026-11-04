@@ -134,22 +134,18 @@
 
       <div class="nav-heading">Overview</div>
       <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
-      <a href="world-population.html"><span class="dot"></span>World Population</a>
-
-      <div class="nav-heading">Powertrain</div>
       <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
       <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="world-oil.html" aria-current="page"><span class="dot"></span>World Oil</a>
 
       <div class="nav-heading">Markets</div>
       <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
       <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
-      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
-      <a href="world-oil.html" aria-current="page"><span class="dot"></span>World Oil</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
 
-      <div class="nav-heading">Rankings</div>
+      <div class="nav-heading">Trends</div>
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
-
-      <div class="nav-heading">Trends<span class="soon-pill">Soon</span></div>
 
       <div class="nav-heading">Archive</div>
       <a href="powertrain-mix-by-country-copy.html"><span class="dot"></span>Mix by Country (copy)</a>
@@ -228,7 +224,7 @@
       <!-- 3b. what if -->
       <div class="card chart-card" id="wi-card">
         <h2>4 · What if…? Build your own oil scenario</h2>
-        <p class="wo-note">Move the levers and watch world oil demand change from today to 2060. Dashed line = <b>current trends</b> (every lever left at its default). The chart is a simple fleet model, not a forecast: <b>read the assumptions below</b>. “Electric” means battery-electric; plug-in hybrids still burn fuel.</p>
+        <p class="wo-note">Move the levers and watch world oil demand change from today to 2060. Dashed line = <b>current trends</b> (every lever left at its default); dotted flat line = <b>today's level</b>, to see whether demand ends above or below it. The chart is a simple fleet model, not a forecast: <b>read the assumptions below</b>. “Electric” means battery-electric; plug-in hybrids still burn fuel.</p>
         <div class="wo-frow" style="margin:2px 0 8px" id="wi-presets"></div>
         <div class="wo-filters" id="wi-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Scenario levers</span><span class="wo-fsum" id="wi-fsum"></span><i class="wo-car">▾</i></button>
@@ -241,8 +237,8 @@
           <ol>
             <li><b>Starting point 2026</b> = the purposes of chart 1 (cars 22 mb/d, trucks, vans and buses 17, aviation 7, shipping 6, plastics and chemicals 16…). The 2026 world car fleet (1.35 billion) and its 4.9% battery-electric share come from the World Car Sales page.</li>
             <li><b>Electric cars and trucks:</b> each year 5% of the car fleet (6% of the truck fleet) is scrapped and the fleet grows 1% (1.5%). New vehicles follow the electric sales share you choose, rising evenly from today's level (cars 18.8% in 2026, trucks about 10%) to your target at the target year, then held. Oil use of a fleet = what the same fleet would burn without electrics × the share of the fleet that is not electric. Electric vehicles are assumed to be driven like the vehicles they replace.</li>
-            <li><b>Current trends</b> (the defaults): electric new-car share 35% in 2030, 60% in 2040, 75% in 2050; electric new-truck share 15%, 30%, 45%; petrol and diesel vehicles gain 1.0% (cars) and 0.8% (trucks) fuel economy a year; air traffic grows 3% a year with 1.2% yearly efficiency gains (the IEA Oil 2025 outlook has jet fuel at +2.1% a year to 2030); shipping traffic +2% a year with 1% efficiency; feedstocks +1.8% a year (IEA: +2.0% LPG/ethane, +2.5% naphtha); heating, industry and other oil −0.8% a year. These are our assumptions, not IEA scenarios.</li>
-            <li><b>Not modelled:</b> price effects, rebound, biofuels in road fuels, ethane (not oil in some statistics), the oil used to make electricity, country differences. Power plants and refinery fuel move in step with final use.</li>
+            <li><b>Current trends</b> (the defaults): electric new-car share 35% in 2030, 60% in 2040, 75% in 2050; electric new-truck share 15%, 30%, 45%; petrol and diesel vehicles gain 1.0% (cars) and 0.8% (trucks) fuel economy a year; air traffic grows 3% a year with 1.2% yearly efficiency gains (the IEA Oil 2025 outlook has jet fuel at +2.1% a year to 2030); shipping traffic +2% a year with 1% efficiency; feedstocks +1.8% a year (IEA: +2.0% LPG/ethane, +2.5% naphtha); industry and power plants, homes (heating and cooking), and farms, services and other oil use each −0.8% a year. These are our assumptions, not IEA scenarios.</li>
+            <li><b>Not modelled:</b> price effects, rebound, biofuels in road fuels, ethane (not oil in some statistics), the oil used to make electricity, country differences. Power plants and refinery fuel move in step with final use; the industry and power plants lever also moves them directly, on top of that link, because the data do not say how much of that block is electricity and how much is refinery fuel.</li>
           </ol>
         </details>
       </div>
@@ -359,6 +355,9 @@ function stackedArea(host, years, series, o){
   const ticks = d3.range(Math.ceil(years[0] / 10) * 10, years[years.length - 1] + 1, 10);
   g.append('g').selectAll('text').data(ticks).join('text').attr('x', d => x(d)).attr('y', H - 8).attr('text-anchor', 'middle').text(d => d);
   if(o.overlay){ g.append('path').datum(years.map((yy, i) => [yy, o.overlay.vals[i]])).attr('fill', 'none').attr('stroke', o.overlay.color).attr('stroke-width', 2).attr('stroke-dasharray', '6 4').attr('d', d3.line().x(d => x(d[0])).y(d => y(d[1])).curve(d3.curveMonotoneX)).style('pointer-events', 'none'); }
+  if(o.ref){ const ry = y(o.ref.val), rx0 = x(Math.max(o.ref.from, years[0])), rx1 = x(years[years.length - 1]);
+    g.append('line').attr('x1', rx0).attr('x2', rx1).attr('y1', ry).attr('y2', ry).attr('stroke', o.ref.color).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-dasharray', '1 5').style('pointer-events', 'none');
+    g.append('text').attr('x', rx1 - 4).attr('y', ry - 6).attr('text-anchor', 'end').style('font-weight', 800).style('fill', 'var(--text)').style('paint-order', 'stroke').style('stroke', 'var(--card, #fff)').style('stroke-width', 3).style('pointer-events', 'none').text(o.ref.label); }
   (o.mark || []).forEach(([yy, lb]) => { if(yy < years[0] || yy > years[years.length - 1]) return; g.append('line').attr('x1', x(yy)).attr('x2', x(yy)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--text)').attr('stroke-opacity', .55).attr('stroke-dasharray', '3 3').style('pointer-events', 'none'); g.append('text').attr('x', x(yy) + 4).attr('y', m.t + 11).style('font-weight', 800).style('fill', 'var(--text)').text(lb); });
   const rule = g.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', 'var(--text)').attr('stroke-opacity', .5).style('opacity', 0);
   svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent').style('cursor', 'crosshair')
@@ -494,7 +493,9 @@ const WI_LEVERS = [
   { id:'navNon', grp:'Shipping', label:'Shipping fuel that is not oil at the target year (ammonia, methanol, LNG, electric)', min:0, max:100, step:1, unit:'%', base:t => interp(BASEPATH.navNon, t) },
   { id:'petGrowth', grp:'Plastics & chemicals', label:'Feedstock demand growth', min:-3, max:6, step:.1, unit:'%/yr', def:1.8 },
   { id:'petSub', grp:'Plastics & chemicals', label:'Plastics replaced or recycled (feedstock avoided) at the target year', min:0, max:60, step:1, unit:'%', def:5 },
-  { id:'other', grp:'Everything else', label:'Heating, industry & other oil use, yearly change', min:-6, max:2, step:.1, unit:'%/yr', def:-0.8 }
+  { id:'ind', grp:'Industry, power plants & homes', label:'Industry fuel, power plants and refineries, yearly change', min:-6, max:2, step:.1, unit:'%/yr', def:-0.8 },
+  { id:'home', grp:'Industry, power plants & homes', label:'Homes (heating and cooking) oil use, yearly change', min:-6, max:2, step:.1, unit:'%/yr', def:-0.8 },
+  { id:'other', grp:'Everything else', label:'Farms, services & other oil use, yearly change', min:-6, max:2, step:.1, unit:'%/yr', def:-0.8 }
 ];
 const WIS = {}, WIT = {};                 // value, touched
 WI_LEVERS.forEach(l => { WIS[l.id] = l.def != null ? l.def : l.base(2040); WIT[l.id] = false; });
@@ -518,9 +519,11 @@ function wiRun(S, T){        // S: levers values, T: touched map -> {year: {purp
     const av = U('aviation') * Math.pow((1 + S.avTraffic / 100) * 0.988, n) * (1 - S.avEff / 100 * prog(t)) * (1 - share('avNon', t, 0.5) / 100);
     const nav = U('navigation') * Math.pow((1 + S.navTraffic / 100) * 0.99, n) * (1 - S.navEff / 100 * prog(t)) * (1 - share('navNon', t, 1) / 100);
     const ne = U('nonenergy') * Math.pow(1 + S.petGrowth / 100, n) * (1 - S.petSub / 100 * prog(t));
-    const og = Math.pow(1 + S.other / 100, n);
-    const o = { road_passenger:cars, road_goods:trucks, aviation:av, navigation:nav, rail:U('rail') * (1 - Et) / (1 - E0t), industry:U('industry') * og, nonenergy:ne, residential:U('residential') * og, other:U('other') * og };
-    const fin = Object.values(o).reduce((q, v) => q + v, 0); o.nonfinal = fin * nf0; o.total = fin + o.nonfinal; o.EVc = Ec; o.EVt = Et; out[t] = o;
+    const og = id => Math.pow(1 + S[id] / 100, n);
+    const o = { road_passenger:cars, road_goods:trucks, aviation:av, navigation:nav, rail:U('rail') * (1 - Et) / (1 - E0t), industry:U('industry') * og('ind'), nonenergy:ne, residential:U('residential') * og('home'), other:U('other') * og('other') };
+    const fin = Object.values(o).reduce((q, v) => q + v, 0);
+    o.nonfinal = fin * nf0 * Math.pow((1 + S.ind / 100) / (1 + lv('ind').def / 100), n);       // power plants and refinery fuel follow final use, plus the industry & power plants lever relative to its default
+    o.total = fin + o.nonfinal; o.EVc = Ec; o.EVt = Et; out[t] = o;
   }
   return out;
 }
@@ -530,7 +533,7 @@ function wiDraw(){
   const run = wiRun(S, WIT), base = wiRun((() => { const b = {}; WI_LEVERS.forEach(l => b[l.id] = l.def != null ? l.def : l.base(WIS.target)); return b; })(), {});
   const tg = S.target, series = CATS.map(c => ({ key:c.k, label:c.label, color:c.color, vals:WI_YEARS.map(y => y <= 2026 ? useVal(c.k, y) : run[y][c.k]) }));
   const totS = WI_YEARS.map(y => y <= 2026 ? tot(y) : run[y].total), totB = WI_YEARS.map(y => y <= 2026 ? tot(y) : base[y].total);
-  stackedArea(document.getElementById('wi-chart'), WI_YEARS, series, { h:440, est:yy => yy > 2026, overlay:{ vals:totB, label:'Current trends', color:'#111827' }, mark:[[2026, 'Today'], [tg, 'Target ' + tg]],
+  stackedArea(document.getElementById('wi-chart'), WI_YEARS, series, { h:440, est:yy => yy > 2026, overlay:{ vals:totB, label:'Current trends', color:'#111827' }, ref:{ val:tot(2026), from:2026, color:'#111827', label:`Flat at today's ${fmt1(tot(2026))} mb/d` }, mark:[[2026, 'Today'], [tg, 'Target ' + tg]],
     tip:(r, ss) => `<b>${r.year}</b> ${r.year > 2026 ? '<span class="est">scenario</span>' : r.year >= 2020 ? '<span class="est">estimate</span>' : ''}<div class="r"><span>Scenario total</span><b>${fmt1(totS[r.i])} mb/d</b></div>${r.year > 2026 ? `<div class="r"><span>Current trends</span><b>${fmt1(totB[r.i])} mb/d</b></div><div class="r"><span>Difference</span><b class="${totS[r.i] <= totB[r.i] ? 'wi-dn' : 'wi-up'}">${totS[r.i] - totB[r.i] >= 0 ? '+' : ''}${fmt1(totS[r.i] - totB[r.i])} mb/d</b></div>` : ''}${tipRows(r, ss, false)}` });
   // KPIs
   const t25 = tot(2025), vT = run[tg].total, vB = base[tg].total;
@@ -574,6 +577,7 @@ const WI_PRESETS = [
   ['Planes 50% more efficient by 2045', { target:2045, avEff:50 }],
   ['Cleaner ships: 60% non-oil by 2050', { target:2050, navNon:60 }],
   ['Plastics boom: +4% a year', { petGrowth:4 }],
+  ['Electrified industry and heating: −4% a year', { ind:-4, home:-4 }],
   ['Everything at once', { target:2040, car:100, truck:100, avEff:50, avNon:30, navNon:60, petSub:30, carEff:25, truckEff:25 }]
 ];
 (function initWhatIf(){
