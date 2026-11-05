@@ -256,8 +256,63 @@ for y, (pcd, ov, tot) in PSA.items():
     sc = 'PSA vehicle sales worldwide, passenger cars + LCV, including CKD kits'
     nt = 'includes about 144,000 vehicles sold in Iran by Iran Khodro and IKAP (141,000 under a Peugeot licence)' if y == 2018 else ''
     add(G_S, 'Peugeot, Citroën and DS (PCD, PSA)', y, 'CY', pcd, 'sales', 'filing', lab, url, scope=sc, notes=nt)
-    add(G_S, 'Opel/Vauxhall (OV, PSA)', y, 'CY', ov, 'sales', 'filing', lab, url, scope=sc, notes=nt)
-    add(G_S, 'PSA Group total', y, 'CY', tot, 'sales', 'filing', lab, url, scope=sc, notes=nt)
+    add(G_S, 'PSA Group total', y, 'CY', tot, 'sales', 'filing', lab, url, scope=sc, notes=nt)   # Opel/Vauxhall (OV) is loaded by brand in PSA_BR below
+
+# PSA brand tables 2001-2020, "Ventes mondiales consolidees" / "Worldwide sales" (passenger cars + light commercial vehicles, assembled vehicles + CKD kits).
+# Sources: PSA Documents de reference (2001-2008), PSA sales press releases filed with the AMF (BusinessWire regulated news, 2009-2020).
+DR = 'https://www.bnains.org/archives/communiques/Peugeot/%s_Document_de_reference_%s_Peugeot.pdf'
+AMF = 'https://echanges.dila.gouv.fr/OPENDATA/AMF/BWR/%s/%s/FCBWR%s_%s.pdf'
+PSA_SRC = {
+    'DR2003': ('PSA Peugeot Citroen Rapport annuel / Document de reference 2003, Ventes mondiales consolidees (p. 155)', DR % ('20040427', '2003')),
+    'DR2005': ('PSA Peugeot Citroen Document de reference 2005, Ventes mondiales consolidees (p. 130)', DR % ('20060424', '2005')),
+    'DR2006': ('PSA Peugeot Citroen Document de reference 2006, Ventes mondiales consolidees (p. 138)', DR % ('20070423', '2006')),
+    'DR2008': ('PSA Peugeot Citroen Document de reference 2008, Ventes mondiales consolidees (6.1.4)', DR % ('20090424', '2008')),
+    'PR2010': ('PSA Peugeot Citroen press release 13 Jan 2011, Worldwide sales 2009 and 2010 (AMF regulated news)', AMF % ('2011', '01', '064133', '20110113')),
+    'PR2011': ('PSA Peugeot Citroen press release 12 Jan 2012, Worldwide sales 2010 and 2011 (AMF regulated news)', AMF % ('2012', '01', '074102', '20120112')),
+    'PR2012': ('PSA Peugeot Citroen press release 9 Jan 2013, Worldwide sales 2012 versus 2011 (AMF regulated news)', AMF % ('2013', '01', '086824', '20130109')),
+    'PR2014': ('PSA Peugeot Citroen press release 14 Jan 2015, Worldwide automobile sales 2013 and 2014 (AMF regulated news)', AMF % ('2015', '01', '082695', '20150114')),
+    'PR2015': ('PSA Peugeot Citroen press release 12 Jan 2016, Worldwide sales 2014 and 2015 (AMF regulated news)', AMF % ('2016', '01', '090305', '20160112')),
+    'PR2016': ('Groupe PSA press release 11 Jan 2017, Ventes mondiales consolidees 2015 and 2016 (AMF regulated news)', AMF % ('2017', '01', '098023', '20170111')),
+    'PR2018': ('Groupe PSA press release 15 Jan 2019, Consolidated world sales 2017 and 2018 (AMF regulated news)', AMF % ('2019', '01', '115005', '20190115')),
+    'PR2019': ('Groupe PSA press release 16 Jan 2020, Total consolidated world sales 2018 and 2019 (AMF regulated news)', AMF % ('2020', '01', '122981', '20200116')),
+    'PR2020': ('Groupe PSA press release 14 Jan 2021, Total consolidated world sales 2019 and 2020 (AMF regulated news)', AMF % ('2021', '01', '131012', '20210114')),
+}
+# year -> (source key, Peugeot, Citroen, DS or None, Opel/Vauxhall or None, PSA total, note)
+PSA_BR = {
+    2001: ('DR2003', 1899200, 1233600, None, None, 3132800, ''),
+    2002: ('DR2003', 1955400, 1312100, None, None, 3267500, ''),
+    2003: ('DR2003', 1913600, 1372500, None, None, 3286100, ''),
+    2004: ('DR2005', 2027200, 1348100, None, None, 3375300, ''),
+    2005: ('DR2005', 1995500, 1394500, None, None, 3390000, ''),
+    2006: ('DR2006', 1959800, 1406100, None, None, 3365900, ''),
+    2007: ('DR2008', 1967100, 1461300, None, None, 3428400, ''),
+    2008: ('DR2008', 1904100, 1356300, None, None, 3260400, ''),
+    2009: ('PR2010', 1841500, 1346400, None, None, 3187900, ''),
+    2010: ('PR2011', 2141790, 1460373, None, None, 3602163, ''),
+    2011: ('PR2011', 2113728, 1435688, None, None, 3549416, ''),
+    2012: ('PR2012', 1700000, 1265000, None, None, 2965000, 'rounded to thousands in the release'),
+    2013: ('PR2014', 1552675, 1143326, 122694, None, 2818695, 'DS shown separately from Citroen as restated in the 2014 release (the 2013 release gave Citroen incl. DS: 1,266,000)'),
+    2014: ('PR2014', 1635193, 1185234, 118472, None, 2938899, ''),
+    2015: ('PR2015', 1709723, 1160941, 102335, None, 2972999, ''),
+    2016: ('PR2016', 1919460, 1140941, 85981, None, 3146382, 'includes 233,000 vehicles produced in Iran under Peugeot licence'),
+    2017: ('PR2018', 2119845, 1055676, 52860, 403933, 3632314, 'Opel/Vauxhall consolidated by PSA from 1 August 2017 only (5 months)'),
+    2018: ('PR2018', 1740214, 1046229, 53265, 1038057, 3877765, 'Peugeot includes about 144,000 vehicles sold in Iran by Iran Khodro / IKAP (1,596,216 excluding Iran)'),
+    2019: ('PR2020', 1453823, 989853, 61989, 973431, 3479096, 'as restated in the 2020 release (the 2019 release gave 1,456,463 / 992,825 / 62,512 / 977,130 = 3,488,930)'),
+    2020: ('PR2020', 1118912, 717190, 43686, 632687, 2512475, ''),
+}
+for y, (sk, pe, ci, ds, ov, tot, nt) in PSA_BR.items():
+    assert pe + ci + (ds or 0) + (ov or 0) == tot, (y, pe + ci + (ds or 0) + (ov or 0), tot)
+    lab, url = PSA_SRC[sk]
+    sc = 'PSA worldwide sales, passenger cars + light commercial vehicles, assembled vehicles + CKD kits'
+    ci_nt = '; '.join(x for x in (nt, 'Citroen includes the DS line (DS3/DS4/DS5, Citroen DS) until 2013' if y <= 2012 else '') if x)
+    add(G_S, 'Peugeot', y, 'CY', pe, 'sales', 'filing', lab, url, scope=sc, notes='' if y == 2013 else nt)
+    add(G_S, 'Citroën', y, 'CY', ci, 'sales', 'filing', lab, url, scope=sc, notes=ci_nt if y <= 2013 else '')
+    if ds:
+        add(G_S, 'DS Automobiles', y, 'CY', ds, 'sales', 'filing', lab, url, scope=sc, notes='DS was a Citroen sub-line before 2014 and a separate brand from 2015' if y <= 2014 else '')
+    if ov:
+        add(G_S, 'Opel/Vauxhall', y, 'CY', ov, 'sales', 'filing', lab, url, scope=sc, notes='Opel/Vauxhall belonged to General Motors until 31 July 2017' if y == 2017 else '')
+    if y < 2018:
+        add(G_S, 'PSA Group total', y, 'CY', tot, 'sales', 'filing', lab, url, scope=sc, notes='' if y != 2017 else 'includes Opel/Vauxhall from 1 August 2017')
 
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
