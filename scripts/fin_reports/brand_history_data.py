@@ -314,6 +314,43 @@ for y, (sk, pe, ci, ds, ov, tot, nt) in PSA_BR.items():
     if y < 2018:
         add(G_S, 'PSA Group total', y, 'CY', tot, 'sales', 'filing', lab, url, scope=sc, notes='' if y != 2017 else 'includes Opel/Vauxhall from 1 August 2017')
 
+# Brand figures published by the brands / holding in press releases (2012-2026). Several are rounded in the release ("around", "more than") and flagged in notes.
+# Fetched from media.stellantis.com (pages are public; the PDF attachments sit behind a download captcha and were NOT used).
+MS = 'https://www.media.stellantis.com/'
+PEU = {  # year -> (units, source page, note)
+    2022: (1056182, 'em-en/peugeot/press/peugeot-sales-results-2022', 'registrations worldwide; 27.4% outside EU30'),
+    2023: (1124268, 'em-en/peugeot/press/peugeot-sales-results-2023', 'registrations worldwide (+6% on 2022)'),
+    2024: (1097750, 'em-en/peugeot/press/peugeot-sales-results-2024', 'registrations worldwide; 25.1% outside Europe (Enlarged Europe 827,523; Middle East & Africa 121,429)'),
+}
+for y, (u, pg, nt) in PEU.items():
+    add(G_S, 'Peugeot', y, 'CY', u, 'registrations', 'press_release', 'Peugeot sales results %d (Stellantis Media)' % y, MS + pg, scope='Peugeot worldwide registrations, passenger cars + light commercial vehicles', notes=nt)
+add(G_S, 'Citroën', 2021, 'CY', 796868, 'sales', 'media', 'Journal de l\'Automobile, 14 Jan 2022 "Pres de 800 000 ventes pour Citroen en 2021" (brand figure)', 'https://journalauto.com/constructeurs/pres-de-800-000-ventes-pour-citroen-en-2021/',
+    scope='Citroen worldwide sales', notes='brand-reported; Automotive News quotes the automaker at +7% vs 2020 (the 2020 base is not restated in the release). Not found from a free official Stellantis page')
+add(G_S, 'Citroën', 2026, 'H1', 373700, 'sales', 'press_release', 'Citroen first half 2026 press release (Stellantis Media)', MS + 'em-en/citroen/press/a-renewed-range-a-confirmed-dynamic-citroen-picked-up-speed-in-the-first-half-of-2026',
+    scope='Citroen worldwide sales, January-June 2026', notes='+4.4% on H1 2025; Q1 2026 was 190,000 (+10%)')
+add(G_S, 'Opel/Vauxhall', 2023, 'CY', 670000, 'sales', 'press_release', 'Opel increases global sales by a strong 15 percent in 2023 (Stellantis Media, 30 Jan 2024)', MS + 'em-en/opel/press/opel-increases-global-sales-by-a-strong-15-percent-in-2023',
+    scope='Opel + Vauxhall worldwide sales', notes='"around 670,000 vehicles" (rounded in the release); +15% on 2022; incl. about 125,000 LCV')
+add(G_S, 'Opel/Vauxhall', 2026, 'H1', 313000, 'sales', 'press_release', 'Opel continues growth momentum, first half 2026 (Stellantis Media)', MS + 'em-en/opel/press/opel-continues-growth-momentum-new-registrations-market-share-and-electric-vehicle-sales-increase-in-the-first-half-year',
+    scope='Opel + Vauxhall worldwide sales, January-June 2026', notes='"around 313,000 vehicles" (rounded)')
+add(G_S, 'Fiat', 2023, 'CY', 1350000, 'sales', 'press_release', 'In 2023 FIAT continues to grow by 12% globally (Stellantis Media)', MS + 'uk-en/fiat/press/in-2023-fiat-continues-to-grow-by-12-globally-and-confirms-it-has-taken-the-top-spot-as-stellantis-volume-brand-leader-in-italy-brazil-turkey-and-algeria',
+    scope='Fiat worldwide sales', notes='"1.35 million" (rounded in the release), +12%')
+add(G_S, 'Fiat', 2024, 'CY', 1200000, 'sales', 'press_release', 'In 2024 FIAT confirms the leadership in its 4 domestic markets (Stellantis Media, 21 Jan 2025)', MS + 'em-en/fiat/press/in-2024-fiat-confirms-the-leadership-in-its-4-domestic-markets-in-3-continents-and-its-role-as-the-first-stellantis-brand-with-more-than-1-2-million-units-sold-globally',
+    scope='Fiat worldwide sales', notes='"more than 1.2 million units" (lower bound, not an exact count); Brazil 521 thousand, Italy 190 thousand')
+add(G_S, 'Alfa Romeo', 2025, 'CY', 73000, 'sales', 'press_release', 'Alfa Romeo accelerates in 2025 with global growth of over 20% (Stellantis Media, 3 Mar 2026)', MS + 'uk-en/alfa-romeo/press/alfa-romeo-accelerates-in-2025-with-global-growth-of-over-20-and-junior-leading-sales-growth-of-80-in-the-uk',
+    scope='Alfa Romeo worldwide registrations', notes='"over 73,000 units" (lower bound); +20.1% on 2024; Europe +31.1% and over 80% of volume')
+JEEP = {  # year -> (units, source label, url, note)
+    2012: (701626, 'Jeep brand sets all-time global sales record in 2012 (Chrysler Group LLC release, 3 Jan 2013)', 'https://www.automotiveworld.com/news-releases/jeep-brand-sets-all-time-global-sales-record-in-2012', 'prior record 675,494 (1999); US 474,131; +19% on 2011'),
+    2013: (731565, 'Jeep brand records new all-time global sales record in 2013 (Stellantis Media)', MS + 'uk-en/jeep/press/jeep-brand-records-new-all-time-global-sales-record-in-2013', '+4% on 2012'),
+    2014: (1017019, 'Jeep vehicle sales exceed 1 million units, third consecutive global record (Stellantis Media, 5 Jan 2015)', MS + 'uk-en/jeep/press/jeep-vehicle-sales-exceed-1-million-units-resulting-in-third-consecutive-global-record', '+39% on 2013'),
+    2015: (1237583, 'Jeep brand records fourth consecutive global sales record (Stellantis Media, 5 Jan 2016)', MS + 'em-en/jeep/press/jeep-brand-records-fourth-consecutive-global-sales-record', 'US 865,028; +22% on 2014'),
+}
+for y, (u, lab, url, nt) in JEEP.items():
+    add(G_S, 'Jeep', y, 'CY', u, 'sales', 'press_release', lab, url, scope='Jeep worldwide vehicle sales', notes=nt)
+add(G_S, 'Jeep', 2016, 'CY', 1410000, 'sales', 'press_release', 'FCA via ANSA, 10 Jan 2017 "New Jeep global sales record in 2016"', 'https://www.ansa.it/english/news/business/2017/01/10/new-jeep-global-sales-record-in-2016_51c4edc1-ac60-47ef-b0f8-574de0c46380.html',
+    scope='Jeep worldwide vehicle sales', notes='"1.41 million units", +12% (rounded; exact FCA release not located)')
+add(G_S, 'Jeep (combined shipments)', 2016, 'CY', 1424000, 'shipments', 'filing', 'FCA delivers record 2016 results (Stellantis Media, 25 Jan 2017)', MS + 'uk-en/fiat/press/fca-delivers-record-2016-results',
+    scope='Jeep combined shipments (consolidated + joint ventures), thousand units', notes='+9% on 2015')
+
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
     vals = []
