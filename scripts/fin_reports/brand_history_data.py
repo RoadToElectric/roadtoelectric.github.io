@@ -190,6 +190,75 @@ for y, (rep, pg, note, brands, tot) in VW_BR.items():
                          ('Commercial Vehicles (Volkswagen Commercial Vehicles)', ('Volkswagen Commercial Vehicles',))):
             add(G_V, b, y, 'CY', sum(brands[p] for p in parts), 'derived', 'derived', src + ': sum of the brands in the group', UAB % rep, scope=VW_SCOPE_OLD, notes='derived from the brand figures')
 
+# =====================================================================================================================
+# 3 - STELLANTIS (FCA 2012-2020 + PSA 2018-2020, Stellantis from 2021).  Shipments by segment as reported in the Forms 20-F / annual reports (thousand units -> units).
+# The holdings' filings do NOT give a brand table for the Group: only the Maserati segment (and Ferrari 2012-2014) are brands. PSA's brand groups
+# (Peugeot-Citroën-DS and Opel/Vauxhall) appear for 2018-2020 in the Stellantis FY2020 Form 20-F ("About this report": PSA information).
+G_S = 'Stellantis N.V. (FCA / PSA)'
+SEC = 'https://www.sec.gov/Archives/edgar/data/1605484/'
+STLA = 'https://www.stellantis.com/content/dam/stellantis-corporate/investors/financial-reports/Stellantis-NV-%s1231-Annual-Report.pdf'
+S_SRC = {   # report -> (label, url)
+    'FY2014': ('FCA Form 20-F FY2014, shipments by segment', SEC + '000160548415000011/fca2014123120f.htm'),
+    'FY2017': ('FCA Form 20-F FY2017, shipments by segment', SEC + '000160548418000008/fca2017123120f.htm'),
+    'FY2019': ('FCA Form 20-F FY2019, shipments by segment', SEC + '000160548420000011/fca20191231annualreportand.htm'),
+    'FY2020': ('Stellantis Form 20-F FY2020 (FCA), shipments by segment', SEC + '000160548421000032/stellantis-20201231.htm'),
+    'AR2022': ('Stellantis Annual Report 2022, consolidated shipments by segment', STLA % '2022'),
+    'AR2023': ('Stellantis Annual Report 2023, consolidated shipments by segment', STLA % '2023'),
+    'AR2025': ('Stellantis Annual Report 2025, consolidated shipments by segment', STLA % '2025'),
+}
+# FCA segments 2012-2020: year -> (report, NAFTA, LATAM, APAC, EMEA, Ferrari, Maserati, total consolidated, JV or None, combined or None)   thousand units
+FCA_SEG = {
+    2012: ('FY2014', 2115, 979, 103, 1012, 7, 6, 4223, None, None, 'Ferrari still consolidated'),
+    2013: ('FY2014', 2238, 950, 163, 979, 7, 15, 4352, None, None, 'Ferrari still consolidated'),
+    2014: ('FY2014', 2493, 827, 220, 1024, 7, 36, 4608, None, None, 'Ferrari still consolidated'),
+    2015: ('FY2017', 2726, 553, 149, 1142, 0, 32, 4602, 136, 4738, 'as restated in the FY2017 filing (Ferrari excluded)'),
+    2016: ('FY2017', 2587, 456, 91, 1306, 0, 42, 4482, 238, 4720, ''),
+    2017: ('FY2017', 2401, 521, 85, 1365, 0, 51, 4423, 317, 4740, ''),
+    2018: ('FY2019', 2633, 585, 84, 1318, 0, 35, 4655, 187, 4842, ''),
+    2019: ('FY2019', 2401, 577, 76, 1199, 0, 19, 4272, 146, 4418, ''),
+    2020: ('FY2020', 1842, 475, 62, 858, 0, 17, 3254, 181, 3435, ''),
+}
+for y, (rep, na, la, ap, em, fe, ma, tot, jv, comb, note) in FCA_SEG.items():
+    assert abs(na + la + ap + em + fe + ma - tot) <= 2, (y, na + la + ap + em + fe + ma, tot)
+    lab, url = S_SRC[rep]
+    sc = 'consolidated shipments (vehicles shipped to dealers/distributors by consolidated subsidiaries), thousand units rounded in the filing'
+    for b, v in (('North America (NAFTA until 2020)', na), ('LATAM (FCA segment 2012-2020; South America from 2021)', la), ('APAC (FCA segment 2012-2020)', ap), ('EMEA (FCA segment 2012-2020)', em), ('Maserati', ma), ('Ferrari', fe)):
+        if b == 'Ferrari' and not fe:
+            continue
+        add(G_S, b, y, 'CY', v * 1000, 'shipments', 'filing', lab, url, scope=sc, notes=note)
+    add(G_S, 'Total consolidated shipments', y, 'CY', tot * 1000, 'shipments', 'filing', lab, url, scope=sc, notes=note)
+    if jv is not None:
+        add(G_S, 'Joint venture shipments', y, 'CY', jv * 1000, 'shipments', 'filing', lab, url, scope='shipments by unconsolidated joint ventures (China, Turkey, Italy...)', notes=note)
+        add(G_S, 'Total combined shipments', y, 'CY', comb * 1000, 'shipments', 'filing', lab, url, scope='consolidated + joint venture shipments', notes=note)
+# Stellantis 2021-2025: year -> (report, North America, South America, China/India/APAC, Enlarged Europe, Middle East & Africa, Maserati, total, JV, combined)
+STLA_SEG = {
+    2021: ('AR2022', 1764, 811, 118, 2847, 272, 24, 5836, 213, 6049),
+    2022: ('AR2023', 1861, 859, 127, 2626, 283, 26, 5782, 221, 6003),
+    2023: ('AR2023', 1903, 879, 102, 2814, 443, 27, 6168, 225, 6393),
+    2024: ('AR2025', 1432, 912, 61, 2576, 423, 11, 5415, 111, 5526),
+    2025: ('AR2025', 1472, 1000, 61, 2490, 453, 8, 5484, 89, 5573),
+}
+for y, (rep, na, sa, ci, ee, mea, ma, tot, jv, comb) in STLA_SEG.items():
+    assert abs(na + sa + ci + ee + mea + ma - tot) <= 2, (y, na + sa + ci + ee + mea + ma, tot)
+    lab, url = S_SRC[rep]
+    sc = 'consolidated shipments, thousand units rounded in the report'
+    for b, v in (('North America (NAFTA until 2020)', na), ('LATAM (FCA segment 2012-2020; South America from 2021)', sa), ('China and India & Asia Pacific (Stellantis segment)', ci), ('Enlarged Europe (Stellantis segment)', ee),
+                 ('Middle East & Africa (Stellantis segment)', mea), ('Maserati', ma)):
+        add(G_S, b, y, 'CY', v * 1000, 'shipments', 'filing', lab, url, scope=sc, notes='segment structure of Stellantis (Enlarged Europe and Middle East & Africa replace FCA EMEA)' if y == 2021 else '')
+    add(G_S, 'Total consolidated shipments', y, 'CY', tot * 1000, 'shipments', 'filing', lab, url, scope=sc)
+    add(G_S, 'Joint venture shipments', y, 'CY', jv * 1000, 'shipments', 'filing', lab, url, scope='shipments by joint ventures')
+    add(G_S, 'Total combined shipments', y, 'CY', comb * 1000, 'shipments', 'filing', lab, url, scope='consolidated + joint venture shipments')
+# PSA brand groups 2018-2020 (vehicle sales, passenger cars + LCV, incl. CKD kits; 2018 includes about 144,000 vehicles sold in Iran by Iran Khodro and IKAP, 141,000 of them under a Peugeot licence)
+PSA = {2020: (1879788, 632687, 2512475), 2019: (2505665, 973431, 3479096), 2018: (2839708, 1038057, 3877765)}
+for y, (pcd, ov, tot) in PSA.items():
+    assert pcd + ov == tot, (y, pcd + ov, tot)
+    lab, url = S_SRC['FY2020'][0].replace('shipments by segment', 'PSA vehicle sales by region'), S_SRC['FY2020'][1]
+    sc = 'PSA vehicle sales worldwide, passenger cars + LCV, including CKD kits'
+    nt = 'includes about 144,000 vehicles sold in Iran by Iran Khodro and IKAP (141,000 under a Peugeot licence)' if y == 2018 else ''
+    add(G_S, 'Peugeot, Citroën and DS (PCD, PSA)', y, 'CY', pcd, 'sales', 'filing', lab, url, scope=sc, notes=nt)
+    add(G_S, 'Opel/Vauxhall (OV, PSA)', y, 'CY', ov, 'sales', 'filing', lab, url, scope=sc, notes=nt)
+    add(G_S, 'PSA Group total', y, 'CY', tot, 'sales', 'filing', lab, url, scope=sc, notes=nt)
+
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
     vals = []
