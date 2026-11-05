@@ -408,6 +408,12 @@
             </div>
             <select id="mfr-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <a href="#" class="mfr-reset-link" data-reset-all title="Back to the world view: clears the country and every filter, and scrolls up to the map">↺ Reset all filters</a>
+            <div class="chart-mode-toggle hidden mfr-period-mirror-toggle" role="group" aria-label="Monthly or yearly view">
+              <button type="button" class="mode-btn active" data-mfr-period-mirror="monthly" title="Show recent individual months.">Monthly</button>
+              <button type="button" class="mode-btn" data-mfr-period-mirror="yearly" title="Show full calendar years.">Yearly</button>
+            </div>
+            <select class="filter-search hidden mfr-month-mirror" style="width:auto;" title="Period — the same filter as in the other two sections and the page's Period filter, kept in sync."></select>
+            <select class="filter-search hidden mfr-year-mirror" style="width:auto;" title="Year — the same filter as in the other two sections and the page's Period filter, kept in sync."></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -456,6 +462,12 @@
             </div>
             <select id="mfr-model-country-select" class="filter-search" style="width:auto;" title="Switch the focused country — applies to the whole page, not just this section."></select>
             <a href="#" class="mfr-reset-link" data-reset-all title="Back to the world view: clears the country and every filter, and scrolls up to the map">↺ Reset all filters</a>
+            <div class="chart-mode-toggle hidden mfr-period-mirror-toggle" role="group" aria-label="Monthly or yearly view">
+              <button type="button" class="mode-btn active" data-mfr-period-mirror="monthly" title="Show recent individual months.">Monthly</button>
+              <button type="button" class="mode-btn" data-mfr-period-mirror="yearly" title="Show full calendar years.">Yearly</button>
+            </div>
+            <select class="filter-search hidden mfr-month-mirror" style="width:auto;" title="Period — the same filter as in the other two sections and the page's Period filter, kept in sync."></select>
+            <select class="filter-search hidden mfr-year-mirror" style="width:auto;" title="Year — the same filter as in the other two sections and the page's Period filter, kept in sync."></select>
             <div class="chart-mode-toggle" role="group" aria-label="Bar display mode">
               <button type="button" class="mode-btn" data-mfr-model-mode="pct" title="Show each row's fuel mix as a % of its own total.">%</button>
               <button type="button" class="mode-btn active" data-mfr-model-mode="raw" title="Show actual unit counts — bars scaled to the top-selling row shown."># of Units</button>
@@ -6452,6 +6464,38 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     mfrCountryGroupCoverageNote.classList.remove('hidden');
     mfrCountryGroupCoverageNote.innerHTML = `⚠ ${excludedTotal.toLocaleString('en-US')} units (${names}) have no known manufacturing country and are excluded here -- Sales by Brand's total for this period is real and includes them.`;
   }
+  // --- the Period filter (Monthly/Yearly toggle + month <select> + year <select>) lives in the Manufacturing Country header; the Brand and
+  // Model headers repeat it (same options, same value, same visibility). A mirror just drives its primary control, which keeps its existing
+  // handlers (push the pick into the page's Period filter, re-render everything); after every render the mirrors copy the primaries back.
+  const mfrPeriodMirrors = [mfrSection, mfrModelSection].map(card => card && ({
+    toggle: card.querySelector('.mfr-period-mirror-toggle'), month: card.querySelector('.mfr-month-mirror'), year: card.querySelector('.mfr-year-mirror') })).filter(Boolean);
+  function syncMfrPeriodMirrors(){
+    mfrPeriodMirrors.forEach(m => {
+      if(m.toggle && mfrPeriodToggleEl){
+        m.toggle.classList.toggle('hidden', mfrPeriodToggleEl.classList.contains('hidden'));
+        const on = mfrPeriodToggleEl.querySelector('[data-mfr-period].active');
+        m.toggle.querySelectorAll('[data-mfr-period-mirror]').forEach(b => b.classList.toggle('active', !!on && b.dataset.mfrPeriodMirror === on.dataset.mfrPeriod));
+      }
+      [[m.month, mfrMonthSelect], [m.year, mfrYearSelect]].forEach(([mir, prim]) => {
+        if(!mir) return;
+        mir.classList.toggle('hidden', prim.classList.contains('hidden'));
+        if(mir.innerHTML !== prim.innerHTML) mir.innerHTML = prim.innerHTML;
+        mir.value = prim.value;
+      });
+    });
+  }
+  mfrPeriodMirrors.forEach(m => {
+    if(m.toggle) m.toggle.addEventListener('click', e => {
+      const btn = e.target.closest('[data-mfr-period-mirror]');
+      if(!btn || btn.classList.contains('active') || !mfrPeriodToggleEl) return;
+      const prim = mfrPeriodToggleEl.querySelector(`[data-mfr-period="${btn.dataset.mfrPeriodMirror}"]`);
+      if(prim) prim.click();
+      syncMfrPeriodMirrors();
+    });
+    [[m.month, mfrMonthSelect], [m.year, mfrYearSelect]].forEach(([mir, prim]) => {
+      if(mir) mir.addEventListener('change', () => { prim.value = mir.value; prim.dispatchEvent(new Event('change')); syncMfrPeriodMirrors(); });
+    });
+  });
   function renderBoth(){
     renderSection('brand');
     if(!mfrModelSection.classList.contains('mfr-card-empty')) renderSection('model');
@@ -6464,6 +6508,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     updateMfrModelCoverageNote();
     updateMfrCountryGroupCoverageNote();
     renderMfrPeriodNotes();
+    syncMfrPeriodMirrors();
   }
   // --- "no data for the selected period" label + clickable list of the periods that do have data.
   // Shown in each of the three sections (brand / model / manufacturing country) whenever the
@@ -6705,6 +6750,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       mfrRequestedOverride = null;
       mfrMonthSelect.classList.add('hidden');
       mfrYearSelect.classList.add('hidden');
+      syncMfrPeriodMirrors();
       if(mfrCoverageNote) mfrCoverageNote.classList.add('hidden');
       if(mfrModelCoverageNote) mfrModelCoverageNote.classList.add('hidden');
       return;
