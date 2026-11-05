@@ -29,12 +29,12 @@ html[data-view="mobile"] .rte-menu-btn{
   display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; border:1px solid #16345c; background:rgba(255,255,255,.06);
   color:#e6f0fa; font-size:22px; line-height:1; cursor:pointer; padding:0; flex:none;
 }
-html[data-view="mobile"] .sidebar-nav{
+html[data-view="mobile"] .sidebar-nav{ align-items:stretch;
   display:none; position:absolute; top:100%; left:0; right:0; max-height:calc(100vh - var(--m-bar)); overflow-y:auto; flex-direction:column; flex-wrap:nowrap; gap:2px;
   padding:10px var(--m-pad) 18px; background:#021129; border-bottom:1px solid #0e2a50; box-shadow:0 18px 34px rgba(0,0,0,.4);
 }
 html[data-view="mobile"].rte-nav-open .sidebar-nav{ display:flex; }
-html[data-view="mobile"] nav.sidebar-nav a{ white-space:normal; flex-shrink:0; min-height:44px; display:flex; align-items:center; gap:10px; font-size:16px; padding:10px 12px; }
+html[data-view="mobile"] nav.sidebar-nav a{ white-space:normal; flex-shrink:0; min-height:44px; display:flex; align-items:center; gap:10px; justify-content:flex-start; text-align:left; font-size:16px; padding:10px 12px; }
 html[data-view="mobile"] .sidebar-nav .nav-heading{ margin-top:12px; }
 html[data-view="mobile"] .sidebar-nav .rte-view-link{ margin:14px 0 4px; padding:12px; font-size:14px; }
 
@@ -79,3 +79,25 @@ html[data-view="mobile"] .rank-row .country-label{ width:auto; flex:1 1 0; min-w
 html[data-view="mobile"] .rank-row .bar-track{ order:9; flex:1 0 100%; min-width:100%; }
 html[data-view="mobile"] .rank-rows{ gap:12px; }
 html[data-view="mobile"] .rank-rows-header .rrh-spacer{ flex:1; }
+
+/* ---------- charts and tables that are wider than a phone ---------- */
+/* grid and flex items may shrink below their content (zero specificity, so any min-width a page sets itself still wins): stops one wide chart or table from stretching a 1fr column past the screen */
+:where(html[data-view="mobile"] .main div, html[data-view="mobile"] .main section, html[data-view="mobile"] .main details, html[data-view="mobile"] .main form){ min-width:0; }
+/* view-mode.js gives a wide SVG chart a min-width that keeps its text readable and marks its parent .rte-xscroll: the chart scrolls sideways inside its card */
+html[data-view="mobile"] .rte-xscroll{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; max-width:100%; }
+html[data-view="mobile"] .rte-xscroll > svg{ max-width:none; flex:none; }
+html[data-view="mobile"] .rte-xscroll::before{ content:"swipe sideways \2194"; position:sticky; left:0; display:block; width:max-content; font-size:10.5px; color:var(--text-muted); padding:0 0 2px; }
+/* a bare table in a plain wrapper scrolls inside it instead of widening the page */
+html[data-view="mobile"] :is(div, section, details):has(> table){ overflow-x:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+
+/* ---------- filters drawer (view-mode.js; a panel marked data-rte-drawer) ---------- */
+.rte-filter-bar, .rte-drawer-done{ display:none; }
+html[data-view="mobile"]{ scroll-padding-top:calc(var(--m-bar) + 8px); }
+html[data-view="mobile"] .rte-filter-bar{ display:flex; align-items:center; gap:10px; position:sticky; top:var(--m-bar); z-index:250; margin:0 calc(var(--m-pad) * -1) 12px; padding:8px var(--m-pad); background:var(--bg); border-bottom:1px solid var(--border); }
+html[data-view="mobile"] .rte-filter-bar[hidden]{ display:none; }
+html[data-view="mobile"] .rte-filter-btn{ flex:none; appearance:none; border:none; cursor:pointer; font:inherit; font-size:14px; font-weight:800; color:#fff; padding:9px 16px; border-radius:999px; background:linear-gradient(135deg, #0a80d0, #2fae4e); box-shadow:0 4px 12px rgba(0,0,0,.22); }
+html[data-view="mobile"] .rte-filter-sum{ min-width:0; flex:1; font-size:12.5px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+html[data-view="mobile"] [data-rte-drawer]{ position:fixed; z-index:500; left:0; right:0; top:var(--m-bar); bottom:0; width:100%; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px var(--m-pad) 0; background:var(--bg); transform:translateY(105%); visibility:hidden; transition:transform .25s ease, visibility 0s .25s; }
+html[data-view="mobile"].rte-drawer-open [data-rte-drawer]{ transform:none; visibility:visible; transition:transform .25s ease; }
+html[data-view="mobile"] .rte-drawer-done{ display:block; position:sticky; bottom:0; width:100%; margin-top:12px; padding:14px; border:none; border-radius:14px 14px 0 0; font:inherit; font-size:15px; font-weight:800; color:#fff; cursor:pointer; background:linear-gradient(135deg, #0a80d0, #2fae4e); box-shadow:0 -6px 18px rgba(0,0,0,.25); }
+html[data-view="mobile"].rte-drawer-open body{ overflow:hidden; }
