@@ -1,7 +1,7 @@
-// "Electrification Mix — Recent" stacked bar chart: BEV/PHEV/HEV as a % (or, in "# of Units" mode,
-// the raw count) of each period's total registrations. Petrol/Diesel are also available but start
-// hidden (dimmed in the legend) -- click either chip (or "# of Units"/"%" mode toggle) to reveal
-// them stacked on top. Periods are the last 5 full annual years (fewer if a country's history is
+// "Electrification Mix — Recent" stacked bar chart: BEV/PHEV as a % (or, in "# of Units" mode,
+// the raw count) of each period's total registrations. Hybrid (HEV), Petrol and Diesel are also
+// available but start hidden (dimmed in the legend) -- click a chip (or "# of Units"/"%" mode toggle)
+// to reveal them stacked on top. Periods are the last 5 full annual years (fewer if a country's history is
 // shorter), then the current year's YTD bar, then each real month of the current year so far (just
 // the YTD bar, on its own, if no monthly breakdown exists for that country). Shared by country.html
 // (always, for the URL country),
@@ -19,11 +19,11 @@
 // The %/# of Units mode toggle is injected into the DOM on first render (wrapping the existing
 // h2 in a .chart-header-row) -- no host-page markup change needed.
 
-const ELEC_BARS_KEYS = ['bev', 'phev', 'hev']; // shown by default
-const ELEC_BARS_EXTRA_KEYS = ['petrol', 'diesel']; // start hidden/dimmed in the legend -- click to reveal
+const ELEC_BARS_KEYS = ['bev', 'phev']; // shown by default
+const ELEC_BARS_EXTRA_KEYS = ['hev', 'petrol', 'diesel']; // start hidden/dimmed in the legend -- click to reveal
 const ELEC_BARS_ALL_KEYS = [...ELEC_BARS_KEYS, ...ELEC_BARS_EXTRA_KEYS];
 const ELEC_BARS_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ELEC_BARS_NOTE = "Battery Electric, Plug-in Hybrid, and Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Petrol and Diesel start dimmed in the legend; click either one (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year's YTD total, then each month of the current year so far (just the YTD bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
+const ELEC_BARS_NOTE = "Battery Electric and Plug-in Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Hybrid, Petrol and Diesel start dimmed in the legend; click any of them (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year's YTD total, then each month of the current year so far (just the YTD bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
 // how many full annual years (immediately preceding the current one) to show, history permitting
 const ELEC_BARS_YEAR_COUNT = 5;
 // width ratios, relative to a single narrow bar (width 1) -- years widest, the current year's
