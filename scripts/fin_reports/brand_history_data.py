@@ -71,6 +71,87 @@ for y in JAPAN:
         H75 + 'overseas/region.html', scope='worldwide, Toyota + Lexus, excl. Daihatsu and Hino',
         notes=f'Japan {JAPAN[y]:,} ({H75}japan/1950.html) + overseas {OVERSEAS_K[y]:,.1f} thousand (rounded to 100 vehicles); Lexus not split out before 2007; Daihatsu and Hino worldwide sales for 2000-2006 not found')
 
+# =====================================================================================================================
+# 2 - VOLKSWAGEN GROUP   (Volkswagen AG; deliveries to customers worldwide, incl. the equity-accounted Chinese joint ventures)
+# Basis 'deliveries'. Every row records the annual report it was read in. Rule: the figure from the year's own report when read, otherwise the restated
+# prior-year figure of the next report ("updated to reflect subsequent statistical trends"). Brand rows exactly as the report lists them.
+G_V = 'Volkswagen Group'
+WAY = 'http://web.archive.org/web/'
+AR = {   # report -> (label, url)
+    2025: ('Annual Report 2025, Deliveries', 'https://annualreport2025.volkswagen-group.com/group-management-report/business-development/deliveries.html'),
+    2023: ('Annual Report 2023, Deliveries', 'https://annualreport2023.volkswagen-group.com/group-management-report/business-development/deliveries.html'),
+    2021: ('Annual Report 2021, Deliveries', 'https://annualreport2021.volkswagenag.com/group-management-report/business-development/deliveries.html'),
+    2019: ('Annual Report 2019, Deliveries', 'https://annualreport2019.volkswagenag.com/group-management-report/business-development/deliveries.html'),
+    2017: ('Annual Report 2017, Deliveries', 'https://annualreport2017.volkswagenag.com/group-management-report/business-development/deliveries.html'),
+    2015: ('Annual Report 2015, Deliveries (printed pp. 96-98)', WAY + '20160504050407/http://annualreport2015.volkswagenag.com:80/group-management-report/business-development/deliveries.html'),
+    2014: ('Annual Report 2014, Deliveries', WAY + '20150323221502/http://annualreport2014.volkswagenag.com/group-management-report/business-development/deliveries.html'),
+    2013: ('Annual Report 2013, Deliveries', WAY + '20140903072229/http://annualreport2013.volkswagenag.com/group-management-report/business-development/deliveries.html'),
+    2012: ('Annual Report 2012, Deliveries', WAY + '20230610141648/https://annualreport2012.volkswagenag.com/managementreport/businessdevelopment/deliveries.html'),
+    2011: ('Annual Report 2011, Deliveries', WAY + '20240713184559/https://annualreport2011.volkswagenag.com/managementreport/businessdevelopment/deliveries.html'),
+    2010: ('Annual Report 2010, Deliveries', WAY + '20170801213546/http://annualreport2010.volkswagenag.com:80/managementreport/businessdevelopment/deliveries.html'),
+    2009: ('Annual Report 2009, Deliveries', WAY + '20170929055731/http://annualreport2009.volkswagenag.com:80/managementreport/businessdevelopment/deliveries.html'),
+    2008: ('Annual Report 2008, Deliveries', WAY + '20100918075403/http://annualreport2008.volkswagenag.com:80/managementreport/businessdevelopment/deliveries.html'),
+}
+SEAT = 'SEAT (incl. CUPRA)'
+# year -> (report year, {brand: units}, passenger cars + LCV total or None, commercial vehicles total or None, group total or None, note)
+VW = {
+    2025: (2025, {'Volkswagen Passenger Cars': 4730574, 'Audi': 1623551, 'ŠKODA': 1043938, SEAT: 586251, 'Bentley': 10131, 'Lamborghini': 10747, 'Porsche': 279449, 'Volkswagen Commercial Vehicles': 393693,
+                  'Scania': 94091, 'MAN': 101632, 'International (Navistar)': 63732, 'Volkswagen Truck & Bus': 46111}, 8678334, 305566, 8983900, ''),
+    2024: (2025, {'Volkswagen Passenger Cars': 4796192, 'Audi': 1671218, 'ŠKODA': 926567, SEAT: 558159, 'Bentley': 10643, 'Lamborghini': 10687, 'Porsche': 310718, 'Volkswagen Commercial Vehicles': 408281,
+                  'Scania': 102120, 'MAN': 95705, 'International (Navistar)': 90562, 'Volkswagen Truck & Bus': 45829}, 8692465, 334216, 9026681, 'restated in the 2025 report'),
+    2023: (2023, {'Volkswagen Passenger Cars': 4866803, 'Audi': 1895240, 'ŠKODA': 866820, SEAT: 519176, 'Bentley': 13560, 'Lamborghini': 10112, 'Porsche': 320221, 'Volkswagen Commercial Vehicles': 409406,
+                  'Scania': 96568, 'MAN': 115653, 'International (Navistar)': 88880, 'Volkswagen Truck & Bus': 37073}, 8901338, 338174, 9239512, ''),
+    2022: (2023, {'Volkswagen Passenger Cars': 4563327, 'Audi': 1614231, 'ŠKODA': 731262, SEAT: 385591, 'Bentley': 15174, 'Lamborghini': 9233, 'Porsche': 309884, 'Volkswagen Commercial Vehicles': 328572,
+                  'Scania': 85232, 'MAN': 84372, 'International (Navistar)': 81892, 'Volkswagen Truck & Bus': 53991}, 7957274, 305487, 8262761, 'restated in the 2023 report'),
+    2021: (2021, {'Volkswagen Passenger Cars': 4896914, 'Audi': 1680512, 'ŠKODA': 878202, SEAT: 470531, 'Bentley': 14659, 'Lamborghini': 8405, 'Porsche': 301915, 'Bugatti': 63, 'Volkswagen Commercial Vehicles': 359546,
+                  'Scania': 90366, 'MAN': 150968, 'International (Navistar)': 29876}, 8610747, 271210, 8881957, 'Navistar included from July 1 2021; Bugatti only until October 31 2021'),
+    2020: (2021, {'Volkswagen Passenger Cars': 5328090, 'Audi': 1692773, 'ŠKODA': 1004816, SEAT: 426641, 'Bentley': 11206, 'Lamborghini': 7430, 'Porsche': 272162, 'Bugatti': 77, 'Volkswagen Commercial Vehicles': 371609,
+                  'Scania': 72085, 'MAN': 118102}, 9114804, 190187, 9304991, 'restated in the 2021 report'),
+    2019: (2019, {'Volkswagen Passenger Cars': 6278345, 'Audi': 1845573, 'ŠKODA': 1242767, SEAT: 574078, 'Bentley': 11006, 'Lamborghini': 8205, 'Porsche': 280800, 'Bugatti': 82, 'Volkswagen Commercial Vehicles': 491559,
+                  'Scania': 99457, 'MAN': 142764}, 10732415, 242221, 10974636, 'Volkswagen Commercial Vehicles reported inside Passenger Cars from January 1 2019 (earlier years restated this way)'),
+    2018: (2019, {'Volkswagen Passenger Cars': 6244888, 'Audi': 1812485, 'ŠKODA': 1253741, SEAT: 517627, 'Bentley': 10494, 'Lamborghini': 5750, 'Porsche': 256255, 'Bugatti': 76, 'Volkswagen Commercial Vehicles': 499698,
+                  'Scania': 96477, 'MAN': 136517}, 10601014, 232994, 10834008, 'restated in the 2019 report (incl. the new segment structure)'),
+    2017: (2017, {'Volkswagen Passenger Cars': 6230229, 'Audi': 1878105, 'ŠKODA': 1200535, SEAT: 468431, 'Bentley': 11089, 'Lamborghini': 3815, 'Porsche': 246375, 'Bugatti': 71, 'Volkswagen Commercial Vehicles': 497894,
+                  'Scania': 90777, 'MAN': 114134}, None, None, 10741455, 'passenger cars 10,038,650 (without Volkswagen Commercial Vehicles) + commercial vehicles 702,805 (incl. Volkswagen Commercial Vehicles) in the 2017 structure'),
+    2016: (2017, {'Volkswagen Passenger Cars': 5980309, 'Audi': 1867738, 'ŠKODA': 1126477, SEAT: 408703, 'Bentley': 11023, 'Lamborghini': 3457, 'Porsche': 237778, 'Bugatti': 1, 'Volkswagen Commercial Vehicles': 477974,
+                  'Scania': 81346, 'MAN': 102235}, None, None, 10297041, 'restated in the 2017 report; passenger cars 9,635,486 (without Volkswagen Commercial Vehicles) + commercial vehicles 661,555'),
+    2015: (2015, {'Volkswagen Passenger Cars': 5823408, 'Audi': 1803246, 'ŠKODA': 1055501, SEAT: 400037, 'Bentley': 10100, 'Lamborghini': 3245, 'Porsche': 225121, 'Bugatti': 23, 'Volkswagen Commercial Vehicles': 430801,
+                  'Scania': 76561, 'MAN': 102474}, None, None, 9930517, 'passenger cars 9,320,681 + commercial vehicles 609,836 (incl. Volkswagen Commercial Vehicles) in the 2015 structure'),
+    2014: (2015, {'Volkswagen Passenger Cars': 6118654, 'Audi': 1741129, 'ŠKODA': 1037226, SEAT: 390505, 'Bentley': 11020, 'Lamborghini': 2530, 'Porsche': 189849, 'Bugatti': 45, 'Volkswagen Commercial Vehicles': 446616,
+                  'Scania': 79782, 'MAN': 120088}, None, None, 10137444, 'restated in the 2015 report; passenger cars 9,490,958 + commercial vehicles 646,486'),
+    2013: (2014, {'Volkswagen Passenger Cars': 6021750, 'Audi': 1575480, 'ŠKODA': 920750, SEAT: 355004, 'Bentley': 10120, 'Lamborghini': 2121, 'Porsche': 162145, 'Bugatti': 47, 'Volkswagen Commercial Vehicles': 462373,
+                  'Scania': 80464, 'MAN': 140333}, None, None, None, 'restated in the 2014 report (Saveiro moved into Volkswagen Passenger Cars from January 1 2013; the 2013 report itself shows Volkswagen Passenger Cars 5,932,308 and Volkswagen Commercial Vehicles 551,908)'),
+    2012: (2013, {'Volkswagen Passenger Cars': 5738417, 'Audi': 1455123, 'ŠKODA': 939202, SEAT: 321002, 'Bentley': 8510, 'Lamborghini': 2083, 'Porsche': 59513, 'Bugatti': 31, 'Volkswagen Commercial Vehicles': 550156,
+                  'Scania': 67401, 'MAN': 134245}, None, None, 9275909, 'restated in the 2013 report; Porsche counted from August 1 2012 only; group total 9,275,909 is the 2012 report figure (9,074,283 passenger cars + LCV + 201,626 trucks and buses)'),
+    2011: (2012, {'Volkswagen Passenger Cars': 5091035, 'Audi': 1302659, 'ŠKODA': 879184, SEAT: 350009, 'Bentley': 7003, 'Lamborghini': 1602, 'Bugatti': 38, 'Volkswagen Commercial Vehicles': 528878,
+                  'Scania': 80108, 'MAN': 24750}, None, None, None, 'restated in the 2012 report; MAN consolidated from November 9 2011 (partial year); passenger cars + LCV 8,160,408'),
+    2010: (2011, {'Volkswagen Passenger Cars': 4502832, 'Audi': 1092411, 'ŠKODA': 762600, SEAT: 339501, 'Bentley': 5117, 'Lamborghini': 1302, 'Bugatti': 40, 'Volkswagen Commercial Vehicles': 435669,
+                  'Scania': 63712}, 7139472, None, None, 'restated in the 2011 report'),
+    2009: (2010, {'Volkswagen Passenger Cars': 3954551, 'Audi': 949729, 'ŠKODA': 684226, SEAT: 336683, 'Bentley': 4616, 'Lamborghini': 1515, 'Bugatti': 50, 'Volkswagen Commercial Vehicles': 361506,
+                  'Scania': 43443}, 6336319, None, None, 'restated in the 2010 report; the report\'s worldwide total (6,336,319) includes Scania'),
+    2008: (2009, {'Volkswagen Passenger Cars': 3667843, 'Audi': 1003469, 'ŠKODA': 674530, SEAT: 368104, 'Bentley': 7604, 'Lamborghini': 2430, 'Bugatti': 71, 'Volkswagen Commercial Vehicles': 502265,
+                  'Scania': 30527}, 6256843, None, None, 'restated in the 2009 report; Scania only from its consolidation in 2008 (part-year); the report\'s worldwide total (6,256,843) includes Scania'),
+    2007: (2008, {'Volkswagen Passenger Cars': 3663154, 'Audi': 964151, 'ŠKODA': 630032, SEAT: 431024, 'Bentley': 10014, 'Lamborghini': 2406, 'Bugatti': 81, 'Volkswagen Commercial Vehicles': 488726}, 6189588, None, None,
+                  'restated in the 2008 report; Scania and MAN not yet in the Group'),
+}
+for y, (rep, brands, pc, cv, tot, note) in VW.items():
+    label, url = AR[rep]
+    scope = 'deliveries to customers worldwide, incl. equity-accounted Chinese joint ventures'
+    for b, u in brands.items():
+        add(G_V, b, y, 'CY', u, 'deliveries', 'filing', f'Volkswagen Group {label}', url, scope=scope, notes=note)
+    if tot:
+        add(G_V, 'Volkswagen Group total', y, 'CY', tot, 'deliveries', 'filing', f'Volkswagen Group {label}', url, scope='all brands, passenger cars + LCV + commercial vehicles', notes=note)
+    if pc:
+        add(G_V, 'Passenger cars and light commercial vehicles (Group)', y, 'CY', pc, 'deliveries', 'filing', f'Volkswagen Group {label}', url, scope=scope, notes=note)
+    if cv:
+        add(G_V, 'Commercial vehicles (Group)', y, 'CY', cv, 'deliveries', 'filing', f'Volkswagen Group {label}', url, scope='Scania, MAN, International, Volkswagen Truck & Bus', notes=note)
+# check: where the report gives a passenger car + LCV total, the passenger-car brand rows (incl. Volkswagen Commercial Vehicles) must add up to it
+_PCB = ('Volkswagen Passenger Cars', 'Audi', 'ŠKODA', SEAT, 'Bentley', 'Lamborghini', 'Porsche', 'Bugatti', 'Volkswagen Commercial Vehicles')
+for y, (rep, brands, pc, cv, tot, note) in VW.items():
+    if pc:
+        s = sum(v for b, v in brands.items() if b in _PCB) + (brands['Scania'] if y in (2008, 2009) else 0)   # the 2009 and 2010 reports' "Worldwide" row still contained Scania
+        assert s == pc, (y, s, pc)
+
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
     vals = []
