@@ -54,8 +54,10 @@
   const panelsOf = side => GROUPS.filter(g => g.side === side);
   let collapsed = store.get('mixFilterCollapsed', { rank:true, classes:true, continents:true, countries:true });
   let railsClosed = store.get('mixFilterRails', { left:false, right:false });
-  let mode = store.get('mixFilterLayout', 'collapse');
-  if(!MODES.some(m => m[0] === mode)) mode = 'collapse';
+  const isMobile = () => document.documentElement.getAttribute('data-view') === 'mobile';     // assets/view-mode.js: on a phone the filters always open as a drawer, the desktop choice is kept untouched
+  let saved = store.get('mixFilterLayout', 'collapse');
+  if(!MODES.some(m => m[0] === saved)) saved = 'collapse';
+  let mode = isMobile() ? 'drawer' : saved;
   let bar = null, drawer = null, backdrop = null, openPop = null;
 
   // ---------- group headers: a chevron to collapse + a one-line summary ----------
@@ -182,7 +184,7 @@
   function setDrawer(on){ if(drawer){ drawer.classList.toggle('open', on); backdrop.classList.toggle('open', on); } }
 
   function applyMode(m){
-    mode = m; store.set('mixFilterLayout', m);
+    mode = m; if(!isMobile()){ saved = m; store.set('mixFilterLayout', m); }
     teardown();
     document.body.dataset.flMode = m;
     applyCollapsed(m === 'collapse' || m === 'drawer');
@@ -203,4 +205,5 @@
   // the page's own recompute() keeps the summaries and tags in step with every filter change
   window.refreshFilterLayout = refresh;
   applyMode(mode);
+  window.addEventListener('rte-viewchange', () => { const want = isMobile() ? 'drawer' : saved; if(want !== mode) applyMode(want); });
 })();

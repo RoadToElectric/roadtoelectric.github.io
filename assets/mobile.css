@@ -1,0 +1,81 @@
+/* Road to Electric -- mobile view. Everything is scoped to <html data-view="mobile"> (set by assets/view-mode.js), so the desktop view is untouched.
+   Pages opt in by loading assets/view-mode.js + this file. Mix by Country is the first. */
+
+/* ---------- switch buttons (visible in the views that use them) ---------- */
+.rte-menu-btn{ display:none; }
+.rte-view-link{
+  appearance:none; border:1px solid color-mix(in srgb, var(--accent) 45%, transparent); background:transparent; color:var(--accent);
+  font:inherit; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:8px; cursor:pointer; margin-top:10px; text-align:left;
+}
+.rte-view-link:hover{ background:color-mix(in srgb, var(--accent) 14%, transparent); }
+.rte-view-pill{
+  position:fixed; right:12px; bottom:12px; z-index:400; appearance:none; border:none; cursor:pointer; font:inherit; font-size:15px; font-weight:800;
+  padding:12px 16px; border-radius:999px; color:#fff; background:linear-gradient(135deg, #0a80d0, #2fae4e); box-shadow:0 8px 22px rgba(0,0,0,.35);
+}
+.rte-view-pill[hidden]{ display:none; }
+
+/* ---------- shell: sticky top bar with a menu button, one column ---------- */
+html[data-view="mobile"]{ --m-pad:14px; --m-bar:58px; -webkit-text-size-adjust:100%; }
+html[data-view="mobile"] body{ overflow-x:hidden; }
+html[data-view="mobile"] .shell{ flex-direction:column; }
+html[data-view="mobile"] .sidebar{
+  width:100%; height:var(--m-bar); min-height:var(--m-bar); position:sticky; top:0; z-index:300; flex-direction:row; align-items:center; justify-content:space-between;
+  padding:6px var(--m-pad); gap:12px; overflow:visible;
+}
+html[data-view="mobile"] .sidebar-logo{ flex-direction:row; gap:8px; }
+html[data-view="mobile"] .sidebar-logo img{ width:auto; height:42px; max-width:none; }
+html[data-view="mobile"] .sidebar-footer{ display:none; }
+html[data-view="mobile"] .rte-menu-btn{
+  display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; border:1px solid #16345c; background:rgba(255,255,255,.06);
+  color:#e6f0fa; font-size:22px; line-height:1; cursor:pointer; padding:0; flex:none;
+}
+html[data-view="mobile"] .sidebar-nav{
+  display:none; position:absolute; top:100%; left:0; right:0; max-height:calc(100vh - var(--m-bar)); overflow-y:auto; flex-direction:column; flex-wrap:nowrap; gap:2px;
+  padding:10px var(--m-pad) 18px; background:#021129; border-bottom:1px solid #0e2a50; box-shadow:0 18px 34px rgba(0,0,0,.4);
+}
+html[data-view="mobile"].rte-nav-open .sidebar-nav{ display:flex; }
+html[data-view="mobile"] nav.sidebar-nav a{ white-space:normal; flex-shrink:0; min-height:44px; display:flex; align-items:center; gap:10px; font-size:16px; padding:10px 12px; }
+html[data-view="mobile"] .sidebar-nav .nav-heading{ margin-top:12px; }
+html[data-view="mobile"] .sidebar-nav .rte-view-link{ margin:14px 0 4px; padding:12px; font-size:14px; }
+
+/* ---------- content ---------- */
+html[data-view="mobile"] .main{ padding:14px var(--m-pad) 56px; }
+html[data-view="mobile"] .page{ max-width:100%; width:100%; gap:16px; }
+html[data-view="mobile"] .content-with-filters{ flex-direction:column; align-items:stretch; gap:14px; max-width:100%; }
+html[data-view="mobile"] .content-with-filters .page{ width:100%; flex:none; max-width:100%; }
+html[data-view="mobile"] h1{ font-size:26px; line-height:1.15; }
+html[data-view="mobile"] h2{ font-size:19px; }
+html[data-view="mobile"] .subtitle{ font-size:14px; }
+html[data-view="mobile"] header.page-header{ padding-bottom:14px; }
+html[data-view="mobile"] .card{ padding:14px 12px; border-radius:14px; }
+html[data-view="mobile"] .stat-row{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+html[data-view="mobile"] img, html[data-view="mobile"] svg, html[data-view="mobile"] canvas{ max-width:100%; }
+html[data-view="mobile"] .tooltip{ max-width:86vw; }
+
+/* wide tables scroll inside their own card, first column stays */
+html[data-view="mobile"] .table-card{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+html[data-view="mobile"] .table-card table{ min-width:640px; }
+html[data-view="mobile"] .table-card th:first-child, html[data-view="mobile"] .table-card td:first-child{ position:sticky; left:0; z-index:2; background:var(--surface); }
+
+/* touch targets; 16 px fields so iOS does not zoom in */
+html[data-view="mobile"] button, html[data-view="mobile"] select, html[data-view="mobile"] summary{ min-height:40px; }
+html[data-view="mobile"] input[type="text"], html[data-view="mobile"] input[type="search"], html[data-view="mobile"] select{ font-size:16px; }
+
+/* ---------- Mix by Country ---------- */
+html[data-view="mobile"] .fl-switch{ display:none; }
+html[data-view="mobile"] .fl-bar{ top:var(--m-bar); margin:0; padding:8px 0; z-index:250; }
+html[data-view="mobile"] .fl-drawer{ z-index:500; }
+html[data-view="mobile"] .fl-backdrop{ z-index:490; }
+html[data-view="mobile"] .fl-active{ flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+html[data-view="mobile"] .fl-tag{ flex:none; }
+html[data-view="mobile"] .stat-row .stat{ padding:10px; }
+html[data-view="mobile"] .momentum-grid.five-up{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+html[data-view="mobile"] .chart-header-row{ flex-wrap:wrap; gap:8px; }
+html[data-view="mobile"] .chart-mode-toggle{ flex-wrap:wrap; max-width:100%; }
+html[data-view="mobile"] .chart-mode-toggle .mode-btn{ flex:1 1 auto; }
+/* ranking rows: name + figures on the first line, the bar on its own full-width line (the desktop row has no room for the bar on a phone) */
+html[data-view="mobile"] .rank-row{ flex-wrap:wrap; gap:4px 8px; }
+html[data-view="mobile"] .rank-row .country-label{ width:auto; flex:1 1 0; min-width:0; text-align:left; font-size:13.5px; }
+html[data-view="mobile"] .rank-row .bar-track{ order:9; flex:1 0 100%; min-width:100%; }
+html[data-view="mobile"] .rank-rows{ gap:12px; }
+html[data-view="mobile"] .rank-rows-header .rrh-spacer{ flex:1; }
