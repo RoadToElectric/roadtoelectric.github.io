@@ -4,6 +4,7 @@ and assets/charging-brand-index.js (BRAND_INDEX: brand, file, sites, ports, fast
 Positions come from the best public source available for each place:
   * AFDC / NRCan station locator API (United States + Canada; public, operating stations only), cached as .scratch/chg/qc/afdc_us.json / afdc_ca.json
       curl -G "https://developer.nlr.gov/api/alt-fuel-stations/v1.json" -d api_key=DEMO_KEY -d fuel_type=ELEC -d country=US -d limit=all
+  * NOBIL (Norway, Sweden: the Nordic register, CC BY 4.0), cached in .scratch/chg/nobil/ by fetch_nobil.py
   * Open Charge Map (every other country, and any US/Canada site of a brand that the AFDC feed does not list within 120 m), cached in .scratch/chg/ocm/
   * OpenStreetMap (.scratch/chg/ck/ck_osm_all.json, one Overpass query per tag, fetched by .scratch/chg/ck/osm_fetch.py) for the Circle K / Couche-Tard layer only
   * Tesla Superchargers are not here: they have their own layer (supercharge.info, exact sites and stalls).
@@ -20,11 +21,12 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
 import build_charging as bc  # noqa: E402
 from ocm_names import name_brand  # noqa: E402
+import nobil_lib  # noqa: E402
 from charging_sources import COUNTRIES  # noqa: E402
 
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
 OUT = os.path.join(ROOT, 'assets', 'brand-sites')
-TOP_N = 200
+TOP_N = 245
 FORCE = ['Couche-Tard / Circle K']      # small networks the map should always offer
 SKIP = {bc.UNKNOWN, bc.SELF, 'Other brands', 'Other operators', 'Tesla', 'Non-Networked', 'Unknown operator'}
 HOST = 'Couche-Tard / Circle K'
@@ -159,6 +161,7 @@ def main():
             sites[b].add(lat, lon, p, f, 'a', iso)
     # 2. Open Charge Map everywhere
     cells = defaultdict(list)
+    nobil = {iso: nobil_lib.stations(code) for iso, code in bc.NOBIL.items()}
     for iso in COUNTRIES:
         f = os.path.join(CACHE, 'ocm', iso + '.json')
         if not os.path.exists(f):
@@ -173,6 +176,8 @@ def main():
             if ai.get('Latitude') is None or ai.get('Longitude') is None:
                 continue
             cells[(int(ai['Latitude'] * 10), int(ai['Longitude'] * 10))].append((ai['Latitude'], ai['Longitude'], iso))
+            if nobil.get(iso) is not None:
+                continue                                         # Norway, Sweden: positions and operators come from NOBIL (next block)
             bs = [b] if b in want else []
             if HOST in want and HOST not in bs and HOST_RX.search(' '.join(str(x or '') for x in (ops.get(p.get('OperatorID')), ai.get('Title'), ai.get('AddressLine1'), ai.get('RelatedURL')))):
                 bs.append(HOST)                                  # a charger on a Circle K / Couche-Tard site run by someone else
@@ -184,6 +189,15 @@ def main():
             fast = sum((c.get('Quantity') or 1) for c in conns if (c.get('PowerKW') or 0) >= 50) * n / q
             for b in bs:
                 sites[b].add(ai['Latitude'], ai['Longitude'], n, fast, 'o', iso)
+    # 2b. NOBIL: Norway and Sweden
+    for iso, sts in nobil.items():
+        for s in sts or []:
+            b = bc.brand_nobil(s['op'])
+            bs = [b] if b in want else []
+            if HOST in want and HOST not in bs and HOST_RX.search(' '.join((s['op'], s['owner'], s['name'], s['addr']))):
+                bs.append(HOST)                                  # a charger on a Circle K / Couche-Tard site run by someone else
+            for b in bs:
+                sites[b].add(s['lat'], s['lon'], len(s['kw']), sum(1 for k in s['kw'] if (k or 0) >= 50), 'n', iso)
     # 3. OpenStreetMap: Circle K / Couche-Tard sites only (operator, brand, name, description or network tag)
     if HOST in want and os.path.exists(OSM_FILE):
         for e in json.load(open(OSM_FILE, encoding='utf8')):
@@ -204,14 +218,15 @@ def main():
         rows.sort(key=lambda r: (r[0], r[1]))
         n_a = sum(1 for r in rows if r[4] == 'a')
         n_m = sum(1 for r in rows if r[4] == 'm')
+        n_n = sum(1 for r in rows if r[4] == 'n')
         data = [r[:4] for r in rows]
         sl = slug(b)
         open(os.path.join(OUT, sl + '.js'), 'w', encoding='utf8').write(
             '(window.BRAND_SITES = window.BRAND_SITES || {})[%s] = %s;\n' % (json.dumps(b, ensure_ascii=False), json.dumps(data, separators=(',', ':'))))
-        index.append({'b': b, 'f': sl, 'n': len(rows), 'p': sum(r[2] for r in rows), 'fp': sum(r[3] for r in rows), 'a': n_a, 'o': len(rows) - n_a - n_m, 'm': n_m,
+        index.append({'b': b, 'f': sl, 'n': len(rows), 'p': sum(r[2] for r in rows), 'fp': sum(r[3] for r in rows), 'a': n_a, 'o': len(rows) - n_a - n_m - n_n, 'm': n_m, 'nb': n_n,
                       'rep': round(rank[b]), 'c': dict(sorted(Counter(r[5] for r in rows if r[5]).items(), key=lambda kv: -kv[1]))})
     open(os.path.join(ROOT, 'assets', 'charging-brand-index.js'), 'w', encoding='utf8').write(
-        '// Brands with a site layer on the charging map (assets/brand-sites/<f>.js): n sites, p ports, fp fast ports (50+ kW), a = sites from AFDC, o = from Open Charge Map, m = from OpenStreetMap (Circle K / Couche-Tard only), rep = ports reported for the brand on this page\n'
+        '// Brands with a site layer on the charging map (assets/brand-sites/<f>.js): n sites, p ports, fp fast ports (50+ kW), a = sites from AFDC, o = from Open Charge Map, nb = from NOBIL (Norway, Sweden), m = from OpenStreetMap (Circle K / Couche-Tard only), rep = ports reported for the brand on this page\n'
         'const BRAND_INDEX = ' + json.dumps(index, ensure_ascii=False, separators=(',', ':')) + ';\n')
     tot = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
     print(len(index), 'brands,', sum(i['n'] for i in index), 'sites,', tot // 1024, 'KB')

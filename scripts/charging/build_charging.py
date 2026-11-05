@@ -22,12 +22,17 @@ sys.path.insert(0, HERE)
 from charging_sources import COUNTRIES, OFFICIAL, AFDC_NETWORKS_NA, CHINA_OPERATORS, CHINA_TOP15_SHARE, CHINA_NOTE  # noqa: E402
 from charging_sql import write_sql  # noqa: E402
 from ocm_names import name_brand  # noqa: E402
+import nobil_lib  # noqa: E402
 
 IEA = os.path.join(HERE, 'data', 'iea')
 CACHE = os.path.join(ROOT, '.scratch', 'chg')
 YEARS = [2019, 2022, 2023, 2024, 2025]
 BANDS = ['Level 2 (<12 kW)', 'Slow (12-49 kW)', 'Fast (50-149 kW)', 'Ultra-fast (150-349 kW)', 'Mega-fast (350+ kW)']
 SNAPSHOT = '2026-10-27'
+# Norway and Sweden: stations, operators and power come from NOBIL (the Nordic register, CC BY 4.0; fetch_nobil.py) instead of Open Charge Map, which lists half of
+# the Swedish and four fifths of the Norwegian ports without an operator.  Finland (NOBIL lists 24% of the IEA ports) and Iceland stay on Open Charge Map.
+NOBIL = {'NO': 'NOR', 'SE': 'SWE'}
+NOBIL_SNAPSHOT = '2026-11-05'
 
 # ---- brand normalisation (OCM operator titles -> one brand)
 ALIASES = [
@@ -181,6 +186,70 @@ def ocm_country(iso, ops, usage):
     return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out, 'fs': [fst, round(fpo)], 'mix': mix}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}
 
 
+# NOBIL operator names -> one brand (applied before the general ALIASES; legal forms and country suffixes are dropped first)
+NOBIL_ALIASES = [
+    (r'oslo kommune|bymilj', 'Oslo kommune'), (r'^kople', 'Kople'), (r'^eviny', 'Eviny'), (r'^current', 'CURRENT'), (r'charge365', 'Charge365'), (r'^wattif', 'Wattif'),
+    (r'lade i norge', 'Lade i Norge'), (r'uno-?x', 'Uno-X'), (r'plug ?pay', 'Plugpay'), (r'^time ?park', 'Time Park'), (r'easypark', 'EasyPark'), (r'^st1', 'St1'),
+    (r'okq8', 'OKQ8'), (r'chargenode', 'ChargeNode'), (r'qwello', 'Qwello'), (r'voltiva', 'Voltiva'), (r'milepost', 'Milepost'), (r're&go', 'RE&GO'), (r'^aimo', 'Aimo Charge'),
+    (r'waybler', 'Waybler'), (r'^eways', 'Eways'), (r'spirii', 'Spirii'), (r'pay ?n ?charge', 'Pay N Charge'), (r'^cheap charge', 'Cheap Charge'), (r'^ebb charge|^ebb ', 'EBB Charge'),
+    (r'stockholm parkering', 'Stockholm Parkering'), (r'^pair recharge', 'Pair Recharge'), (r'^fastcharge', 'Fastcharge'), (r'^evbox', 'EVBox'), (r'^allego', 'Allego'),
+]
+_LEGAL = re.compile(r'\b(as|asa|ab|aps|a/s|oy|oyj|ltd|gmbh)\b\.?|\b(norge|norway|sverige|sweden|nordic|global|mobility)\b', re.I)
+
+
+def brand_nobil(op):
+    t = norm(re.sub(r'\s+', ' ', op or ''))
+    for rx, name in NOBIL_ALIASES:
+        if re.search(rx, t):
+            return name
+    t = re.sub(r'\s+', ' ', _LEGAL.sub(' ', op or '')).strip(' -,')
+    return brand_of(t) if t else UNKNOWN
+
+
+def nobil_country(iso):
+    """Same shape as ocm_country, from the NOBIL dump of Norway / Sweden: stations, ports, power bands, operators (top 14), cells for the density layer"""
+    sts = nobil_lib.stations(NOBIL[iso])
+    if sts is None:
+        return None, {}, {}, []
+    st = po = 0
+    bands = [0] * 5
+    brands = defaultdict(lambda: [0] * 7)
+    cells = defaultdict(lambda: [0, 0, 0])
+    mix = [0] * 6
+    fst = fpo = 0
+    for s in sts:
+        n = len(s['kw'])
+        alloc = [0.0] * 5
+        for kw in s['kw']:
+            alloc[band_of(kw)] += 1
+            if kw is not None:
+                mix[0 if kw < 12 else 1 if kw <= 22.01 else 2 if kw < 50 else 3 if kw < 150 else 4 if kw < 350 else 5] += 1
+        b = brand_nobil(s['op'])
+        st += 1
+        po += n
+        for i in range(5):
+            bands[i] += alloc[i]
+        e = brands[b]
+        e[0] += 1
+        e[1] += n
+        for i in range(5):
+            e[2 + i] += alloc[i]
+        if b != 'Tesla' and sum(alloc[2:]) > 0:
+            fst += 1
+            fpo += sum(alloc[2:])
+        k = (int(s['lon'] // 0.5), int(s['lat'] // 0.5))
+        cells[k][0] += 1
+        cells[k][1] += n
+        cells[k][2] += sum(alloc[2:])
+    top = sorted(brands.items(), key=lambda kv: -kv[1][1])
+    keep = top[:14]
+    rest = [v for k, v in top[14:]]
+    out = [[k] + [round(x) for x in v] for k, v in keep]
+    if rest:
+        out.append(['Other brands'] + [round(sum(v[i] for v in rest)) for i in range(7)])
+    return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out, 'fs': [fst, round(fpo)], 'mix': mix}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}, sts
+
+
 def main():
     iea, stock = load_iea()
     pop = load_pop()
@@ -205,7 +274,13 @@ def main():
         if tname and tname in tby:
             t = tby[tname]
             e['tesla'] = {'sites': t['sites'], 'stalls': t['stalls'], 'b': t['b']}
-        o, cells, allb = ocm_country(iso, ops, usage)
+        o = None
+        if iso in NOBIL:
+            o, cells, allb, _ = nobil_country(iso)
+            if o:
+                e['src'] = 'nobil'
+        if not o:
+            o, cells, allb = ocm_country(iso, ops, usage)
         world_in = {k: v for k, v in allb.items()}
         if o:
             e['ocm'] = o
@@ -257,6 +332,7 @@ def main():
     unattributed = {iso: sum((world_brands[b].get(iso) or [0, 0])[1] or 0 for b in skip if iso in world_brands[b]) for iso in COUNTRIES}
     meta = {'snapshot': SNAPSHOT, 'ieaYear': 2025, 'years': YEARS, 'bands': BANDS, 'poolShare': [round(pool_u, 3), round(pool_s, 3)],
             'afdcNetworks': sorted(AFDC_NETWORKS_NA, key=lambda x: -x[1]),
+            'nobil': {'snapshot': NOBIL_SNAPSHOT, 'countries': sorted(NOBIL), 'licence': 'CC BY 4.0', 'credit': 'NOBIL.no (Nordic charging-station register, nobil.no), Creative Commons Attribution 4.0'},
             'sources': {'iea': 'IEA Global EV Data Explorer / Global EV Outlook 2026 (CC BY 4.0): public charging points; slow <=22 kW, fast 22-150 kW, ultra-fast >150 kW (the page re-cuts slow at 50 kW with Open Charge Map shares)',
                         'ocm': 'Open Charge Map (open registry of charging locations, crowd-sourced and imported from operators; coverage varies by country)',
                         'tesla': 'supercharge.info (community database of Tesla Supercharger sites)',
