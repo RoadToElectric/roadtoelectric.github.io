@@ -104,6 +104,8 @@
   .wp-method li{ margin:5px 0; }
   .wp-method code{ overflow-wrap:anywhere; }
   .wp-load{ color:var(--text-muted); font-size:13px; padding:30px 0; text-align:center; }
+  .wp-more{ text-align:center; margin:10px 0 2px; }
+  .wp-more .wp-mini{ padding:7px 18px; font-weight:800; }
 </style>
 </head>
 <body>
@@ -197,57 +199,11 @@
         <div id="ex-table"></div>
       </div>
 
-      <!-- 3. growth -->
-      <div class="card chart-card" id="gr-card">
-        <h2>3 · The fastest-growing (and shrinking) populations</h2>
-        <p class="wp-note" id="gr-note"></p>
-        <div class="wp-filters" id="gr-f">
-          <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="gr-fsum"></span><i class="wp-car">▾</i></button>
-          <div class="wp-fbody">
-            <div class="wp-frow"><label class="wp-fl">Show</label>
-              <div class="wp-seg" id="gr-measure"><button type="button" data-v="raw" class="active">Raw gain (people)</button><button type="button" data-v="pct">% growth</button></div>
-              <div class="wp-seg" id="gr-dir"><button type="button" data-v="up" class="active">Growing</button><button type="button" data-v="down">Shrinking</button></div>
-              <div class="wp-seg" id="gr-scope"><button type="button" data-v="country" class="active">Countries</button><button type="button" data-v="sub">Subregions</button><button type="button" data-v="region">Regions</button></div></div>
-            <div class="wp-frow"><label class="wp-fl" for="gr-group">Population</label>
-              <select class="wp-sel" id="gr-group"><option value="total">Everyone</option><option value="u16">Under 16</option><option value="w1664">Aged 16–64</option><option value="ge65">Aged 65+</option><option value="ge18">Aged 18+ (potential drivers)</option><option value="ge80">Aged 80+</option></select>
-              <label class="wp-fl" for="gr-n" style="min-width:0">Top</label><select class="wp-sel" id="gr-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select>
-              <label class="wp-fl" for="gr-min" style="min-width:0">Ignore areas under</label><select class="wp-sel" id="gr-min"><option value="0">no limit</option><option value="100000">100 thousand</option><option value="1000000" selected>1 million</option><option value="5000000">5 million</option><option value="10000000">10 million</option></select></div>
-            <div class="wp-frow"><label class="wp-fl">Period</label>
-              <div class="wp-range"><span>from</span><select class="wp-sel" id="gr-from"></select></div>
-              <div class="wp-range"><span>to</span><select class="wp-sel" id="gr-to"></select></div>
-              <span id="gr-presets"></span></div>
-          </div>
-        </div>
-        <div class="wp-bars" id="gr-bars"></div>
-      </div>
-
-      <!-- 4. rankings -->
-      <div class="card chart-card" id="rk-card">
-        <h2>4 · Population rankings, year by year (1950–2050)</h2>
-        <p class="wp-note">Press play, or drag the year, to watch the ranking change. 2024 onward is the UN projection.</p>
-        <div class="wp-filters" id="rk-f">
-          <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="rk-fsum"></span><i class="wp-car">▾</i></button>
-          <div class="wp-fbody">
-            <div class="wp-frow"><label class="wp-fl" for="rk-measure">Rank by</label>
-              <select class="wp-sel" id="rk-measure"><option value="total">Total population</option><option value="u16">Under 16</option><option value="w1664">Aged 16–64</option><option value="ge65">Aged 65+</option><option value="ge18">Aged 18+ (potential drivers)</option><option value="ge80">Aged 80+</option></select>
-              <label class="wp-fl" for="rk-cmp" style="min-width:0">Rank change vs</label>
-              <select class="wp-sel" id="rk-cmp"><option value="10" selected>10 years earlier</option><option value="25">25 years earlier</option><option value="50">50 years earlier</option><option value="1950">1950</option></select></div>
-            <div class="wp-frow"><label class="wp-fl">Year</label>
-              <button type="button" class="wp-play" id="rk-play" aria-label="Play">▶</button>
-              <div class="wp-range"><input type="range" id="rk-year" min="1950" max="2050" value="2026" style="width:min(340px,52vw)"><b id="rk-yl" style="font-size:20px">2026</b></div></div>
-          </div>
-        </div>
-        <div class="wp-bars" id="rk-bars"></div>
-        <h3 style="margin:18px 0 2px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Rank history 1950–2050</h3>
-        <div class="wp-frow" style="margin:4px 0 6px"><span id="rk-chips"></span>
-          <select class="wp-sel" id="rk-add"></select><button type="button" class="wp-mini" id="rk-top">Top 10 of the year above</button></div>
-        <div class="wp-chart" id="rk-chart"></div>
-      </div>
-
-      <!-- 5. potential drivers -->
+      <!-- 3. potential drivers -->
       <div class="card chart-card" id="dr-card">
-        <h2>5 · Who will gain the most potential drivers?</h2>
+        <h2>3 · Who will gain the most potential drivers?</h2>
         <p class="wp-note" id="dr-note"></p>
+        <p class="wp-note"><b>Note:</b> potential drivers are not buyers. Few drivers over 80 will purchase a brand-new car — new-car demand comes mostly from people in their 30s to 60s, so a growing 80+ population adds licence-holders on the road but very little to new-car sales.</p>
         <div class="wp-filters" id="dr-f">
           <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="dr-fsum"></span><i class="wp-car">▾</i></button>
           <div class="wp-fbody">
@@ -269,8 +225,57 @@
         <div class="wp-stats" id="dr-kpis"></div>
         <div class="wp-two">
           <div><h3 id="dr-h-reg">Regions</h3><div class="wp-bars" id="dr-reg"></div></div>
-          <div><h3 id="dr-h-cty">Countries</h3><div class="wp-bars" id="dr-cty"></div></div>
+          <div><h3 id="dr-h-cty">Countries</h3><div class="wp-bars" id="dr-cty"></div><div class="wp-more"><button type="button" class="wp-mini" id="dr-more"></button></div></div>
         </div>
+      </div>
+
+      <!-- 4. growth -->
+      <div class="card chart-card" id="gr-card">
+        <h2>4 · The fastest-growing (and shrinking) populations</h2>
+        <p class="wp-note" id="gr-note"></p>
+        <div class="wp-filters" id="gr-f">
+          <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="gr-fsum"></span><i class="wp-car">▾</i></button>
+          <div class="wp-fbody">
+            <div class="wp-frow"><label class="wp-fl">Show</label>
+              <div class="wp-seg" id="gr-measure"><button type="button" data-v="raw" class="active">Raw gain (people)</button><button type="button" data-v="pct">% growth</button></div>
+              <div class="wp-seg" id="gr-dir"><button type="button" data-v="up" class="active">Growing</button><button type="button" data-v="down">Shrinking</button></div>
+              <div class="wp-seg" id="gr-scope"><button type="button" data-v="country" class="active">Countries</button><button type="button" data-v="sub">Subregions</button><button type="button" data-v="region">Regions</button></div></div>
+            <div class="wp-frow"><label class="wp-fl" for="gr-group">Population</label>
+              <select class="wp-sel" id="gr-group"><option value="total">Everyone</option><option value="u16">Under 16</option><option value="w1664">Aged 16–64</option><option value="ge65">Aged 65+</option><option value="ge18">Aged 18+ (potential drivers)</option><option value="ge80">Aged 80+</option></select>
+              <label class="wp-fl" for="gr-n" style="min-width:0">Top</label><select class="wp-sel" id="gr-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select>
+              <label class="wp-fl" for="gr-min" style="min-width:0">Ignore areas under</label><select class="wp-sel" id="gr-min"><option value="0">no limit</option><option value="100000">100 thousand</option><option value="1000000" selected>1 million</option><option value="5000000">5 million</option><option value="10000000">10 million</option></select></div>
+            <div class="wp-frow"><label class="wp-fl">Period</label>
+              <div class="wp-range"><span>from</span><select class="wp-sel" id="gr-from"></select></div>
+              <div class="wp-range"><span>to</span><select class="wp-sel" id="gr-to"></select></div>
+              <span id="gr-presets"></span></div>
+          </div>
+        </div>
+        <div class="wp-bars" id="gr-bars"></div>
+        <div class="wp-more"><button type="button" class="wp-mini" id="gr-more"></button></div>
+      </div>
+
+      <!-- 5. rankings -->
+      <div class="card chart-card" id="rk-card">
+        <h2>5 · Population rankings, year by year (1950–2050)</h2>
+        <p class="wp-note">Press play, or drag the year, to watch the ranking change. 2024 onward is the UN projection.</p>
+        <div class="wp-filters" id="rk-f">
+          <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="rk-fsum"></span><i class="wp-car">▾</i></button>
+          <div class="wp-fbody">
+            <div class="wp-frow"><label class="wp-fl" for="rk-measure">Rank by</label>
+              <select class="wp-sel" id="rk-measure"><option value="total">Total population</option><option value="u16">Under 16</option><option value="w1664">Aged 16–64</option><option value="ge65">Aged 65+</option><option value="ge18">Aged 18+ (potential drivers)</option><option value="ge80">Aged 80+</option></select>
+              <label class="wp-fl" for="rk-cmp" style="min-width:0">Rank change vs</label>
+              <select class="wp-sel" id="rk-cmp"><option value="10" selected>10 years earlier</option><option value="25">25 years earlier</option><option value="50">50 years earlier</option><option value="1950">1950</option></select></div>
+            <div class="wp-frow"><label class="wp-fl">Year</label>
+              <button type="button" class="wp-play" id="rk-play" aria-label="Play">▶</button>
+              <div class="wp-range"><input type="range" id="rk-year" min="1950" max="2050" value="2026" style="width:min(340px,52vw)"><b id="rk-yl" style="font-size:20px">2026</b></div></div>
+          </div>
+        </div>
+        <div class="wp-bars" id="rk-bars"></div>
+        <div class="wp-more"><button type="button" class="wp-mini" id="rk-more"></button></div>
+        <h3 style="margin:18px 0 2px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Rank history 1950–2050</h3>
+        <div class="wp-frow" style="margin:4px 0 6px"><span id="rk-chips"></span>
+          <select class="wp-sel" id="rk-add"></select><button type="button" class="wp-mini" id="rk-top">Top 10 of the year above</button></div>
+        <div class="wp-chart" id="rk-chart"></div>
       </div>
 
       <!-- 6. over 80 -->
@@ -294,7 +299,7 @@
         <div class="wp-stats" id="old-kpis"></div>
         <div class="wp-two">
           <div><h3 id="old-h-reg">Regions</h3><div class="wp-bars" id="old-reg"></div></div>
-          <div><h3 id="old-h-cty">Countries</h3><div class="wp-bars" id="old-cty"></div></div>
+          <div><h3 id="old-h-cty">Countries</h3><div class="wp-bars" id="old-cty"></div><div class="wp-more"><button type="button" class="wp-mini" id="old-more"></button></div></div>
         </div>
       </div>
 
@@ -517,17 +522,19 @@ function barRows(el, rows, { value, label, sub, color, max, rankOf, click, selId
       <span class="v">${label(r)}<em>${sub ? sub(r) : ''}</em>${delta ? delta(r) : ''}</span></div>`).join('') || '<div class="wp-load">Nothing to show for these filters.</div>';
   if (click) el.querySelectorAll('.wp-brow').forEach(b => b.addEventListener('click', () => click(+b.dataset.id)));
 }
+function syncMore(id, all, total, n){ const b = $(id); if (!b) return; b.style.display = total > n ? '' : 'none'; b.textContent = all ? `Shrink to ${n}` : `Show all ${total}`; b.setAttribute('aria-expanded', all); }
 const periodOpts = (sel, from, to, val) => { sel.innerHTML = d3.range(from, to + 1).map(y => `<option value="${y}"${y === val ? ' selected' : ''}>${y}${y >= PROJ ? ' (proj.)' : ''}</option>`).join(''); };
 function openAge(id){ setLoc(id); $('age-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
 // ---------- 3 · growth ----------
-const G = { measure: 'raw', dir: 'up', scope: 'country', group: 'total', n: 15, min: 1e6, from: 2000, to: 2026 };
+const G = { measure: 'raw', dir: 'up', scope: 'country', group: 'total', n: 15, min: 1e6, from: 2000, to: 2026, all: false };
 periodOpts($('gr-from'), 1950, 2049, G.from); periodOpts($('gr-to'), 1951, 2050, G.to);
 $('gr-presets').innerHTML = [[1950, 2026, '1950 → now'], [2000, 2026, '2000 → now'], [2026, 2050, 'now → 2050'], [2026, 2036, 'next 10 years'], [2050 - 25, 2050, '2025 → 2050']].map(([a, b, t]) => `<button type="button" class="wp-mini" data-a="${a}" data-b="${b}">${t}</button>`).join(' ');
 $('gr-presets').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; G.from = +b.dataset.a; G.to = +b.dataset.b; $('gr-from').value = G.from; $('gr-to').value = G.to; renderGrowth(); });
 seg('gr-measure', v => { G.measure = v; renderGrowth(); }); seg('gr-dir', v => { G.dir = v; renderGrowth(); }); seg('gr-scope', v => { G.scope = v; renderGrowth(); });
 $('gr-group').addEventListener('change', e => { G.group = e.target.value; renderGrowth(); });
-$('gr-n').addEventListener('change', e => { G.n = +e.target.value; renderGrowth(); });
+$('gr-n').addEventListener('change', e => { G.n = +e.target.value; G.all = false; renderGrowth(); });
+$('gr-more').addEventListener('click', () => { G.all = !G.all; renderGrowth(); });
 $('gr-min').addEventListener('change', e => { G.min = +e.target.value; renderGrowth(); });
 $('gr-from').addEventListener('change', e => { G.from = +e.target.value; if (G.to <= G.from) { G.to = G.from + 1; $('gr-to').value = G.to; } renderGrowth(); });
 $('gr-to').addEventListener('change', e => { G.to = +e.target.value; if (G.from >= G.to) { G.from = G.to - 1; $('gr-from').value = G.from; } renderGrowth(); });
@@ -537,7 +544,7 @@ function renderGrowth(){
   if (pct) rows = rows.filter(r => r.p !== null && r.a >= G.min); else rows = rows.filter(r => r.a >= 0);
   rows.forEach(r => r.bar = pct ? r.p : r.d);
   rows.sort((x, y) => up ? y.bar - x.bar : x.bar - y.bar);
-  rows = rows.slice(0, G.n);
+  const nAll = rows.length; if (!G.all) rows = rows.slice(0, G.n); syncMore('gr-more', G.all, nAll, G.n);
   const max = d3.max(rows, r => Math.abs(r.bar)) || 1;
   const yrs = G.to - G.from, avg = r => r.a > 0 ? (Math.pow(r.b / r.a, 1 / yrs) - 1) * 100 : 0;
   barRows($('gr-bars'), rows, { max, click: openAge, selId: st.loc, color: r => r.bar >= 0 ? 'var(--wp-up)' : 'var(--wp-dn)',
@@ -549,7 +556,7 @@ function renderGrowth(){
 }
 
 // ---------- 4 · rankings ----------
-const R = { measure: 'total', year: 2026, cmp: '10', hist: [] };
+const R = { measure: 'total', year: 2026, cmp: '10', hist: [], all: false, n: 20 };
 const rankCache = new Map();
 function ranks(measure){                  // per country, per year: rank by the measure (1 = largest)
   if (rankCache.has(measure)) return rankCache.get(measure);
@@ -559,6 +566,7 @@ function ranks(measure){                  // per country, per year: rank by the 
 }
 $('rk-measure').addEventListener('change', e => { R.measure = e.target.value; renderRank(); });
 $('rk-cmp').addEventListener('change', e => { R.cmp = e.target.value; renderRank(); });
+$('rk-more').addEventListener('click', () => { R.all = !R.all; renderRank(); });
 $('rk-year').addEventListener('input', e => { R.year = +e.target.value; renderRank(); });
 let rkTimer = null;
 $('rk-play').addEventListener('click', () => {
@@ -568,7 +576,8 @@ $('rk-play').addEventListener('click', () => {
 });
 function renderRank(){
   const rk = ranks(R.measure), y = yi(R.year), cmpYear = R.cmp === '1950' ? 1950 : Math.max(Y0, R.year - +R.cmp);
-  const rows = COUNTRIES.map(l => ({ l, v: S(l, R.measure)[y], r: rk.get(l.id)[y], r0: rk.get(l.id)[yi(cmpYear)] })).sort((a, b) => a.r - b.r).slice(0, 20);
+  const rows = COUNTRIES.map(l => ({ l, v: S(l, R.measure)[y], r: rk.get(l.id)[y], r0: rk.get(l.id)[yi(cmpYear)] })).sort((a, b) => a.r - b.r);
+  const nAll = rows.length; if (!R.all) rows.length = Math.min(rows.length, R.n); syncMore('rk-more', R.all, nAll, R.n);
   rows.forEach(r => r.bar = r.v);
   barRows($('rk-bars'), rows, { max: rows[0].v, click: id => addHist(id), color: r => R.hist.includes(r.l.id) ? 'var(--accent-2)' : 'var(--accent)',
     label: r => fmtN(r.v), sub: r => `${(r.v / WORLD_VAL() * 100).toFixed(1)}% of world`,
@@ -644,7 +653,8 @@ function gainCard(p, cfg){
     const sortRows = rows => rows.filter(r => val(r) !== null).sort((a, b) => up ? val(b) - val(a) : val(a) - val(b));
     const w = compute(WORLD);
     const regs = sortRows((s.lvl === 'region' ? REGIONS : SUBS).map(compute));
-    const ctys = sortRows(COUNTRIES.map(compute).filter(r => s.measure !== 'pct' || r.a >= s.min)).slice(0, s.n);
+    const ctysAll = sortRows(COUNTRIES.map(compute).filter(r => s.measure !== 'pct' || r.a >= s.min)), ctys = s.all ? ctysAll : ctysAll.slice(0, s.n);
+    syncMore(p + '-more', s.all, ctysAll.length, s.n);
     const label = r => s.measure === 'pct' ? fmtP(r.pc) : s.measure === 'ent' ? fmtN(r.ent) : s.measure === 'out' ? fmtN(r.lost) : fmtS(r.d);
     const sub = r => s.stop && r.ent !== null
       ? (s.measure === 'ent' ? `net ${fmtS(r.d)} · ${fmtN(r.lost)} lost` : s.measure === 'out' ? `${fmtN(r.out)} reach ${s.stop} · ${fmtN(r.died)} deaths and net migration` : `${fmtN(r.a)} → ${fmtN(r.b)} · +${fmtN(r.ent)} new · −${fmtN(r.lost)} lost`)
@@ -666,12 +676,13 @@ function gainCard(p, cfg){
       kp('#64748b', `${topC[0].l.n} <small style="font-size:13px;color:var(--text-muted)">${fmtS(topC[0].d)}</small>`, `top 10 countries add ${fmtN(top10)} (${(top10 / w.d * 100).toFixed(0)}% of the world's net gain)`, 'Biggest country');
     el('note').innerHTML = cfg.note(s, end);
     el('h-reg').textContent = `${s.lvl === 'region' ? 'Regions' : 'Subregions'} — ${s.measure === 'out' ? 'most drivers lost' : up ? 'biggest gains' : 'biggest losses'}`;
-    el('h-cty').textContent = `Countries — top ${s.n}`;
+    el('h-cty').textContent = s.all ? `Countries — all ${ctysAll.length}` : `Countries — top ${s.n}`;
     el('fsum').textContent = `${s.age}${s.stop ? '–' + (s.stop - 1) : '+'} · ${s.base}→${end}`;
   };
-  [['age', v => s.age = +v], ['base', v => { s.base = +v; }], ['n', v => s.n = +v], ['min', v => s.min = +v]].forEach(([k, f]) => el(k).addEventListener(el(k).type === 'range' ? 'input' : 'change', e => { f(e.target.value); render(); }));
+  [['age', v => s.age = +v], ['base', v => { s.base = +v; }], ['n', v => { s.n = +v; s.all = false; }], ['min', v => s.min = +v]].forEach(([k, f]) => el(k).addEventListener(el(k).type === 'range' ? 'input' : 'change', e => { f(e.target.value); render(); }));
   if (cfg.stop) el('stop').addEventListener('input', e => { s.stop = +e.target.value; render(); });
   el('x').addEventListener('input', e => { s.x = +e.target.value; render(); });
+  $(p + '-more').addEventListener('click', () => { s.all = !s.all; render(); });
   seg(p + '-measure', v => { s.measure = v; render(); }); seg(p + '-lvl', v => { s.lvl = v; render(); });
   if ($(p + '-dir')) seg(p + '-dir', v => { s.dir = v; render(); });
   render(); return { s, render, compute, computeFull };
