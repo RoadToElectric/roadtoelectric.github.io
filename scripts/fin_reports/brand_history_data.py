@@ -152,6 +152,44 @@ for y, (rep, brands, pc, cv, tot, note) in VW.items():
         s = sum(v for b, v in brands.items() if b in _PCB) + (brands['Scania'] if y in (2008, 2009) else 0)   # the 2009 and 2010 reports' "Worldwide" row still contained Scania
         assert s == pc, (y, s, pc)
 
+# --- Volkswagen Group 2000-2006: the annual reports of that time give deliveries by BRAND GROUP (and, in 2000, 2001 and the 2007 report's 2006 column, by brand).
+# Volkswagen brand group = Volkswagen Passenger Cars + Škoda + Bentley + Bugatti; Audi brand group = Audi + SEAT + Lamborghini; Commercial Vehicles = Volkswagen Commercial Vehicles
+# (the 2001 figures add up: Audi 726,134 + SEAT 487,617 + Lamborghini 297 = 1,214,048 against the Audi brand group's 1,214,047 in the 2002 report).
+UAB = 'https://ddd.uab.cat/pub/infanu/146223/iaVOLKSWAGENa%dieng.pdf'
+VW_SCOPE_OLD = 'deliveries to customers worldwide; Volkswagen brand group = Volkswagen Passenger Cars + Škoda + Bentley + Bugatti, Audi brand group = Audi + SEAT + Lamborghini, Commercial Vehicles = Volkswagen Commercial Vehicles'
+# year: (report, pdf page, note, {Volkswagen brand group, Audi brand group, Commercial Vehicles, total})
+VW_BG = {
+    2001: (2002, 20, 'restated in the 2002 report', (3566235, 1214047, 299805, 5080087)),
+    2002: (2003, 35, 'restated in the 2003 report', (3500630, 1202579, 280385, 4983594)),
+    2003: (2004, 109, 'restated in the 2004 report', (3525553, 1231349, 258825, 5015727)),
+    2004: (2005, 56, 'restated in the 2005 report', (3521694, 1223121, 333820, 5078635)),
+    2005: (2006, 60, 'restated in the 2006 report', (3588690, 1252955, 401562, 5243207)),
+    2006: (2006, 60, '', (3954526, 1337393, 441681, 5733600)),
+}
+for y, (rep, pg, note, vals) in VW_BG.items():
+    assert sum(vals[:3]) == vals[3], (y, sum(vals[:3]), vals[3])
+    src = f'Volkswagen AG Annual Report {rep}, deliveries to customers by market (PDF p. {pg})'
+    for b, u in zip(('Volkswagen brand group', 'Audi brand group', 'Commercial Vehicles (Volkswagen Commercial Vehicles)'), vals[:3]):
+        add(G_V, b, y, 'CY', u, 'deliveries', 'filing', src, UAB % rep, scope=VW_SCOPE_OLD, notes=note)
+    add(G_V, 'Volkswagen Group total', y, 'CY', vals[3], 'deliveries', 'filing', src, UAB % rep, scope='all brands (the "Worldwide" row)', notes=note)
+# by brand: 2000 and 2001 (own reports), 2006 (the 2007 report's restated prior-year column)
+VW_BR = {
+    2000: (2000, 22, '', {'Volkswagen Passenger Cars': 3127471, 'Volkswagen Commercial Vehicles': 328798, 'Audi': 653377, SEAT: 514976, 'ŠKODA': 435403, 'Bentley (reported as Rolls-Royce/Bentley)': 1822, 'Lamborghini': 296}, 5062143),
+    2001: (2001, 26, '', {'Volkswagen Passenger Cars': 3105673, 'Volkswagen Commercial Vehicles': 299706, 'Audi': 726134, SEAT: 487617, 'ŠKODA': 462321, 'Bentley (reported as Rolls-Royce/Bentley)': 1799, 'Lamborghini': 297}, 5083547),
+    2006: (2007, 122, 'restated in the 2007 report', {'Volkswagen Passenger Cars': 3396098, 'Audi': 905188, 'ŠKODA': 549667, SEAT: 429355, 'Bentley': 9387, 'Lamborghini': 2095, 'Volkswagen Commercial Vehicles': 441457, 'Bugatti': 45}, 5733292),
+}
+for y, (rep, pg, note, brands, tot) in VW_BR.items():
+    assert sum(brands.values()) == tot, (y, sum(brands.values()), tot)
+    src = f'Volkswagen AG Annual Report {rep}, deliveries by brand (PDF p. {pg})'
+    for b, u in brands.items():
+        add(G_V, b, y, 'CY', u, 'deliveries', 'filing', src, UAB % rep, scope='deliveries to customers worldwide', notes=note)
+    if y == 2000:
+        add(G_V, 'Volkswagen Group total', y, 'CY', tot, 'deliveries', 'filing', src, UAB % rep, scope='all brands (the "Worldwide" row)', notes='')
+        # brand groups of 2000 are derived from the brand figures (the 2000 report has no brand-group table)
+        for b, parts in (('Volkswagen brand group', ('Volkswagen Passenger Cars', 'ŠKODA', 'Bentley (reported as Rolls-Royce/Bentley)')), ('Audi brand group', ('Audi', SEAT, 'Lamborghini')),
+                         ('Commercial Vehicles (Volkswagen Commercial Vehicles)', ('Volkswagen Commercial Vehicles',))):
+            add(G_V, b, y, 'CY', sum(brands[p] for p in parts), 'derived', 'derived', src + ': sum of the brands in the group', UAB % rep, scope=VW_SCOPE_OLD, notes='derived from the brand figures')
+
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
     vals = []
