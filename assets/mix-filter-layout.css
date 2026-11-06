@@ -129,3 +129,12 @@ body[data-fl-mode="drawer"] .filters-panel{ display:none; }
 .fl-drawer-body{ flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
 .fl-backdrop{ position:fixed; inset:0; z-index:190; background:rgba(0,0,0,.35); opacity:0; pointer-events:none; transition:opacity .2s ease; }
 .fl-backdrop.open{ opacity:1; pointer-events:auto; }
+
+/* narrower left panel (Period, Market rank, Powertrain, Car class): the longest period label is 94 px, the page gets the room */
+@media (min-width: 1001px){
+  .filters-panel-left{ width:168px; }
+  .filters-panel-left .filter-group{ padding-left:12px; padding-right:12px; }
+  .filters-panel-left .filter-label{ flex-wrap:wrap; row-gap:3px; }      /* Check all / Uncheck all drop under the title */
+  .filters-panel-left .fl-left{ flex:1 1 100%; flex-wrap:wrap; row-gap:0; }
+  .filters-panel-left .fl-sum{ flex:1 0 100%; max-width:none; padding-left:23px; margin-top:-1px; }      /* the current choice sits under the title, in full, instead of being cut */
+}
