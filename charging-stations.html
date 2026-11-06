@@ -243,6 +243,7 @@
           <select id="brand-country"></select>
           <div class="ch-note" id="brand-cov" style="margin:0"></div>
         </div>
+        <div class="ch-row" style="margin:4px 0 8px"><div class="ch-label">Count</div><div class="ch-seg" id="br-metric"><button type="button" data-m="ports" class="active">Ports</button><button type="button" data-m="stations">Stations</button></div></div>
         <div class="ch-bands" id="brand-legend" role="group" aria-label="Port speeds"></div>
         <p class="ch-note" id="brand-sel" style="margin:0 0 8px"></p>
         <div id="brand-rows"></div>
@@ -261,7 +262,7 @@
         <p class="ch-note" id="co-note"></p>
       </div>
 
-      <div class="card chart-card">
+      <div class="card chart-card" id="table-card">
         <h2>Country table</h2>
         <p class="note" style="display:block" id="table-note"></p>
         <div class="ch-tablewrap"><table class="ch-t" id="ch-table"></table></div>
@@ -623,7 +624,9 @@ let applyList = () => {};
     ctryName = cs.value || null; buildCtry(ctryName); applyTeslaFilter();
     for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
     if(ctryName && BY[ctryName]){ selected = ctryName; renderTable(); renderBrands(); }
-    applyList(); renderCompanies(); renderStats(); summarize(); scheduleBrand();
+    applyList(); syncCountryMode(); renderCompanies(); renderStats();
+    selBrands.clear(); if(ctryName && BY[ctryName]) visible().forEach(i => selBrands.add(i.value));      // a country picked: every company that has a site there is checked (none for All countries)
+    sync(); refreshBrands(false); summarize(); scheduleBrand();
     if(ctryBox) fitBox(ctryBox[0], ctryBox[1], ctryBox[2], ctryBox[3], 200); else svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
   };
   const list = document.getElementById('bm-list'), panel = document.getElementById('bm-panel'), q = document.getElementById('bm-q');
@@ -669,7 +672,7 @@ document.getElementById('ch-layers').addEventListener('click', e => {
   drawGrid(); drawTesla();
 });
 document.getElementById('z-qc').onclick = () => {
-  document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]); applyList(); renderCompanies();
+  document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]); applyList(); syncCountryMode(); renderCompanies(); renderStats();
   layers.tesla = true; document.querySelector('#ch-layers [data-layer="tesla"]').classList.add('on'); drawTesla();
   selBrands.clear(); selBrands.add('Circuit électrique'); selBrands.add('Couche-Tard / Circle K'); window.__bmSync(); refreshBrands(false);
   // southern Québec, where nearly all of both networks sit (about -79.5..-64 E, 44.9..48.8 N)
@@ -738,6 +741,8 @@ const legendEl = document.getElementById('brand-legend');
 const drawBandBtns = () => { legendEl.innerHTML = '<span class="bl">Port speeds</span>' + CHARGING.meta.bands.map((b, i) => `<button type="button" class="${bandOn[i] ? 'on' : 'off'}" data-i="${i}" aria-pressed="${bandOn[i]}" title="${bandOn[i] ? 'Click to remove' : 'Click to add'} ${b} ports from the ranking and the share"><i style="background:${BAND_COL[i]}"></i>${b}</button>`).join(''); };
 drawBandBtns();
 legendEl.addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; const i = +b.dataset.i; if(bandOn[i] && bandOn.filter(Boolean).length === 1) return; bandOn[i] = !bandOn[i]; drawBandBtns(); renderBrands(); });
+let brMetric = 'ports';
+document.getElementById('br-metric').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; brMetric = b.dataset.m; document.querySelectorAll('#br-metric button').forEach(x => x.classList.toggle('active', x === b)); renderBrands(); });
 function renderBrands(){
   const n = selected || sel.value, c = BY[n]; if(!c) return; sel.value = n;
   const cov = ocmCov(c), t = total(c, LATEST);
@@ -746,17 +751,26 @@ function renderBrands(){
   const bandless = bs.length && bs.every(b => b[3] == null);   // China: operator ranking by public piles only
   document.getElementById('brand-cov').innerHTML = bandless ? esc(c.bnote || '') : (c.ocm ? `${listSrc(c)} lists <b>${fmt(c.ocm.st)}</b> stations and <b>${fmt(c.ocm.po)}</b> ports` + (t ? ` — ${Math.round(100 * cov)}% of the IEA's ${fmt(t)} points${cov < .25 ? ' (low coverage: treat the split as a sample)' : ''}.` : ' (no IEA total for this country).') : 'No Open Charge Map data.');
   const on = bandOn, BN = CHARGING.meta.bands, cb = (c.ocm && c.ocm.bands) || [0, 0, 0, 0, 0];     // cb: the country's ports per speed, every operator
-  const sp = b => bandless ? b[2] : [3, 4, 5, 6, 7].reduce((x, k, i) => x + (on[i] ? b[k] : 0), 0);     // a company's ports at the selected speeds
-  const tot = bandless ? 0 : cb.reduce((x, k, i) => x + (on[i] ? k : 0), 0);                              // the country's ports at the selected speeds
+  const byStations = brMetric === 'stations';
+  const sp = b => byStations ? (b[1] || 0) : bandless ? b[2] : [3, 4, 5, 6, 7].reduce((x, k, i) => x + (on[i] ? b[k] : 0), 0);     // a company's stations, or its ports at the selected speeds
+  const tot = byStations ? (c.ocm ? c.ocm.st : 0) : bandless ? 0 : cb.reduce((x, k, i) => x + (on[i] ? k : 0), 0);                    // the country's stations, or its ports at the selected speeds
   const rows = bs.map(b => ({ b, v: sp(b) })).filter(x => x.v > 0).sort((x, y) => (x.b[0] === 'Other brands') - (y.b[0] === 'Other brands') || y.v - x.v);
   const mx = Math.max(1, ...rows.map(x => x.v));
   legendEl.style.display = bandless ? 'none' : '';
-  document.getElementById('brand-sel').textContent = bandless ? '' : `Counting ports at: ${BN.filter((x, i) => on[i]).join(', ')}. Click a speed above to add or remove it. Share = the company's part of the ${fmt(tot)} ports at these speeds in ${c.n}; the Stations column counts every speed.`;
-  const tipRow = (b, v) => `${b[0]} in ${c.n}` + NL + `${fmt(b[2])} ports in ${b[1] == null ? '?' : fmt(b[1])} stations` + (b[1] ? ` (${(b[2] / b[1]).toFixed(1)} ports per station)` : '') + (bandless ? '' : NL + `At the selected speeds: ${fmt(v)} ports = ${pct(v, tot)} of the ${fmt(tot)} in ${c.n}` + NL + BN.map((x, i) => `${x}: ${fmt(b[3 + i])}`).join(NL));
-  const tipSeg = (b, k, i, v) => `${b[0]} · ${BN[i]}` + NL + `${fmt(b[k])} ports = ${pct(b[k], v)} of its ports at the selected speeds` + NL + `${pct(b[k], cb[i])} of the ${fmt(cb[i])} ${BN[i]} ports in ${c.n}`;
-  document.getElementById('brand-rows').innerHTML = rows.length ? `<div class="ch-brow hd${bandless ? '' : ' sh'}"><span>Company</span>${bandless ? '' : `<span class="sp" title="Share of the country's ports at the selected speeds">Share</span>`}<span>${bandless ? 'Public charging ports' : 'Ports by speed'}</span><span style="text-align:right" title="Ports at the selected speeds">Ports</span><span style="text-align:right" title="Stations of the company, every speed">Stations</span></div>` +
-    rows.map(({ b, v }) => `<div class="ch-brow${bandless ? '' : ' sh'}" title="${esc(tipRow(b, v))}"><span class="nm">${esc(b[0])}</span>${bandless ? '' : `<span class="n sp">${pct(v, tot)}</span>`}<span class="tr">${b[3] == null ? `<div style="width:${(100 * b[2] / mx).toFixed(2)}%;background:linear-gradient(90deg,var(--ch-a),var(--ch-b))" title="${esc(b[0] + ' · ' + fmt(b[2]) + ' public charging piles')}"></div>` : [3, 4, 5, 6, 7].map((k, i) => on[i] ? `<div style="width:${(100 * b[k] / mx).toFixed(2)}%;background:${BAND_COL[i]}" title="${esc(tipSeg(b, k, i, v))}"></div>` : '').join('')}</span><span class="n">${fmt(v)}</span><span class="n m">${b[1] == null ? '–' : fmt(b[1])}</span></div>`).join('') +
-    (bandless ? `<p class="ch-note">${esc(c.bnote || '')}</p>` : `<p class="ch-note">Companies are the network operators (who runs and bills the charger): the 14 largest by total ports plus Other brands. A charger sitting in a Walmart, Couche-Tard or hotel car park shows under its operator (ChargePoint, Electrify America, Circuit électrique, Tesla…) unless the chain runs it itself; the colors show how many of each brand's ports sit in each selected power band (Level 2 and Slow are hidden until you add them). Share of ports at 50 kW or more: <b>${c.ocm.po ? Math.round(100 * (c.ocm.bands[2] + c.ocm.bands[3] + c.ocm.bands[4]) / c.ocm.po) : 0}%</b> (ultra-fast 150–349 kW: ${fmt(c.ocm.bands[3])} ports · mega-fast 350+ kW: ${fmt(c.ocm.bands[4])} ports). Hover a row or a colored segment for the details.</p>`) : bs.length ? '<p class="ch-note">No company has ports at the selected speeds in this country.</p>' : '<p class="ch-note">No brand data for this country.</p>';
+  legendEl.style.opacity = byStations ? .4 : ''; legendEl.style.pointerEvents = byStations ? 'none' : '';      // speeds do not split stations
+  document.getElementById('brand-sel').textContent = byStations ? `Counting stations at every speed (the speed buttons apply to ports). Share = the company's part of the ${fmt(tot)} stations mapped in ${c.n}; the Ports column counts every speed.`
+    : bandless ? '' : `Counting ports at: ${BN.filter((x, i) => on[i]).join(', ')}. Click a speed above to add or remove it. Share = the company's part of the ${fmt(tot)} ports at these speeds in ${c.n}; the Stations column counts every speed.`;
+  const lastListed = bs.filter(x => x[0] !== 'Other brands').slice(-1)[0];
+  const tipRow = (b, v) => {
+    const ps = b[1] ? ` (${(b[2] / b[1]).toFixed(1)} ports per station)` : '';
+    const head = b[0] === 'Other brands' ? `Other companies in ${c.n}` + NL + `${b[8] ? fmt(b[8]) + ' smaller companies' : 'The smaller companies'}${lastListed ? ', each with fewer ports than ' + lastListed[0] + ' (' + fmt(lastListed[2]) + ')' : ''}` + (b[9] && b[9].length ? NL + 'Largest of them: ' + b[9].join(', ') : '') : `${b[0]} in ${c.n}`;
+    return head + NL + `${fmt(b[2])} ports in ${b[1] == null ? '?' : fmt(b[1])} stations` + ps + (byStations ? NL + `${pct(v, tot)} of the ${fmt(tot)} stations mapped in ${c.n}` : bandless ? '' : NL + `At the selected speeds: ${fmt(v)} ports = ${pct(v, tot)} of the ${fmt(tot)} in ${c.n}` + (b[0] === 'Other brands' ? '' : NL + BN.map((x, i) => `${x}: ${fmt(b[3 + i])}`).join(NL)));
+  };
+  const tipSeg = (b, k, i, v) => `${b[0] === 'Other brands' ? 'Other companies' : b[0]} · ${BN[i]}` + NL + `${fmt(b[k])} ports = ${pct(b[k], v)} of its ports at the selected speeds` + NL + `${pct(b[k], cb[i])} of the ${fmt(cb[i])} ${BN[i]} ports in ${c.n}`;
+  const one = (w, tip) => `<div style="width:${(100 * w / mx).toFixed(2)}%;background:linear-gradient(90deg,var(--ch-a),var(--ch-b))" title="${esc(tip)}"></div>`;
+  document.getElementById('brand-rows').innerHTML = rows.length ? `<div class="ch-brow hd${bandless ? '' : ' sh'}"><span>Company</span>${bandless ? '' : `<span class="sp" title="Share of the country's ${byStations ? 'stations' : 'ports at the selected speeds'}">Share</span>`}<span>${bandless ? 'Public charging ports' : byStations ? 'Stations by company' : 'Ports by speed'}</span><span style="text-align:right" title="${byStations ? 'Stations of the company' : 'Ports at the selected speeds'}">${byStations ? 'Stations' : 'Ports'}</span><span style="text-align:right" title="${byStations ? 'Ports of the company, every speed' : 'Stations of the company, every speed'}">${byStations ? 'Ports' : 'Stations'}</span></div>` +
+    rows.map(({ b, v }) => `<div class="ch-brow${bandless ? '' : ' sh'}" title="${esc(tipRow(b, v))}"><span class="nm">${b[0] === 'Other brands' ? 'Other companies' + (b[8] ? ` (${fmt(b[8])})` : '') : esc(b[0])}</span>${bandless ? '' : `<span class="n sp">${pct(v, tot)}</span>`}<span class="tr">${byStations ? one(v, tipRow(b, v)) : b[3] == null ? one(b[2], b[0] + ' · ' + fmt(b[2]) + ' public charging piles') : [3, 4, 5, 6, 7].map((k, i) => on[i] ? `<div style="width:${(100 * b[k] / mx).toFixed(2)}%;background:${BAND_COL[i]}" title="${esc(tipSeg(b, k, i, v))}"></div>` : '').join('')}</span><span class="n">${fmt(v)}</span><span class="n m">${byStations ? fmt(b[2]) : b[1] == null ? '–' : fmt(b[1])}</span></div>`).join('') +
+    (bandless ? `<p class="ch-note">${esc(c.bnote || '')}</p>` : `<p class="ch-note">Companies are the network operators (who runs and bills the charger): the 40 largest by total ports; the long tail of small owners (hotels, councils, shops with a few chargers) is grouped as Other companies, with the count in brackets. A charger sitting in a Walmart, Couche-Tard or hotel car park shows under its operator (ChargePoint, Electrify America, Circuit électrique, Tesla…) unless the chain runs it itself; the colors show how many of each brand's ports sit in each selected power band (Level 2 and Slow are hidden until you add them). Share of ports at 50 kW or more: <b>${c.ocm.po ? Math.round(100 * (c.ocm.bands[2] + c.ocm.bands[3] + c.ocm.bands[4]) / c.ocm.po) : 0}%</b> (ultra-fast 150–349 kW: ${fmt(c.ocm.bands[3])} ports · mega-fast 350+ kW: ${fmt(c.ocm.bands[4])} ports). Hover a row or a colored segment for the details.</p>`) : bs.length ? `<p class="ch-note">${byStations ? 'No station count for this country.' : 'No company has ports at the selected speeds in this country.'}</p>` : '<p class="ch-note">No brand data for this country.</p>';
   const tb = c.tesla;
   document.getElementById('tesla-box').innerHTML = '<h3>Tesla Superchargers (supercharge.info)</h3>' + (tb ? `<div><b>${fmt(tb.sites)}</b> open sites · <b>${fmt(tb.stalls)}</b> stalls</div><div class="ch-note">Stalls by site power: ${CHARGING.meta.bands.map((b, i) => `<span style="white-space:nowrap"><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BAND_COL[i]};margin-right:3px"></i>${b} ${fmt(tb.b[i])}</span>`).join(' · ')}</div>` : '<div class="ch-note">No Supercharger listed.</div>');
   let ob = '<h3>Official counts</h3>';
@@ -808,6 +822,10 @@ function coTip(r, k){
   const list = Object.entries(w.c).filter(([iso, v]) => ISO_CONT[iso] === k && v[idx] != null).sort((x, y) => y[1][idx] - x[1][idx]);
   return `${r.b} in ${k}` + NL + `${fmt(r.per[k])} ${unit} = ${pct(r.per[k], r.tot)} of its ${fmt(r.tot)} ${unit} in the selected continents` + NL + `${list.length} ${list.length === 1 ? 'country' : 'countries'}: ` + list.slice(0, 4).map(([iso, v]) => `${NAME_OF[iso] || iso} ${fmt(v[idx])}`).join(' · ') + (list.length > 4 ? ' · …' : '');
 }
+function syncCountryMode(){      // a country picked above the map: its cards and "Who runs the chargers" replace the cross-country sections
+  const on = !!(ctryName && BY[ctryName]);
+  ['company-card', 'table-card', 'ratio-card'].forEach(id => { document.getElementById(id).style.display = on ? 'none' : ''; });
+}
 function renderCompanies(){
   const card = document.getElementById('company-card');
   card.style.display = ctryName && BY[ctryName] ? 'none' : '';      // with a country picked above the map, "Who runs the chargers" below it says more: the world ranking is hidden
@@ -834,7 +852,7 @@ function renderRatioCard(){
   renderRatio('rk-rows', 'rk-note', 'lg-rk', 'pop', ratioMode);
 }
 document.getElementById('rk-toggle').addEventListener('click', e => { const b = e.target.closest('button'); if(!b || b.dataset.m === ratioMode) return; ratioMode = b.dataset.m; renderRatioCard(); });
-function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); renderRatioCard(); renderCompanies(); }
+function refresh(){ syncControls(); renderStats(); renderMap(); renderTable(); renderBrands(); renderRatioCard(); renderCompanies(); syncCountryMode(); }
 selected = 'Norway'; refresh();
 })();
 </script>

@@ -129,6 +129,19 @@ def tesla():
     return by, pts
 
 
+BRAND_ROWS = 40     # companies listed per country; the long tail of small owners (hotels, councils, shops) is one "Other brands" row
+
+
+def fold_brands(brands):
+    """[name, stations, ports, 5 speed bands] for the BRAND_ROWS largest companies by ports, then 'Other brands' = the rest, with how many companies and the largest four names"""
+    top = sorted(brands.items(), key=lambda kv: -kv[1][1])
+    out = [[k] + [round(x) for x in v] for k, v in top[:BRAND_ROWS]]
+    rest = top[BRAND_ROWS:]
+    if rest:
+        out.append(['Other brands'] + [round(sum(v[i] for _, v in rest)) for i in range(7)] + [len(rest), [k for k, _ in rest[:4]]])
+    return out
+
+
 def ocm_country(iso, ops, usage):
     f = os.path.join(CACHE, 'ocm', iso + '.json')
     if not os.path.exists(f):
@@ -177,12 +190,7 @@ def ocm_country(iso, ops, usage):
             cells[k][0] += 1
             cells[k][1] += n
             cells[k][2] += sum(alloc[2:])
-    top = sorted(brands.items(), key=lambda kv: -kv[1][1])
-    keep = [(k, v) for k, v in top[:14]]
-    rest = [v for k, v in top[14:]]
-    out = [[k] + [round(x) for x in v] for k, v in keep]
-    if rest:
-        out.append(['Other brands'] + [round(sum(v[i] for v in rest)) for i in range(7)])
+    out = fold_brands(brands)
     return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out, 'fs': [fst, round(fpo)], 'mix': mix}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}
 
 
@@ -197,13 +205,17 @@ NOBIL_ALIASES = [
 _LEGAL = re.compile(r'\b(as|asa|ab|aps|a/s|oy|oyj|ltd|gmbh)\b\.?|\b(norge|norway|sverige|sweden|nordic|global|mobility)\b', re.I)
 
 
+_CANON = {}
+
+
 def brand_nobil(op):
     t = norm(re.sub(r'\s+', ' ', op or ''))
     for rx, name in NOBIL_ALIASES:
         if re.search(rx, t):
             return name
     t = re.sub(r'\s+', ' ', _LEGAL.sub(' ', op or '')).strip(' -,')
-    return brand_of(t) if t else UNKNOWN
+    name = brand_of(t) if t else UNKNOWN
+    return _CANON.setdefault(name.lower(), name)       # "Stavanger Parkering" and "Stavanger parkering" are one company
 
 
 def nobil_country(iso):
@@ -241,12 +253,7 @@ def nobil_country(iso):
         cells[k][0] += 1
         cells[k][1] += n
         cells[k][2] += sum(alloc[2:])
-    top = sorted(brands.items(), key=lambda kv: -kv[1][1])
-    keep = top[:14]
-    rest = [v for k, v in top[14:]]
-    out = [[k] + [round(x) for x in v] for k, v in keep]
-    if rest:
-        out.append(['Other brands'] + [round(sum(v[i] for v in rest)) for i in range(7)])
+    out = fold_brands(brands)
     return {'st': st, 'po': round(po), 'bands': [round(x) for x in bands], 'brands': out, 'fs': [fst, round(fpo)], 'mix': mix}, cells, {k: [v[0], round(v[1])] for k, v in brands.items()}, sts
 
 
