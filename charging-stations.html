@@ -28,7 +28,15 @@
   .ch-metrics .mode-btn:hover{ transform:translateY(-2px); color:var(--text); box-shadow:0 6px 14px rgba(27,31,59,.1); }
   .ch-metrics .mode-btn.active{ background:linear-gradient(135deg,var(--ch-a),var(--ch-b)); border-color:transparent; color:#fff; box-shadow:0 8px 18px rgba(14,165,164,.35); }
   .ch-metrics .mode-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
-  .ch-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:6px 0 18px; }
+  .ch-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:0; }
+  .ch-stats.six{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  @media (max-width:760px){ .ch-stats, .ch-stats.six{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .ch-stat .rk{ margin-top:8px; padding-top:7px; border-top:1px dashed var(--border); font-size:11.5px; line-height:1.45; color:var(--text); }
+  .ch-stat .rk b{ font-weight:800; }
+  .ch-stat .rk .rn{ font-size:13px; }
+  .ch-stat .rk .lead{ color:var(--text-muted); font-weight:500; }
+  .ch-stat .rk .rl{ display:flex; justify-content:space-between; gap:8px; }
+  .ch-stat .rk .rl span:first-child{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ch-stat{ padding:14px 16px; border-radius:16px; background:var(--surface); border:1px solid var(--border); border-left:5px solid var(--ch-a); }
   .ch-stat .l{ font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
   .ch-stat .v{ font-size:25px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; margin:3px 0 1px; }
@@ -191,8 +199,6 @@
         </div>
       </div>
 
-      <div class="ch-stats" id="ch-stats"></div>
-
       <div class="ch-metrics" id="metric-btns" role="group" aria-label="Metric"></div>
 
       <div class="card chart-card" id="map-card">
@@ -227,6 +233,8 @@
         </div>
         <div class="ch-sum" id="brand-sum" style="display:none"></div>
       </div>
+
+      <div class="ch-stats" id="ch-stats"></div>
 
       <div class="card chart-card" id="brand-card">
         <h2>Who runs the chargers: companies and speeds</h2>
@@ -391,20 +399,54 @@ mb.addEventListener('click', e => {
 document.getElementById('scope-seg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; scope = b.dataset.scope; refresh(); });
 
 // ---------- headline cards ----------
+// ---------- stat cards (under the map): the countries shown (world view) or the country picked on the map ----------
+const CARD_METRICS = { points:METRICS.points, fast:METRICS.fast, ultra:METRICS.ultra, fast100k:METRICS.fast100k, fastEV:METRICS.fastEV,
+  ultraEV:{ years:['2024', '2025'], dec:1, get:(c, y) => { const a = pts(c, y), e = evs(c, y); return a && e ? (a[2] || 0) / e * 1000 : null; } } };
+const metricYear = (m, y) => m.years && !m.years.includes(y) ? LATEST : y;
+const shortN = (v, dec) => v == null ? '–' : dec ? f1(v) : v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e4 ? Math.round(v / 1e3) + ' k' : fmt(v);
+const SCOPE_LABEL = { all:'All 58', top30:'Top 30 by EV fleet', iea:'With IEA data' };
+function rankIn(mkey, c, y){      // rank among the countries of the chosen scope that have data (the picked country is added when it is outside the scope)
+  const m = CARD_METRICS[mkey], yy = metricYear(m, y);
+  const list = CHARGING.countries.filter(x => x === c || inScope(x)).map(x => ({ x, v:m.get(x, yy) })).filter(r => r.v != null && r.v > 0).sort((p, q) => q.v - p.v);
+  const i = c ? list.findIndex(r => r.x === c) : -1;
+  return { rank:i < 0 ? null : i + 1, n:list.length, list, yy };
+}
 function renderStats(){
+  const el = document.getElementById('ch-stats');
+  const pick = ctryName && BY[ctryName] ? BY[ctryName] : null;
+  const prevY = year === '2019' ? null : YEARS[YEARS.indexOf(year) - 1];
+  const st = (tip, l, v, sub, rk) => `<div class="ch-stat" title="${esc(tip)}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${sub}</div><div class="rk">${rk}</div></div>`;
+  const tipScope = `Ranked among the countries of the chosen scope (${SCOPE_LABEL[scope]}) that have data for this figure.`;
+  if(pick){
+    const c = pick, t = total(c, year), a = pts(c, year), fa = fast50(c, year), ul = a ? a[2] || 0 : null;
+    const ye = metricYear(CARD_METRICS.fastEV, year), e = evs(c, ye), fe = CARD_METRICS.fastEV.get(c, ye), ue = CARD_METRICS.ultraEV.get(c, ye);
+    const yTag = ye !== year ? ` · ${ye}` : '';
+    const rank = mkey => { const r = rankIn(mkey, c, year), m = CARD_METRICS[mkey], lead = r.list[0];
+      return (r.rank ? `<span class="rn"><b>#${r.rank}</b> of ${r.n}</span>` : '<span class="lead">not ranked: no data</span>') + (lead && lead.x !== c ? `<div class="lead">${esc(lead.x.n)} leads: ${shortN(lead.v, m.dec)}</div>` : lead ? '<div class="lead">the leader</div>' : ''); };
+    const prev = prevY ? total(c, prevY) : null;
+    el.innerHTML =
+      st(`Public charging ports in ${c.n} (IEA), every speed. ${tipScope}`, `Public ports · ${year}`, fmt(t), prev && t ? `${(100 * (t / prev - 1)).toFixed(0)}% vs ${prevY}` : 'IEA public ports', rank('points')) +
+      st(`Ports of 50 kW and more in ${c.n}: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated). ${tipScope}`, 'Fast ports (50+ kW)', fmt(fa), t && fa != null ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '', rank('fast')) +
+      st(`Ports above 150 kW in ${c.n} (IEA ultra-fast class). ${tipScope}`, 'Ultra-fast (150+ kW)', fmt(ul), t && ul != null ? `${(100 * ul / t).toFixed(1)}% of all ports` : '', rank('ultra')) +
+      st(`Fast ports (50+ kW) per 100,000 people aged 15–64 in ${c.n}. ${tipScope}`, 'Fast ports per 100k aged 15–64', f1(CARD_METRICS.fast100k.get(c, year)), `all ports: ${c.w && t != null ? f1(t / c.w * 1e5) : '–'} per 100k`, rank('fast100k')) +
+      st(`Fast ports (50+ kW) per 1,000 electric cars (battery-electric + plug-in hybrid, IEA stock, 2024 and 2025 only) in ${c.n}. ${tipScope}`, `Fast ports per 1,000 EVs${yTag}`, f1(fe), e ? `${fmt(e)} electric cars on the road` : 'no EV stock figure', rank('fastEV')) +
+      st(`Ultra-fast ports (150+ kW) per 1,000 electric cars (battery-electric + plug-in hybrid, IEA stock, 2024 and 2025 only) in ${c.n}. ${tipScope}`, `Ultra-fast ports per 1,000 EVs${yTag}`, f1(ue), e && ul != null ? `${fmt(ul)} ultra-fast ports for ${fmt(e)} EVs` : 'no EV stock figure', rank('ultraEV'));
+    el.classList.add('six');
+    return;
+  }
+  el.classList.remove('six');
   const cs = CHARGING.countries.filter(inScope);
-  const sum = f => cs.reduce((s, c) => s + (f(c) || 0), 0);
+  const sum = f => cs.reduce((x, c) => x + (f(c) || 0), 0);
   const t = sum(c => total(c, year)), fa = sum(c => fast50(c, year) || 0), ul = sum(c => { const a = pts(c, year); return a ? a[2] || 0 : 0; });
   const withData = cs.filter(c => total(c, year) != null).length;
-  const prevY = year === '2019' ? null : YEARS[YEARS.indexOf(year) - 1];
-  const tp = prevY ? cs.reduce((s, c) => s + (total(c, prevY) || 0), 0) : null;
-  const w = cs.reduce((s, c) => s + (total(c, year) != null ? c.w || 0 : 0), 0);
-  const st = (x, l, v, s) => `<div class="ch-stat"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
-  document.getElementById('ch-stats').innerHTML =
-    st(0, `Public ports · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`) +
-    st(0, 'Fast ports (50+ kW)', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '') +
-    st(0, 'Ultra-fast (150+ kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all ports` : '') +
-    st(0, 'Fast ports (50+ kW) per 100k aged 15–64', w ? f1(fa / w * 1e5) : '–', `all ports: ${w ? f1(t / w * 1e5) : '–'} per 100k · average of the countries shown`);
+  const tp = prevY ? cs.reduce((x, c) => x + (total(c, prevY) || 0), 0) : null;
+  const w = cs.reduce((x, c) => x + (total(c, year) != null ? c.w || 0 : 0), 0);
+  const top = mkey => { const r = rankIn(mkey, null, year), m = CARD_METRICS[mkey]; return '<div class="lead">Top countries</div>' + r.list.slice(0, 3).map((x, i) => `<div class="rl"><span><b>${i + 1}</b> ${esc(x.x.n)}</span><span>${shortN(x.v, m.dec)}</span></div>`).join(''); };
+  el.innerHTML =
+    st(`Public charging ports of the ${withData} countries with IEA data in the chosen scope, every speed. Pick a country on the map for its own cards. ${tipScope}`, `Public ports · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`, top('points')) +
+    st('Ports of 50 kW and more: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated from Open Charge Map connector shares). ' + tipScope, 'Fast ports (50+ kW)', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '', top('fast')) +
+    st('Ports above 150 kW (IEA ultra-fast class). ' + tipScope, 'Ultra-fast (150+ kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all ports` : '', top('ultra')) +
+    st('Fast ports (50+ kW) divided by the working-age population (15–64) of the countries with data: the average, then the countries with the most. ' + tipScope, 'Fast ports (50+ kW) per 100k aged 15–64', w ? f1(fa / w * 1e5) : '–', `all ports: ${w ? f1(t / w * 1e5) : '–'} per 100k · average of the countries shown`, top('fast100k'));
 }
 
 // ---------- map ----------
@@ -581,7 +623,7 @@ let applyList = () => {};
     ctryName = cs.value || null; buildCtry(ctryName); applyTeslaFilter();
     for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
     if(ctryName && BY[ctryName]){ selected = ctryName; renderTable(); renderBrands(); }
-    applyList(); renderCompanies(); summarize(); scheduleBrand();
+    applyList(); renderCompanies(); renderStats(); summarize(); scheduleBrand();
     if(ctryBox) fitBox(ctryBox[0], ctryBox[1], ctryBox[2], ctryBox[3], 200); else svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
   };
   const list = document.getElementById('bm-list'), panel = document.getElementById('bm-panel'), q = document.getElementById('bm-q');
