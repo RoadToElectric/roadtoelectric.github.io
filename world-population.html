@@ -65,6 +65,13 @@
   .wp-chart text{ fill:var(--text-muted); font-size:11px; }
   .wp-chart .domain, .wp-chart .tick line{ stroke:var(--border); }
   .wp-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
+  .wp-pop{ position:fixed; z-index:600; width:372px; max-width:92vw; padding:12px 14px 10px; border-radius:14px; background:var(--surface); color:var(--text); border:1px solid var(--border); box-shadow:0 16px 44px rgba(0,16,40,.30); pointer-events:none; opacity:0; transform:translateY(4px); transition:opacity .12s, transform .12s; font-size:12px; }
+  .wp-pop.on{ opacity:1; transform:none; }
+  .wp-pop h4{ margin:0 0 4px; font-size:13.5px; font-weight:800; }
+  .wp-pop svg{ display:block; width:100%; height:auto; }
+  .wp-pop .lg{ display:flex; flex-wrap:wrap; gap:3px 12px; margin-top:5px; font-size:11px; color:var(--text-muted); }
+  .wp-pop .lg i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; }
+  .wp-pop .gx{ margin-top:6px; line-height:1.5; }
   .wp-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.45; min-width:200px; transition:opacity .1s; }
   .wp-tip b{ font-weight:800; }
   .wp-tip .r{ display:flex; justify-content:space-between; gap:14px; }
@@ -519,13 +526,42 @@ async function renderExact(){
 }
 
 // ---------- shared: ranked bar rows ----------
-function barRows(el, rows, { value, label, sub, color, max, rankOf, click, selId, delta }){
+// ---------- hover window: population since 1990, one bar per 5 years (now in its own colour, UN projection to 2050 in a third) ----------
+const NOW = Math.min(Y1, new Date().getFullYear());
+const POP_COL = { past: '#0a80d0', now: '#f59e0b', proj: '#a855f7' };
+const popEl = Object.assign(document.createElement('div'), { className: 'wp-pop', role: 'tooltip' }); document.body.appendChild(popEl);
+let popTimer = null;
+function popHtml(l, key){
+  const ys = [...new Set(d3.range(1990, 2051, 5).concat(NOW))].sort((a, b) => a - b), ser = S(l, key), vs = ys.map(y => ser[yi(y)]), iN = ys.indexOf(NOW);
+  const mx = d3.max(vs) || 1, W = 344, H = 138, m = { t: 15, b: 18, l: 2, r: 2 }, bw = (W - m.l - m.r) / ys.length, col = y => y === NOW ? POP_COL.now : y > NOW ? POP_COL.proj : POP_COL.past;
+  const bars = ys.map((y, i) => {
+    const x = m.l + i * bw, hh = (H - m.t - m.b) * vs[i] / mx, top = H - m.b - hh, last = i === ys.length - 1;
+    const lab = (i === 0 || y === NOW || last) ? `<text x="${(i === 0 ? x : last ? x + bw : x + bw / 2).toFixed(1)}" y="${(top - 3).toFixed(1)}" text-anchor="${i === 0 ? 'start' : last ? 'end' : 'middle'}" font-size="9.5" font-weight="800" fill="currentColor">${fmtN(vs[i])}</text>` : '';
+    return `<rect x="${(x + 1.5).toFixed(1)}" y="${top.toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${Math.max(0.5, hh).toFixed(1)}" rx="2" fill="${col(y)}"/>${lab}<text x="${(x + bw / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="8.5" fill="var(--text-muted)">${y === NOW ? 'now' : "'" + String(y).slice(2)}</text>`;
+  }).join('');
+  const pc = (a, b) => a > 0 ? (b / a - 1) * 100 : null, fp = v => v == null ? '–' : (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 1) + '%';
+  const v90 = vs[0], vN = vs[iN], v50 = vs[vs.length - 1];
+  const what = key === 'total' ? 'population' : MEASURE_LABEL[key];
+  return `<h4>${l.n} · ${what}</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${l.n}: ${what} every 5 years from 1990 to 2050">${bars}</svg>` +
+    `<div class="lg"><span><i style="background:${POP_COL.past}"></i>1990–${ys[iN - 1] || 1990}</span><span><i style="background:${POP_COL.now}"></i>now (${NOW})</span><span><i style="background:${POP_COL.proj}"></i>UN projection ${ys[iN + 1] || ''}–2050</span></div>` +
+    `<div class="gx">Since 1990: <b>${fp(pc(v90, vN))}</b> (${fmtN(v90)} → ${fmtN(vN)})<br>${NOW} → 2050: <b>${fp(pc(vN, v50))}</b> (→ ${fmtN(v50)})</div>`;
+}
+function placePop(ev){ const w = popEl.offsetWidth || 372, h = popEl.offsetHeight || 230; let x = ev.clientX + 18, y = ev.clientY - h / 2; if (x + w > innerWidth - 8) x = ev.clientX - w - 18; popEl.style.left = Math.max(8, x) + 'px'; popEl.style.top = Math.max(8, Math.min(innerHeight - h - 8, y)) + 'px'; }
+function hidePop(){ clearTimeout(popTimer); popEl.classList.remove('on'); }
+window.addEventListener('scroll', hidePop, { passive: true });
+function barRows(el, rows, { value, label, sub, color, max, rankOf, click, selId, delta, hover }){
   el.innerHTML = rows.map((r, i) => `<div class="wp-brow${click ? ' click' : ''}${selId === r.l.id ? ' sel' : ''}" data-id="${r.l.id}">
       <span class="rk">${rankOf ? rankOf(r, i) : i + 1}</span>
       <span class="n">${flag(r.l)}<span style="overflow:hidden;text-overflow:ellipsis">${r.l.n}</span></span>
       <span class="t"><i style="width:${Math.max(0.6, Math.abs(r.bar) / max * 100)}%;background:${typeof color === 'function' ? color(r) : color}"></i></span>
       <span class="v">${label(r)}<em>${sub ? sub(r) : ''}</em>${delta ? delta(r) : ''}</span></div>`).join('') || '<div class="wp-load">Nothing to show for these filters.</div>';
   if (click) el.querySelectorAll('.wp-brow').forEach(b => b.addEventListener('click', () => click(+b.dataset.id)));
+  if (hover) el.querySelectorAll('.wp-brow').forEach(b => {      // mouse only: a window with the population since 1990 and the UN projection
+    const l = L.get(+b.dataset.id);
+    b.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'mouse') return; clearTimeout(popTimer); popTimer = setTimeout(() => { popEl.innerHTML = popHtml(l, hover()); popEl.classList.add('on'); placePop(ev); }, 110); });
+    b.addEventListener('pointermove', ev => { if (ev.pointerType === 'mouse' && popEl.classList.contains('on')) placePop(ev); });
+    b.addEventListener('pointerleave', hidePop);
+  });
 }
 function syncMore(id, all, total, n){ const b = $(id); if (!b) return; b.style.display = total > n ? '' : 'none'; b.textContent = all ? `Shrink to ${n}` : `Show all ${total}`; b.setAttribute('aria-expanded', all); }
 const periodOpts = (sel, from, to, val) => { sel.innerHTML = d3.range(from, to + 1).map(y => `<option value="${y}"${y === val ? ' selected' : ''}>${y}${y >= PROJ ? ' (proj.)' : ''}</option>`).join(''); };
@@ -552,7 +588,7 @@ function renderGrowth(){
   const nAll = rows.length; if (!G.all) rows = rows.slice(0, G.n); syncMore('gr-more', G.all, nAll, G.n);
   const max = d3.max(rows, r => Math.abs(r.bar)) || 1;
   const yrs = G.to - G.from, avg = r => r.a > 0 ? (Math.pow(r.b / r.a, 1 / yrs) - 1) * 100 : 0;
-  barRows($('gr-bars'), rows, { max, click: openAge, selId: st.loc, color: r => r.bar >= 0 ? 'var(--wp-up)' : 'var(--wp-dn)',
+  barRows($('gr-bars'), rows, { max, click: openAge, selId: st.loc, hover: () => G.group, color: r => r.bar >= 0 ? 'var(--wp-up)' : 'var(--wp-dn)',
     label: r => pct ? fmtP(r.p) : fmtS(r.d), sub: r => `${fmtN(r.a)} → ${fmtN(r.b)}`, delta: r => `<span class="d ${avg(r) >= 0 ? 'wp-up' : 'wp-dn'}">${fmtP(avg(r), 2)}/yr</span>` });
   const scopeName = { country: 'countries and areas', sub: 'subregions', region: 'regions' }[G.scope];
   $('gr-note').innerHTML = `${up ? 'Biggest gains' : 'Biggest losses'} in the number of <b>${MEASURE_LABEL[G.group]}</b>, ${pct ? 'as a percentage of' : 'in people, from'} ${G.from} to ${G.to}${G.to >= PROJ ? ' (the end year is a UN projection)' : ''} — ${scopeName}.` +
@@ -591,7 +627,7 @@ function renderRank(){
   const rows = COUNTRIES.map(l => ({ l, v: rv(l, y), n: S(l, R.measure)[y], r: rk.get(l.id)[y], r0: rk.get(l.id)[yi(cmpYear)] })).filter(r => r.r > 0).sort((a, b) => a.r - b.r);
   const nAll = rows.length; if (!R.all) rows.length = Math.min(rows.length, R.n); syncMore('rk-more', R.all, nAll, R.n);
   rows.forEach(r => r.bar = r.v);
-  barRows($('rk-bars'), rows, { max: rows[0].v, click: id => addHist(id), color: r => R.hist.includes(r.l.id) ? 'var(--accent-2)' : 'var(--accent)',
+  barRows($('rk-bars'), rows, { max: rows[0].v, hover: () => R.measure, click: id => addHist(id), color: r => R.hist.includes(r.l.id) ? 'var(--accent-2)' : 'var(--accent)',
     label: r => pc ? fmtPct(r.v) : fmtN(r.v), sub: r => pc ? `${fmtN(r.n)} ${unit}` : `${(r.v / WORLD_VAL() * 100).toFixed(1)}% of world`,
     delta: r => { if (!r.r0) return `<span class="d wp-flat">new in the ranking vs ${cmpYear}</span>`; const d = r.r0 - r.r; return `<span class="d ${d > 0 ? 'wp-up' : d < 0 ? 'wp-dn' : 'wp-flat'}">${d > 0 ? '▲ ' + d : d < 0 ? '▼ ' + (-d) : '= '} vs ${cmpYear}</span>`; } });
   $('rk-yl').textContent = R.year; $('rk-fsum').textContent = `${R.year}${R.year >= PROJ ? ' (proj.)' : ''} · ${MEASURE_LABEL[R.measure]}${pc ? ' · % of population' : ''}`;
@@ -672,7 +708,7 @@ function gainCard(p, cfg){
       ? (s.measure === 'ent' ? `net ${fmtS(r.d)} · ${fmtN(r.lost)} lost` : s.measure === 'out' ? `${fmtN(r.out)} reach ${s.stop} · ${fmtN(r.died)} deaths and net migration` : `${fmtN(r.a)} → ${fmtN(r.b)} · +${fmtN(r.ent)} new · −${fmtN(r.lost)} lost`)
       : s.measure === 'ent' ? `net ${fmtS(r.d)}` : `${fmtN(r.a)} → ${fmtN(r.b)}${cfg.entrants && r.ent !== null && s.measure !== 'ent' ? ` · ${fmtN(r.ent)} reach ${s.age}` : ''}`;
     const col = r => (s.measure === 'out' ? 'var(--wp-dn)' : val(r) >= 0 ? cfg.color : 'var(--wp-dn)');
-    const mk = (rows, id, click) => { const max = d3.max(rows, r => Math.abs(val(r))) || 1; rows.forEach(r => r.bar = val(r)); barRows(el(id), rows, { max, color: col, label, sub, click }); };
+    const mk = (rows, id, click) => { const max = d3.max(rows, r => Math.abs(val(r))) || 1; rows.forEach(r => r.bar = val(r)); barRows(el(id), rows, { max, color: col, label, sub, click, hover: cfg.hover }); };
     mk(regs, 'reg'); mk(ctys, 'cty', openAge);
     const topC = [...COUNTRIES.map(compute)].sort((a, b) => b.d - a.d), topR = [...REGIONS.map(compute)].sort((a, b) => b.d - a.d)[0];
     const top10 = d3.sum(topC.slice(0, 10), r => r.d);
@@ -701,7 +737,7 @@ function gainCard(p, cfg){
 }
 const DR = gainCard('dr', { age: 18, stop: 80, color: 'var(--wp-w)', entrants: true, what: s => `people aged ${s.age}–${s.stop - 1} (potential drivers)`,
   note: (s, end) => `Potential drivers = people aged <b>${s.age} to ${s.stop - 1}</b> in ${s.base} and in <b>${end}</b>${end >= PROJ ? ' (UN projection)' : ''}. <b>New drivers</b> are everyone who turns ${s.age} during those ${s.x} years. <b>Drivers lost</b> are the people who reach ${s.stop} (assumed to stop driving) plus those who die — or leave the country, net of newcomers — while aged ${s.age}–${s.stop - 1}. <b>Net gain = new drivers − drivers lost</b>, the change in the pool. Slide <b>Start driving at</b> and <b>Stop driving at</b> to change when people enter and leave the driving market. The pool is an upper bound: it counts who is old enough, not who holds a licence. Click a country to open its age structure.` });
-const OLD = gainCard('old', { age: 80, color: 'var(--wp-o)', entrants: false, what: s => `people aged ${s.age}+`,
+const OLD = gainCard('old', { age: 80, hover: () => 'ge80', color: 'var(--wp-o)', entrants: false, what: s => `people aged ${s.age}+`,
   note: (s, end) => `People aged <b>${s.age} or more</b> in ${s.base} and in <b>${end}</b>${end >= PROJ ? ' (UN projection)' : ''}. Very old drivers are a small and declining part of the driving market, but the over-80s are where ageing societies grow fastest — and where mobility and licence rules change. Click a country to open its age structure.` });
 
 // ---------- hero + insights ----------
