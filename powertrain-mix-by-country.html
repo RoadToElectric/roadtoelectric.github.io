@@ -3669,20 +3669,22 @@ function computeGlobalMaxBevPct(){
   });
   return max || 1;
 }
+// BEV share -> shade of green. Many countries sit below 40% and few above 60%, so the ramp is stretched: 0-40% gets about four fifths of the shades (one step every 5 to 10 points), 40-60% a little, 60-100% almost none.
+const BEV_STOPS = [0, 5, 10, 20, 30, 40, 60, 100], BEV_T = [0, .22, .38, .55, .68, .78, .90, 1];
+const BEV_RAMP = ['#EEF6E2', '#CFE8B4', '#A6D486', '#7BBF5C', '#4DA544', '#2A8636', '#156A2C', '#0C4A22', '#0A3216'];
 function makeColorScale(){
   if(GLOBAL_MAX_BEV_PCT === null) GLOBAL_MAX_BEV_PCT = computeGlobalMaxBevPct();
-  return d3.scaleSequential().domain([0, GLOBAL_MAX_BEV_PCT]).interpolator(d3.interpolate("#EAF3DE", "#173404"));
+  const t = d3.scaleLinear().domain(BEV_STOPS).range(BEV_T).clamp(true), ramp = d3.piecewise(d3.interpolateRgb, BEV_RAMP);
+  const f = pct => ramp(t(pct)); f.domain = () => [0, 100];
+  return f;
 }
 let colorScale = null;
 
 function renderLegend(){
-  const maxPct = colorScale ? colorScale.domain()[1] : 0;
-  const steps = 6;
   document.getElementById('map-legend').innerHTML = `
-    <div class="legend-label">BEV share</div>
+    <div class="legend-label" title="The shades are stretched below 40%, where most countries are, and close together above 60%">BEV share</div>
     <div class="legend-scale">
-      ${Array.from({length:steps}, (_,i) => {
-        const v = maxPct * i / (steps-1);
+      ${BEV_STOPS.map(v => {
         return `<div class="legend-step">
           <div class="legend-swatch" style="background:${colorScale(v)}"></div>
           <div class="legend-num">${v.toFixed(0)}%</div>
