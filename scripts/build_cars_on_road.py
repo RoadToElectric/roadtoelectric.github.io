@@ -21,6 +21,8 @@ Method (v2, 2026-10-16)
      whose growth rate is calibrated on 2024->2026, borrowed from a regional comparator (Germany: Europe/Middle East;
      China: everything else) when the own base is < 15% and the own rate is higher, floored at 0 and decayed with a
      6-year half-life.
+     New registrations are capped at the anchor-year market size (fix 2026-11-05: e.g. Finland needed 184K replacements a year
+     against a 76K market); the rest of what the fleet needs to stay constant (used imports) enters as non-BEV (futureOtherInflow).
 Usage: python scripts/build_cars_on_road.py [--write]   (default: dry run, prints a summary)
 """
 import json, math, re, sys
@@ -180,14 +182,17 @@ def build(first_model=FIRST):
         else: g = g_own
         g = max(g, 0.0)
         share = min(max(s0 or 0.0, 1e-6), 0.99)
-        newreg, bev_new = {}, {}
+        newreg, bev_new, inflow = {}, {}, {}
         Rb = {y: bev.get(y, 0.0) for y in range(1980, T + 1)}
+        cap = tot[T]           # new registrations can never exceed the market size of the anchor year
         for Y in range(T + 1, END + 1):
             k = Y - T
             o = odds(share) * math.exp(g * 0.5 ** (k / 6))
             share = min(o / (1 + o), 0.995)
-            e_tot = F * sum(tot[cc] * S(Y - cc) for cc in range(1980, T + 1)) + sum(newreg[cc] * S(Y - cc) for cc in range(T + 1, Y))
-            N = max(total_T - e_tot, 0.0)
+            e_tot = F * sum(tot[cc] * S(Y - cc) for cc in range(1980, T + 1)) + sum(inflow[cc] * S(Y - cc) for cc in range(T + 1, Y))
+            need = max(total_T - e_tot, 0.0)     # cars that must join the fleet this year to keep it constant
+            N = min(need, cap)                   # of which new registrations (the BEV share applies to these only)
+            inflow[Y] = need                     # the remainder (used imports, re-registrations) is non-BEV
             newreg[Y] = N; bev_new[Y] = N * share
             b_Y = Fb * sum(Rb[cc] * S(Y - cc) for cc in range(1980, T + 1)) + sum(bev_new[cc] * S(Y - cc) for cc in range(T + 1, Y + 1))
             b_Y = min(b_Y, total_T)
@@ -195,7 +200,9 @@ def build(first_model=FIRST):
         rows[c] = []
         for y in sorted(res):
             d = dict(year=y, bev=round(res[y][0]), nonBev=round(res[y][1]), method=res[y][2])
-            if y in newreg: d['futureNewRegProj'] = round(newreg[y])
+            if y in newreg:
+                d['futureNewRegProj'] = round(newreg[y])
+                if inflow[y] - newreg[y] > 0.5: d['futureOtherInflow'] = round(inflow[y] - newreg[y])
             rows[c].append(d)
         info[c] = dict(curve=key, anchored=bool(anc), anchor_years=[min(anc), max(anc)] if anc else None, T=T,
                        g=round(g, 3), g_own=None if g_own is None else round(g_own, 3), share0=None if s0 is None else round(s0, 3),
@@ -230,7 +237,7 @@ def notes_for(c, i, method):
     if method == 'REAL': return base + ' Real fleet count (see asset header).'
     if method.startswith('MODEL_ANCHORED'): return base + ' Model scaled to real fleet counts (%s-%s).' % tuple(i['anchor_years'])
     if method == 'MODEL_RAW': return base + ' No real fleet count found: pure model with estimated pre-2005 cohorts (typical error +/-20%).'
-    return base + ' Total fleet held at its 2026 level; BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
+    return base + ' Total fleet held at its 2026 level (new registrations capped at the 2026 market, rest = non-BEV used inflow); BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
 
 
 METHODS = ['REAL', 'MODEL_ANCHORED_BACK', 'MODEL_ANCHORED', 'MODEL_RAW', 'MODEL_STOCK_CONSTANT_WITH_FUTURE_REG']
@@ -242,7 +249,7 @@ def country_note(c, i):
         s += ' Real fleet counts used where available (anchor years %s-%s; REAL rows%s), model scaled to them elsewhere.' % (tuple(i['anchor_years']) + ({'Finland': ', Statistics Finland / Traficom passenger cars IN TRAFFIC, not all registered', 'Iceland': ', Statistics Iceland passenger cars in traffic; 2023 BEV modelled because the national and Eurostat counts disagree'}.get(c, ''),))
     else:
         s += ' No real fleet count found: pure model with estimated pre-2005 cohorts (typical error +/-20%).'
-    s += ' 2027-2041: total held at the 2026 level, BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
+    s += ' 2027-2041: total held at the 2026 level, new registrations capped at the 2026 market (rest = non-BEV used inflow), BEV-share growth %.3f (own %s).' % (i['g'], i['g_own'])
     return s
 
 
