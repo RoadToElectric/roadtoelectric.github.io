@@ -40,6 +40,6 @@ def stations(code):
             lat, lon = (float(x) for x in re.findall(r'-?\d+\.?\d*', m['Position'])[:2])
         except Exception:
             continue
-        out.append({'id': m['id'], 'name': clean(m.get('name')), 'lat': lat, 'lon': lon, 'op': clean(m.get('Operator')) or clean(m.get('Owned_by')), 'owner': clean(m.get('Owned_by')),
+        out.append({'id': m['id'], 'created': (m.get('Created') or '')[:10], 'name': clean(m.get('name')), 'lat': lat, 'lon': lon, 'op': clean(m.get('Operator')) or clean(m.get('Owned_by')), 'owner': clean(m.get('Owned_by')),
                     'addr': clean(' '.join(str(m.get(k) or '') for k in ('Street', 'Description_of_location'))), 'kw': kws})
     return out

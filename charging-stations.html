@@ -31,6 +31,8 @@
   .ch-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:0; }
   .ch-stats.six{ grid-template-columns:repeat(3,minmax(0,1fr)); }
   @media (max-width:760px){ .ch-stats, .ch-stats.six{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  .ch-stat .ad{ margin-top:6px; font-size:11.5px; line-height:1.4; color:var(--accent-2); }
+  .ch-stat .ad b{ font-weight:800; }
   .ch-stat .rk{ margin-top:8px; padding-top:7px; border-top:1px dashed var(--border); font-size:11.5px; line-height:1.45; color:var(--text); }
   .ch-stat .rk b{ font-weight:800; }
   .ch-stat .rk .rn{ font-size:13px; }
@@ -293,6 +295,7 @@
             <li><strong>Speed bands</strong> of the brand card and station layers come from the power of each connector in Open Charge Map, or NOBIL for Norway and Sweden (&lt;12, 12–49, 50–149, 150–349, 350+ kW); ports of a station are spread over its connectors in proportion. Missing power counts as Level 2.</li>
             <li><strong>Operators read from station names.</strong> Open Charge Map's Nordic imports (Denmark, Finland, the Baltics…) keep the station name but not the operator, so most of those ports are "Unknown operator". Norway and Sweden no longer need this because NOBIL names the operator. For Denmark, Finland, the Baltics, Poland and Ireland, stations with no operator are attributed to a well-known fuel or charging brand when its name appears in the station name (Circle K, Uno-X, Esso, Shell, St1, Neste, Preem, OKQ8, Recharge, Fortum, IONITY…). This means <em>a charger on that brand's site</em>: it can include chargers run by a partner (a Circle K forecourt can also host Tesla and IONITY units) and it is a minimum, since many station names say nothing about the brand. Retail chains (Kiwi, Coop, Rema…) are not attributed.</li>
             <li><strong>Couche-Tard / Circle K</strong> is one company (Alimentation Couche-Tard: Circle K in the United States, Europe and Asia, Couche-Tard in Québec), so the two names are merged into one company. Its map layer shows every charger that sits on one of its sites, whoever runs it (the IONNA hubs at Circle K stations, for example): AFDC stations whose name says Circle K or Couche-Tard (any network), Open Charge Map and NOBIL operator and station names, and OpenStreetMap operator, brand and name tags (Overpass extract of 3 Nov 2026); a site found in several sources is counted once. That is why the layer can hold more sites than the company card, which attributes chargers mostly by operator.</li>
+            <li><strong>Fast ports added in the last 6 months</strong> (green line on the Fast ports card) are counted from the opening date of each site now in the files: Tesla Superchargers (supercharge.info, every country), the US and Canada (US DOE AFDC) and Norway (NOBIL registration date). Closed sites are not dated, so these are gross openings of sites still open. Other countries have no dated source here; the monthly snapshots saved in the database (table charging_fast_history) will give their 6-month change from about May 2027.</li>
             <li><strong>Tesla Superchargers</strong> come from supercharge.info (community database, open sites only); Tesla also appears in Open Charge Map under several operator names, so use the Tesla box for Tesla and ignore the Tesla line of the OCM list when they differ.</li>
             <li><strong>Public only.</strong> Every figure counts public chargers: the IEA's public ports, Open Charge Map without private or restricted sites, NOBIL's public and customer sites for Norway and Sweden, the US DOE and Canadian public counts. Home chargers and private workplace or fleet chargers are not included anywhere.</li>
             <li><strong>Ratios.</strong> The table and the two ranking charts use <em>fast</em> ports (50 kW and more): per 100,000 people aged 15–64 (working-age population of this site's Population &amp; Energy page, latest year applied to every year) and per 1,000 EVs (IEA EV stock, battery-electric + plug-in hybrid cars, 2024 and 2025 only). The same ratios for all ports, every speed, remain available as map metrics.</li>
@@ -314,6 +317,7 @@
 <script src="assets/charging-grid-data.js"></script>
 <script src="assets/charging-tesla-sites-data.js"></script>
 <script src="assets/charging-brand-index.js"></script>
+<script src="assets/charging-added-data.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
 (function(){
@@ -412,6 +416,20 @@ function rankIn(mkey, c, y){      // rank among the countries of the chosen scop
   const i = c ? list.findIndex(r => r.x === c) : -1;
   return { rank:i < 0 ? null : i + 1, n:list.length, list, yy };
 }
+function addedHtml(iso){      // fast ports (50+ kW) opened in the last 6 months, from the dated sources (scripts/charging/charging_history.py)
+  if(typeof CHARGING_ADDED === 'undefined') return '';
+  const A = CHARGING_ADDED, M = A.meta, parts = [], wins = [];
+  if(iso){
+    const all = A.all[iso], te = A.tesla[iso];
+    if(all){ parts.push(`<b>+${fmt(all.n)}</b> in the last 6 months (+${pct(all.n, all.base)}) · ${all.src}`); wins.push(`${all.src}: ${all.win[0]} to ${all.win[1]}`); }
+    if(te){ parts.push(`Tesla Superchargers <b>+${fmt(te[0])}</b> stalls (${fmt(te[1])} sites)`); wins.push(`Tesla (supercharge.info): ${M.tesla[0]} to ${M.tesla[1]}`); }
+    if(!parts.length) return '';
+  } else {
+    parts.push(`Tesla Superchargers alone: <b>+${fmt(A.teslaWorld[0])}</b> stalls in the last 6 months (${fmt(A.teslaWorld[1])} sites)`);
+    wins.push(`Tesla (supercharge.info): ${M.tesla[0]} to ${M.tesla[1]}`);
+  }
+  return `<div class="ad" title="${esc('Fast ports (50 kW and more) opened in the last 6 months. Window: ' + wins.join('; ') + '. ' + M.note + (iso ? '' : ' Other operators are not dated, so only Tesla is shown for the world; pick a country for more.'))}">${parts.join('<br>')}</div>`;
+}
 function renderStats(){
   const el = document.getElementById('ch-stats');
   const pick = ctryName && BY[ctryName] ? BY[ctryName] : null;
@@ -427,7 +445,7 @@ function renderStats(){
     const prev = prevY ? total(c, prevY) : null;
     el.innerHTML =
       st(`Public charging ports in ${c.n} (IEA), every speed. ${tipScope}`, `Public ports · ${year}`, fmt(t), prev && t ? `${(100 * (t / prev - 1)).toFixed(0)}% vs ${prevY}` : 'IEA public ports', rank('points')) +
-      st(`Ports of 50 kW and more in ${c.n}: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated). ${tipScope}`, 'Fast ports (50+ kW)', fmt(fa), t && fa != null ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '', rank('fast')) +
+      st(`Ports of 50 kW and more in ${c.n}: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated). ${tipScope}`, 'Fast ports (50+ kW)', fmt(fa), (t && fa != null ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '') + addedHtml(c.iso), rank('fast')) +
       st(`Ports above 150 kW in ${c.n} (IEA ultra-fast class). ${tipScope}`, 'Ultra-fast (150+ kW)', fmt(ul), t && ul != null ? `${(100 * ul / t).toFixed(1)}% of all ports` : '', rank('ultra')) +
       st(`Fast ports (50+ kW) per 100,000 people aged 15–64 in ${c.n}. ${tipScope}`, 'Fast ports per 100k aged 15–64', f1(CARD_METRICS.fast100k.get(c, year)), `all ports: ${c.w && t != null ? f1(t / c.w * 1e5) : '–'} per 100k`, rank('fast100k')) +
       st(`Fast ports (50+ kW) per 1,000 electric cars (battery-electric + plug-in hybrid, IEA stock, 2024 and 2025 only) in ${c.n}. ${tipScope}`, `Fast ports per 1,000 EVs${yTag}`, f1(fe), e ? `${fmt(e)} electric cars on the road` : 'no EV stock figure', rank('fastEV')) +
@@ -445,7 +463,7 @@ function renderStats(){
   const top = mkey => { const r = rankIn(mkey, null, year), m = CARD_METRICS[mkey]; return '<div class="lead">Top countries</div>' + r.list.slice(0, 3).map((x, i) => `<div class="rl"><span><b>${i + 1}</b> ${esc(x.x.n)}</span><span>${shortN(x.v, m.dec)}</span></div>`).join(''); };
   el.innerHTML =
     st(`Public charging ports of the ${withData} countries with IEA data in the chosen scope, every speed. Pick a country on the map for its own cards. ${tipScope}`, `Public ports · ${year}`, fmt(t), `${withData} countries with IEA data${tp ? ` · ${(100 * (t / tp - 1)).toFixed(0)}% vs ${prevY}` : ''}`, top('points')) +
-    st('Ports of 50 kW and more: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated from Open Charge Map connector shares). ' + tipScope, 'Fast ports (50+ kW)', fmt(fa), t ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '', top('fast')) +
+    st('Ports of 50 kW and more: IEA fast + ultra-fast with the 22–49 kW part taken out (estimated from Open Charge Map connector shares). ' + tipScope, 'Fast ports (50+ kW)', fmt(fa), (t ? `${(100 * fa / t).toFixed(0)}% of all ports · estimated` : '') + addedHtml(null), top('fast')) +
     st('Ports above 150 kW (IEA ultra-fast class). ' + tipScope, 'Ultra-fast (150+ kW)', fmt(ul), t ? `${(100 * ul / t).toFixed(1)}% of all ports` : '', top('ultra')) +
     st('Fast ports (50+ kW) divided by the working-age population (15–64) of the countries with data: the average, then the countries with the most. ' + tipScope, 'Fast ports (50+ kW) per 100k aged 15–64', w ? f1(fa / w * 1e5) : '–', `all ports: ${w ? f1(t / w * 1e5) : '–'} per 100k · average of the countries shown`, top('fast100k'));
 }
