@@ -221,6 +221,15 @@
         <div class="ch-sum" id="brand-sum" style="display:none"></div>
       </div>
 
+      <div class="card chart-card" id="company-card">
+        <h2 id="co-title">Charging companies, world view</h2>
+        <p class="note" style="display:block" id="co-intro"></p>
+        <div class="ch-row" style="margin:6px 0 8px"><div class="ch-label">Count</div><div class="ch-seg" id="co-metric"><button type="button" data-m="ports" class="active">Ports</button><button type="button" data-m="stations">Stations</button></div></div>
+        <div class="ch-legendbtns" id="lg-co"></div>
+        <div id="co-rows"></div>
+        <p class="ch-note" id="co-note"></p>
+      </div>
+
       <div class="card chart-card">
         <h2>Country table</h2>
         <p class="note" style="display:block" id="table-note"></p>
@@ -237,15 +246,6 @@
         <p class="note" style="display:block" id="rk-note"></p>
         <div class="ch-legendbtns" id="lg-rk"></div>
         <div id="rk-rows"></div>
-      </div>
-
-      <div class="card chart-card" id="company-card">
-        <h2>Charging companies, world view</h2>
-        <p class="note" style="display:block">The largest charging companies by ports in the 58 countries of this page, split by continent. Click a continent in the legend to take it in or out. China is counted from the EVCIPA operator ranking (public ports, July 2025); Tesla from supercharge.info; everywhere else from Open Charge Map, which is a partial sample outside the United States, Canada, Spain and a few other countries — read it as a ranking of what is mapped, not a census.</p>
-        <div class="ch-row" style="margin:6px 0 8px"><div class="ch-label">Count</div><div class="ch-seg" id="co-metric"><button type="button" data-m="ports" class="active">Ports</button><button type="button" data-m="stations">Stations</button></div></div>
-        <div class="ch-legendbtns" id="lg-co"></div>
-        <div id="co-rows"></div>
-        <p class="ch-note" id="co-note"></p>
       </div>
 
       <div class="card chart-card" id="brand-card">
@@ -530,14 +530,17 @@ function summarize(){
   const el = document.getElementById('brand-sum'), btn = document.getElementById('bm-btn');
   btn.textContent = selBrands.size ? `Companies: ${selBrands.size} selected ▾` : 'Companies: none ▾'; btn.classList.toggle('on', selBrands.size > 0);
   if(!selBrands.size){ el.style.display = 'none'; return; }
-  let ts = 0, tp = 0; const parts = [];
+  let ts = 0, tp = 0, shown = 0, loading = 0; const parts = [];
   for(const name of selBrands){
     const d = brandData[name];
-    if(!d || !d.vis){ parts.push(`<span><i style="background:${brandCol(name)}"></i>${esc(name)}: loading…</span>`); continue; }
-    const ports = d.vis.reduce((x, q) => x + q[2], 0); ts += d.vis.length; tp += ports;
+    if(!d || !d.vis){ loading++; parts.push(`<span><i style="background:${brandCol(name)}"></i>${esc(name)}: loading…</span>`); continue; }
+    if(!d.vis.length) continue;                      // no site in the picked country: not listed
+    const ports = d.vis.reduce((x, q) => x + q[2], 0); ts += d.vis.length; tp += ports; shown++;
     parts.push(`<span><i style="background:${d.col}"></i><b>${esc(name)}</b> ${fmt(d.vis.length)} sites · ${fmt(ports)} ports</span>`);
   }
-  if(selBrands.size > 1) parts.push(`<span><b>Total</b> ${fmt(ts)} sites · ${fmt(tp)} ports</span>`);
+  if(ctryName && !loading) btn.textContent = `Companies: ${shown} with sites in ${ctryName} ▾`;
+  if(shown > 1) parts.push(`<span><b>Total</b> ${fmt(ts)} sites · ${fmt(tp)} ports</span>`);
+  if(ctryName && !loading && !shown) parts.push(`<span style="white-space:normal">None of the selected companies has a mapped site in ${esc(ctryName)}.</span>`);
   parts.push(`<span style="white-space:normal">${ctryName ? esc(ctryName) + ' (main territory)' : 'All countries'} · positions from the US DOE AFDC / NRCan locator (United States, Canada), NOBIL (Norway, Sweden) and Open Charge Map (elsewhere)${selBrands.has('Couche-Tard / Circle K') ? ', plus OpenStreetMap for Couche-Tard / Circle K' : ''}; a site found in two sources is counted once. Dot size = ports.</span>`);
   el.innerHTML = parts.join(''); el.style.display = '';
 }
@@ -562,13 +565,14 @@ async function refreshBrands(fit){
   }
 }
 // ---- controls: country select, company multi-select
+let applyList = () => {};
 (function(){
   const cs = document.getElementById('map-country');
   cs.innerHTML += Object.keys(CONT_COL).sort().map(k => { const l = CHARGING.countries.filter(c => (c.cont || 'Asia') === k).sort((x, y) => x.n.localeCompare(y.n)); return l.length ? `<optgroup label="${k}">${l.map(c => `<option value="${esc(c.n)}">${esc(c.n)}</option>`).join('')}</optgroup>` : ''; }).join('');
   cs.onchange = () => {
     ctryName = cs.value || null; buildCtry(ctryName); applyTeslaFilter();
     for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
-    summarize(); scheduleBrand();
+    applyList(); renderCompanies(); summarize(); scheduleBrand();
     if(ctryBox) fitBox(ctryBox[0], ctryBox[1], ctryBox[2], ctryBox[3], 200); else svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
   };
   const list = document.getElementById('bm-list'), panel = document.getElementById('bm-panel'), q = document.getElementById('bm-q');
@@ -584,7 +588,17 @@ async function refreshBrands(fit){
   list.onchange = e => { const i = e.target; if(i.checked) selBrands.add(i.value); else selBrands.delete(i.value); refreshBrands(true); };
   document.getElementById('bm-all').onclick = () => { visible().forEach(i => selBrands.add(i.value)); sync(); refreshBrands(false); };
   document.getElementById('bm-none').onclick = () => { visible().forEach(i => selBrands.delete(i.value)); sync(); refreshBrands(false); };
-  q.oninput = () => { const t = q.value.trim().toLowerCase(); list.querySelectorAll('label').forEach(l => { l.style.display = !t || l.dataset.n.includes(t) ? '' : 'none'; }); list.querySelectorAll('.grp').forEach(g => { g.style.display = [...g.querySelectorAll('label')].some(l => l.style.display !== 'none') ? '' : 'none'; }); };
+  const ixBy = {}; BRAND_INDEX.forEach(b => { ixBy[b.b] = b; });
+  applyList = () => {
+    const t = q.value.trim().toLowerCase(), iso = ctryName && BY[ctryName] ? BY[ctryName].iso : null;
+    list.querySelectorAll('label').forEach(l => {
+      const b = ixBy[l.querySelector('input').value], here = iso ? ((b.c || {})[iso] || 0) : b.n;     // with a country picked: only companies that have a site there, with that country's count
+      l.style.display = (!t || l.dataset.n.includes(t)) && here > 0 ? '' : 'none';
+      l.querySelector('.n').textContent = fmt(here) + ' sites';
+    });
+    list.querySelectorAll('.grp').forEach(g => { g.style.display = [...g.querySelectorAll('label')].some(l => l.style.display !== 'none') ? '' : 'none'; });
+  };
+  q.oninput = applyList;
   document.getElementById('bm-btn').onclick = e => { panel.hidden = !panel.hidden; e.stopPropagation(); };
   document.addEventListener('click', e => { if(!panel.hidden && !e.target.closest('#brand-multi')) panel.hidden = true; });
   window.__bmSync = sync;
@@ -604,7 +618,7 @@ document.getElementById('ch-layers').addEventListener('click', e => {
   drawGrid(); drawTesla();
 });
 document.getElementById('z-qc').onclick = () => {
-  document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]);
+  document.getElementById('map-country').value = ''; ctryName = null; buildCtry(null); applyTeslaFilter(); for(const n of selBrands) if(brandData[n]) brandVis(brandData[n]); applyList(); renderCompanies();
   layers.tesla = true; document.querySelector('#ch-layers [data-layer="tesla"]').classList.add('on'); drawTesla();
   selBrands.clear(); selBrands.add('Circuit électrique'); selBrands.add('Couche-Tard / Circle K'); window.__bmSync(); refreshBrands(false);
   // southern Québec, where nearly all of both networks sit (about -79.5..-64 E, 44.9..48.8 N)
@@ -722,19 +736,27 @@ function renderRatio(id, noteId, legId, key, mkey){
 let coMetric = 'ports';
 document.getElementById('co-metric').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; coMetric = b.dataset.m; document.querySelectorAll('#co-metric button').forEach(x => x.classList.toggle('active', x === b)); renderCompanies(); });
 function renderCompanies(){
-  renderLegend2('lg-co', 'co', renderCompanies);
+  const pick = ctryName && BY[ctryName] ? BY[ctryName] : null, iso1 = pick ? pick.iso : null;      // the country picked above the map: the ranking is for this country only
+  document.getElementById('co-title').textContent = pick ? `Charging companies in ${ctryName}` : 'Charging companies, world view';
+  document.getElementById('co-intro').innerHTML = pick
+    ? `The largest charging companies by ${coMetric === 'ports' ? 'ports' : 'stations'} in ${esc(ctryName)}, the country picked on the map above (choose All countries there to go back to the world view). Tesla from supercharge.info; the other companies from ${pick.src === 'nobil' ? 'NOBIL, the Nordic register' : pick.iso === 'CN' ? 'the EVCIPA operator ranking (public ports, July 2025)' : 'Open Charge Map, a partial sample outside the United States, Canada, Spain and a few other countries'} — read it as a ranking of what is mapped, not a census.`
+    : 'The largest charging companies by ports in the 58 countries of this page, split by continent. Click a continent in the legend to take it in or out. China is counted from the EVCIPA operator ranking (public ports, July 2025); Tesla from supercharge.info; Norway and Sweden from NOBIL; everywhere else from Open Charge Map, which is a partial sample outside the United States, Canada, Spain and a few other countries — read it as a ranking of what is mapped, not a census.';
+  document.getElementById('lg-co').style.display = pick ? 'none' : '';
+  if(!pick) renderLegend2('lg-co', 'co', renderCompanies);
   const idx = coMetric === 'ports' ? 1 : 0;
   const rows = CHARGING.worldBrands.map(w => {
-    const per = {}; let tot = 0, nc = 0;
-    Object.entries(w.c).forEach(([iso, v]) => { const k = ISO_CONT[iso]; if(!contOn.co.has(k) || v[idx] == null) return; per[k] = (per[k] || 0) + v[idx]; tot += v[idx]; nc++; });
-    return { b:w.b, per, tot, nc };
+    const per = {}; let tot = 0, nc = 0, sub = '';
+    if(pick){
+      const v = w.c[iso1]; if(v && v[idx] != null){ per[ISO_CONT[iso1]] = v[idx]; tot = v[idx]; nc = 1; if(v[1 - idx] != null) sub = `${fmt(v[1 - idx])} ${idx === 1 ? 'stations' : 'ports'}`; }
+    } else Object.entries(w.c).forEach(([iso, v]) => { const k = ISO_CONT[iso]; if(!contOn.co.has(k) || v[idx] == null) return; per[k] = (per[k] || 0) + v[idx]; tot += v[idx]; nc++; });
+    return { b:w.b, per, tot, nc, sub: pick ? sub : `${nc} ${nc === 1 ? 'country' : 'countries'}` };
   }).filter(r => r.tot > 0).sort((a, b) => b.tot - a.tot).slice(0, 25);
   const mx = Math.max(1, ...rows.map(r => r.tot));
-  document.getElementById('co-rows').innerHTML = rows.map(r => `<div class="ch-rk" style="grid-template-columns:170px 1fr 84px"><span class="nm" title="${esc(r.b)}">${esc(r.b)}</span><span class="tr">${CONTS.filter(k => r.per[k]).map(k => `<div style="width:${(100 * r.per[k] / mx).toFixed(2)}%;background:${CONT_COL[k]}" title="${k}: ${fmt(r.per[k])}"></div>`).join('')}</span><span class="v">${fmt(r.tot)}<br><span class="s" style="font-size:10.5px">${r.nc} ${r.nc === 1 ? 'country' : 'countries'}</span></span></div>`).join('');
-  const sel = CHARGING.countries.filter(c => contOn.co.has(c.cont || 'Asia'));
+  document.getElementById('co-rows').innerHTML = rows.map(r => `<div class="ch-rk" style="grid-template-columns:170px 1fr 84px"><span class="nm" title="${esc(r.b)}">${esc(r.b)}</span><span class="tr">${CONTS.filter(k => r.per[k]).map(k => `<div style="width:${(100 * r.per[k] / mx).toFixed(2)}%;background:${CONT_COL[k]}" title="${k}: ${fmt(r.per[k])}"></div>`).join('')}</span><span class="v">${fmt(r.tot)}<br><span class="s" style="font-size:10.5px">${r.sub}</span></span></div>`).join('') || `<p class="ch-note">No ranked company in ${esc(ctryName || 'this selection')}.</p>`;
+  const sel = CHARGING.countries.filter(c => pick ? c.iso === iso1 : contOn.co.has(c.cont || 'Asia'));
   const mapped = sel.reduce((s, c) => s + (c.iso === 'CN' ? 4286000 : (c.ocm ? c.ocm.po : 0)), 0), iea = sel.reduce((s, c) => s + (total(c, LATEST) || 0), 0);
   const un = sel.reduce((s, c) => s + (CHARGING.unattributed[c.iso] || 0), 0);
-  document.getElementById('co-note').innerHTML = `Selected continents: <b>${fmt(mapped)}</b> ports mapped (IEA total for the same countries: <b>${fmt(iea)}</b>), of which <b>${fmt(un)}</b> sit with an unknown operator or an independent site owner and are not ranked here. Chargers hosted by a retailer, hotel or Couche-Tard store count under whoever operates them.`;
+  document.getElementById('co-note').innerHTML = `${pick ? esc(ctryName) + ':' : 'Selected continents:'} <b>${fmt(mapped)}</b> ports mapped (IEA total for the same countries: <b>${fmt(iea)}</b>), of which <b>${fmt(un)}</b> sit with an unknown operator or an independent site owner and are not ranked here. Chargers hosted by a retailer, hotel or Couche-Tard store count under whoever operates them.`;
 }
 function renderRatioCard(){
   document.getElementById('rk-title').textContent = METRICS[ratioMode].title;
