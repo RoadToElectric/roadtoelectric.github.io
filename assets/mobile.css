@@ -101,3 +101,8 @@ html[data-view="mobile"] [data-rte-drawer]{ position:fixed; z-index:500; left:0;
 html[data-view="mobile"].rte-drawer-open [data-rte-drawer]{ transform:none; visibility:visible; transition:transform .25s ease; }
 html[data-view="mobile"] .rte-drawer-done{ display:block; position:sticky; bottom:0; width:100%; margin-top:12px; padding:14px; border:none; border-radius:14px 14px 0 0; font:inherit; font-size:15px; font-weight:800; color:#fff; cursor:pointer; background:linear-gradient(135deg, #0a80d0, #2fae4e); box-shadow:0 -6px 18px rgba(0,0,0,.25); }
 html[data-view="mobile"].rte-drawer-open body{ overflow:hidden; }
+
+/* EV Charging: company rows (name, share, speed bar, ports, stations) fit a phone */
+html[data-view="mobile"] .ch-brow{ grid-template-columns:96px 1fr 52px 46px; gap:6px; font-size:12px; }
+html[data-view="mobile"] .ch-brow.sh{ grid-template-columns:96px 38px 1fr 52px 46px; }
+html[data-view="mobile"] .ch-bands{ gap:6px; }
