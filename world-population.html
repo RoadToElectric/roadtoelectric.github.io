@@ -95,6 +95,9 @@
   @media (max-width:1000px){ .wp-two{ grid-template-columns:1fr; } .wp-brow{ grid-template-columns:22px minmax(90px,150px) 1fr 80px; } }
   .wp-play{ appearance:none; border:0; cursor:pointer; width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; font-weight:900; }
   #ex-table{ overflow-x:auto; }
+  #ex-table .wp-table{ font-size:12px; }
+  #ex-table .wp-table th, #ex-table .wp-table td{ padding:4px 5px; white-space:nowrap; }
+  #ex-table .wp-table th:first-child, #ex-table .wp-table td:first-child{ white-space:normal; min-width:78px; max-width:112px; line-height:1.25; padding-right:8px; }
   .wp-table{ border-collapse:collapse; width:100%; font-size:12.5px; margin-top:8px; font-variant-numeric:tabular-nums; }
   .wp-table th, .wp-table td{ border-bottom:1px solid var(--border); padding:4px 10px; text-align:right; }
   .wp-table th:first-child, .wp-table td:first-child{ text-align:left; }
@@ -504,12 +507,12 @@ async function renderExact(){
         `<div class="r" style="color:var(--text-muted)"><span>Most numerous age in ${st.year}</span><span>${order[0][1] === 100 ? '100+' : order[0][1]}</span></div>`, ev); })
     .on('pointerleave', () => { untip(box); hov.attr('opacity', 0); });
   box.replaceChildren(svg.node(), box.querySelector('.wp-tip') || Object.assign(document.createElement('div'), { className: 'wp-tip' }));
-  const RANGES = [[15, 24], [25, 34], [35, 44], [45, 54], [55, 64], [65, 74], [75, 84], [85, 100]], rl = ([lo, hi]) => hi === 100 ? `${lo}+` : `${lo}–${hi}`, sumR = (arr, [lo, hi]) => { let q = 0; for (let g = lo; g <= hi; g++) q += arr[g]; return q; };
+  const RANGES = [[0, 14], [15, 24], [25, 34], [35, 44], [45, 54], [55, 64], [65, 74], [75, 84], [85, 100]], rl = ([lo, hi]) => hi === 100 ? `${lo}+` : `${lo}–${hi}`, sumR = (arr, [lo, hi]) => { let q = 0; for (let g = lo; g <= hi; g++) q += arr[g]; return q; };
   $('ex-table').innerHTML = `<table class="wp-table"><tr><th>Age range</th>${RANGES.map(r => `<th>${rl(r)}</th>`).join('')}</tr>` +
     `<tr class="hl"><td>${l.n} · ${st.year}</td>${RANGES.map(r => `<td>${full(sumR(a, r))}</td>`).join('')}</tr>` +
     (b ? `<tr><td>${st.compare}</td>${RANGES.map(r => `<td>${full(sumR(b, r))}</td>`).join('')}</tr>` : '') +
     `<tr><td>share of ${st.year} population</td>${RANGES.map(r => `<td>${(sumR(a, r) / tot * 100).toFixed(1)}%</td>`).join('')}</tr></table>` +
-    `<p class="wp-note">Age ranges are inclusive (15–24 means from the 15th to the 24th birthday year, ten single ages). Hover the chart for one single age, its share of the population and its ranking among the 101 ages.${st.year >= PROJ ? ' 2024 onward is the UN projection.' : ''}</p>`;
+    `<p class="wp-note">Age ranges are inclusive (0–14 is the children, 15 single ages; 15–24 means from the 15th to the 24th birthday year, ten single ages). Hover the chart for one single age, its share of the population and its ranking among the 101 ages.${st.year >= PROJ ? ' 2024 onward is the UN projection.' : ''}</p>`;
   $('ex-fsum').textContent = `${l.n} · ${st.year}`;
 }
 
