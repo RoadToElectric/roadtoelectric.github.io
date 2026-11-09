@@ -136,3 +136,14 @@ html[data-view="mobile"] .rank-rows-header .rrh-name-gap{ display:none; }
 html[data-view="mobile"] header.page-header .subtitle{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 html[data-view="mobile"] header.page-header .subtitle.rte-open{ display:block; overflow:visible; }
 html[data-view="mobile"] .rte-sec-link{ margin-top:-2px; }
+
+/* maps: the legend sits under the map instead of covering it (Manufacturers) */
+html[data-view="mobile"] .map-legend.in-map{ position:static; max-width:100%; margin:8px 0 0; padding:8px 0 0; border-top:1px solid var(--border); background:transparent; box-shadow:none; }
+html[data-view="mobile"] .map-legend.in-map .legend-swatch{ width:30px; height:14px; }
+html[data-view="mobile"] .map-legend.in-map .legend-num{ font-size:11px; }
+
+/* the timeline year chips (Manufacturers, Mix): one row that scrolls sideways instead of five rows of chips */
+html[data-view="mobile"] .tl-chips{ flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; align-items:center; scrollbar-width:thin; }
+html[data-view="mobile"] .tl-chips > *, html[data-view="mobile"] .tl-chip-group{ flex:none; flex-wrap:nowrap; }
+html[data-view="mobile"] .tl-chip-group{ display:inline-flex; gap:6px; }
+html[data-view="mobile"] .tl-chip{ flex:none; min-height:34px; padding:0 12px; }

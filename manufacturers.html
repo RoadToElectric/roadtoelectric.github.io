@@ -6,8 +6,8 @@
 <title>Manufacturers — Who Sells What, Country by Country</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
-<link rel="stylesheet" href="assets/mobile.css?v=7">
-<script src="assets/view-mode.js?v=4"></script>
+<link rel="stylesheet" href="assets/mobile.css?v=9">
+<script src="assets/view-mode.js?v=6"></script>
 <script src="assets/section-link.js?v=2" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
 <script src="assets/deeplink.js?v=2"></script>
@@ -129,6 +129,16 @@
   .gr-chart .gr-grid{ stroke:var(--border); stroke-dasharray:2 4; }
   .gr-chart .gr-hit{ fill:transparent; cursor:pointer; }
   .gr-chart .gr-hit:hover{ fill:rgba(99,102,241,.10); }
+  html[data-view="mobile"] .gr-chart{ overflow-x:visible; }
+  .gr-mhead{ display:flex; justify-content:space-between; padding:0 56px 4px 104px; font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+  .gr-mrow{ display:grid; grid-template-columns:98px 1fr 52px; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+  .gr-mname{ display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; min-width:0; }
+  .gr-mname span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gr-mname img{ width:18px; height:13px; object-fit:cover; border-radius:2px; flex:none; box-shadow:0 0 0 1px var(--border); }
+  .gr-mtrack{ position:relative; display:block; }
+  .gr-mtrack i{ position:absolute; border-radius:2px; }
+  .gr-mtrack u{ position:absolute; top:0; bottom:0; width:1px; background:var(--text-muted); opacity:.7; text-decoration:none; }
+  .gr-mval{ display:flex; flex-direction:column; text-align:right; font-size:11.5px; font-variant-numeric:tabular-nums; line-height:1.2; }
   .gr-chart .gr-axis-t{ font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
   #gr-fuel{ border-color:#15803d; }
   #gr-fuel .mode-btn + .mode-btn{ border-left-color:rgba(21,128,61,.35); }
@@ -264,6 +274,8 @@
     display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; }
   #bars-legend .lg-note, #continent-bars-legend .lg-note{ flex-basis:100%; color:var(--text-muted); font-weight:500; font-size:11px; }
   #bars-card .rrh-spacer, #continent-bars-card .rrh-spacer{ display:none; }
+  html[data-view="mobile"] .bar-hover.rte-sheet{ left:8px !important; right:8px; top:auto !important; bottom:64px; width:auto !important; max-width:none; max-height:66vh; overflow-y:auto; pointer-events:auto; z-index:430; box-shadow:0 -10px 34px rgba(0,16,40,.3); }
+  .bar-hover .rte-sheet-x{ position:sticky; top:0; float:right; z-index:2; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:15px; cursor:pointer; }
   .bar-hover{ position:fixed; z-index:60; pointer-events:none; opacity:0; transition:opacity .08s ease; width:400px; max-width:94vw; box-sizing:border-box;
     background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,.28); padding:14px 16px 12px; font-size:12.5px; line-height:1.4; }
   .bar-hover h3{ margin:0 0 2px; font-size:15px; }
@@ -402,7 +414,7 @@
         <p class="note" style="display:block" id="world-note"></p>
       </div>
 
-      <div class="card chart-card" id="map-card">
+      <div class="card chart-card" id="map-card" data-rte-title="Map — sales by country">
         <p class="note" id="map-note"></p>
         <div class="map-wrap" id="map-wrap">
           <svg class="map-svg" id="map-svg" viewBox="0 0 940 460" role="img" aria-label="World map shaded by manufacturer sales"></svg>
@@ -2140,7 +2152,19 @@ function placeHover(e){
   if(y + h > window.innerHeight - 8) y = window.innerHeight - h - 8;
   hoverPanel.style.left = Math.max(8, x) + 'px'; hoverPanel.style.top = Math.max(8, y) + 'px';
 }
-function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; hoverPanel.classList.remove('wide'); }
+function hideHover(){ hoverKey = null; hoverPanel.style.opacity = 0; hoverPanel.classList.remove('wide', 'rte-sheet'); }
+// phone view: there is no hover, so a tap on a brand / model / country bar opens the same details as a sheet at the bottom of the screen (tap outside or the cross to close)
+document.addEventListener('click', e => {
+  if(!MOBV()) return;
+  if(e.target.closest('.rte-sheet-x')){ hideHover(); return; }
+  if(e.target.closest('#bar-hover')) return;
+  const row = e.target.closest && e.target.closest('.rank-row[data-hov], .rank-row[data-scope]');
+  if(!row || e.target.closest('a, button') || (row.dataset.hov === 'country' && e.target.closest('.country-label'))){ if(hoverPanel.classList.contains('rte-sheet')) hideHover(); return; }
+  if(row.dataset.hov){ hoverKey = 'hov|' + row.dataset.hov + '|' + row.dataset.key; renderEntityHover(row.dataset.hov, row.dataset.key, row); }
+  else { hoverKey = row.dataset.scope + '|' + row.dataset.key; renderHover(row.dataset.scope, row.dataset.key); }
+  hoverPanel.insertAdjacentHTML('afterbegin', '<button type="button" class="rte-sheet-x" aria-label="Close">✕</button>');
+  hoverPanel.classList.add('rte-sheet'); hoverPanel.style.opacity = 1;
+});
 ['country-bars', 'continent-bars'].forEach(id => {
   const el = document.getElementById(id);
   el.addEventListener('mousemove', e => {
@@ -2314,6 +2338,18 @@ function renderGrowth(){
   const maxNeg = Math.max(0, ...vals.filter(v => v < 0).map(v => -v));
   const niceUp = v => { const pw = Math.pow(10, Math.floor(Math.log10(v))), f = v / pw; return pw * ([1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 10].find(s => f <= s + 1e-9) || 10); };
   const capN = maxNeg > 0 ? Math.min(cap, niceUp(maxNeg)) : cap * 0.1;                               // decline side: only as deep as the biggest decline (a % decline cannot pass -100%), so the flags sit close to the last red bar
+  const fmtG = v => mk === 'pct' ? (v > 0 ? '+' : '') + Math.round(v) + '%' : (v > 0 ? '+' : v < 0 ? '−' : '') + compactN(Math.abs(v));
+  const mobHTML = !MOBV() ? '' : (() => {          // phone: one row per country, bars growing right (green) / left (red) of a zero line
+    const tot = cap + capN, z = 100 * capN / tot, nn = series.length, bh = nn > 1 ? 8 : 14;
+    const lgM = nn > 1 ? `<div class="bw-lg">${series.map((s0, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s0)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
+    return `${lgM}<div class="gr-mlist"><div class="gr-mhead"><span style="color:#dc2626">▼ decline</span><span style="color:#16a34a">growth ▲</span></div>` + rows.map(r => {
+      const bars = r.per.map((q, k) => { if(!q) return ''; const v = q[mk], wd = 100 * Math.min(Math.abs(v), v > 0 ? cap : capN) / tot, col = v >= 0 ? '#16a34a' : '#dc2626';
+        return `<i style="top:${3 + k * (bh + 1)}px;height:${bh}px;left:${v >= 0 ? z : z - wd}%;width:${Math.max(0.6, wd)}%;background:${col};opacity:${k === 0 ? 1 : .45}"></i>`; }).join('');
+      const vals = r.per.map((q, k) => q ? `<b style="color:${q[mk] >= 0 ? '#16a34a' : '#dc2626'};opacity:${k === 0 ? 1 : .6}">${fmtG(q[mk])}</b>` : '<b>–</b>').join('');
+      const fu = flagUrl(r.country);
+      return `<div class="gr-mrow gr-hit" data-country="${esc(r.country)}"><span class="gr-mname">${fu ? `<img src="${fu}" alt="" loading="lazy">` : ''}<span>${esc(r.country)}</span></span><span class="gr-mtrack" style="height:${6 + nn * (bh + 1)}px"><u style="left:${z}%"></u>${bars}</span><span class="gr-mval">${vals}</span></div>`;
+    }).join('') + '</div>';
+  })();
   const n = series.length, m = { t:22, r:10, b:104, l:58 }, posPx = 137, negPx = Math.max(24, capN / cap * posPx), y0 = m.t + posPx, yB = y0 + negPx, plotBottom = yB + 16, H = plotBottom + m.b;   // 16 px under the decline side hold the "decline" label
   const bw = Math.max(n * 9 + 6, ((host.clientWidth || 900) - m.l - m.r) / rows.length), W = Math.round(m.l + m.r + bw * rows.length);      // real pixels, so the country names stay readable; a narrow column scrolls sideways
   const sP = posPx / cap, sN = negPx / capN;
@@ -2342,7 +2378,7 @@ function renderGrowth(){
     g += `<rect class="gr-hit" data-country="${esc(r.country)}" x="${x0}" y="${m.t}" width="${bw}" height="${plotBottom - m.t}"><title>${esc(tip)}</title></rect>`;
   });
   const lg = n > 1 ? `<div class="bw-lg">${series.map((s, k) => `<span><i style="background:linear-gradient(90deg,#16a34a 50%,#dc2626 50%);opacity:${k === 0 ? 1 : .45}"></i><span class="bw-who">${esc(s)}</span> (${k === 0 ? 'solid' : 'light'} bar)</span>`).join('')}</div>` : '';
-  host.innerHTML = `${lg}<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Growth by country">${g}</svg>`;
+  host.innerHTML = mobHTML || `${lg}<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Growth by country">${g}</svg>`;
   note.textContent = `${pr.label}${growthFuel === 'bev' ? ', BEV units only' : growthFuel === 'ice' ? ', ICE units only (everything that is not battery-electric: petrol, diesel, hybrids and plug-in hybrids)' : ''}, ${growthMode === 'pct' ? 'change in %' : 'change in units'}: green above zero = growth, red below = decline${n > 1 ? `; ${series[0]} is the solid bar, ${series[1]} the light one` : ''}. ${rows.length} countries with data in both periods, biggest growth first${n > 1 ? ` (${series[0]})` : ''}${mk === 'pct' ? `; the growth side of the scale stops at +${Math.round(cap)}% and arrows mark bars that go beyond it (hover for the real figure)` : ''}. Click a bar to focus the page on that country.`;
 }
 document.getElementById('gr-toggle').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if(!b) return; growthMode = b.dataset.gr; renderGrowth(); });
@@ -2501,22 +2537,25 @@ function bwStats(rows, i, name, col){
   if(r.basis) L.push(`<span class="bw-basis">${esc(r.basis)}</span>`);
   return L.join('<br>');
 }
+const MOBV = () => !!(window.RTEView && RTEView.get && RTEView.get() === 'mobile');       // phone view: charts are drawn at the width of the screen
+// year / value labels of a bar chart on a phone: every k-th bar so the labels fit (the latest bar always kept)
+const bwEvery = (n, bw, px) => { const k = Math.max(1, Math.ceil(px / bw)); return i => (n - 1 - i) % k === 0; };
 // rows: [{y, v, kind:'a'|'p'|'e'|'proj', bk:basis key, basis:text, extra:html, none:text}]
 function bwChart(host, rows, color){
-  const W = 940, H = 230, m = { t:22, r:10, b:26, l:46 };
+  const mob = MOBV() && host.clientWidth > 120, W = mob ? Math.max(280, Math.round(host.clientWidth)) : 940, H = mob ? 240 : 230, m = mob ? { t:20, r:6, b:26, l:36 } : { t:22, r:10, b:26, l:46 };
   const top0 = Math.max(...rows.map(r => r.v)), step = niceStep(top0 * 1.1 / 4), nT = Math.ceil(top0 * 1.04 / step), mx = nT * step, bw = (W - m.l - m.r) / rows.length;
   const y = v => H - m.b - (v / mx) * (H - m.t - m.b), id = 'hx' + Math.random().toString(36).slice(2, 7);
   let g = hatchDefs(id);
   for(let i = 0; i <= nT; i++){ const v = step * i; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : step >= 1e6 ? +(v / 1e6).toFixed(1) + ' M' : mFmt(v)}</text>`; }
-  const dense = rows.length > 14;
+  const dense = rows.length > 14, yrOk = mob ? bwEvery(rows.length, bw, 30) : i => !dense || i % 2 === 0 || i === rows.length - 1, vlOk = mob ? bwEvery(rows.length, bw, 44) : i => !dense || i === 0 || i === rows.length - 1 || rows[i].y % 5 === 0;
   rows.forEach((r, i) => {
-    const x = m.l + i * bw + 2, w = Math.max(2, bw - 4), fill = r.kind === 'proj' ? `url(#${id})` : r.kind === 'p' ? color + '88' : r.kind === 'e' ? color + 'aa' : color;
+    const x = m.l + i * bw + (mob ? 1 : 2), w = Math.max(2, bw - (mob ? 2 : 4)), fill = r.kind === 'proj' ? `url(#${id})` : r.kind === 'p' ? color + '88' : r.kind === 'e' ? color + 'aa' : color;
     if(r.v) g += `<rect x="${x}" y="${y(r.v)}" width="${w}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${color}" stroke-dasharray="3 2"` : ''}/>`;
-    if(!dense || i % 2 === 0 || i === rows.length - 1) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${r.y}</text>`;
-    if(r.v && (!dense || i === 0 || i === rows.length - 1 || r.kind === 'proj' || r.y % 5 === 0)) g += `<text class="vl" x="${x + w / 2}" y="${y(r.v) - 5}" text-anchor="middle">${mFmt(r.v)}</text>`;
+    if(yrOk(i)) g += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${r.y}</text>`;
+    if(r.v && (vlOk(i) || (r.kind === 'proj' && !mob))) g += `<text class="vl" x="${x + w / 2}" y="${y(r.v) - 5}" text-anchor="middle">${mFmt(r.v)}</text>`;
     g += `<rect class="hit" data-i="${i}" x="${m.l + i * bw}" y="${m.t - 6}" width="${bw}" height="${H - m.t - m.b + 6}"/>`;
   });
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="bw-tip"></div>`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"${mob ? ' data-rte-nofit="1"' : ''}>${g}</svg><div class="bw-tip"></div>`;
   const tip = host.querySelector('.bw-tip'); let cur = -1;
   host.onmousemove = e => {
     const h = e.target.closest && e.target.closest('.hit');
@@ -2531,23 +2570,23 @@ function bwChart(host, rows, color){
 }
 // rows of every series share the same years: [{name, color, rows:[{y, v, kind, bk, basis, extra, none}]}]; one chart with the series side by side for each year
 function bwChartMulti(host, series){
-  const n = series.length, R0 = series[0].rows, W = 940, H = 240, m = { t:24, r:10, b:26, l:46 };
+  const mob = MOBV() && host.clientWidth > 120, n = series.length, R0 = series[0].rows, W = mob ? Math.max(280, Math.round(host.clientWidth)) : 940, H = 240, m = mob ? { t:24, r:6, b:26, l:36 } : { t:24, r:10, b:26, l:46 };
   const top0 = Math.max(1, ...series.flatMap(s => s.rows.map(r => r.v))), step = niceStep(top0 * 1.1 / 4), nT = Math.ceil(top0 * 1.04 / step), mx = nT * step, bw = (W - m.l - m.r) / R0.length;
   const y = v => H - m.b - (v / mx) * (H - m.t - m.b), id = 'hx' + Math.random().toString(36).slice(2, 7);
   let g = `<defs>${series.map((s, k) => `<pattern id="${id}${k}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="${s.color}26"/><line x1="0" y1="0" x2="0" y2="6" stroke="${s.color}" stroke-width="2.2"/></pattern>`).join('')}</defs>`;
   for(let i = 0; i <= nT; i++){ const v = step * i; g += `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${v === 0 ? '0' : step >= 1e6 ? +(v / 1e6).toFixed(1) + ' M' : mFmt(v)}</text>`; }
-  const dense = R0.length > 10, gap = 3, w = Math.max(2, (bw - 2 * gap) / n);
+  const dense = R0.length > 10, gap = 3, w = Math.max(2, (bw - 2 * gap) / n), yrOk = mob ? bwEvery(R0.length, bw, 30) : i => !dense || i % 2 === 0 || i === R0.length - 1, vlOk = mob ? bwEvery(R0.length, bw, 52) : i => !dense || i === 0 || i === R0.length - 1 || R0[i].y % 5 === 0;
   R0.forEach((r0, i) => {
     series.forEach((s, k) => {
       const r = s.rows[i], x = m.l + i * bw + gap + k * w, fill = r.kind === 'proj' ? `url(#${id}${k})` : r.kind === 'p' ? s.color + '88' : r.kind === 'e' ? s.color + 'aa' : s.color;
       if(r.v) g += `<rect x="${x}" y="${y(r.v)}" width="${w - 1}" height="${H - m.b - y(r.v)}" rx="2" fill="${fill}"${r.kind === 'proj' ? ` stroke="${s.color}" stroke-dasharray="3 2"` : ''}/>`;
-      if(r.v && (!dense || i === 0 || i === R0.length - 1 || r.kind === 'proj' || r0.y % 5 === 0)) g += `<text class="vl" style="font-size:9px" x="${x + (w - 1) / 2}" y="${y(r.v) - 4}" text-anchor="middle">${mFmt(r.v)}</text>`;
+      if(r.v && (vlOk(i) || (r.kind === 'proj' && !mob))) g += `<text class="vl" style="font-size:9px" x="${x + (w - 1) / 2}" y="${y(r.v) - 4}" text-anchor="middle">${mFmt(r.v)}</text>`;
     });
-    if(!dense || i % 2 === 0 || i === R0.length - 1) g += `<text x="${m.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle">${r0.y}</text>`;
+    if(yrOk(i)) g += `<text x="${m.l + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle">${r0.y}</text>`;
     g += `<rect class="hit" data-i="${i}" x="${m.l + i * bw}" y="${m.t - 6}" width="${bw}" height="${H - m.t - m.b + 6}"/>`;
   });
   const lg = `<div class="bw-lg">${series.map(s => `<span><i style="background:${s.color}"></i><span class="bw-who">${esc(s.name)}</span>${s.sub ? ` <small>${esc(s.sub)}</small>` : ''}</span>`).join('')}</div>`;
-  host.innerHTML = `${lg}<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg><div class="bw-tip"></div>`;
+  host.innerHTML = `${lg}<svg viewBox="0 0 ${W} ${H}" role="img"${mob ? ' data-rte-nofit="1"' : ''}>${g}</svg><div class="bw-tip"></div>`;
   const tip = host.querySelector('.bw-tip'); let cur = -1;
   host.onmousemove = e => {
     const h = e.target.closest && e.target.closest('.hit');
@@ -2897,6 +2936,7 @@ function updateSegStatus(nCountries){
   st.textContent = parts.join(' ');
 }
 
+if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderWorldBars(); renderGrowth(); });      // phone: the charts are drawn at the screen width, so redraw after a rotation or a view switch
 buildPeriodSelect();
 selCountry.innerHTML = '<option value="">All countries</option>' + COUNTRIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
 const savedFilters = window.FilterMemory ? FilterMemory.load() : null;

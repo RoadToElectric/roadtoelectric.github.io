@@ -116,7 +116,7 @@
     return out;
   }
   function secOff(){ var b = document.querySelector('.rte-filter-bar:not([hidden]), .fl-bar'); return (b && b.offsetHeight && getComputedStyle(b).position === 'sticky' ? b.offsetHeight : 0) + 6; }
-  function secTitle(el){ var h = el.querySelector('h1, h2, h3, .wp-eyebrow, .wo-eyebrow'), t = h ? h.textContent.replace(/\s+/g, ' ').trim() : ''; return (t || (el.id ? el.id.replace(/[-_]/g, ' ') : 'Section')).slice(0, 60); }
+  function secTitle(el){ if(el.getAttribute('data-rte-title')) return el.getAttribute('data-rte-title'); var h = el.querySelector('h1, h2, h3, .wp-eyebrow, .wo-eyebrow'), t = h ? h.textContent.replace(/\s+/g, ' ').trim() : ''; return (t || (el.id ? el.id.replace(/[-_]/g, ' ') : 'Section')).slice(0, 60); }
   function secIdx(list){ var off = secOff() + 40, idx = 0, i; for(i = 0; i < list.length; i++){ if(list[i].getBoundingClientRect().top <= off) idx = i; else break; } return idx; }
   function secUpdate(){
     snRaf = null; if(!sn) return;
