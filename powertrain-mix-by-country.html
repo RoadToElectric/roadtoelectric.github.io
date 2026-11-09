@@ -585,7 +585,9 @@ const MONTHLY_DATA = {
       // PROVISIONAL (ACEA October split due 24 Nov): total 1,359 = BestSellingCarsBlog (BGS 1,360); fuel DERIVED from BGS's published Jan-Oct shares (BEV 54.3%, hybrid 19.5%, PHEV 17.1%, petrol+diesel under 9% of 11,641) minus this site's ACEA Jan-Sep, +-6 units rounding; BGS's own preliminary October BEV share is about 89% (here 89.3%); petrol/diesel 13 split in September's 5:7 ratio. Replace with ACEA 24 Nov
       "Iceland": [1213,68,65,0,6,7,1359],
       // SMMT press release 5 Nov 2026 (Year-end push lifts EV sales but Mandate gap set to widen), OCTOBER CAR REGISTRATION BY FUEL TYPE table: total 152,730 (+5.4%), BEV 48,858 (32.0%, +32.7%), PHEV 22,898, HEV 18,287, petrol 56,876, diesel 5,811; sums exactly to the published total; SMMT's own Jan-Oct BEV 503,805 (+30.4%) is 28 above this site's monthly sum because SMMT revised earlier months. Preliminary, subject to change
-      "United Kingdom": [48858,22898,18287,0,56876,5811,152730]
+      "United Kingdom": [48858,22898,18287,0,56876,5811,152730],
+      // FCAI/VFACTS via CarExpert 'VFACTS October 2026' monthly report ('Sales by fuel or propulsion type', excludes heavy commercial): Diesel 25,649, Electric 24,845, Petrol 23,605, Hybrid 18,434, PHEV 11,745; sum of the 5 categories (104,278) used as total, same method as every prior month (the article's headline 107,493 is light+heavy incl. Tesla/Polestar from the Electric Vehicle Council; heavy commercial = 3.0%). Same table's YTD column (Jan-Oct) is diesel 258,361 / electric 205,436 / petrol 293,298 / hybrid 178,487 / PHEV 97,023.
+      "Australia": [24845,11745,18434,0,23605,25649,104278]
     },
     priorYearBev: {
           "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":39900,      "Denmark":99857,      "Turkey":146773,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830},
@@ -1800,7 +1802,7 @@ const MONTHLY_DATA = {
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
       "Japan": [82881,33792,1216604,374,573156,80561,1987368],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
-      "Australia": [180539,85263,160068,0,269691,232714,928275],
+      "Australia": [205384,97008,178502,0,293296,258363,1032553],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
       "Brazil": [166084,131994,135811,0,1526608,197751,2158248],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
@@ -1874,7 +1876,7 @@ const MONTHLY_DATA = {
       "Mexico":"through Sep 2026",
       "India":"through Sep 2026",
       "Japan":"through Sep 2026",
-      "Australia":"through Sep 2026",
+      "Australia":"through Oct 2026",
       "Brazil":"through Sep 2026",
       "Argentina":"through Jul 2026",
       "Turkey":"through Oct 2026",
@@ -1952,7 +1954,7 @@ const MONTHLY_DATA = {
       "Ecuador": [14689, 0, 32953, 0, 77762, 44265, 169669],
       "Malaysia": [75338, 0, 56233, 0, 702831, 39314, 873716],
       "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
-      "Australia": [257364, 116285, 215257, 0, 359588, 310285, 1258779],
+      "Australia": [257491, 118613, 215128, 0, 351955, 310036, 1253223],
       "China": [7315000, 3483000, 0, 0, 7446667, 0, 18244667],
       "Austria": [86284, 36429, 94335, 3, 76979, 29631, 323661],
       "Belgium": [167189, 25397, 49547, 4116, 170671, 11357, 428277],
