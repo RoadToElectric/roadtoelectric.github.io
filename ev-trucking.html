@@ -1004,12 +1004,14 @@ playBtn.addEventListener('click', () => {
 hero(); insights(); fillSelect(); spotlight(); takeoff(); compare(); waffle(); segments(); oil(); fleet(); makers(); refresh();
 })();
 </script>
-<script src="assets/filter-memory.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
-FilterMemory.attach([
+FilterMemory.auto({ extra: [
   { key:'mode', sel:'#seg-mode', type:'seg' }, { key:'metric', sel:'#seg-metric', type:'seg' }, { key:'year', sel:'#year', type:'range' },
   { key:'hide', sel:'#hide-china', type:'check' }, { key:'stk', sel:'#stk-sel', type:'select' }, { key:'sp', sel:'#sp-sel', type:'select' }, { key:'shift', sel:'#shift', type:'check' }
-]);
+  ,{ key:'country', type:'fn', get:() => selected, set:v => { pick(v); return true; } }
+  ,{ key:'wf', type:'fn', get:() => wfSel, set:v => { wfSel = v; waffle(); return true; } }
+] });
 FilterMemory.restore();
 </script>
 </body>

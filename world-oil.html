@@ -338,6 +338,7 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/world-oil-data.js"></script>
 <script src="assets/world-oil-consumers.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
 const O = WORLD_OIL, Y = O.years, NY = Y.length, EST = O.kind.map(k => k !== 'iea');
 const fmt1 = d3.format(',.1f'), fmt0 = d3.format(',.0f');
@@ -732,6 +733,17 @@ function drawCons(){
 // ---------- method table ----------
 document.getElementById('method-table').innerHTML = `<table><thead><tr><th>Year</th><th>Total oil (mb/d)</th><th>Transport (mb/d)</th><th>% of all oil</th><th>Cars</th><th>Trucks, vans, buses</th><th>Aviation</th><th>Shipping</th><th>Plastics &amp; chemicals</th><th>Basis</th></tr></thead><tbody>${[1950, 1973, 1990, 2000, 2010, 2019, 2024, 2026].map(y => `<tr><td>${y}</td><td>${fmt1(tot(y))}</td><td>${fmt1(trans(y))}</td><td>${Math.round(100 * trans(y) / tot(y))}%</td><td>${fmt1(useVal('road_passenger', y))}</td><td>${fmt1(useVal('road_goods', y))}</td><td>${fmt1(useVal('aviation', y))}</td><td>${fmt1(useVal('navigation', y))}</td><td>${fmt1(useVal('nonenergy', y))}</td><td>${EST[iy(y)] ? 'estimate' : 'IEA'}</td></tr>`).join('')}</tbody></table>`;
 let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { drawUse(); drawTransport(); drawUS(); drawProd(); }, 150); });
+
+// ---------- shareable links: every filter (sliders, toggles, chips, what-if levers) is kept in the address (assets/filter-memory.js) ----------
+FilterMemory.auto({ exclude:['co-chips'], extra: [
+  { key:'use', type:'fn', get:() => [...useOn].join(','), set:v => { useOn.clear(); v.split(',').filter(Boolean).forEach(k => useOn.add(k)); document.querySelectorAll('#use-legend .wo-chip').forEach(b => b.classList.toggle('off', !useOn.has(b.dataset.k))); drawUse(); return true; } },
+  { key:'tr', type:'fn', get:() => [...trYears].sort().join(','), set:v => { trYears = new Set(v.split(',').filter(Boolean).map(Number)); document.querySelectorAll('#tr-years .wo-chip').forEach(b => b.classList.toggle('off', !trYears.has(+b.dataset.y))); drawTransport(); return true; } },
+  { key:'pies', type:'fn', get:() => PIE_YEARS.join(','), set:v => { v.split(',').map(Number).forEach((y, n) => { PIE_YEARS[n] = y; const sel = document.querySelectorAll('#pies select')[n]; if(sel) sel.value = y; drawPie(n); }); return true; } },
+  { key:'wi', type:'fn', get:() => JSON.stringify(WI_LEVERS.filter(l => WIT[l.id]).map(l => [l.id, WIS[l.id]])), set:v => { JSON.parse(v).forEach(([id, val]) => { WIS[id] = val; WIT[id] = true; }); document.querySelectorAll('#wi-levers input').forEach(i => { i.value = WIS[i.dataset.id]; }); wiSync(); return true; } },
+  { key:'prc', type:'fn', get:() => COUNTRIES.map((c, i) => prSel.has(c.n) ? i : -1).filter(i => i >= 0).join(','), set:v => { prSel.clear(); v.split(',').filter(Boolean).forEach(i => { if(COUNTRIES[+i]) prSel.add(COUNTRIES[+i].n); }); drawList(); drawProd(); return true; } },
+  { key:'prr', type:'fn', get:() => REGIONS.map((r, i) => regOn.has(r) ? i : -1).filter(i => i >= 0).join(','), set:v => { regOn.clear(); v.split(',').filter(Boolean).forEach(i => { if(REGIONS[+i]) regOn.add(REGIONS[+i]); }); document.querySelectorAll('#pr-regions .wo-chip').forEach(x => x.classList.toggle('off', !regOn.has(x.dataset.r))); drawList(); drawProd(); return true; } }
+] });
+FilterMemory.restore();
 </script>
 </body>
 </html>

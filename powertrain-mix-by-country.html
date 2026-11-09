@@ -538,7 +538,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
-<script src="assets/filter-memory.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/world-market-totals-2025.js"></script>
@@ -5543,6 +5543,7 @@ function applyURLState(){
 
 const copyLinkBtn = document.getElementById('copy-link-btn');
 copyLinkBtn.addEventListener('click', async () => {
+  if(window.FilterMemory && FilterMemory.sync) FilterMemory.sync();      // the lower sections' selections (?fm=) are added to the address
   const url = window.location.href;
   let copied = false;
   try{
@@ -7263,6 +7264,11 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 </script>
 <script src="assets/notes-toggle.js"></script>
 <script src="assets/mix-filter-layout.js"></script>
+<script>
+// the core filters (period, country, fuels, continents ...) live in the address by the page's own code; the other selections (brand / model sections, toggles) go in ?fm= through assets/filter-memory.js
+FilterMemory.auto({ exclude:['elec-tl-range'] });
+FilterMemory.restore();
+</script>
 <script>
 // a link such as index.html's first card (…?period=latest#elec-share-card): scroll to the section once the page has drawn (the URL is rewritten by the state code, so the hash is read from the early copy)
 (function(){ const id = (window.__wantHash || '').replace('#', ''); if(!id) return; const go = () => { const el = document.getElementById(id); if(el) el.scrollIntoView({ block:'start' }); };

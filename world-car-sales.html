@@ -497,11 +497,11 @@ wireToggle('b', drawB); wireToggle('c', drawC);
 })();
 </script>
 <script src="assets/notes-toggle.js"></script>
-<script src="assets/filter-memory.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
-FilterMemory.attach([
+FilterMemory.auto({ extra: [
   { key:'a', sel:'.chart-mode-toggle.lg', n:0, type:'seg' }, { key:'b', sel:'.chart-mode-toggle.lg', n:1, type:'seg' }, { key:'set', sel:'[aria-label="Market set"]', type:'seg' }
-]);
+] });
 FilterMemory.restore();
 </script>
 </body>

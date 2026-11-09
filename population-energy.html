@@ -897,11 +897,12 @@ document.getElementById('pe-play').addEventListener('click', () => {
 renderBubble();
 </script>
 <script src="assets/notes-toggle.js"></script>
-<script src="assets/filter-memory.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
-FilterMemory.attach([
+FilterMemory.auto({ extra: [
   { key:'year', sel:'.pe-year-toggle', type:'seg' }, { key:'metric', sel:'.metric-toggle', type:'seg' }, { key:'era', sel:'#pe-era-dots', type:'seg', cls:'active' }
-]);
+  ,{ key:'cont', type:'fn', get:() => [...contSel].join('|'), set:v => { contSel.clear(); v.split('|').filter(Boolean).forEach(c => contSel.add(c)); const data = activeData(); renderMap(); renderBars(data); renderContinentLegend(data, 'map-continent-legend'); renderContinentLegend(data); if(window.__peBubbleRows) renderBubble(); return true; } }
+] });
 FilterMemory.restore();
 </script>
 </body>

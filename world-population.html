@@ -286,7 +286,7 @@
         <div class="wp-more"><button type="button" class="wp-mini" id="rk-more"></button></div>
         <h3 style="margin:18px 0 2px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Rank history 1950–2050</h3>
         <div class="wp-frow" style="margin:4px 0 6px"><span id="rk-chips"></span>
-          <select class="wp-sel" id="rk-add"></select><button type="button" class="wp-mini" id="rk-top">Top 10 of the year above</button></div>
+          <select class="wp-sel" id="rk-add" data-nofm></select><button type="button" class="wp-mini" id="rk-top">Top 10 of the year above</button></div>
         <div class="wp-chart" id="rk-chart"></div>
       </div>
 
@@ -361,6 +361,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/world-population-data.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
 const P = WORLD_POP, Y0 = P.y0, Y1 = P.y1, NY = Y1 - Y0 + 1, PROJ = P.projFrom, GE = P.ge;
 const L = new Map(P.locs.map(l => [l.id, l]));
@@ -924,6 +925,13 @@ renderGrowth();
 R.hist = COUNTRIES.map(c => [c.id, ranks('total').get(c.id)[yi(2026)]]).sort((a, b) => a[1] - b[1]).slice(0, 8).map(a => a[0]);
 renderRank();
 renderHero(); renderInsights();
+
+// ---------- shareable links: every filter (sliders, toggles, selects, chips) is kept in the address (assets/filter-memory.js) ----------
+FilterMemory.auto({ exclude:['age-regchips', 'rk-chips'], extra: [
+  { key:'regs', type:'fn', get:() => REG_IDS.filter(id => RG.on.has(id)).join(','), set:v => { RG.on = new Set(v.split(',').filter(Boolean).map(Number)); renderAge(); return true; } },
+  { key:'hist', type:'fn', get:() => R.hist.join(','), set:v => { R.hist = v ? v.split(',').map(Number).filter(id => L.has(id)) : []; R.autoHist = false; renderRank(); return true; } }
+] });
+FilterMemory.restore();
 </script>
 </body>
 </html>
