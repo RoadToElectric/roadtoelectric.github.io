@@ -401,11 +401,11 @@ function segVal(id){ return $(id).querySelector('.active').dataset.v; }
 document.querySelectorAll('.wp-filters').forEach(f => f.querySelector('.wp-ftoggle').addEventListener('click', () => { f.classList.toggle('closed'); f.querySelector('.wp-ftoggle').setAttribute('aria-expanded', !f.classList.contains('closed')); }));
 
 // ---------- location selectors (one focus, shared by sections 1 and 2) ----------
-function locOptions(){
+function locOptions(){   // Northern America is listed under Regions and under Subregions (same UN series)
   const byName = (a, b) => a.n.localeCompare(b.n);
   const o = l => `<option value="${l.id}">${l.n}</option>`;
   return `<option value="900">World</option><optgroup label="Regions">${REGIONS.slice().sort(byName).map(o).join('')}</optgroup>` +
-    `<optgroup label="Subregions">${SUBS.filter(l => l.id !== 905).sort(byName).map(o).join('')}</optgroup>` +
+    `<optgroup label="Subregions">${SUBS.slice().sort(byName).map(o).join('')}</optgroup>` +
     `<optgroup label="Countries and areas">${COUNTRIES.slice().sort(byName).map(o).join('')}</optgroup>`;
 }
 ['loc-a', 'loc-b'].forEach(id => { $(id).innerHTML = locOptions(); $(id).addEventListener('change', e => setLoc(+e.target.value)); });
