@@ -113,3 +113,8 @@ html[data-view="mobile"] svg.chart{ touch-action:pan-y; }
 
 /* Mix by Country: the Clear Selection button on the map covers its zoom buttons on a phone; the one above the map stays */
 html[data-view="mobile"] #map-clear{ display:none !important; }
+
+/* white page background in the phone view (light theme only; the dark theme keeps its own) */
+@media (prefers-color-scheme: light){ html[data-view="mobile"]:not([data-theme="dark"]){ --bg:#ffffff; } }
+html[data-view="mobile"][data-theme="light"]{ --bg:#ffffff; }
+html[data-view="mobile"] .card, html[data-view="mobile"] .chart-card{ box-shadow:none; border:1px solid var(--border); }
