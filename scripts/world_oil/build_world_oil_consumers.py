@@ -17,6 +17,8 @@ Method
 Checks printed at the end: the countries added up against the world series, and the United States against the EIA (US petroleum products supplied: 1950 6.46, 1955 8.46, 1960 9.80 mb/d).
 Run:  python scripts/world_oil/build_world_oil_consumers.py   (from the repo root)"""
 import csv, collections, json, os
+import sys as _sys, os as _os; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from oil_regions import REGION_OF
 import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -72,7 +74,7 @@ for ent, s in ei.items():
     if max(ser.values(), default=0) < 0.01:
         continue
     p = [round((sum(pop_of(c, y) for c in SOV) if hist and y <= 1984 else pop_of(iso, y)) / 1000) for y in YEARS]
-    row = {'n': ent, 'c': iso, 'v': [round(ser[y], 4) if y in ser else None for y in YEARS], 'p': p}
+    row = {'n': ent, 'c': iso, 'v': [round(ser[y], 4) if y in ser else None for y in YEARS], 'p': p, 'g': REGION_OF.get(iso, 'Other')}
     if hist: row['h'] = hist
     rows.append(row)
 rows.sort(key=lambda r: -(r['v'][-1] or 0))
