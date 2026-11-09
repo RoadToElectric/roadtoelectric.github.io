@@ -275,6 +275,8 @@
             <div class="wp-frow"><label class="wp-fl">Age range</label>
               <div class="wp-dual" id="rk-dual"><div class="tr"></div><div class="fill" id="rk-fill"></div><input type="range" id="rk-a" min="0" max="100" value="0" aria-label="Youngest age of the range"><input type="range" id="rk-b" min="0" max="100" value="100" aria-label="Oldest age of the range"></div>
               <b class="wp-agel" id="rk-agel">0–100+</b><span class="wp-note" id="rk-load" style="margin:0"></span></div>
+            <div class="wp-frow"><label class="wp-fl">Level</label>
+              <div class="wp-seg" id="rk-scope"><button type="button" data-v="country" class="active">Countries</button><button type="button" data-v="sub">Subregions</button><button type="button" data-v="region">Regions</button></div></div>
             <div class="wp-frow"><label class="wp-fl">Show</label>
               <div class="wp-seg" id="rk-mode"><button type="button" data-v="n" class="active">Number of people</button><button type="button" data-v="p">% of population</button></div></div>
             <div class="wp-frow"><label class="wp-fl">Year</label>
@@ -708,31 +710,35 @@ function renderGrowth(){
 }
 
 // ---------- 4 · rankings ----------
-const R = { measure: 'total', mode: 'n', year: 2026, cmp: '10', hist: [], all: false, n: 20 };
+const R = { scope: 'country', autoHist: false, measure: 'total', mode: 'n', year: 2026, cmp: '10', hist: [], all: false, n: 20 };
 const rankCache = new Map();
 const RANK_MIN = 1e6;      // % mode: areas under a million people are left out of the age-group rankings
 const rv = (l, y) => R.mode === 'p' ? (R.measure === 'total' ? S(l, 'total')[y] / S(WORLD, 'total')[y] * 100 : S(l, R.measure)[y] / S(l, 'total')[y] * 100) : S(l, R.measure)[y];     // the ranked value: people, or % of population
-const eligible = (l, y) => R.mode !== 'p' || R.measure === 'total' || S(l, 'total')[y] >= RANK_MIN;
+const rankList = () => R.scope === 'country' ? COUNTRIES : R.scope === 'sub' ? SUBS : REGIONS;
+const scopeWord = { country: 'country', sub: 'subregion', region: 'region' };
+const eligible = (l, y) => R.mode !== 'p' || R.measure === 'total' || R.scope !== 'country' || S(l, 'total')[y] >= RANK_MIN;
 const fmtPct = v => (v >= 10 ? v.toFixed(1) : v.toFixed(2)) + '%';
 function ranks(measure){                  // per country, per year: rank by the measure or its % of population (1 = largest; 0 = left out)
-  const key = measure + '|' + R.mode;
+  const key = measure + '|' + R.mode + '|' + R.scope, list = rankList();
   if (rankCache.has(key)) return rankCache.get(key);
-  const rk = new Map(COUNTRIES.map(c => [c.id, new Int16Array(NY)]));
-  for (let y = 0; y < NY; y++) { COUNTRIES.filter(c => eligible(c, y)).map(c => [c.id, rv(c, y)]).sort((a, b) => b[1] - a[1]).forEach(([id], r) => { rk.get(id)[y] = r + 1; }); }
+  const rk = new Map(list.map(c => [c.id, new Int16Array(NY)]));
+  for (let y = 0; y < NY; y++) { list.filter(c => eligible(c, y)).map(c => [c.id, rv(c, y)]).sort((a, b) => b[1] - a[1]).forEach(([id], r) => { rk.get(id)[y] = r + 1; }); }
   rankCache.set(key, rk); return rk;
 }
 // age range A-B: the slider's two ends. A ready-made group (everyone, under 16, 16-64, 65+, 18+, 80+) uses the kept series; any other range
 // needs the single-year file of every country (assets/population/<id>.json), loaded once.
 const RK_PRESET = { total: [0, 100], u16: [0, 15], w1664: [16, 64], ge65: [65, 100], ge18: [18, 100], ge80: [80, 100] };
 const rangeKey = (a, b) => { for (const k in RK_PRESET) if (RK_PRESET[k][0] === a && RK_PRESET[k][1] === b) return k; if (b === 100 && GE.includes(a)) return 'ge' + a; return `range:${a}-${b}`; };
-let allAgesReady = false, allAgesPromise = null;
+const agesReady = () => rankList().concat([WORLD]).every(l => RANGE_PREFIX.has(l.id));
+let allAgesPromise = null, allAgesFor = '';
 function loadAllAges(){
-  if (allAgesPromise) return allAgesPromise;
-  const ids = COUNTRIES.map(c => c.id).concat([900]); let done = 0, next = 0;
+  if (allAgesPromise && allAgesFor === R.scope) return allAgesPromise;
+  allAgesFor = R.scope;
+  const ids = rankList().concat([WORLD]).map(l => l.id).filter(id => !RANGE_PREFIX.has(id)); let done = 0, next = 0;
   const work = async () => { while (next < ids.length) { const id = ids[next++], j = await getAges(id), pre = new Float64Array(NY * 102);
     for (let y = 0; y < NY; y++) { const row = j.d[y]; let c = 0; for (let a = 0; a < 101; a++) { pre[y * 102 + a] = c; c += row[a]; } pre[y * 102 + 101] = c; }
     RANGE_PREFIX.set(id, pre); done++; $('rk-load').textContent = `loading single-year ages… ${done}/${ids.length}`; } };
-  allAgesPromise = Promise.all(Array.from({ length: 10 }, work)).then(() => { allAgesReady = true; $('rk-load').textContent = ''; }, e => { allAgesPromise = null; $('rk-load').textContent = 'could not load the single-year files'; throw e; });
+  allAgesPromise = Promise.all(Array.from({ length: 10 }, work)).then(() => { $('rk-load').textContent = ''; }, e => { allAgesPromise = null; $('rk-load').textContent = 'could not load the single-year files'; throw e; });
   return allAgesPromise;
 }
 function syncRkRange(a, b){
@@ -761,14 +767,15 @@ $('rk-play').addEventListener('click', () => {
   rkTimer = setInterval(() => { R.year++; $('rk-year').value = R.year; renderRank(); if (R.year >= Y1) { clearInterval(rkTimer); rkTimer = null; $('rk-play').textContent = '▶'; } }, 260);
 });
 function renderRank(){
-  if (R.measure.startsWith('range:') && !allAgesReady) {            // custom age range: wait for the single-year files, then draw
+  if (R.measure.startsWith('range:') && !agesReady()) {            // custom age range: wait for the single-year files, then draw
     $('rk-load').textContent = 'loading single-year ages…'; $('rk-fsum').textContent = `loading… · ${MEASURE_LABEL[R.measure]}`;
-    const key = R.measure; loadAllAges().then(() => { if (R.measure === key) renderRank(); }, () => {}); return;
+    const key = R.measure, sc = R.scope; loadAllAges().then(() => { if (R.measure === key && R.scope === sc) renderRank(); }, () => {}); return;
   }
   $('rk-leg').innerHTML = contLegend('<span><i style="background:var(--accent)"></i>bar</span><span><i style="background:var(--accent-2)"></i>followed in the rank history below (click a bar to add or remove)</span>');
+  if (R.autoHist) { R.autoHist = false; R.hist = rankList().map(c => [c.id, ranks(R.measure).get(c.id)[yi(R.year)]]).filter(a => a[1] > 0).sort((a, b) => a[1] - b[1]).slice(0, R.scope === 'country' ? 8 : 6).map(a => a[0]); }
   const rk = ranks(R.measure), y = yi(R.year), cmpYear = R.cmp === '1950' ? 1950 : Math.max(Y0, R.year - +R.cmp);
   const pc = R.mode === 'p', unit = R.measure === 'total' ? 'people' : MEASURE_LABEL[R.measure];
-  const rows = COUNTRIES.map(l => ({ l, v: rv(l, y), n: S(l, R.measure)[y], r: rk.get(l.id)[y], r0: rk.get(l.id)[yi(cmpYear)] })).filter(r => r.r > 0).sort((a, b) => a.r - b.r);
+  const rows = rankList().map(l => ({ l, v: rv(l, y), n: S(l, R.measure)[y], r: rk.get(l.id)[y], r0: rk.get(l.id)[yi(cmpYear)] })).filter(r => r.r > 0).sort((a, b) => a.r - b.r);
   const nAll = rows.length; if (!R.all) rows.length = Math.min(rows.length, R.n); syncMore('rk-more', R.all, nAll, R.n);
   rows.forEach(r => r.bar = r.v);
   barRows($('rk-bars'), rows, { max: rows[0].v, hover: () => R.measure, click: id => toggleHist(id), tint: r => contColor(r.l), color: r => R.hist.includes(r.l.id) ? 'var(--accent-2)' : 'var(--accent)',
@@ -784,9 +791,11 @@ function renderChips(){
   $('rk-chips').innerHTML = R.hist.map(id => `<button type="button" class="wp-chip on" data-id="${id}">${L.get(id).n}<b>✕</b></button>`).join(' ');
   $('rk-chips').querySelectorAll('.wp-chip').forEach(b => b.addEventListener('click', () => { R.hist = R.hist.filter(x => x !== +b.dataset.id); renderRank(); }));
 }
-$('rk-add').innerHTML = '<option value="">+ add a country…</option>' + COUNTRIES.slice().sort((a, b) => a.n.localeCompare(b.n)).map(l => `<option value="${l.id}">${l.n}</option>`).join('');
+function fillAdd(){ $('rk-add').innerHTML = `<option value="">+ add a ${scopeWord[R.scope]}…</option>` + rankList().slice().sort((a, b) => a.n.localeCompare(b.n)).map(l => `<option value="${l.id}">${l.n}</option>`).join(''); }
+fillAdd();
+seg('rk-scope', v => { R.scope = v; R.all = false; R.autoHist = true; fillAdd(); renderRank(); });
 $('rk-add').addEventListener('change', e => { if (e.target.value) addHist(+e.target.value); e.target.value = ''; });
-$('rk-top').addEventListener('click', () => { R.hist = COUNTRIES.map(c => [c.id, ranks(R.measure).get(c.id)[yi(R.year)]]).filter(a => a[1] > 0).sort((a, b) => a[1] - b[1]).slice(0, 10).map(a => a[0]); renderRank(); });
+$('rk-top').addEventListener('click', () => { R.hist = rankList().map(c => [c.id, ranks(R.measure).get(c.id)[yi(R.year)]]).filter(a => a[1] > 0).sort((a, b) => a[1] - b[1]).slice(0, 10).map(a => a[0]); renderRank(); });
 function renderRankChart(){
   renderChips();
   const rk = ranks(R.measure), box = chartBox('rk-chart'), ids = R.hist;
