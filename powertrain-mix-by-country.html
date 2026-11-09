@@ -7,8 +7,8 @@
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/mix-filter-layout.css">
-<link rel="stylesheet" href="assets/mobile.css">
-<script src="assets/view-mode.js"></script>
+<link rel="stylesheet" href="assets/mobile.css?v=3">
+<script src="assets/view-mode.js?v=2"></script>
 <script src="assets/tooltip-fit.js" defer></script>
 </head>
 <body>
@@ -549,7 +549,7 @@
 <script src="assets/manufacturer-model-yearly-data.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
-<script src="assets/electrification-bars.js"></script>
+<script src="assets/electrification-bars.js?v=3"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
 <script src="assets/country-ev-regulations-data.js"></script>
 <script>
@@ -3477,7 +3477,7 @@ function renderCarsOnRoadChart(country){
 
   const COLOR = '#64748b';
   const BEV_COLOR = '#1e8f5f';
-  const W = 900, H = 320, M = {top:16, right:16, bottom:30, left:56};
+  const nv = mixNative('cars-on-road-svg', 900, 320, { h:290 }), W = nv.W, H = nv.H, M = nv.mobile ? {top:12, right:10, bottom:28, left:44} : {top:16, right:16, bottom:30, left:56};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
   const svg = d3.select('#cars-on-road-svg');
@@ -3497,7 +3497,7 @@ function renderCarsOnRoadChart(country){
   g.append('g')
     .attr('class', 'bubble-axis')
     .attr('transform', `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickValues(series.map(d => d.year).filter(y => y % 2 === 0)));
+    .call(d3.axisBottom(xScale).tickValues(series.map(d => d.year).filter(y => y % (nv.mobile ? 4 : 2) === 0)));
 
   g.append('g')
     .attr('class', 'bubble-axis')
@@ -3516,10 +3516,10 @@ function renderCarsOnRoadChart(country){
         .attr('stroke', '#dc2626').attr('stroke-width', 1.25).attr('stroke-dasharray', '2,3')
         .style('pointer-events', 'none');
       g.append('text')
-        .attr('x', innerW).attr('y', ty - 3)
-        .attr('text-anchor', 'end').attr('fill', '#dc2626')
+        .attr('x', nv.mobile ? 2 : innerW).attr('y', ty - 3)
+        .attr('text-anchor', nv.mobile ? 'start' : 'end').attr('fill', '#dc2626')
         .style('font-size', '10px').style('pointer-events', 'none')
-        .text(`${label} of ${peakYear.year} peak (${Math.round(threshold).toLocaleString('en-US')})`);
+        .text(nv.mobile ? `${label} of peak · ${d3.format('~s')(Math.round(threshold))}` : `${label} of ${peakYear.year} peak (${Math.round(threshold).toLocaleString('en-US')})`);
     });
   }
 
@@ -4055,6 +4055,8 @@ function trendsSeriesAggregate(){
   })) };
 }
 
+// phone view: a chart is drawn at the width of its card instead of scrolling sideways (assets/view-mode.js RTEView.native)
+const mixNative = (id, w, h, o) => (window.RTEView && RTEView.native) ? RTEView.native(document.getElementById(id), w, h, o) : { mobile:false, W:w, H:h };
 function renderTrendsChart(){
   const isFocused = focusedCountry && (COUNTRY_YEARLY[focusedCountry] || (typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[focusedCountry]));
   const { granularity, points } = isFocused ? trendsSeriesForCountry(focusedCountry) : trendsSeriesAggregate();
@@ -4078,7 +4080,7 @@ function renderTrendsChart(){
   trendsSvg.selectAll('*').remove();
   if(points.length === 0 || activeKeys.length === 0 || points.every(d => d.total === 0)) return;
 
-  const W = 900, H = 300, M = {top:16, right:16, bottom:30, left:38};
+  const nv = mixNative('trends-svg', 900, 300, { h:280 }), W = nv.W, H = nv.H, M = nv.mobile ? {top:12, right:10, bottom:28, left:34} : {top:16, right:16, bottom:30, left:38};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
@@ -4106,7 +4108,7 @@ function renderTrendsChart(){
   const monthStep = hasTime ? ([1, 3, 6, 12].find(s => s * pxPerMonth >= 30) || 12) : 1;
   const lastMonthPt = pctSeries.filter(d => d.kind === 'month').pop();
   const tickLabelOf = d => {
-    if(!hasTime) return d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
+    if(!hasTime) return nv.mobile ? (d.isPartial || d.isProjected ? d.label + '*' : d.label) : d.isPartial ? `${d.label} (YTD)` : d.isProjected ? `${d.label} (Proj.)` : d.label;
     if(d.kind === 'proj') return 'Proj.';
     if(d.kind === 'year') return d.label;
     if(d.kind === 'partial') return d.label.replace(/ \d{4}$/, '');   // the year is implied by its neighbours; the tooltip has it in full
@@ -4114,6 +4116,11 @@ function renderTrendsChart(){
     return m === 0 ? d.label.slice(0, 4) : TREND_MONTH_ABBR[m];
   };
   let tickPts = pctSeries.filter(d => !hasTime || d.kind !== 'month' || d.t0 % monthStep === 0 || d === lastMonthPt);
+  if(nv.mobile && !hasTime){ const step = Math.max(1, Math.ceil(46 / (innerW / Math.max(1, pctSeries.length - 1)))); tickPts = tickPts.filter((d, k) => (tickPts.length - 1 - k) % step === 0); }   // phone: as many year labels as fit
+  if(nv.mobile && hasTime){   // phone: year labels (12 months wide) thinned to what fits, the latest kept
+    const yrs = tickPts.filter(d => d.kind === 'year'), stepY = Math.max(1, Math.ceil(40 / Math.max(1, 12 * pxPerMonth))), keepY = new Set(yrs.filter((d, k) => (yrs.length - 1 - k) % stepY === 0));
+    tickPts = tickPts.filter(d => (d.kind !== 'year' || keepY.has(d)) && d.kind !== 'partial');   // the "Jan-Apr" period label is left to the tooltip
+  }
   const tickText = new Map(tickPts.map(d => [d.t, tickLabelOf(d)]));
   if(hasTime){   // a month label that would run into a year / period label gives way to it
     const halfW = d => (tickText.get(d.t).length * 6 + 8) / 2;
@@ -5051,7 +5058,7 @@ function makeBrokenXScale(breakVal, maxVal, innerW, hasBreak){
 }
 
 function renderBubbleChart(){
-  const W = 900, H = 460, M = {top:20, right:30, bottom:50, left:70};
+  const nv = mixNative('bubble-svg', 900, 460, { h:420 }), W = nv.W, H = nv.H, M = nv.mobile ? {top:14, right:12, bottom:44, left:38} : {top:20, right:30, bottom:50, left:70};
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
@@ -7268,6 +7275,8 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 // the core filters (period, country, fuels, continents ...) live in the address by the page's own code; the other selections (brand / model sections, toggles) go in ?fm= through assets/filter-memory.js
 FilterMemory.auto({ exclude:['elec-tl-range'] });
 FilterMemory.restore();
+// phone view: charts that draw at the width of their card are redrawn after a rotation or a view switch
+if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderTrendsChart(); renderBubbleChart(); if(focusedCountry) renderCarsOnRoad(); });
 </script>
 <script>
 // a link such as index.html's first card (…?period=latest#elec-share-card): scroll to the section once the page has drawn (the URL is rewritten by the state code, so the hash is read from the early copy)

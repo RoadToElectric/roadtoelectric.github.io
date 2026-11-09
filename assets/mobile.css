@@ -107,3 +107,9 @@ html[data-view="mobile"] .ch-brow{ grid-template-columns:96px 1fr 52px 46px; gap
 html[data-view="mobile"] .ch-brow.sh{ grid-template-columns:96px 38px 1fr 52px 46px; }
 html[data-view="mobile"] .ch-bands{ gap:6px; }
 html[data-view="mobile"] .ch-stats, html[data-view="mobile"] .ch-stats.six{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+
+/* charts may be scrolled past with a finger (the desktop rule touch-action:none would make a chart a scroll trap) */
+html[data-view="mobile"] svg.chart{ touch-action:pan-y; }
+
+/* Mix by Country: the Clear Selection button on the map covers its zoom buttons on a phone; the one above the map stays */
+html[data-view="mobile"] #map-clear{ display:none !important; }

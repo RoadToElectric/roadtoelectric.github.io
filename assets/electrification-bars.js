@@ -167,7 +167,9 @@ function renderElectrificationBarsChart(country){
   const wrap = svgEl.closest('.chart-card');
   svg.selectAll('*').remove();
 
-  const W = 900, H = 320, M = { top: 16, right: 16, bottom: displaySeries.length > 6 ? 56 : 34, left: elecBarsMode === 'raw' ? 50 : 38 };
+  // on a phone the chart is drawn at the width of its card (assets/view-mode.js RTEView.native): real pixel text, no sideways scroll
+  const nv = (window.RTEView && RTEView.native) ? RTEView.native(svgEl, 900, 320, { h: 300 }) : { mobile: false, W: 900, H: 320 };
+  const W = nv.W, H = nv.H, M = { top: 16, right: nv.mobile ? 8 : 16, bottom: displaySeries.length > 6 ? 56 : 34, left: elecBarsMode === 'raw' ? (nv.mobile ? 42 : 50) : (nv.mobile ? 34 : 38) };
   const innerW = W - M.left - M.right;
   const innerH = H - M.top - M.bottom;
 
@@ -192,10 +194,12 @@ function renderElectrificationBarsChart(country){
   const xAxisG = g.append('g').attr('class', 'bubble-axis').attr('transform', `translate(0,${innerH})`);
   xAxisG.append('line').attr('class', 'domain').attr('x1', 0).attr('x2', innerW).attr('y1', 0).attr('y2', 0);
   const rotateLabels = displaySeries.length > 6;
-  laidOut.forEach(d => {
+  const monthW = d3.min(laidOut, d => d.w) || 20, xStep = nv.mobile ? Math.max(1, Math.ceil(22 / monthW)) : 1;       // phone: rotated labels need ~22 px each; wide (year) bars always keep theirs
+  laidOut.forEach((d, idx) => {
     const cx = d.x0 + d.w / 2;
     const tick = xAxisG.append('g').attr('class', 'tick').attr('transform', `translate(${cx},0)`);
     tick.append('line').attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 6);
+    if(xStep > 1 && d.w < monthW * 1.8 && (laidOut.length - 1 - idx) % xStep) return;
     const label = tick.append('text').attr('x', 0).attr('y', rotateLabels ? 10 : 20).text(d.label);
     if(rotateLabels){
       label.attr('transform', 'rotate(-40)').style('text-anchor', 'end');
@@ -237,8 +241,10 @@ function renderElectrificationBarsChart(country){
   // BEV label above each bar -- always the full BEV value (in whichever unit the current mode
   // uses), positioned above the top of the visible stack, only when BEV itself is shown
   if(visibleKeys.includes('bev')){
+    // on a phone only as many bar labels as fit side by side (about 38 px each, the latest bar always kept), in a short format
+    const lblStep = nv.mobile ? Math.max(1, Math.ceil(38 / Math.max(1, d3.mean(laidOut, d => d.w)))) : 1;
     g.selectAll('.elec-bar-bev-label')
-      .data(laidOut)
+      .data(laidOut.filter((d, i) => (laidOut.length - 1 - i) % lblStep === 0))
       .join('text')
       .attr('class', 'elec-bar-bev-label')
       .attr('x', d => d.x0 + d.w / 2)
@@ -249,6 +255,7 @@ function renderElectrificationBarsChart(country){
       .style('font-variant-numeric', 'tabular-nums')
       .style('fill', 'var(--text)')
       .style('pointer-events', 'none')
-      .text(d => elecBarsMode === 'raw' ? d.bev.toLocaleString('en-US') : d.bev.toFixed(1) + '%');
+      .text(d => elecBarsMode === 'raw' ? (nv.mobile ? d3.format('~s')(d.bev) : d.bev.toLocaleString('en-US')) : d.bev.toFixed(1) + '%');
   }
 }
+if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { if(typeof renderElectrificationBars === 'function') renderElectrificationBars(); });

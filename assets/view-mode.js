@@ -107,6 +107,22 @@
     window.addEventListener('resize', function(){ scheduleFit(300); });
   }
 
+  // ---------- native portrait charts: RTEView.native(svg, deskW, deskH, {h}) sizes a chart's drawing to the width of its box on a phone (real pixels, readable text, no sideways scroll) ----------
+  // Returns {mobile, W, H}: the chart code draws with these (desktop keeps its own W x H). RTEView.onResize(fn) re-draws after a rotation / view switch.
+  window.RTEView.native = function(svgEl, deskW, deskH, opt){
+    opt = opt || {};
+    var host = svgEl.parentElement, w = svgEl.getBoundingClientRect().width || (host && host.clientWidth) || 0;
+    if(current !== 'mobile' || w < 120){ svgEl.removeAttribute('data-rte-nofit'); svgEl.setAttribute('viewBox', '0 0 ' + deskW + ' ' + deskH); return { mobile: false, W: deskW, H: deskH }; }
+    var W = Math.max(280, Math.round(w)), H = Math.round(opt.h || Math.min(deskH, W * 0.9));
+    svgEl.setAttribute('data-rte-nofit', '1'); svgEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    return { mobile: true, W: W, H: H };
+  };
+  var reCbs = [], reT = null, lastIW = window.innerWidth;
+  window.RTEView.onResize = function(fn){ reCbs.push(fn); };
+  function fireRe(){ reCbs.forEach(function(f){ try{ f(); }catch(e){ if(window.console) console.error(e); } }); }
+  window.addEventListener('resize', function(){ if(current !== 'mobile' || Math.abs(window.innerWidth - lastIW) < 30) return; lastIW = window.innerWidth; clearTimeout(reT); reT = setTimeout(fireRe, 250); });
+  window.addEventListener('rte-viewchange', function(){ lastIW = window.innerWidth; clearTimeout(reT); reT = setTimeout(fireRe, 150); });
+
   apply(false);
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ ui(); watchCharts(); }); else { ui(); watchCharts(); }
   var t = null;
