@@ -107,6 +107,49 @@
     window.addEventListener('resize', function(){ scheduleFit(300); });
   }
 
+  // ---------- section bar (phone): the sections of the page (the direct children of .page) with Previous / Next buttons ----------
+  var sn = null, snT = null, snP = null, snN = null, snRaf = null;
+  function secList(){
+    var pg = document.querySelector('.main .page') || document.querySelector('.page'), out = [], i, c;
+    if(!pg) return out;
+    for(i = 0; i < pg.children.length; i++){ c = pg.children[i]; if(c.matches('footer, .page-footer, .mfr-sales-preview, .fx-chipbar, script, style') || c.offsetHeight < 80) continue; out.push(c); }
+    return out;
+  }
+  function secOff(){ var b = document.querySelector('.rte-filter-bar:not([hidden]), .fl-bar'); return (b && b.offsetHeight && getComputedStyle(b).position === 'sticky' ? b.offsetHeight : 0) + 6; }
+  function secTitle(el){ var h = el.querySelector('h1, h2, h3, .wp-eyebrow, .wo-eyebrow'), t = h ? h.textContent.replace(/\s+/g, ' ').trim() : ''; return (t || (el.id ? el.id.replace(/[-_]/g, ' ') : 'Section')).slice(0, 60); }
+  function secIdx(list){ var off = secOff() + 40, idx = 0, i; for(i = 0; i < list.length; i++){ if(list[i].getBoundingClientRect().top <= off) idx = i; else break; } return idx; }
+  function secUpdate(){
+    snRaf = null; if(!sn) return;
+    if(current !== 'mobile'){ sn.hidden = true; return; }
+    var list = secList(), idx = secIdx(list); sn.hidden = list.length < 2; if(!list.length) return;
+    snT.textContent = (idx + 1) + ' / ' + list.length + ' · ' + secTitle(list[idx]); snP.disabled = idx === 0; snN.disabled = idx >= list.length - 1;
+  }
+  function secSoon(ms){ if(snRaf) return; snRaf = setTimeout(secUpdate, ms || 60); }
+  function secGo(dir){
+    var list = secList(); if(!list.length) return; var idx = secIdx(list), cur = list[idx], target;
+    if(dir < 0){ target = cur.getBoundingClientRect().top - secOff() < -40 ? idx : idx - 1; }      // inside a long section, Previous first goes back to its top
+    else target = idx + 1;
+    target = Math.max(0, Math.min(list.length - 1, target));
+    window.scrollTo({ top: list[target].getBoundingClientRect().top + window.pageYOffset - secOff() - 4, behavior: 'smooth' });
+    secSoon(500); secSoon(900);
+  }
+  function secnav(){
+    if(!document.body || !document.querySelector('.page')) return;
+    if(!sn){
+      sn = mk('div', 'rte-secnav'); sn.setAttribute('role', 'navigation'); sn.setAttribute('aria-label', 'Sections');
+      snP = mk('button', 'rte-secnav-prev', '‹ Prev'); snP.type = 'button'; snN = mk('button', 'rte-secnav-next', 'Next ›'); snN.type = 'button'; snT = mk('span', 'rte-secnav-lbl');
+      sn.appendChild(snP); sn.appendChild(snT); sn.appendChild(snN); document.body.appendChild(sn);
+      snP.addEventListener('click', function(){ secGo(-1); }); snN.addEventListener('click', function(){ secGo(1); });
+      window.addEventListener('scroll', function(){ secSoon(60); }, { passive: true }); window.addEventListener('resize', function(){ secSoon(200); });
+      document.addEventListener('click', function(){ secSoon(500); }, true); document.addEventListener('change', function(){ secSoon(500); }, true);
+      if(window.MutationObserver) new MutationObserver(function(){ secSoon(300); }).observe(document.querySelector('.page'), { attributes: true, childList: true });
+    }
+    secUpdate();
+  }
+  document.addEventListener('click', function(e){ var t = e.target.closest && e.target.closest('header.page-header .subtitle'); if(t && current === 'mobile') t.classList.toggle('rte-open'); });   // a long intro: tap to read it all
+  window.addEventListener('rte-viewchange', function(){ secnav(); });
+  window.addEventListener('load', function(){ secnav(); setTimeout(secnav, 1200); });
+
   // ---------- native portrait charts: RTEView.native(svg, deskW, deskH, {h}) sizes a chart's drawing to the width of its box on a phone (real pixels, readable text, no sideways scroll) ----------
   // Returns {mobile, W, H}: the chart code draws with these (desktop keeps its own W x H). RTEView.onResize(fn) re-draws after a rotation / view switch.
   window.RTEView.native = function(svgEl, deskW, deskH, opt){
