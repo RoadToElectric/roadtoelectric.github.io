@@ -351,6 +351,35 @@ add(G_S, 'Jeep', 2016, 'CY', 1410000, 'sales', 'press_release', 'FCA via ANSA, 1
 add(G_S, 'Jeep (combined shipments)', 2016, 'CY', 1424000, 'shipments', 'filing', 'FCA delivers record 2016 results (Stellantis Media, 25 Jan 2017)', MS + 'uk-en/fiat/press/fca-delivers-record-2016-results',
     scope='Jeep combined shipments (consolidated + joint ventures), thousand units', notes='+9% on 2015')
 
+# VERcity (auto.vercity.ru) brand sales statistics: third-party compilation (AEB, ACEA, Automotive News, GoodCarBadCar, Focus2move) with a worldwide Jan-Dec series per brand.
+# NOT company-reported: used ONLY for brand-years with no holding/press-release figure above, from 2015 on (the older years are erratic, e.g. Maserati 2013 1,336 vs 15k shipped).
+# Measured gap against the company-reported figures already in this table: Peugeot 2022-24 -4.3% / -4.6% / -1.9%; Jeep 2012-16 -10.6% / -11.7% / -11.1% / -5.8% / -2.7%; Citroen 2021 -4.4%, 2017-19 -6% to -10% (DS included);
+# Fiat 2023 -8%; Opel + Vauxhall 2023 -7%; Alfa Romeo 2024 60,167 vs about 60.8k implied by Alfa's own +20.1% in 2025. No 2020 row exists on the site; 2025 = January-June only.
+VC = 'https://auto.vercity.ru/statistics/sales/marks/%s/'
+VC_NOTE = 'third-party compilation, typically 2-12% below company-reported totals; fills a year with no company figure'
+VC_CY = {  # brand label -> (vercity slug(s), {year: units})
+    'Peugeot': (('peugeot',), {2021: 1159797}),
+    'Citroën': (('citroen',), {2022: 679814, 2023: 685566, 2024: 678228}),
+    'DS Automobiles': (('ds',), {2021: 48590, 2022: 56176, 2023: 54952, 2024: 40968}),
+    'Opel/Vauxhall': (('opel', 'vauxhall'), {2022: 434256 + 111606, 2024: 463275 + 115369}),
+    'Fiat': (('fiat',), {2015: 1534042, 2016: 1467740, 2017: 1512735, 2018: 1389151, 2019: 1321469, 2021: 1261296, 2022: 1151327}),
+    'Jeep': (('jeep',), {2017: 1374658, 2018: 1532750, 2019: 1439252, 2021: 1224426, 2022: 1064784, 2023: 1011132, 2024: 944767}),
+    'Alfa Romeo': (('alfa_romeo',), {2015: 63799, 2016: 71329, 2017: 104161, 2018: 113232, 2019: 77738, 2021: 50679, 2022: 50831, 2023: 68754, 2024: 60167}),
+    'Lancia': (('lancia',), {2015: 61649, 2016: 67152, 2017: 60542, 2018: 48582, 2019: 58775, 2021: 43773, 2022: 40990, 2023: 44715, 2024: 32558}),
+    'Ram': (('ram',), {2015: 607827, 2016: 656352, 2017: 682921, 2018: 710753, 2019: 829316, 2021: 750337, 2022: 656796, 2023: 664081, 2024: 567946}),
+    'Dodge': (('dodge',), {2015: 640507, 2016: 617027, 2017: 548495, 2018: 527194, 2019: 481877, 2021: 240126, 2022: 218058, 2023: 229604, 2024: 168283}),
+    'Chrysler': (('chrysler',), {2015: 402037, 2016: 310327, 2017: 257500, 2018: 230974, 2019: 187982, 2021: 172142, 2022: 171675, 2023: 193017, 2024: 166241}),
+}
+VC_H1_2025 = {'Peugeot': 568438, 'Citroën': 335287, 'DS Automobiles': 18393, 'Opel/Vauxhall': 216954 + 58329, 'Fiat': 552287, 'Alfa Romeo': 38813, 'Lancia': 6445, 'Jeep': 461737, 'Ram': 264197, 'Dodge': 58386, 'Chrysler': 69961}
+_have = {(r[1], r[2], r[3]) for r in ROWS if r[0] == G_S}
+for b, (slugs, yrs) in VC_CY.items():
+    for y, u in yrs.items():
+        if (b, y, 'CY') in _have:
+            continue
+        add(G_S, b, y, 'CY', u, 'sales', 'media', 'VERcity brand sales statistics (auto.vercity.ru)', VC % slugs[0], scope='VERcity worldwide compilation, Jan-Dec' + (' (Opel + Vauxhall pages added)' if len(slugs) > 1 else ''), notes=VC_NOTE)
+for b, u in VC_H1_2025.items():
+    add(G_S, b, 2025, 'H1', u, 'sales', 'media', 'VERcity brand sales statistics (auto.vercity.ru)', VC % VC_CY[b][0][0], scope='VERcity worldwide compilation, January-June 2025' + (' (Opel + Vauxhall pages added)' if len(VC_CY[b][0]) > 1 else ''), notes=VC_NOTE)
+
 if __name__ == '__main__':
     q = lambda s: "'" + str(s).replace("'", "''") + "'"
     vals = []
