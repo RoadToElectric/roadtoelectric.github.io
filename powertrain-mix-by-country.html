@@ -273,7 +273,7 @@
           <div class="mfr-sales-preview-title" id="elec-share-preview-title"></div>
           <div class="mfr-preview-panels">
             <div class="mfr-preview-panel">
-              <div class="mfr-preview-panel-title">BEV sales by year (2020 on)</div>
+              <div class="mfr-preview-panel-title">BEV sales by year (2020 on, running year = year to date + projection)</div>
               <svg class="chart" id="elec-share-year-svg" viewBox="0 0 320 260" preserveAspectRatio="none"></svg>
             </div>
             <div class="mfr-preview-panel mfr-preview-panel-wide">
@@ -4686,15 +4686,34 @@ function elecShareCountries(kind, key){
 }
 
 function buildBevYearRows(countries){
-  const byYear = new Map();
+  const byYear = new Map(), cur = +ELEC_CUR_YEAR;
   countries.forEach(c => {
-    (COUNTRY_YEARLY[c] || []).filter(r => r.period_type === 'ANNUAL' && r.year >= 2020).forEach(r => {
-      byYear.set(r.year, (byYear.get(r.year) || 0) + (r.bev || 0));
+    const rows = COUNTRY_YEARLY[c] || [];
+    rows.filter(r => r.period_type === 'ANNUAL' && r.year >= 2020).forEach(r => {
+      byYear.set(r.year, { year: r.year, bev: (byYear.get(r.year)?.bev || 0) + (r.bev || 0), projected: null });
     });
+    // the running year: real year-to-date BEV, and the projected full year where the country has one (YTD counts as its own projection otherwise)
+    const ytd = rows.find(r => r.year === cur && r.period_type === 'YTD'), pj = rows.find(r => r.year === cur && r.period_type === 'PROJECTED');
+    if(ytd || pj){
+      const e = byYear.get(cur) || { year: cur, bev: 0, projected: 0 };
+      const a = ytd ? (ytd.bev || 0) : 0;
+      e.bev += a; e.projected = (e.projected || 0) + (pj ? Math.max(pj.bev || 0, a) : a); e.isCurrent = true;
+      byYear.set(cur, e);
+    }
   });
-  return [...byYear.entries()].sort((a,b) => a[0] - b[0]).map(([year, bev]) => ({ year, bev }));
+  return [...byYear.values()].sort((a,b) => a.year - b.year);
 }
 
+// small legend inside a year bar chart: solid = real (year-to-date for the running year), paler = projected full year
+function addYearLegend(svg, x0, y0, hasProjection){
+  const lg = svg.append('g').attr('class', 'year-legend').attr('transform', `translate(${x0},${y0})`).style('font-size', '8.5px').style('fill', 'var(--text-muted)');
+  lg.append('rect').attr('width', 8).attr('height', 8).attr('y', -7).attr('fill', FUEL_COLORS.bev);
+  lg.append('text').attr('x', 11).text('actual / year to date');
+  if(hasProjection){
+    lg.append('rect').attr('x', 88).attr('width', 8).attr('height', 8).attr('y', -7).attr('fill', FUEL_COLORS.phev);
+    lg.append('text').attr('x', 99).text('projected full year');
+  }
+}
 function renderElecShareYearChart(rows){
   const svgEl = document.getElementById('elec-share-year-svg');
   const svg = d3.select(svgEl);
@@ -4703,7 +4722,7 @@ function renderElecShareYearChart(rows){
   const W = 320, H = 260, M = { top: 16, right: 10, bottom: 28, left: 46 };
   const innerW = W - M.left - M.right, innerH = H - M.top - M.bottom;
   const x = d3.scaleBand().domain(rows.map(d => d.year)).range([0, innerW]).padding(0.25);
-  const yMax = Math.max(1, ...rows.map(d => d.bev));
+  const yMax = Math.max(1, ...rows.map(d => d.projected || d.bev));
   const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
   const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
   g.append('g').attr('class', 'bubble-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('~s')));
@@ -4714,10 +4733,16 @@ function renderElecShareYearChart(rows){
     .attr('x', d => x(d.year)).attr('width', x.bandwidth())
     .attr('y', d => y(d.bev)).attr('height', d => innerH - y(d.bev))
     .attr('fill', FUEL_COLORS.bev);
+  const withProj = rows.filter(d => d.projected != null && d.projected > d.bev);
+  g.selectAll('.bar-projected').data(withProj).join('rect').attr('class', 'bar-projected')
+    .attr('x', d => x(d.year)).attr('width', x.bandwidth())
+    .attr('y', d => y(d.projected)).attr('height', d => Math.max(0, y(d.bev) - y(d.projected)))
+    .attr('fill', FUEL_COLORS.phev);
   g.selectAll('.bev-year-value').data(rows).join('text').attr('class', 'bev-year-value')
-    .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.bev) - 5)
+    .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.bev) - 5)
     .attr('text-anchor', 'middle').style('font-size', '9px').style('font-weight', '700')
-    .style('fill', 'var(--text)').text(d => d3.format('~s')(d.bev));
+    .style('fill', 'var(--text)').text(d => d3.format('~s')(d.projected || d.bev));
+  if(rows.some(d => d.isCurrent)) addYearLegend(svg, M.left, 9, withProj.length > 0);
 }
 
 // Every country's source spells the same car differently ("Model Y" / "MODEL Y" / "MODEL Y BEV",
@@ -6932,6 +6957,13 @@ const MFR_MONTHLY_SOURCE_NOTE = {
       .attr('x', d => x(d.year)).attr('width', x.bandwidth())
       .attr('y', d => y(d.projected)).attr('height', d => Math.max(0, y(d.total) - y(d.projected)))
       .attr('fill', FUEL_COLORS.phev);
+    if(!opts.rankByYear){
+      g.selectAll('.year-value').data(data.filter((d, i) => i >= data.length - 7)).join('text').attr('class', 'year-value')   // value labels on the last 7 bars (older ones would overlap)
+        .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.total) - 4)
+        .attr('text-anchor', 'middle').style('font-size', '8.5px').style('font-weight', '700')
+        .style('fill', 'var(--text)').text(d => d3.format('~s')(d.projected || d.total));
+    }
+    if(data.some(d => d.year === MFR_CURRENT_YEAR)) addYearLegend(svg, 4, 8, data.some(d => d.projected != null));
     if(opts.rankByYear){
       const rankLabels = g.selectAll('.rank-label').data(data).join('text').attr('class', 'rank-label')
         .attr('x', d => x(d.year) + x.bandwidth() / 2).attr('y', d => y(d.projected || d.total) - 5)
