@@ -115,6 +115,8 @@
   .wp-method li{ margin:5px 0; }
   .wp-method code{ overflow-wrap:anywhere; }
   .wp-load{ color:var(--text-muted); font-size:13px; padding:30px 0; text-align:center; }
+  .wp-table tr.sub td{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); background:var(--surface-alt); }
+  .wp-table td i.sw{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
   .wp-more{ text-align:center; margin:10px 0 2px; }
   .wp-more .wp-mini{ padding:7px 18px; font-weight:800; }
   .wp-conleg{ display:flex; flex-wrap:wrap; align-items:center; gap:3px 12px; font-size:11.5px; color:var(--text-muted); margin:2px 0 8px; }
@@ -219,9 +221,12 @@
               <button type="button" class="wp-play" id="ex-play" aria-label="Play">▶</button>
               <div class="wp-range"><input type="range" id="ex-year" min="1950" max="2050" value="2026" style="width:min(300px,52vw)"><b id="ex-yl" style="font-size:18px">2026</b></div>
               <label class="wp-fl" for="ex-cmp" style="min-width:0">Compare with</label><select class="wp-sel" id="ex-cmp"></select></div>
+            <div class="wp-frow"><label class="wp-fl" for="ex-cmpc">Compare country</label><select class="wp-sel" id="ex-cmpc"></select>
+              <span class="wp-note" style="margin:0">another area at the same year, dotted purple line</span></div>
           </div>
         </div>
         <div class="wp-chart" id="ex-chart"></div>
+        <div class="wp-frow" style="margin:10px 0 2px"><label class="wp-fl">Show</label><div class="wp-seg" id="ex-mode"><button type="button" data-v="n" class="active">Nb of people</button><button type="button" data-v="p">% of population</button></div><span class="wp-note" style="margin:0">applies to the chart and to the table</span></div>
         <div id="ex-table"></div>
       </div>
 
@@ -426,7 +431,7 @@ const projTag = y => y >= PROJ ? ' <span class="proj">UN projection</span>' : ''
 const flag = l => l.iso2 ? `<img src="https://flagcdn.com/w20/${l.iso2}.png" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
 
 // ---------- state ----------
-const st = { loc: 900, year: 2026, y0: 1950, y1: 2050, mode: 'abs', compare: 'none' };
+const st = { loc: 900, year: 2026, y0: 1950, y1: 2050, mode: 'abs', compare: 'none', cmpLoc: 'none', exMode: 'n' };
 const tip = (box, html, ev) => {
   const t = box.querySelector('.wp-tip'); t.innerHTML = html; t.style.opacity = 1;
   const r = box.getBoundingClientRect(); let x = ev.clientX - r.left + 14; const w = t.offsetWidth;
@@ -563,6 +568,9 @@ const ageCache = new Map();
 async function getAges(id){ if (!ageCache.has(id)) ageCache.set(id, fetch(`assets/population/${id}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })); return ageCache.get(id); }
 $('ex-cmp').innerHTML = '<option value="none">nothing</option>' + [1950, 1970, 1990, 2000, 2010, 2020, 2026, 2035, 2050].map(y => `<option value="${y}">${y}</option>`).join('');
 $('ex-cmp').addEventListener('change', e => { st.compare = e.target.value; renderExact(); });
+$('ex-cmpc').innerHTML = '<option value="none">nobody</option>' + locOptions();
+$('ex-cmpc').addEventListener('change', e => { st.cmpLoc = e.target.value; renderExact(); });
+seg('ex-mode', v => { st.exMode = v; renderExact(); });
 $('ex-year').addEventListener('input', e => { stopExPlay(); setYear(+e.target.value); });
 let exTimer = null;
 function stopExPlay(){ if (exTimer) { clearInterval(exTimer); exTimer = null; } $('ex-play').textContent = '▶'; }
@@ -573,48 +581,56 @@ $('ex-play').addEventListener('click', () => {
 });
 let exToken = 0;
 async function renderExact(){
-  const token = ++exToken, l = L.get(st.loc), box = chartBox('ex-chart');
-  let j; try { j = await getAges(l.id); } catch (e) { box.innerHTML = '<div class="wp-load">Could not load the single-age data for this area.</div>'; return; }
+  const token = ++exToken, l = L.get(st.loc), cl = st.cmpLoc === 'none' ? null : L.get(+st.cmpLoc), box = chartBox('ex-chart'), TA = [900].concat(REG_IDS);
+  let j, jc, JR; try { [j, jc, JR] = await Promise.all([getAges(l.id), cl ? getAges(cl.id) : null, Promise.all(TA.map(getAges))]); } catch (e) { box.innerHTML = '<div class="wp-load">Could not load the single-age data for this area.</div>'; return; }
   if (token !== exToken) return;
-  const a = j.d[yi(st.year)], b = st.compare === 'none' ? null : j.d[yi(+st.compare)];
+  const pct = st.exMode === 'p', sum = arr => arr.reduce((q, v) => q + v, 0);
+  const a = j.d[yi(st.year)], b = st.compare === 'none' ? null : j.d[yi(+st.compare)], c = jc ? jc.d[yi(st.year)] : null;
+  const tot = sum(a), totB = b ? sum(b) : 0, totC = c ? sum(c) : 0;
+  const va = pct ? a.map(v => v / tot * 100) : a, vb = b && (pct ? b.map(v => v / totB * 100) : b), vc = c && (pct ? c.map(v => v / totC * 100) : c);
   const W = 1000, H = 340, m = { t: 22, r: 18, b: 32, l: 62 };
   const x = d3.scaleLinear([0, 100], [m.l, W - m.r]);
-  const y = d3.scaleLinear([0, d3.max([...a, ...(b || [])])], [H - m.b, m.t]).nice();
+  const y = d3.scaleLinear([0, d3.max([...va, ...(vb || []), ...(vc || [])])], [H - m.b, m.t]).nice();
   const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', `${l.n} population by single year of age, ${st.year}`);
-  const band = (a0, a1, c, name) => { svg.append('rect').attr('x', x(a0)).attr('width', x(a1 + 1) - x(a0)).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', c).attr('opacity', .09);
-    svg.append('text').attr('x', (x(a0) + x(a1 + 1)) / 2).attr('y', m.t - 7).attr('text-anchor', 'middle').attr('font-weight', 800).attr('fill', c).style('fill', c).text(name); };
+  const band = (a0, a1, col, name) => { svg.append('rect').attr('x', x(a0)).attr('width', x(a1 + 1) - x(a0)).attr('y', m.t).attr('height', H - m.t - m.b).attr('fill', col).attr('opacity', .09);
+    svg.append('text').attr('x', (x(a0) + x(a1 + 1)) / 2).attr('y', m.t - 7).attr('text-anchor', 'middle').attr('font-weight', 800).attr('fill', col).style('fill', col).text(name); };
   band(0, 15, C.u16, 'Under 16'); band(16, 64, C.w1664, '16–64'); band(65, 79, C.ge65, '65–79'); band(80, 100, C.ge80, '80+');
   y.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)));
   const area = d3.area().x((d, i) => x(i)).y0(y(0)).y1(d => y(d)).curve(d3.curveMonotoneX);
-  const a79 = a.slice(0, 81), a80 = a.slice(80);                       // ages 0-80 in blue, 80 onward in grey (the two pieces share the age-80 point)
+  const a79 = va.slice(0, 81), a80 = va.slice(80);                       // ages 0-80 in blue, 80 onward in grey (the two pieces share the age-80 point)
   const ln = d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX), ln80 = d3.line().x((d, i) => x(i + 80)).y(d => y(d)).curve(d3.curveMonotoneX), ar80 = d3.area().x((d, i) => x(i + 80)).y0(y(0)).y1(d => y(d)).curve(d3.curveMonotoneX);
   svg.append('path').attr('d', area(a79)).attr('fill', '#0a80d0').attr('opacity', .55);
   svg.append('path').attr('d', ar80(a80)).attr('fill', C.ge80).attr('opacity', .6);
   svg.append('path').attr('d', ln(a79)).attr('fill', 'none').attr('stroke', '#0b3a82').attr('stroke-width', 2);
   svg.append('path').attr('d', ln80(a80)).attr('fill', 'none').attr('stroke', '#374151').attr('stroke-width', 2);
-  const tot = a.reduce((q, v) => q + v, 0), order = a.map((v, i) => [v, i]).sort((u, w) => w[0] - u[0]), rankA = new Array(a.length); order.forEach(([, i], r) => { rankA[i] = r + 1; });
-  const totB = b ? b.reduce((q, v) => q + v, 0) : 0, orderB = b ? b.map((v, i) => [v, i]).sort((u, w) => w[0] - u[0]) : [], rankB = new Array(a.length); orderB.forEach(([, i], r) => { rankB[i] = r + 1; });
-  if (b) svg.append('path').attr('d', d3.line().x((d, i) => x(i)).y(d => y(d)).curve(d3.curveMonotoneX)(b)).attr('fill', 'none').attr('stroke', '#dc2626').attr('stroke-width', 2).attr('stroke-dasharray', '6 4');
+  const ranking = arr => { const o = arr.map((v, i) => [v, i]).sort((u, w) => w[0] - u[0]), r = new Array(arr.length); o.forEach(([, i], k) => { r[i] = k + 1; }); return { o, r }; };
+  const RA = ranking(a), RB = b ? ranking(b) : null, RC = c ? ranking(c) : null, order = RA.o, rankA = RA.r;
+  if (b) svg.append('path').attr('d', ln(vb)).attr('fill', 'none').attr('stroke', '#dc2626').attr('stroke-width', 2).attr('stroke-dasharray', '6 4');
+  if (c) svg.append('path').attr('d', ln(vc)).attr('fill', 'none').attr('stroke', '#7c3aed').attr('stroke-width', 2.4).attr('stroke-dasharray', '2 3');
   [16, 18].forEach(g => svg.append('line').attr('x1', x(g)).attr('x2', x(g)).attr('y1', m.t).attr('y2', H - m.b).attr('stroke', '#334155').attr('stroke-dasharray', '2 3').attr('opacity', .7));
   svg.append('g').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickValues(d3.range(0, 101, 10).concat([16, 18])).tickFormat(d => d === 100 ? '100+' : d));
-  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(fmtN));
-  svg.append('text').attr('x', W - m.r).attr('y', m.t + 14).attr('text-anchor', 'end').attr('font-weight', 800).text(`${l.n} · ${st.year}` + (b ? `  vs  ${st.compare} (dashed)` : ''));
+  svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(pct ? d => d.toFixed(1) + '%' : fmtN));
+  svg.append('text').attr('x', W - m.r).attr('y', m.t + 14).attr('text-anchor', 'end').attr('font-weight', 800).text(`${l.n} · ${st.year}` + (b ? `  vs  ${st.compare} (dashed red)` : '') + (c ? `  vs  ${cl.n} (dotted purple)` : '') + (pct ? ' · % of population' : ''));
   const hov = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', '#64748b').attr('opacity', 0);
+  const blk = (name, arr, tt, rk, first) => `<div class="r"${first ? '' : ' style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"'}><span>${name}</span><span><b>${full(arr)}</b></span></div><div class="r"><span>% of population</span><span><b>${(arr / tt * 100).toFixed(2)}%</b></span></div><div class="r"><span>Ranking of this age</span><span><b>#${rk}</b> of 101</span></div>`;
   svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent')
     .on('pointermove', ev => { const r = svg.node().getBoundingClientRect(); const ag = Math.max(0, Math.min(100, Math.round(x.invert((ev.clientX - r.left) / r.width * W))));
       hov.attr('x1', x(ag)).attr('x2', x(ag)).attr('opacity', 1);
-      tip(box, `<b>Age ${ag === 100 ? '100+' : ag}</b> <span style="color:var(--text-muted)">${ag < 16 ? 'under 16' : ag < 65 ? '16–64' : ag < 80 ? '65–79' : '80+'}</span><div class="r"><span>${st.year}${projTag(st.year)}</span><span><b>${full(a[ag])}</b></span></div><div class="r"><span>% of population</span><span><b>${(a[ag] / tot * 100).toFixed(2)}%</b></span></div><div class="r"><span>Ranking of this age</span><span><b>#${rankA[ag]}</b> of ${a.length}</span></div>` +
-        (b ? `<div class="r" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span>${st.compare}</span><span><b>${full(b[ag])}</b></span></div><div class="r"><span>% of population</span><span><b>${(b[ag] / totB * 100).toFixed(2)}%</b></span></div><div class="r"><span>Ranking of this age</span><span><b>#${rankB[ag]}</b> of ${a.length}</span></div>` : '') +
+      tip(box, `<b>Age ${ag === 100 ? '100+' : ag}</b> <span style="color:var(--text-muted)">${ag < 16 ? 'under 16' : ag < 65 ? '16–64' : ag < 80 ? '65–79' : '80+'}</span>` +
+        `<div class="r"><span>${l.n} · ${st.year}${projTag(st.year)}</span><span><b>${full(a[ag])}</b></span></div><div class="r"><span>% of population</span><span><b>${(a[ag] / tot * 100).toFixed(2)}%</b></span></div><div class="r"><span>Ranking of this age</span><span><b>#${rankA[ag]}</b> of 101</span></div>` +
+        (b ? blk(`${l.n} · ${st.compare}`, b[ag], totB, RB.r[ag]) : '') + (c ? blk(`${cl.n} · ${st.year}`, c[ag], totC, RC.r[ag]) : '') +
         `<div class="r" style="color:var(--text-muted)"><span>Most numerous age in ${st.year}</span><span>${order[0][1] === 100 ? '100+' : order[0][1]}</span></div>`, ev); })
     .on('pointerleave', () => { untip(box); hov.attr('opacity', 0); });
   box.replaceChildren(svg.node(), box.querySelector('.wp-tip') || Object.assign(document.createElement('div'), { className: 'wp-tip' }));
   const RANGES = [[0, 14], [15, 24], [25, 34], [35, 44], [45, 54], [55, 64], [65, 74], [75, 84], [85, 100]], rl = ([lo, hi]) => hi === 100 ? `${lo}+` : `${lo}–${hi}`, sumR = (arr, [lo, hi]) => { let q = 0; for (let g = lo; g <= hi; g++) q += arr[g]; return q; };
+  const cell = (arr, tt, r) => pct ? (sumR(arr, r) / tt * 100).toFixed(1) + '%' : full(sumR(arr, r));
+  const row = (label, arr, tt, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${label}</td>${RANGES.map(r => `<td>${cell(arr, tt, r)}</td>`).join('')}</tr>`;
+  const world = TA.map((id, k) => { const arr = JR[k].d[yi(st.year)], col = id === 900 ? '#64748b' : AREA_COL[contOf(L.get(id))]; return row(`<i class="sw" style="background:${col}"></i>${L.get(id).n}`, arr, sum(arr)); }).join('');
   $('ex-table').innerHTML = `<table class="wp-table"><tr><th>Age range</th>${RANGES.map(r => `<th>${rl(r)}</th>`).join('')}</tr>` +
-    `<tr class="hl"><td>${l.n} · ${st.year}</td>${RANGES.map(r => `<td>${full(sumR(a, r))}</td>`).join('')}</tr>` +
-    (b ? `<tr><td>${st.compare}</td>${RANGES.map(r => `<td>${full(sumR(b, r))}</td>`).join('')}</tr>` : '') +
-    `<tr><td>share of ${st.year} population</td>${RANGES.map(r => `<td>${(sumR(a, r) / tot * 100).toFixed(1)}%</td>`).join('')}</tr></table>` +
-    `<p class="wp-note">Age ranges are inclusive (0–14 is the children, 15 single ages; 15–24 means from the 15th to the 24th birthday year, ten single ages). Hover the chart for one single age, its share of the population and its ranking among the 101 ages.${st.year >= PROJ ? ' 2024 onward is the UN projection.' : ''}</p>`;
-  $('ex-fsum').textContent = `${l.n} · ${st.year}`;
+    row(`${l.n} · ${st.year}`, a, tot, 'hl') + (b ? row(`${l.n} · ${st.compare}`, b, totB) : '') + (c ? row(`${cl.n} · ${st.year}`, c, totC, 'hl') : '') +
+    `<tr class="sub"><td colspan="${RANGES.length + 1}">World and regions · ${st.year}${st.year >= PROJ ? ' (UN projection)' : ''}</td></tr>${world}</table>` +
+    `<p class="wp-note">${pct ? 'Each figure is the share of that area\'s own population.' : 'Number of people.'} Age ranges are inclusive (0–14 is the children, 15 single ages; 15–24 means from the 15th to the 24th birthday year, ten single ages). Hover the chart for one single age, its share of the population and its ranking among the 101 ages.${st.year >= PROJ ? ' 2024 onward is the UN projection.' : ''}</p>`;
+  $('ex-fsum').textContent = `${l.n} · ${st.year}` + (cl ? ` vs ${cl.n}` : '');
 }
 
 // ---------- shared: ranked bar rows ----------
