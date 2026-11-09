@@ -217,17 +217,16 @@
         <div class="wp-filters" id="ex-f">
           <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="ex-fsum"></span><i class="wp-car">▾</i></button>
           <div class="wp-fbody">
-            <div class="wp-frow"><label class="wp-fl" for="loc-b">Where</label><select class="wp-sel" id="loc-b"></select></div>
+            <div class="wp-frow"><label class="wp-fl" for="loc-b">Where</label><select class="wp-sel" id="loc-b"></select>
+              <label class="wp-fl" for="ex-cmpc" style="min-width:0">Compare country</label><select class="wp-sel" id="ex-cmpc"></select></div>
             <div class="wp-frow"><label class="wp-fl">Year</label>
               <button type="button" class="wp-play" id="ex-play" aria-label="Play">▶</button>
               <div class="wp-range"><input type="range" id="ex-year" min="1950" max="2050" value="2026" style="width:min(300px,52vw)"><b id="ex-yl" style="font-size:18px">2026</b></div>
               <label class="wp-fl" for="ex-cmp" style="min-width:0">Compare with</label><select class="wp-sel" id="ex-cmp"></select></div>
-            <div class="wp-frow"><label class="wp-fl" for="ex-cmpc">Compare country</label><select class="wp-sel" id="ex-cmpc"></select>
-              <span class="wp-note" style="margin:0">another area at the same year, dotted purple line</span></div>
           </div>
         </div>
+        <div class="wp-frow" style="margin:4px 0 6px"><label class="wp-fl">Show</label><div class="wp-seg" id="ex-mode"><button type="button" data-v="n" class="active">Nb of people</button><button type="button" data-v="p">% of population</button></div><span class="wp-note" style="margin:0">applies to the chart and to the table</span></div>
         <div class="wp-chart" id="ex-chart"></div>
-        <div class="wp-frow" style="margin:10px 0 2px"><label class="wp-fl">Show</label><div class="wp-seg" id="ex-mode"><button type="button" data-v="n" class="active">Nb of people</button><button type="button" data-v="p">% of population</button></div><span class="wp-note" style="margin:0">applies to the chart and to the table</span></div>
         <div id="ex-table"></div>
       </div>
 
@@ -268,20 +267,18 @@
         <div class="wp-filters" id="rk-f">
           <button type="button" class="wp-ftoggle" aria-expanded="true"><span>Filters</span><span class="wp-fsum" id="rk-fsum"></span><i class="wp-car">▾</i></button>
           <div class="wp-fbody">
-            <div class="wp-frow"><label class="wp-fl" for="rk-measure">Rank by</label>
+            <div class="wp-frow"><label class="wp-fl" for="rk-measure" style="min-width:0">Rank by</label>
               <select class="wp-sel" id="rk-measure"><option value="total">Total population</option><option value="u16">Under 16</option><option value="w1664">Aged 16–64</option><option value="ge65">Aged 65+</option><option value="ge18">Aged 18+ (potential drivers)</option><option value="ge80">Aged 80+</option><option value="range">Custom age range (slider)</option></select>
               <label class="wp-fl" for="rk-cmp" style="min-width:0">Rank change vs</label>
-              <select class="wp-sel" id="rk-cmp"><option value="10" selected>10 years earlier</option><option value="25">25 years earlier</option><option value="50">50 years earlier</option><option value="1950">1950</option></select></div>
-            <div class="wp-frow"><label class="wp-fl">Age range</label>
-              <div class="wp-dual" id="rk-dual"><div class="tr"></div><div class="fill" id="rk-fill"></div><input type="range" id="rk-a" min="0" max="100" value="0" aria-label="Youngest age of the range"><input type="range" id="rk-b" min="0" max="100" value="100" aria-label="Oldest age of the range"></div>
-              <b class="wp-agel" id="rk-agel">0–100+</b><span class="wp-note" id="rk-load" style="margin:0"></span></div>
-            <div class="wp-frow"><label class="wp-fl">Level</label>
-              <div class="wp-seg" id="rk-scope"><button type="button" data-v="country" class="active">Countries</button><button type="button" data-v="sub">Subregions</button><button type="button" data-v="region">Regions</button></div></div>
-            <div class="wp-frow"><label class="wp-fl">Show</label>
+              <select class="wp-sel" id="rk-cmp"><option value="10" selected>10 years earlier</option><option value="25">25 years earlier</option><option value="50">50 years earlier</option><option value="1950">1950</option></select>
+              <div class="wp-seg" id="rk-scope"><button type="button" data-v="country" class="active">Countries</button><button type="button" data-v="sub">Subregions</button><button type="button" data-v="region">Regions</button></div>
               <div class="wp-seg" id="rk-mode"><button type="button" data-v="n" class="active">Number of people</button><button type="button" data-v="p">% of population</button></div></div>
-            <div class="wp-frow"><label class="wp-fl">Year</label>
+            <div class="wp-frow"><label class="wp-fl" style="min-width:0">Age range</label>
+              <div class="wp-dual" id="rk-dual"><div class="tr"></div><div class="fill" id="rk-fill"></div><input type="range" id="rk-a" min="0" max="100" value="0" aria-label="Youngest age of the range"><input type="range" id="rk-b" min="0" max="100" value="100" aria-label="Oldest age of the range"></div>
+              <b class="wp-agel" id="rk-agel">0–100+</b><span class="wp-note" id="rk-load" style="margin:0"></span>
+              <label class="wp-fl" style="min-width:0;margin-left:14px">Year</label>
               <button type="button" class="wp-play" id="rk-play" aria-label="Play">▶</button>
-              <div class="wp-range"><input type="range" id="rk-year" min="1950" max="2050" value="2026" style="width:min(340px,52vw)"><b id="rk-yl" style="font-size:20px">2026</b></div></div>
+              <div class="wp-range"><input type="range" id="rk-year" min="1950" max="2050" value="2026" style="width:min(300px,40vw)"><b id="rk-yl" style="font-size:20px">2026</b></div></div>
           </div>
         </div>
         <div class="wp-conleg" id="rk-leg"></div>
