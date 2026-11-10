@@ -380,7 +380,7 @@
           <div class="fuel-key" id="mfr-country-group-fuel-key" aria-label="Bar colours"></div>
           <div class="rank-rows-header mfr-total-left">
             <span class="rrh-name-gap"></span>
-            <span class="rrh-total">Total</span>
+            <span class="rrh-total" data-total-head>Total</span>
             <span class="rrh-spacer"></span>
             <span class="rrh-pct">BEV %</span>
             <span class="rrh-pct">Share</span>
@@ -431,7 +431,7 @@
           <div class="fuel-key" id="mfr-fuel-key" aria-label="Bar colours"></div>
           <div class="rank-rows-header mfr-total-left">
             <span class="rrh-name-gap"></span>
-            <span class="rrh-total">Total</span>
+            <span class="rrh-total" data-total-head>Total</span>
             <span class="rrh-spacer"></span>
             <span class="rrh-pct">BEV %</span>
             <span class="rrh-pct">Share</span>
@@ -489,7 +489,7 @@
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
             <span class="rrh-total">Share</span>
-            <span class="rrh-total">Total</span>
+            <span class="rrh-total" data-total-head>Total</span>
           </div>
           <div class="rank-rows" id="mfr-model-rank-rows"></div>
           <div class="tooltip" id="mfr-model-tooltip"></div>
@@ -6410,6 +6410,10 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const isOther = r => kind === 'model' ? MODEL_CATCHALL.test(r.model || '') : /^(other|unknown)/i.test(r.label || '');
     const ordered = sorted.filter(r => !isOther(r)).concat(sorted.filter(isOther));
     const globalMax = Math.max(1, ...ordered.map(r => r.total));
+    // sorted by Total BEV: the number beside each bar is its BEV units (bar length stays the row's total, the green part is the BEV share) and the column says so
+    const totalBev = mfrSortKey === 'bev';
+    const head = rowsEl.closest('.card').querySelector('[data-total-head]');
+    if(head) head.textContent = totalBev ? 'Total BEV' : 'Total';
     renderFuelKey(kind, ordered);
     rowsEl.innerHTML = ordered.map((row, i) => {
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
@@ -6429,7 +6433,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
         ? `<div class="mfr-rank-num" title="#${rankNum} best-selling model overall">${rankNum}</div>${catBadgeHTML}`
         : `<div class="mfr-rank-num">${rankNum}</div>`;
       const brandAttr = kind === 'model' ? ` data-brand="${row.brand}" data-model="${row.model}"` : '';
-      const totalHTML = `<div class="total-label">${row.total.toLocaleString('en-US')}</div>`;
+      const totalHTML = `<div class="total-label">${(totalBev ? row.bev : row.total).toLocaleString('en-US')}</div>`;
       return `
       <div class="rank-row" data-label="${row.label}" data-kind="${kind}"${brandAttr}>
         ${rankHTML}
