@@ -470,7 +470,13 @@
       </div>
 
       <div class="card chart-card hidden" id="gm-card">
-        <h2 id="gm-title">Sales by group model</h2>
+        <div class="chart-header-row">
+          <h2 id="gm-title">Sales by group model</h2>
+          <div class="chart-mode-toggle hidden" id="gm-scope" role="group" aria-label="Models of">
+            <button type="button" class="mode-btn active" data-gm-scope="brand" title="Only the models of the brand picked in the filters.">Selected brand</button>
+            <button type="button" class="mode-btn" data-gm-scope="group" title="Every model of the brand's parent group.">Whole group</button>
+          </div>
+        </div>
         <p class="note" id="gm-note" style="display:block"></p>
         <div class="rank-rows wrap-labels" id="gm-rows"></div>
       </div>
@@ -636,7 +642,7 @@ const MARKERS = { "Singapore":[103.82,1.35], "Mauritius":[57.50,-20.16], "Luxemb
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const fmt = n => Math.round(n).toLocaleString('en-US');
 
-let groupMode = 'brand', metric = 'units';
+let groupMode = 'brand', metric = 'units', gmScope = 'brand';      // gmScope: Sales by group model lists the picked brand only ('brand') or its whole parent group ('group')
 // what the Manufacturer-style filters pick: 'brand' (the Manufacturer / Vs. manufacturer pair) or 'model' (the Model / Vs. model pair).
 // In model mode `mfr` / `mfr2` hold model labels ("Toyota RAV4") and every ranking, map and chart works on models instead of brands.
 let kind = 'brand';
@@ -2452,14 +2458,20 @@ function renderGroupBrands(){
 }
 function renderGroupModels(){
   const host = document.getElementById('gm-rows'), note = document.getElementById('gm-note'), groups = selectedGroups(), cs = scopeNow();
-  document.getElementById('gm-title').textContent = `Sales by group model — ${groups.map(g => g.group).join(' and ')}${ctry ? ' in ' + ctry : ''}`;
+  const byBrand = groupMode === 'brand' && gmScope === 'brand';       // the picked brand(s) only; a picked parent group (group mode) always shows its models
+  const scopeBox = document.getElementById('gm-scope');
+  scopeBox.classList.toggle('hidden', groupMode === 'group');
+  scopeBox.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.gmScope === gmScope));
+  const secs = byBrand ? groups.flatMap(g => g.picks.map(p => ({ label:p, test:b => canonicalBrand(b) === canonicalBrand(p) }))) : groups.map(g => ({ label:g.group, test:(b, y) => groupOfBrand(b, y) === g.group }));
+  document.getElementById('gm-title').textContent = byBrand ? `Sales by model — ${secs.map(x => x.label).join(' and ')}${ctry ? ' in ' + ctry : ''}` : `Sales by group model — ${groups.map(g => g.group).join(' and ')}${ctry ? ' in ' + ctry : ''}`;
   if(!MODEL_LABEL){ host.innerHTML = ''; note.textContent = 'The model files (about 24 MB) load when this section comes into view…'; watchModels(); return; }
-  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + groups.map(g => {
-    const items = modelRowsOf(cs, (b, y) => groupOfBrand(b, y) === g.group, 50).map(m => ({ ...m, sub:m.brand, key:m.name })), base = items.reduce((s, m) => s + m.total, 0);
-    return `<div class="ctry-sub-note"><b>${esc(g.group)}</b> · top ${items.length} models</div>` + (items.length ? listRowsHTML(items, 'model', base) : '<p class="note" style="display:block">No model-level data for this group in this period.</p>');
+  host.innerHTML = `<div class="rank-rows-header"><span class="rrh-spacer"></span><span class="rrh-total" style="flex:none;width:auto">${legendLite()}</span></div>` + secs.map(x => {
+    const items = modelRowsOf(cs, x.test, 50).map(m => ({ ...m, sub:m.brand, key:m.name })), base = items.reduce((s, m) => s + m.total, 0);
+    return `<div class="ctry-sub-note"><b>${esc(x.label)}</b> · top ${items.length} models</div>` + (items.length ? listRowsHTML(items, 'model', base) : `<p class="note" style="display:block">No model-level data for this ${byBrand ? 'brand' : 'group'} in this period.</p>`);
   }).join('');
-  note.textContent = `The best-selling models of the group's brands, ${periodLabel(period)}${ctry ? ', ' + ctry : ''} (model-level data exists for part of the countries). Hover a model for its last 10 years and its countries.`;
+  note.textContent = `The best-selling models of ${byBrand ? 'the selected brand' : "the group's brands"}, ${periodLabel(period)}${ctry ? ', ' + ctry : ''} (model-level data exists for part of the countries).${byBrand ? ' "Whole group" adds the other brands of its parent group.' : ''} Hover a model for its last 10 years and its countries.`;
 }
+document.getElementById('gm-scope').addEventListener('click', e => { const b = e.target.closest('[data-gm-scope]'); if(!b || b.dataset.gmScope === gmScope) return; gmScope = b.dataset.gmScope; renderGroupModels(); saveFilters(); });
 
 // ---- hover windows ----
 function brandsPanelHTML(countries){      // 3E: the brands of the selected group(s) in these countries, for the right of a hover window
@@ -2758,7 +2770,7 @@ function refresh(rebuildMfr){
 function saveFilters(){
   if(!window.FilterMemory) return;
   FilterMemory.save({ period:selPeriod.value, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, country:selCountry.value,
-    group:groupMode, metric, cls:[...clsSel], mot:[...motSel], cmp:cmpMode, split:splitOn });
+    group:groupMode, metric, cls:[...clsSel], mot:[...motSel], cmp:cmpMode, split:splitOn, gms:gmScope });
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);
@@ -2945,6 +2957,7 @@ if(savedFilters){        // put the visitor's last selections back (anything tha
   if([...selPeriod.options].some(o => o.value === savedFilters.period)) selPeriod.value = savedFilters.period;
   if([...selCountry.options].some(o => o.value === savedFilters.country)) selCountry.value = savedFilters.country;
   if(savedFilters.group === 'group'){ groupMode = 'group'; setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode); }
+  if(savedFilters.gms === 'group') gmScope = 'group';
   if(savedFilters.metric === 'share'){ metric = 'share'; setActive('#metric-toggle', 'metric', metric); }
   (savedFilters.cls || []).forEach(k => clsSel.add(k)); (savedFilters.mot || []).forEach(k => motSel.add(k));
   if(['all', 'bev', 'nonbev'].includes(savedFilters.cmp)) cmpMode = savedFilters.cmp;
