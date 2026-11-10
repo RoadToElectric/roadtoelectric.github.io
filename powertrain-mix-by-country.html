@@ -599,12 +599,14 @@ const MONTHLY_DATA = {
       // PROVISIONAL (estimated 2026-11-09 at the user's request; to be corrected when the exact data arrives): FEBIAC/FPS Mobility (Belga, 2 Nov): total 31,949, BEV 48.5%, petrol 31.3%, diesel 1.5% are first-hand (0.1pt rounding, about +-16 units); the 18.7% remainder (5,975) is split into PHEV/HEV/others at September's exact composition (2,014 / 3,215 / 294). Replace with ACEA exact counts (24 Nov).
       "Belgium": [15495,2179,3478,318,10000,479,31949],
       // source: Statistik Austria (Kfz-Neuzulassungen nach Bundesland und Kraftstoffart, Pkw Klasse M1, October 2026, published 2026-11-10): BEV 8,434, petrol 4,044, diesel 1,896, hybrids 9,800 (petrol/electric 8,995 + diesel/electric 805). PROVISIONAL PHEV/HEV SPLIT: Statistik Austria does not separate plug-in from other hybrids, so the 9,800 hybrids are split with September's ACEA ratio (PHEV 28.14% = 2,758, HEV 7,042) -- REPLACE with the ACEA October figures when they are out (2026-11-24).
-      "Austria": [8434,2758,7042,0,4044,1896,24174]
+      "Austria": [8434,2758,7042,0,4044,1896,24174],
+      // PROVISIONAL (ANFAVEA letter for October not out on 2026-11-10): total = Fenabrave cumulative Jan-Oct 2026 for automoveis + comerciais leves (2,410,505) MINUS our Jan-Sep ANFAVEA months (2,158,248) = 252,257 (Fenabrave's own October figure is 254,030; the bases agree within 0.1% on the cumulative). BEV 21,645 and hybrids 40,215 are Fenabrave's October electrified split (61,860 electrified); PHEV/HEV split of the hybrids (17,669 / 22,546) and diesel/petrol split of the rest (21,397 / 169,000) use September's ANFAVEA ratios. REPLACE with the ANFAVEA Carta (carta486) when published.
+      "Brazil": [21645,17669,22546,0,169000,21397,252257]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":51316},
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":51316,      "Brazil":61532},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":239594}
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":239594,      "Brazil":2057270}
   },
   "2026-09": {
     label: "September 2026",
@@ -1816,7 +1818,7 @@ const MONTHLY_DATA = {
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
       "Australia": [205384,97008,178502,0,293296,258363,1032553],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
-      "Brazil": [166084,131994,135811,0,1526608,197751,2158248],
+      "Brazil": [187729,149663,158357,0,1695608,219148,2410505],
       // source: ACARA/SIOMAA — from the report's own cumulative "Acum 2026" columns, not summed from separately-revised months
       "Argentina": [4928,0,48291,0,267937,0,321156],
       // source: ODMD — passenger cars (Otomobil) only, excludes light commercial vehicles; others = Otogaz (LPG-converted)
@@ -1889,7 +1891,7 @@ const MONTHLY_DATA = {
       "India":"through Sep 2026",
       "Japan":"through Sep 2026",
       "Australia":"through Oct 2026",
-      "Brazil":"through Sep 2026",
+      "Brazil":"through Oct 2026",
       "Argentina":"through Jul 2026",
       "Turkey":"through Oct 2026",
       "Philippines":"through Sep 2026",
@@ -1935,7 +1937,8 @@ const MONTHLY_DATA = {
       "Thailand":82190,
       "Singapore":16278,
       "Turkey":146773,
-          "Bosnia-Herzegovina":46
+          "Bosnia-Herzegovina":46,
+      "Brazil": 61532
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1952,7 +1955,8 @@ const MONTHLY_DATA = {
       "Thailand":447778,
       "Singapore":37937,
       "Turkey":833382,
-          "Bosnia-Herzegovina":8594
+          "Bosnia-Herzegovina":8594,
+      "Brazil": 2057270
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1970,7 +1974,7 @@ const MONTHLY_DATA = {
       "China": [7315000, 3483000, 0, 0, 7446667, 0, 18244667],
       "Austria": [87921, 35981, 93352, 2, 74134, 28943, 320333],
       "Belgium": [170683, 24514, 54223, 3938, 160435, 10795, 424588],
-      "Brazil": [241438, 187727, 193300, 0, 2065562, 267210, 2955237],
+      "Brazil": [235204, 185839, 200130, 0, 2048225, 263846, 2933244],
       "Bulgaria": [4946, 1982, 3583, 73, 37910, 5883, 54377],
       "Canada": [148780, 63708, 303160, 0, 1325708, 76812, 1918168],
       "Croatia": [3276, 6041, 31252, 766, 28400, 9327, 79062],
