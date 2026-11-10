@@ -601,12 +601,16 @@ const MONTHLY_DATA = {
       // source: Statistik Austria (Kfz-Neuzulassungen nach Bundesland und Kraftstoffart, Pkw Klasse M1, October 2026, published 2026-11-10): BEV 8,434, petrol 4,044, diesel 1,896, hybrids 9,800 (petrol/electric 8,995 + diesel/electric 805). PROVISIONAL PHEV/HEV SPLIT: Statistik Austria does not separate plug-in from other hybrids, so the 9,800 hybrids are split with September's ACEA ratio (PHEV 28.14% = 2,758, HEV 7,042) -- REPLACE with the ACEA October figures when they are out (2026-11-24).
       "Austria": [8434,2758,7042,0,4044,1896,24174],
       // PROVISIONAL (ANFAVEA letter for October not out on 2026-11-10): total = Fenabrave cumulative Jan-Oct 2026 for automoveis + comerciais leves (2,410,505) MINUS our Jan-Sep ANFAVEA months (2,158,248) = 252,257 (Fenabrave's own October figure is 254,030; the bases agree within 0.1% on the cumulative). BEV 21,645 and hybrids 40,215 are Fenabrave's October electrified split (61,860 electrified); PHEV/HEV split of the hybrids (17,669 / 22,546) and diesel/petrol split of the rest (21,397 / 169,000) use September's ANFAVEA ratios. REPLACE with the ANFAVEA Carta (carta486) when published.
-      "Brazil": [21645,17669,22546,0,169000,21397,252257]
+      "Brazil": [21645,17669,22546,0,169000,21397,252257],
+      // PROVISIONAL BEV/PHEV/HEV split: INEGI RAIAVL report of 2026-11-09 gives October 2026 sales of 137,395 (revised; +3.1% y/y, Jan-Oct 1,287,225) but the hybrid/electric breakdown exists only in the open-data CSV, still at September on 2026-11-10. BEV 2,651 / PHEV 3,472 / HEV 11,758 apply September's shares of the total (1.93% / 2.53% / 8.56%); petrol = remainder (diesel not published). REPLACE with the INEGI CSV figures when updated (the September CSV followed the press release by a few days).
+      "Mexico": [2651,3472,11758,0,119514,0,137395],
+      // PROVISIONAL: CPCA PRELIMINARY figures of 2026-11-04 via CnEVPost: passenger-vehicle retail 1,693,000 (-25% y/y), NEV retail 1,148,000 (penetration 67.8%). The BEV / PHEV(+EREV) split of the NEV is not published yet: it uses September's ratio (BEV 70.5% of NEV = 809,000; PHEV+EREV 339,000); petrol/ICE = total - NEV = 545,000. REPLACE with the CPCA final figures (CnEVPost final monthly article, ~8th-12th) when out.
+      "China": [809000,339000,0,0,545000,0,1693000]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":51316,      "Brazil":61532},
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":51316,      "Brazil":61532,      "Mexico":17442,      "China":6250000},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":239594,      "Brazil":2057270}
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":239594,      "Brazil":2057270,      "Mexico":1221825,      "China":19192576}
   },
   "2026-09": {
     label: "September 2026",
@@ -1810,7 +1814,7 @@ const MONTHLY_DATA = {
       // source: StatCan 20-10-0025-01 — only Q1 2026 published so far
       "Canada": [111585,47781,227370,0,994281,57609,1438626],
       // source: INEGI RAIAVL, monthly — 7 of 12 months published so far
-      "Mexico": [21794,25168,99221,0,997807,0,1143990],
+      "Mexico": [24445,28640,110979,0,1117321,0,1281385],
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
       "India": [257521,25,335636,942564,1735475,709350,3980571],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
@@ -1830,7 +1834,7 @@ const MONTHLY_DATA = {
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
       "United States": [730554,144493,1850267,60,9254685,0,11980059],
       // source: CPCA (China Passenger Car Association) via CnEVPost — DOMESTIC passenger-vehicle RETAIL sales (sedans, SUVs, MPVs); excludes exports, heavy/commercial vehicles and light commercial vehicles. BEV exact; PHEV = PHEV + EREV; petrol = remainder (includes non-plug-in hybrids); HEV=0, Diesel=0 (not published)
-      "China": [5205000,2552000,0,0,5585000,0,13342000],
+      "China": [6014000,2891000,0,0,6130000,0,15035000],
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [166123,10456,117095,1303,78035,153029,526041],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
@@ -1887,7 +1891,7 @@ const MONTHLY_DATA = {
       "Sweden":"through Oct 2026","Switzerland":"through Oct 2026","United Kingdom":"through Oct 2026",
       "Canada":"through Sep 2026 (Q3 est.)",
       "Colombia":"through Sep 2026",
-      "Mexico":"through Sep 2026",
+      "Mexico":"through Oct 2026",
       "India":"through Sep 2026",
       "Japan":"through Sep 2026",
       "Australia":"through Oct 2026",
@@ -1897,7 +1901,7 @@ const MONTHLY_DATA = {
       "Philippines":"through Sep 2026",
       "New Zealand":"through Sep 2026",
       "United States":"through Sep 2026",
-      "China":"through Sep 2026",
+      "China":"through Oct 2026",
       "South Korea":"through Oct 2026",
       "Singapore":"through Sep 2026",
       "Malaysia":"through Sep 2026",
@@ -1925,38 +1929,38 @@ const MONTHLY_DATA = {
       "Ireland":23097,"Italy":67338,"Latvia":1252,"Lithuania":2171,"Luxembourg":9396,"Malta":1541,"Netherlands":108416,
       "Norway":118457,"Poland":30640,"Portugal":41325,"Romania":5424,"Slovakia":2969,"Slovenia":4424,"Spain":81166,
       "Sweden":80937,"Switzerland":39900,"United Kingdom":386244,
-      "Canada":84582,"Mexico":10889,"New Zealand":4119,"United States":1026274,"India":139844,"South Korea":190942,"Taiwan":22006,
+      "Canada":84582,"Mexico":17442,"New Zealand":4119,"United States":1026274,"India":139844,"South Korea":190942,"Taiwan":22006,
       "Israel":40028,
       "Peru":437,
       "Uruguay":9136,
       "Albania":3038,
       "Paraguay":547,
-      "China":5438000,
+      "China":6250000,
       "Serbia":298,
       "Hong Kong":24494,
       "Thailand":82190,
       "Singapore":16278,
       "Turkey":146773,
           "Bosnia-Herzegovina":46,
-      "Brazil": 61532
+      "Brazil":61532
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":88335,
-      "Austria":239594,"Belgium":357823,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":150258,"Estonia":9422,"Finland":60152,"France":1326298,"Germany":2360481,"Greece":112232,"Hungary":95953,"Iceland":11711,"Ireland":123840,"Italy":1293729,"Latvia":17566,"Lithuania":31373,"Luxembourg":36494,"Malta":4633,"Netherlands":306697,"Norway":124545,"Poland":480636,"Portugal":187701,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":951445,"Sweden":228105,"Switzerland":187381,"United Kingdom":1723120,"Canada":1455051,"Mexico":842840,"New Zealand":51878,"United States":12209885,"India":3213654,"South Korea":1409095,"Taiwan":258424,
+      "Austria":239594,"Belgium":357823,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":150258,"Estonia":9422,"Finland":60152,"France":1326298,"Germany":2360481,"Greece":112232,"Hungary":95953,"Iceland":11711,"Ireland":123840,"Italy":1293729,"Latvia":17566,"Lithuania":31373,"Luxembourg":36494,"Malta":4633,"Netherlands":306697,"Norway":124545,"Poland":480636,"Portugal":187701,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":951445,"Sweden":228105,"Switzerland":187381,"United Kingdom":1723120,"Canada":1455051,"Mexico":1221825,"New Zealand":51878,"United States":12209885,"India":3213654,"South Korea":1409095,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
       "Uruguay":34219,
       "Albania":54624,
       "Paraguay":21959,
-      "China":16950576,
+      "China":19192576,
       "Serbia":23968,
       "Hong Kong":28910,
       "Thailand":447778,
       "Singapore":37937,
       "Turkey":833382,
           "Bosnia-Herzegovina":8594,
-      "Brazil": 2057270
+      "Brazil":2057270
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1971,7 +1975,7 @@ const MONTHLY_DATA = {
       "Malaysia": [75338, 0, 56233, 0, 702831, 39314, 873716],
       "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
       "Australia": [257491, 118613, 215128, 0, 351955, 310036, 1253223],
-      "China": [7315000, 3483000, 0, 0, 7446667, 0, 18244667],
+      "China": [7528667, 3535000, 0, 0, 7356000, 0, 18419667],
       "Austria": [87921, 35981, 93352, 2, 74134, 28943, 320333],
       "Belgium": [170683, 24514, 54223, 3938, 160435, 10795, 424588],
       "Brazil": [235204, 185839, 200130, 0, 2048225, 263846, 2933244],
@@ -1995,7 +1999,7 @@ const MONTHLY_DATA = {
       "Lithuania": [4434, 6812, 25382, 898, 7969, 4303, 49798],
       "Luxembourg": [15487, 3082, 16291, 84, 11184, 3889, 50017],
       "Malta": [3535, 911, 2374, 2, 1361, 323, 8506],
-      "Mexico": [29820, 34872, 132637, 0, 1336133, 0, 1533462],
+      "Mexico": [29672, 35269, 133624, 0, 1346842, 0, 1545407],
       "Netherlands": [161449, 77293, 99158, 1743, 25937, 3313, 368893],
       "New Zealand": [19950, 12490, 39644, 1087, 33903, 6685, 113759],
       "Norway": [159901, 790, 914, 0, 240, 1128, 162973],
