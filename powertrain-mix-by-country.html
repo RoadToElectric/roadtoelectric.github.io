@@ -3943,27 +3943,6 @@ trendsClearBtn.addEventListener('click', (e) => {
 
 const FUEL_TOTAL_KEYS = ['bev','phev','hev','petrol','diesel','others','total'];
 
-// synthesizes one more year beyond an existing PROJECTED point — applies that point's own
-// implied growth rate (vs. the actual year before it) one more time, per fuel column, so the
-// resulting share is just derived from the projected volumes rather than needing separate
-// share-specific math. Never written back to COUNTRY_YEARLY — purely a client-side display point,
-// same "naive continuation" method as the 2027 point on the other 2 pages.
-function nextYearRow(rows){
-  const proj = rows.find(r => r.period_type === 'PROJECTED');
-  if(!proj) return null;
-  const actual = rows.find(r => r.year === proj.year - 1 && r.period_type === 'ANNUAL');
-  if(!actual || !actual.total) return null;
-  const out = { year: proj.year + 1, period_type: 'NEXT_YEAR_PROJECTED' };
-  FUEL_TOTAL_KEYS.forEach(k => {
-    const p = proj[k], a = actual[k];
-    if(p == null){ out[k] = null; return; }
-    // a genuine 0 base (not null) has no rate to extrapolate from — carry the projected
-    // value forward unchanged rather than divide by zero or drop the field
-    out[k] = a ? p * (p / a) : p;
-  });
-  return out;
-}
-
 function trendsSeriesForCountry(name){
   if(typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[name]){
     // TIME-PROPORTIONAL series: monthly points only for the rolling last TREND_MONTHS real months, every
@@ -4003,35 +3982,15 @@ function trendsSeriesForCountry(name){
     monthlyRows.filter(r => monthIdx(r.ym) >= winStart).forEach(r => {
       points.push({ label: r.ym, kind: 'month', t0: monthIdx(r.ym), w: 1, isPartial: false, ...fuelOf(r) });
     });
-    // append the model's IMPLIED RATE for the remaining months of the year (not the full-year
-    // cumulative total) as a dashed continuation past the last real month. The full-year total
-    // is a blend of every month including ones that may look nothing like the recent trend (an
-    // early-year subsidy spike, say) — plotting that blend as "the next point" on a monthly line
-    // makes a stable recent trend look like it reverses. (proj - ytd) / remaining months is the
-    // actual forward-looking rate the projection model computed, which IS comparable to the real
-    // monthly points before it.
-    const yearlyRows = COUNTRY_YEARLY[name];
-    const proj = yearlyRows && yearlyRows.find(r => r.period_type === 'PROJECTED');
-    const ytd = yearlyRows && yearlyRows.find(r => r.period_type === 'YTD');
-    const remaining = ytd && ytd.months_covered ? 12 - ytd.months_covered : 0;
-    if(proj && ytd && remaining > 0 && FUEL_TOTAL_KEYS.every(k => proj[k] != null && ytd[k] != null)){
-      const rate = {};
-      FUEL_TOTAL_KEYS.forEach(k => { rate[k] = (proj[k] - ytd[k]) / remaining; });
-      points.push({
-        label: String(proj.year), kind: 'proj', t0: lastIdx + 1, w: remaining, isPartial: false, isProjected: true, total: rate.total,
-        bev: rate.bev, phev: rate.phev, hev: rate.hev, petrol: rate.petrol, diesel: rate.diesel, others: rate.others
-      });
-    }
     return { granularity: 'monthly', points };
   }
-  const rows = COUNTRY_YEARLY[name] || [];
-  const next = nextYearRow(rows);
-  const allRows = (next ? [...rows, next] : rows).slice().sort((a, b) => {
+  const rows = (COUNTRY_YEARLY[name] || []).filter(r => r.period_type !== 'PROJECTED');     // real data only: the trend chart draws no projections
+  const allRows = rows.slice().sort((a, b) => {
     if(a.year !== b.year) return a.year - b.year;
     return (PERIOD_DISPLAY_ORDER[a.period_type] ?? 0) - (PERIOD_DISPLAY_ORDER[b.period_type] ?? 0);
   });
   return { granularity: 'annual', points: allRows.map(r => ({
-    label: String(r.year), isPartial: r.period_type === 'YTD', isProjected: r.period_type === 'PROJECTED' || r.period_type === 'NEXT_YEAR_PROJECTED', total: r.total,
+    label: String(r.year), isPartial: r.period_type === 'YTD', total: r.total,
     bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others
   })) };
 }
@@ -4047,25 +4006,17 @@ function trendsSeriesAggregate(){
   countries.forEach(c => {
     (COUNTRY_YEARLY[c] || []).forEach(r => {
       if(r.petrol == null || r.diesel == null) return;
+      if(r.period_type === 'PROJECTED') return;                                                  // real data only: the trend chart draws no projections
       if(r.period_type === 'YTD' && r.year !== latestYear) return;
-      const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false, isProjected: r.period_type === 'PROJECTED'});
+      const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false});
       y.bev += r.bev; y.phev += r.phev; y.hev += r.hev;
       y.petrol += r.petrol; y.diesel += r.diesel; y.others += (r.others||0); y.total += r.total;
       if(r.period_type === 'YTD') y.isPartial = true;
     });
-
-    // each country's own next-year continuation, summed the same way as its PROJECTED year —
-    // every market keeps its own growth rate rather than one blended rate applied to the total
-    const next = nextYearRow(COUNTRY_YEARLY[c]);
-    if(next && FUEL_TOTAL_KEYS.every(k => next[k] != null)){
-      const y = byYear[next.year] || (byYear[next.year] = {year:next.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false, isProjected:true});
-      y.bev += next.bev; y.phev += next.phev; y.hev += next.hev;
-      y.petrol += next.petrol; y.diesel += next.diesel; y.others += next.others; y.total += next.total;
-    }
   });
   const years = Object.values(byYear).sort((a,b) => a.year - b.year);
   return { granularity: 'annual', points: years.map(y => ({
-    label: String(y.year), isPartial: y.isPartial, isProjected: y.isProjected, total: y.total,
+    label: String(y.year), isPartial: y.isPartial, total: y.total,
     bev: y.bev, phev: y.phev, hev: y.hev, petrol: y.petrol, diesel: y.diesel, others: y.others
   })) };
 }
