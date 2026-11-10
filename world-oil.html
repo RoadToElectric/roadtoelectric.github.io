@@ -246,7 +246,7 @@
       <!-- 3b. what if -->
       <div class="card chart-card" id="wi-card">
         <h2>4 · What if…? Build your own oil scenario</h2>
-        <p class="wo-note">Move the levers and watch world oil demand change from today to 2060. Dashed line = <b>current trends</b> (every lever left at its default); dotted flat line = <b>today's level</b>, to see whether demand ends above or below it. The chart is a simple fleet model, not a forecast: <b>read the assumptions below</b>. “Electric” means battery-electric; plug-in hybrids still burn fuel.</p>
+        <p class="wo-note">Move the levers and watch world oil demand change from today to 2060. Dashed line = <b>current trends</b> (every lever left at its default); dotted flat line = <b>the starting level</b>, to see whether demand ends above or below it. The scenarios start from the pre-war 2026 level (97.1 mb/d), not from the lower 2026 of section 1 (the Strait of Hormuz crisis, forecast by the IEA at 94.0 mb/d on this page's basis), because a crisis year is not a base for a 2060 path. The chart is a simple fleet model, not a forecast: <b>read the assumptions below</b>. “Electric” means battery-electric; plug-in hybrids still burn fuel.</p>
         <div class="wo-frow" style="margin:2px 0 8px" id="wi-presets"></div>
         <div class="wo-filters" id="wi-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Scenario levers</span><span class="wo-fsum" id="wi-fsum"></span><i class="wo-car">▾</i></button>
@@ -278,7 +278,7 @@
 
       <!-- 4. production -->
       <div class="card chart-card" id="pr-card">
-        <h2>6 · Oil produced by country, 1960–2025</h2>
+        <h2>6 · Oil produced by country, 1960–2026</h2>
         <p class="wo-note" id="pr-note"></p>
         <div class="wo-filters" id="pr-f">
           <button type="button" class="wo-ftoggle" aria-expanded="true"><span>Filters</span><span class="wo-fsum" id="pr-fsum"></span><i class="wo-car">▾</i></button>
@@ -295,7 +295,7 @@
             </div>
             <div class="wo-frow"><label class="wo-fl">Years</label>
               <div class="wo-range"><span id="pr-y0l">1960</span><input type="range" id="pr-y0" min="1960" max="2015" value="1960"></div>
-              <div class="wo-range"><input type="range" id="pr-y1" min="1970" max="2025" value="2025"><span id="pr-y1l">2025</span></div>
+              <div class="wo-range"><input type="range" id="pr-y1" min="1970" max="2026" value="2026"><span id="pr-y1l">2026</span></div>
             </div>
           </div>
         </div>
@@ -306,7 +306,7 @@
         <h2>7 · Who pumped the most, year by year</h2>
         <p class="wo-note">Top producers of the selected year (regions as ticked above). Press play to watch the ranking change from 1960.</p>
         <div class="wo-frow" style="margin:0 0 6px"><button type="button" class="wo-play" id="rk-play" aria-label="Play">▶</button>
-          <div class="wo-range"><input type="range" id="rk-year" min="1960" max="2025" value="2025" style="width:300px"><b id="rk-yl" style="font-size:20px;color:var(--text)">2025</b></div>
+          <div class="wo-range"><input type="range" id="rk-year" min="1960" max="2026" value="2025" style="width:300px"><b id="rk-yl" style="font-size:20px;color:var(--text)">2025</b></div>
         </div>
         <div class="wo-bars" id="rk-bars"></div>
       </div>
@@ -364,9 +364,10 @@
           <li><b>Who burns it, by country (sections 8 and 9).</b> 1965–2025 are the Energy Institute's country figures (same conversion as above). 1950–1964 are our estimate, because no free source publishes oil consumption by country before 1965 (the UN's own database, which starts in 1950, is only sold or released on request): each country is carried back from its 1965–69 level using the oil CO₂ series of the Global Carbon Project (via Our World in Data), which rests on the UN energy statistics. Two checks: the countries added up come within 1% (1950), 1% (1955) and 3% (1960) of the world total, and the United States comes out at 6.8, 8.7 and 9.7 million barrels a day in 1950, 1955 and 1960 against 6.5, 8.5 and 9.8 in the US government's own series. Seven oil exporters whose UN-based series jumps more than 2.5 times between two years are left out of 1950–64. Per person uses UN World Population Prospects 2024; before 1985 the USSR is the 15 republics added up.</li>
           <li><b>Purposes 1971–2019 are IEA data.</b> The IEA's Key World Energy Statistics 2021 publishes a chart of oil final consumption by sector (road, aviation, navigation, rail, industry, homes, non-energy use, other). We read the values straight from the chart's vector drawing; they reproduce the printed 1973 and 2019 shares to the decimal (for instance road 30.8% then 49.2%, 94 then 169 EJ). Energy is turned into barrels at 2.1 EJ per mb/d.</li>
           <li><b>Cars vs trucks is an estimate.</b> The IEA does not split road oil. We anchor it on the IEA 2017 truck study (trucks use about 17 mb/d, roughly 44% of road oil) and assume trucks, vans and buses were 25% of road oil in 1971, rising evenly to 44% in 2017. Cars, SUVs and motorbikes are the rest. IEA and other estimates put cars at 21–24 mb/d, the same range as our 22.</li>
-          <li><b>1950–1970 are estimates:</b> the IEA series starts in 1971, so we keep the 1971 shares and the 1971 ratio between final consumption and total oil. In reality transport was probably smaller and fuel oil for heat and industry larger. <b>2020–2025: the total is real, the split by purpose is estimated.</b> The Energy Institute total for these years is final data, but the IEA sector chart we read ends in 2019, so each sector follows the IEA Oil 2025 demand figures of the fuel it burns (gasoline for cars, diesel for trucks, jet fuel for planes, fuel oil for ships, LPG and naphtha for chemicals): actual demand up to 2024, the IEA's preliminary figure for 2025. <b>2026 is a forecast</b> (the year is not over). Hatched bands mark the estimated years in the first chart.</li>
+          <li><b>1950–1970 are estimates:</b> the IEA series starts in 1971, so we keep the 1971 shares and the 1971 ratio between final consumption and total oil. In reality transport was probably smaller and fuel oil for heat and industry larger. <b>2020–2025: the total is real, the split by purpose is estimated.</b> The Energy Institute total for these years is final data, but the IEA sector chart we read ends in 2019, so each sector follows the IEA Oil 2025 demand figures of the fuel it burns (gasoline for cars, diesel for trucks, jet fuel for planes, fuel oil for ships, LPG and naphtha for chemicals): actual demand up to 2024, the IEA's preliminary figure for 2025. <b>2026 is the IEA's forecast, converted:</b> the IEA Oil Market Report of 14 October 2026 puts 2026 demand at 102.4 mb/d, 2.6 below 2025 (105.0 on its basis); we apply that ratio (0.975) to the Energy Institute's 2025 total (96.4 mb/d), giving 94.0 mb/d, and share the cut across purposes in proportion. The IEA says diesel, petrochemical feedstocks and jet fuel carried most of it, so the split of 2026 is a rough guide. Hatched bands mark the estimated years in the first chart.</li>
           <li><b>“Power plants, refineries &amp; other conversion”</b> is what remains of total oil after the IEA's final-consumption sectors: oil burnt for electricity, refinery fuel, losses and the definition gap between the two sources.</li>
-          <li><b>What-if scenarios (section 4)</b> run a simple fleet model from the 2026 estimate; the assumptions are listed under the chart. They illustrate orders of magnitude, they are not forecasts.</li>
+          <li><b>Bridging 2026 until the Energy Institute publishes it (June 2027).</b> The Energy Institute has one release a year. For 2026 we use the IEA Oil Market Reports and convert them with the ratio between the two sources in 2025, the last year both exist: world demand (section 1) from the October 2026 report; oil produced by country (sections 6 and 7) as the January–June 2026 average of the 1Q26 figure of the May report and the 2Q26 figure of the July report (the later reports are not yet public as full tables), each country times its own Energy Institute / IEA ratio of 2025 (the IEA counts crude, condensate and NGL together, the Energy Institute series differs by country, so a country's ratio can be well above or below 1). Countries the IEA does not list are kept at their 2025 level. World production uses the IEA supply without biofuels and refinery gains. Script <code>scripts/world_oil/bridge_2026.py</code>; replace it when the Energy Institute 2026 data arrives.</li>
+          <li><b>What-if scenarios (section 4)</b> run a simple fleet model from the pre-war 2026 level; the assumptions are listed under the chart. They illustrate orders of magnitude, they are not forecasts.</li>
           <li><b>Production by country, 1960–2025:</b> Energy Institute / Our World in Data, crude oil and condensate. Russia includes the Soviet Union before 1985 (the data only splits the republics from 1985). The United States figures of chart 3 come from the US Energy Information Administration (Monthly Energy Review).</li>
         </ol>
         <div id="method-table"></div>
@@ -376,12 +377,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="assets/world-oil-data.js"></script>
+<script src="assets/world-oil-data.js?v=2"></script>
 <script src="assets/world-oil-consumers.js"></script>
 <script src="assets/filter-memory.js?v=5"></script>
 <script>
 const O = WORLD_OIL, Y = O.years, NY = Y.length, EST = O.kind.map(k => k !== 'iea');
-const estTag = y => y <= 1970 ? 'split estimated' : y <= 2025 ? 'split estimated · total is real' : 'forecast';   // what a hatched year means: the total oil is Energy Institute data to 2025, only the split by purpose (or 2026 itself) is estimated
+const estTag = y => y <= 1970 ? 'split estimated' : y <= 2025 ? 'split estimated · total is real' : 'IEA forecast, converted';   // what a hatched year means: the total oil is Energy Institute data to 2025, only the split by purpose (or 2026 itself) is estimated
 const fmt1 = d3.format(',.1f'), fmt0 = d3.format(',.0f');
 const CATS = [
   { k:'road_passenger', label:'Cars, SUVs & motorbikes', tr:true, color:'#0a80d0' },
@@ -458,7 +459,7 @@ function seg(id, cb){ const el = document.getElementById(id); el.addEventListene
   document.getElementById('hero-sub').innerHTML = `Of the <b>${fmt1(T)} million barrels</b> burned every day in ${y}, about <b>${fmt1(tr)} million</b> power vehicles, planes and ships. Counted only on oil that reaches final users, the IEA puts transport at <b>${(100 * finalTr).toFixed(0)}%</b> in 2019. Cars use about ${fmt1(useVal('road_passenger', y))} mb/d, trucks, vans and buses about ${fmt1(useVal('road_goods', y))} mb/d.`;
   const K = [['road_passenger', 'Cars, SUVs & motorbikes', '#38bdf8'], ['road_goods', 'Trucks, vans & buses', '#60a5fa'], ['aviation', 'Aviation', '#22d3ee'], ['navigation', 'Shipping', '#2dd4bf'], ['nonenergy', 'Plastics, chemicals & asphalt', '#6fe14a'], ['nonfinal', 'Power plants, refineries & conversion', '#cbd5e1']];
   document.getElementById('hero-kpis').innerHTML = K.map(([k, l, c]) => `<div class="wo-kpi" style="--c:${c}"><div class="v">${fmt1(useVal(k, y))}<small>mb/d</small></div><div class="l">${l} · ${(100 * useVal(k, y) / T).toFixed(0)}% of oil</div></div>`).join('');
-  const i50 = tot(1950), i73 = tot(1973), p = O.prodYears.length - 1;
+  const i50 = tot(1950), i73 = tot(1973), p = O.prodYears.indexOf(2025);
   const top = Object.entries(O.countries).map(([n, c]) => [n, c.mbd[p]]).sort((a, b) => b[1] - a[1]);
   const ins = [
     ['#0a80d0', 'Growth since 1950', fmt0(tot(2025) / tot(1950)) + '×', `World oil use went from ${fmt1(tot(1950))} mb/d in 1950 to ${fmt1(tot(2025))} mb/d in 2025. It fell only twice by more than 4%: after the 1979–80 shocks and in 2020.`],
@@ -480,7 +481,7 @@ function drawUse(){
   document.getElementById('use-fsum').textContent = `${useMode === 'abs' ? 'mb/d' : '% of oil'} · ${cats.length} purposes · ${useY0}–${useY1}`;
   stackedArea(document.getElementById('use-chart'), yrs, series, { pct:useMode === 'pct', h:430, est:yy => EST[iy(yy)],
     tip:(r, ss) => `<b>${r.year}</b> ${EST[iy(r.year)] ? `<span class="est">${estTag(r.year)}</span>` : '<span style="color:var(--text-muted)">IEA data</span>'}<div class="r" style="margin:3px 0"><span>All oil</span><b>${fmt1(tot(r.year))} mb/d</b></div>${tipRows(r, ss, useMode === 'pct')}${ss.length > 1 ? (() => { const sel = ss.reduce((q, z) => q + z.vals[r.i], 0); return `<div class="r" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span><b>Selected total</b> (${ss.length} purposes)</span><b>${fmt1(sel)} mb/d · ${(100 * sel / tot(r.year)).toFixed(0)}%</b></div>`; })() : ''}` });
-  document.getElementById('use-note').innerHTML = `Million barrels a day burned or used as raw material. Solid areas 1971–2019 are IEA data. <b>Hatched years are estimated splits</b>: 1950–70 (before the IEA series) and 2020–26 (the IEA sector chart we read ends in 2019). The total oil for 2020–25 is real Energy Institute data; only 2026 is a forecast. Hover for the numbers of one year.`;
+  document.getElementById('use-note').innerHTML = `Million barrels a day burned or used as raw material. Solid areas 1971–2019 are IEA data. <b>Hatched years are estimated splits</b>: 1950–70 (before the IEA series) and 2020–26 (the IEA sector chart we read ends in 2019). The total oil for 2020–25 is real Energy Institute data. 2026 is the IEA's October 2026 forecast (demand 102.4 mb/d, down 2.6) converted to the Energy Institute basis; the Energy Institute publishes 2026 in June 2027. Hover for the numbers of one year.`;
 }
 (function initUse(){
   const lg = document.getElementById('use-legend');
@@ -572,7 +573,7 @@ const WIS = {}, WIT = {};                 // value, touched
 WI_LEVERS.forEach(l => { WIS[l.id] = l.def != null ? l.def : l.base(2040); WIT[l.id] = false; });
 const wiVal = (l, t) => WIT[l.id] || l.def != null ? WIS[l.id] : l.base(t);
 function wiRun(S, T){        // S: levers values, T: touched map -> {year: {purpose: mb/d, total}}
-  const U = k => useVal(k, 2026), tg = S.target, out = {};
+  const U = k => O.wi2026[k], tg = S.target, out = {};                // the pre-war 2026 level: scenarios start from a normal year, not from the 2026 crisis year of section 1
   const prog = t => WI.clamp((t - 2026) / (tg - 2026), 0, 1);
   const lv = id => WI_LEVERS.find(l => l.id === id);
   const share = (id, t, v0) => T[id] ? v0 + (S[id] - v0) * prog(t) : lv(id).base(t);       // untouched: the calendar baseline path
@@ -602,9 +603,9 @@ const WI_YEARS = d3.range(2000, 2061);
 function wiDraw(){
   const S = {}; WI_LEVERS.forEach(l => S[l.id] = wiVal(l, WIS.target));
   const run = wiRun(S, WIT), base = wiRun((() => { const b = {}; WI_LEVERS.forEach(l => b[l.id] = l.def != null ? l.def : l.base(WIS.target)); return b; })(), {});
-  const tg = S.target, series = CATS.map(c => ({ key:c.k, label:c.label, color:c.color, vals:WI_YEARS.map(y => y <= 2026 ? useVal(c.k, y) : run[y][c.k]) }));
-  const totS = WI_YEARS.map(y => y <= 2026 ? tot(y) : run[y].total), totB = WI_YEARS.map(y => y <= 2026 ? tot(y) : base[y].total);
-  stackedArea(document.getElementById('wi-chart'), WI_YEARS, series, { h:440, est:yy => yy > 2026, overlay:{ vals:totB, label:'Current trends', color:'#111827' }, ref:{ val:tot(2026), from:2026, color:'#111827', label:`Flat at today's ${fmt1(tot(2026))} mb/d` }, mark:[[2026, 'Today'], [tg, 'Target ' + tg]],
+  const tg = S.target, series = CATS.map(c => ({ key:c.k, label:c.label, color:c.color, vals:WI_YEARS.map(y => y < 2026 ? useVal(c.k, y) : y === 2026 ? O.wi2026[c.k] : run[y][c.k]) }));
+  const wiTot = y => y < 2026 ? tot(y) : y === 2026 ? O.wi2026.total : null, totS = WI_YEARS.map(y => y <= 2026 ? wiTot(y) : run[y].total), totB = WI_YEARS.map(y => y <= 2026 ? wiTot(y) : base[y].total);
+  stackedArea(document.getElementById('wi-chart'), WI_YEARS, series, { h:440, est:yy => yy > 2026, overlay:{ vals:totB, label:'Current trends', color:'#111827' }, ref:{ val:O.wi2026.total, from:2026, color:'#111827', label:`Flat at the pre-war ${fmt1(O.wi2026.total)} mb/d` }, mark:[[2026, 'Start'], [tg, 'Target ' + tg]],
     tip:(r, ss) => `<b>${r.year}</b> ${r.year > 2026 ? '<span class="est">scenario</span>' : r.year >= 2020 ? '<span class="est">estimate</span>' : ''}<div class="r"><span>Scenario total</span><b>${fmt1(totS[r.i])} mb/d</b></div>${r.year > 2026 ? `<div class="r"><span>Current trends</span><b>${fmt1(totB[r.i])} mb/d</b></div><div class="r"><span>Difference</span><b class="${totS[r.i] <= totB[r.i] ? 'wi-dn' : 'wi-up'}">${totS[r.i] - totB[r.i] >= 0 ? '+' : ''}${fmt1(totS[r.i] - totB[r.i])} mb/d</b></div>` : ''}${tipRows(r, ss, false)}` });
   // KPIs
   const t25 = tot(2025), vT = run[tg].total, vB = base[tg].total;
@@ -677,12 +678,13 @@ function drawUS(){
 (function initUS(){ seg('us-mode', v => { usMode = v; drawUS(); }); seg('us-unit', v => { usUnit = v; drawUS(); }); drawUS(); })();
 
 // ---------- 4. production ----------
-const COUNTRIES = Object.entries(O.countries).map(([n, c]) => ({ n, region:c.region, mbd:c.mbd })).sort((a, b) => b.mbd[b.mbd.length - 1] - a.mbd[a.mbd.length - 1] || d3.max(b.mbd) - d3.max(a.mbd));
+const I25 = O.prodYears.indexOf(2025);                    // the last Energy Institute year; 2026 (IEA, converted) is the one point after it
+const COUNTRIES = Object.entries(O.countries).map(([n, c]) => ({ n, region:c.region, mbd:c.mbd })).sort((a, b) => b.mbd[I25] - a.mbd[I25] || d3.max(b.mbd) - d3.max(a.mbd));
 const PAL = d3.schemeTableau10.concat(['#a3e635', '#14b8a6', '#f472b6', '#818cf8', '#fb923c', '#84cc16', '#06b6d4', '#c026d3', '#ca8a04', '#64748b', '#dc2626', '#0ea5e9', '#16a34a', '#9333ea']);
 COUNTRIES.forEach((c, i) => c.color = PAL[i % PAL.length]);
 const REGIONS = [...new Set(COUNTRIES.map(c => c.region))];
 const prSel = new Set(COUNTRIES.slice(0, 12).map(c => c.n)), regOn = new Set(REGIONS);
-let prMode = 'abs', prY0 = 1960, prY1 = 2025, prOthers = false, prQuery = '';
+let prMode = 'abs', prY0 = 1960, prY1 = 2026, prOthers = false, prQuery = '';
 const PY = O.prodYears;
 function drawProd(){
   const i0 = PY.indexOf(prY0), i1 = PY.indexOf(prY1), yrs = PY.slice(i0, i1 + 1);
@@ -691,9 +693,9 @@ function drawProd(){
   if(prOthers){ const others = yrs.map((_, i) => Math.max(0, O.worldProd[i0 + i] - chosen.reduce((s, c) => s + c.mbd[i0 + i], 0))); series.push({ key:'__others', label:'All other producers', color:'#cbd5e1', vals:others }); }
   document.getElementById('pr-fsum').textContent = `${chosen.length} countr${chosen.length === 1 ? 'y' : 'ies'} · ${prMode === 'abs' ? 'mb/d' : '% of world'} · ${prY0}–${prY1}`;
   const Wp = O.worldProd.slice(i0, i1 + 1);
-  stackedArea(document.getElementById('pr-chart'), yrs, series, { pct:prMode === 'pct', denom:Wp, h:430,
-    tip:(r, ss) => `<b>${r.year}</b><div class="r"><span>World production</span><b>${fmt1(Wp[r.i])} mb/d</b></div>${prMode === 'pct' ? tipRowsW(r, ss.filter(s => s.vals[r.i] > 0.0005), Wp) : tipRows(r, ss.filter(s => s.vals[r.i] > 0.0005), false)}` });
-  document.getElementById('pr-note').innerHTML = `Crude oil and condensate produced, million barrels a day. Tick or untick countries and regions in the filters; tick “all other producers” to make the stack equal world production. The “only” button next to a country shows that country alone. *Russia includes the Soviet Union before 1985. World production reached ${fmt1(O.worldProd[PY.length - 1])} mb/d in 2025 (${fmt1(O.worldProd[0])} in 1960).`;
+  stackedArea(document.getElementById('pr-chart'), yrs, series, { pct:prMode === 'pct', denom:Wp, h:430, est:yy => yy >= 2025,
+    tip:(r, ss) => `<b>${r.year}</b>${r.year === 2026 ? ' <span class="est">Jan–Jun · IEA converted</span>' : ''}<div class="r"><span>World production</span><b>${fmt1(Wp[r.i])} mb/d</b></div>${prMode === 'pct' ? tipRowsW(r, ss.filter(s => s.vals[r.i] > 0.0005), Wp) : tipRows(r, ss.filter(s => s.vals[r.i] > 0.0005), false)}` });
+  document.getElementById('pr-note').innerHTML = `Crude oil and condensate produced, million barrels a day. Tick or untick countries and regions in the filters; tick “all other producers” to make the stack equal world production. The “only” button next to a country shows that country alone. *Russia includes the Soviet Union before 1985. World production reached ${fmt1(O.worldProd[I25])} mb/d in 2025 (${fmt1(O.worldProd[0])} in 1960). <b>2026 (hatched) is not Energy Institute data yet</b>: it is the January–June 2026 average of the IEA Oil Market Reports (May and July), converted to this basis with each country's own 2025 ratio between the two sources; it shows the Strait of Hormuz crisis. The Energy Institute publishes 2026 in June 2027 and will replace it.`;
   drawRanking();
 }
 function drawList(){
@@ -730,13 +732,13 @@ function drawRanking(){
   document.getElementById('rk-yl').textContent = yr;
   const rows = COUNTRIES.filter(c => regOn.has(c.region)).map(c => ({ n:c.n.replace(' (USSR before 1985)', '*'), v:c.mbd[i], color:c.color })).filter(r => r.v > 0.001).sort((a, b) => b.v - a.v).slice(0, 15);
   const mx = rows.length ? rows[0].v : 1, W = O.worldProd[i];
-  document.getElementById('rk-bars').innerHTML = rows.map((r, k) => `<div class="wo-brow"><span class="n">${k + 1}. ${r.n}</span><span class="t"><i style="width:${100 * r.v / mx}%;background:${r.color}"></i></span><span class="v">${fmt1(r.v)}<small style="color:var(--text-muted);font-weight:600"> ${(100 * r.v / W).toFixed(0)}%</small></span></div>`).join('') + `<div class="wo-note">World: ${fmt1(W)} mb/d in ${yr}.</div>`;
+  document.getElementById('rk-bars').innerHTML = rows.map((r, k) => `<div class="wo-brow"><span class="n">${k + 1}. ${r.n}</span><span class="t"><i style="width:${100 * r.v / mx}%;background:${r.color}"></i></span><span class="v">${fmt1(r.v)}<small style="color:var(--text-muted);font-weight:600"> ${(100 * r.v / W).toFixed(0)}%</small></span></div>`).join('') + `<div class="wo-note">World: ${fmt1(W)} mb/d in ${yr}${yr === 2026 ? ' (January–June, IEA data converted to the Energy Institute basis)' : ''}.</div>`;
 }
 (function initRank(){
   const sl = document.getElementById('rk-year'); sl.oninput = () => { stopRk(); drawRanking(); };
   const pb = document.getElementById('rk-play');
   function stopRk(){ if(rkTimer){ clearInterval(rkTimer); rkTimer = null; } pb.textContent = '▶'; }
-  pb.onclick = () => { if(rkTimer){ stopRk(); return; } if(+sl.value >= 2025) sl.value = 1960; pb.textContent = '❚❚'; rkTimer = setInterval(() => { sl.value = +sl.value + 1; drawRanking(); if(+sl.value >= 2025) stopRk(); }, 260); };
+  pb.onclick = () => { if(rkTimer){ stopRk(); return; } if(+sl.value >= 2026) sl.value = 1960; pb.textContent = '❚❚'; rkTimer = setInterval(() => { sl.value = +sl.value + 1; drawRanking(); if(+sl.value >= 2026) stopRk(); }, 260); };
   drawRanking();
 })();
 
