@@ -605,12 +605,12 @@ const MONTHLY_DATA = {
       // PROVISIONAL BEV/PHEV/HEV split: INEGI RAIAVL report of 2026-11-09 gives October 2026 sales of 137,395 (revised; +3.1% y/y, Jan-Oct 1,287,225) but the hybrid/electric breakdown exists only in the open-data CSV, still at September on 2026-11-10. BEV 2,651 / PHEV 3,472 / HEV 11,758 apply September's shares of the total (1.93% / 2.53% / 8.56%); petrol = remainder (diesel not published). REPLACE with the INEGI CSV figures when updated (the September CSV followed the press release by a few days).
       "Mexico": [2651,3472,11758,0,119514,0,137395],
       // PROVISIONAL: CPCA PRELIMINARY figures of 2026-11-04 via CnEVPost: passenger-vehicle retail 1,693,000 (-25% y/y), NEV retail 1,148,000 (penetration 67.8%). The BEV / PHEV(+EREV) split of the NEV is not published yet: it uses September's ratio (BEV 70.5% of NEV = 809,000; PHEV+EREV 339,000); petrol/ICE = total - NEV = 545,000. REPLACE with the CPCA final figures (CnEVPost final monthly article, ~8th-12th) when out.
-      "China": [809000,339000,0,0,545000,0,1693000]
+      "China": [770000,340000,0,0,533000,0,1643000]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":51316,      "Brazil":61532,      "Mexico":17442,      "China":6250000},
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":239594,      "Brazil":2057270,      "Mexico":1221825,      "China":19192576}
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000}
   },
   "2026-09": {
     label: "September 2026",
@@ -1834,7 +1834,7 @@ const MONTHLY_DATA = {
       // source: Argonne National Laboratory (Wards Auto), monthly, Jan-Jul 2026 summed — no Petrol/Diesel split published, Diesel=0
       "United States": [730554,144493,1850267,60,9254685,0,11980059],
       // source: CPCA (China Passenger Car Association) via CnEVPost — DOMESTIC passenger-vehicle RETAIL sales (sedans, SUVs, MPVs); excludes exports, heavy/commercial vehicles and light commercial vehicles. BEV exact; PHEV = PHEV + EREV; petrol = remainder (includes non-plug-in hybrids); HEV=0, Diesel=0 (not published)
-      "China": [6014000,2891000,0,0,6130000,0,15035000],
+      "China": [5975000,2892000,0,0,6118000,0,14985000],
       // source: world_auto_sales_annual, period_type='YTD' — FTI Automotive Industry Club, Jan-Jul 2026 summed; Total includes pickups/PPV, not passenger-cars-only; Diesel is a residual
       "Thailand": [166123,10456,117095,1303,78035,153029,526041],
       // source: TS/KOTSA new-registration API, Jan-Aug 2026 summed — PHEV folded into HEV
@@ -1975,7 +1975,7 @@ const MONTHLY_DATA = {
       "Malaysia": [75338, 0, 56233, 0, 702831, 39314, 873716],
       "Argentina": [8496, 0, 84254, 0, 459321, 0, 552071],
       "Australia": [257491, 118613, 215128, 0, 351955, 310036, 1253223],
-      "China": [7528667, 3535000, 0, 0, 7356000, 0, 18419667],
+      "China": [7463667, 3536667, 0, 0, 7341600, 0, 18341934],
       "Austria": [87921, 35981, 93352, 2, 74134, 28943, 320333],
       "Belgium": [170683, 24514, 54223, 3938, 160435, 10795, 424588],
       "Brazil": [235204, 185839, 200130, 0, 2048225, 263846, 2933244],
