@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/mobile.css?v=9">
+<script src="assets/view-mode.js?v=6"></script>
+<script src="assets/tooltip-fit.js" defer></script>
+<style>
+  .ct-card{ max-width:760px; }
+  .ct-mail{ display:inline-flex; align-items:center; gap:10px; font-size:clamp(18px,3.4vw,26px); font-weight:900; letter-spacing:-.01em; color:var(--accent); text-decoration:none; word-break:break-all; }
+  .ct-mail:hover{ text-decoration:underline; }
+  .ct-row{ display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 4px; }
+  .ct-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-weight:800; font-size:14px; padding:10px 16px; border-radius:12px; cursor:pointer; text-decoration:none; display:inline-block; }
+  .ct-btn.primary{ background:linear-gradient(135deg,#0a80d0,#2fae4e); border-color:transparent; color:#fff; }
+  .ct-list{ margin:10px 0 0 18px; padding:0; line-height:1.7; color:var(--text); }
+  .ct-form{ display:grid; gap:12px; margin-top:8px; }
+  .ct-form label{ display:grid; gap:5px; font-size:12px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+  .ct-form input, .ct-form select, .ct-form textarea{ font:inherit; font-size:16px; text-transform:none; letter-spacing:0; font-weight:500; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; width:100%; box-sizing:border-box; }
+  .ct-form textarea{ min-height:150px; resize:vertical; }
+  .ct-two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px){ .ct-two{ grid-template-columns:1fr; } }
+  .ct-note{ font-size:13px; color:var(--text-muted); line-height:1.5; margin:10px 0 0; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="world-oil.html"><span class="dot"></span>World Oil</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
+
+      <div class="nav-heading">Trends</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">Archive</div>
+      <a href="powertrain-mix-by-country-copy.html"><span class="dot"></span>Mix by Country (copy)</a>
+
+      <div class="nav-heading">About</div>
+      <a href="contact.html" aria-current="page"><span class="dot"></span>Contact</a>
+      <a href="comments.html"><span class="dot"></span>Comments</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page">
+      <header class="page-header">
+        <div class="eyebrow">About · Contact</div>
+        <h1>Contact</h1>
+        <p class="subtitle">Road to Electric analyses the global shift to electric mobility: monthly car registrations and powertrain mix, manufacturers, oil, population and charging. Write to us — questions, corrections, data sources, collaborations.</p>
+      </header>
+      <div class="card ct-card">
+        <a class="ct-mail" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">✉ roadtoelectric@gmail.com</a>
+        <div class="ct-row">
+          <a class="ct-btn primary" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">Write an email</a>
+          <button type="button" class="ct-btn" id="ct-copy">Copy the address</button>
+          <a class="ct-btn" href="comments.html">Leave a comment instead →</a>
+        </div>
+        <h2 style="margin-top:22px">What is useful to send</h2>
+        <ul class="ct-list">
+          <li><b>A number that looks wrong</b> — the country, the month and the source you compared it with.</li>
+          <li><b>A data source</b> we do not use yet (an association, a registry, a monthly release).</li>
+          <li><b>A request</b> for a chart, a filter or a country.</li>
+          <li><b>Press, partnership or reuse</b> of a chart: tell us where it will appear.</li>
+        </ul>
+        <p class="ct-note">Tip: every graph has a 🔗 button that copies a link to that exact graph with its filters — paste it in your message and we see what you see.</p>
+      </div>
+      <footer class="page-footer">
+        Road to Electric — analyzing the current shift to EVs.
+      </footer>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var MAIL = 'roadtoelectric@gmail.com';
+  var $ = function(id){ return document.getElementById(id); };
+  function build(){
+    var type = $('cf-type').value, page = $('cf-page').value, name = $('cf-name').value.trim(), mail = $('cf-mail').value.trim(), msg = $('cf-msg').value.trim();
+    var subject = 'Road to Electric — ' + type + (page ? ' — ' + page : '');
+    var body = msg + '\n\n' + '—\n' + (name ? 'From: ' + name + '\n' : '') + (mail ? 'Reply to: ' + mail + '\n' : '') + (page ? 'Page: ' + page + '\n' : '');
+    return { subject: subject, body: body, msg: msg };
+  }
+  function flash(el, t){ var o = el.textContent; el.textContent = t; setTimeout(function(){ el.textContent = o; }, 1600); }
+  function copy(t){ if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t); return new Promise(function(ok, no){ try{ var a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(a); a.select(); document.execCommand('copy') ? ok() : no(); document.body.removeChild(a); }catch(e){ no(e); } }); }
+  if($('ct-copy')) $('ct-copy').addEventListener('click', function(){ var b = this; copy(MAIL).then(function(){ flash(b, '✓ Copied'); }, function(){ flash(b, MAIL); }); });
+  if($('cf-send')){
+    $('cf-send').addEventListener('click', function(){
+      var m = build(); if(!m.msg){ $('cf-status').textContent = 'Please write a message first.'; $('cf-msg').focus(); return; }
+      window.location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
+      $('cf-status').textContent = 'If nothing opened, use “Copy the message” and paste it in an email to ' + MAIL + '.';
+    });
+    $('cf-copy').addEventListener('click', function(){ var m = build(), b = this; copy('To: ' + MAIL + '\nSubject: ' + m.subject + '\n\n' + m.body).then(function(){ flash(b, '✓ Copied'); }, function(){ flash(b, 'Copy failed'); }); });
+  }
+})();
+</script>
+</body>
+</html>
