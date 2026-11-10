@@ -448,6 +448,12 @@ svg.chart{ width:100%; height:auto; display:block; overflow: visible; touch-acti
   flex-shrink:0;
 }
 
+/* small-dot key of the bar colours inside the Sales-by cards (stays readable in a screenshot of the card) */
+.fuel-key{ display:flex; flex-wrap:wrap; gap:3px 12px; margin:2px 0 8px; font-size:11px; font-weight:600; color:var(--text-muted); }
+.fuel-key:empty{ display:none; }
+.fuel-key span{ display:inline-flex; align-items:center; gap:4px; }
+.fuel-key i{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
 .chart-header-row{
   display:flex;
   align-items:center;

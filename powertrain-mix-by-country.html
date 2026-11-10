@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/mix-filter-layout.css">
 <link rel="stylesheet" href="assets/mobile.css?v=9">
 <script src="assets/view-mode.js?v=6"></script>
-<script src="assets/section-link.js?v=2" defer></script>
+<script src="assets/section-link.js?v=3" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
 </head>
 <body>
@@ -377,6 +377,7 @@
           </div>
           <p class="note" id="mfr-country-group-note">Bars show each manufacturing country's total new registrations, summed across all its brands sold here; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-country-group-coverage-note"></div>
+          <div class="fuel-key" id="mfr-country-group-fuel-key" aria-label="Bar colours"></div>
           <div class="rank-rows-header mfr-total-left">
             <span class="rrh-name-gap"></span>
             <span class="rrh-total">Total</span>
@@ -427,6 +428,7 @@
           </div>
           <p class="note" id="mfr-note">Bars show each brand's total new registrations; the green segment is its BEV share of that total. Sorted by total sales.</p>
           <div class="mfr-coverage-note hidden" id="mfr-coverage-note"></div>
+          <div class="fuel-key" id="mfr-fuel-key" aria-label="Bar colours"></div>
           <div class="rank-rows-header mfr-total-left">
             <span class="rrh-name-gap"></span>
             <span class="rrh-total">Total</span>
@@ -482,6 +484,7 @@
           <div class="mfr-country-row">
             <div class="chart-legend" id="mfr-category-filter"></div>
           </div>
+          <div class="fuel-key" id="mfr-model-fuel-key" aria-label="Bar colours"></div>
           <div class="rank-rows-header">
             <span class="rrh-spacer"></span>
             <span class="rrh-total">BEV %</span>
@@ -6375,11 +6378,17 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     return { totalRank, categoryRank };
   }
 
+  // small-dot key of the bar colours, repeated inside each Sales-by card (the big clickable legend is far above, out of a screenshot of the card); lists only the powertrains drawn in the rows below
+  function renderFuelKey(kind, rows){
+    const el = document.getElementById(kind === 'model' ? 'mfr-model-fuel-key' : kind === 'mfgcountry' ? 'mfr-country-group-fuel-key' : 'mfr-fuel-key');
+    if(!el) return;
+    el.innerHTML = MFR_FUEL_KEYS.filter(k => rows.some(r => (r[k] || 0) > 0)).map(k => `<span><i style="background:${FUEL_COLORS[k]}"></i>${FUEL_LABELS[k]}</span>`).join('');
+  }
   function renderSection(kind){
     const rowsEl = kind === 'model' ? mfrModelRows : kind === 'mfgcountry' ? mfrCountryGroupRows : mfrRows;
     const mode = kind === 'model' ? mfrModelMode : kind === 'mfgcountry' ? mfrCountryGroupMode : mfrMode;
     const all = fullMfrRows(kind);
-    if(!all.length){ rowsEl.innerHTML = ''; return; }
+    if(!all.length){ rowsEl.innerHTML = ''; renderFuelKey(kind, []); return; }
     const marketTotal = all.reduce((s,r) => s + r.total, 0);
     // member set (every brand/model tracked for the period) is always fixed by real total
     // volume -- mfrSortKey only reorders that same set, it never swaps in a smaller/niche row
@@ -6401,6 +6410,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
     const isOther = r => kind === 'model' ? MODEL_CATCHALL.test(r.model || '') : /^(other|unknown)/i.test(r.label || '');
     const ordered = sorted.filter(r => !isOther(r)).concat(sorted.filter(isOther));
     const globalMax = Math.max(1, ...ordered.map(r => r.total));
+    renderFuelKey(kind, ordered);
     rowsEl.innerHTML = ordered.map((row, i) => {
       const sharePct = marketTotal ? row.total / marketTotal * 100 : 0;
       const widthDenom = mode === 'raw' ? globalMax : row.total;
