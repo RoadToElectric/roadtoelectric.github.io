@@ -79,28 +79,74 @@ function buildElectrificationBarsSeries(country){
   return ytdPeriod ? [...annualPeriods, ytdPeriod, ...monthPeriods] : [...annualPeriods, ...monthPeriods];
 }
 
-// the sum of several countries: only rows with a full fuel-type split are added (so the sum never understates ICE, the Motorisation Trends rule); the YTD bar takes the countries'
-// latest-year YTD rows; the monthly bars of that year appear only when at least 80% of the countries have a monthly series and, month by month, when at least 80% of those have
-// reported it (the newest months are usually in for a few countries only, which would swing the mix), each month being the sum of the countries that reported it
+// the sum of several countries. A row counts when its powertrain parts add up to its total (within 2%): China and the US publish petrol and diesel together and leave diesel empty,
+// a country with only some of the parts (a missing hybrid column) would understate the others. Six years (2020-2025 now) + the latest YTD + the monthly bars of that year.
+// Every period is compared with the same panel: the countries that have a usable row somewhere in that window, each weighted by its latest annual total. The countries of the panel
+// with no usable row for a period (a gap, or a series that starts later, like China in 2021) are its missing share: up to 5% the bar is drawn as it is, up to 25% it is drawn
+// with a star and the note names who is left out, above that it is not drawn (a sum without China is not a sum). The monthly bars appear only when at least 80% of the countries
+// have a monthly series and, month by month, when at least 80% of those have reported it (the newest months are usually in for a few countries only, which would swing the mix).
+// Fills elecBarsMultiInfo: { hidden: [{ label, names }], starred: [{ label, names }] } for the note under the chart.
+const ELEC_BARS_MULTI_YEAR_COUNT = 6;
+const ELEC_BARS_MISSING_STAR = 0.05;
+const ELEC_BARS_MISSING_HIDE = 0.25;
+let elecBarsMultiInfo = { hidden: [], starred: [] };
+function elecBarsComplete(r){
+  if(!r || r.total == null || !(r.total > 0) || r.bev == null) return false;
+  const parts = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'others'].reduce((a, k) => a + (r[k] || 0), 0);
+  return Math.abs(parts - r.total) <= 0.02 * r.total;
+}
 function buildElectrificationBarsSeriesMulti(countries){
   const KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'total'];
   const add = (acc, r) => { KEYS.forEach(k => { acc[k] = (acc[k] || 0) + (r[k] || 0); }); return acc; };
-  const full = r => r.petrol != null && r.diesel != null;
-  const yearly = c => ((typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[c]) || []).filter(full);
-  const years = [...new Set(countries.flatMap(c => yearly(c).filter(r => r.period_type === 'ANNUAL').map(r => r.year)))].sort((a, b) => a - b).slice(-ELEC_BARS_YEAR_COUNT);
-  const annualPeriods = years.map(y => ({ label: String(y), ...countries.reduce((acc, c) => { const r = yearly(c).find(x => x.year === y && x.period_type === 'ANNUAL'); return r ? add(acc, r) : acc; }, {}), isPartial: false, isYear: true }));
-  const ytdYear = Math.max(0, ...countries.flatMap(c => yearly(c).filter(r => r.period_type === 'YTD').map(r => r.year)));
+  const yearly = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY) || {};
+  const rowOf = (c, y, pt) => (yearly[c] || []).find(r => r.year === y && r.period_type === pt && elecBarsComplete(r));
+  elecBarsMultiInfo = { hidden: [], starred: [] };
+  const years = [...new Set(countries.flatMap(c => (yearly[c] || []).filter(r => r.period_type === 'ANNUAL' && elecBarsComplete(r)).map(r => r.year)))].sort((a, b) => a - b).slice(-ELEC_BARS_MULTI_YEAR_COUNT);
+  const ytdYear = Math.max(0, ...countries.flatMap(c => (yearly[c] || []).filter(r => r.period_type === 'YTD' && elecBarsComplete(r)).map(r => r.year)));
+  // the panel and each member's weight (its latest annual total in the window)
+  const weight = new Map();
+  countries.forEach(c => {
+    const latest = years.slice().reverse().map(y => rowOf(c, y, 'ANNUAL')).find(Boolean) || (ytdYear && rowOf(c, ytdYear, 'YTD'));
+    if(latest) weight.set(c, latest.total);
+  });
+  const panelTotal = [...weight.values()].reduce((a, b) => a + b, 0);
+  // one period: the rows of the countries that have it, who is missing, and what to do about it
+  const periodSum = (y, pt, label) => {
+    const have = [], missing = [];
+    weight.forEach((w, c) => { const r = rowOf(c, y, pt); if(r) have.push(r); else missing.push({ c, w }); });
+    const share = panelTotal ? missing.reduce((a, m) => a + m.w, 0) / panelTotal : 1;
+    const names = missing.sort((a, b) => b.w - a.w).map(m => m.c);
+    if(!have.length || share > ELEC_BARS_MISSING_HIDE){ elecBarsMultiInfo.hidden.push({ label, names }); return null; }
+    if(share > ELEC_BARS_MISSING_STAR) elecBarsMultiInfo.starred.push({ label, names });
+    return { sum: have.reduce(add, {}), star: share > ELEC_BARS_MISSING_STAR ? '*' : '' };
+  };
+  const annualPeriods = [];
+  years.forEach(y => {
+    const p = periodSum(y, 'ANNUAL', String(y));
+    if(p) annualPeriods.push({ label: String(y) + p.star, ...p.sum, isPartial: false, isYear: true });
+  });
   if(!ytdYear) return annualPeriods;
-  const ytdPeriod = { label: `${ytdYear} YTD`, ...countries.reduce((acc, c) => { const r = yearly(c).find(x => x.year === ytdYear && x.period_type === 'YTD'); return r ? add(acc, r) : acc; }, {}), isPartial: true, isYear: false, isYTD: true };
-  const withMonths = countries.filter(c => typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[c] && COUNTRY_MONTHLY[c].some(r => r.ym.startsWith(String(ytdYear)) && full(r)));
+  const py = periodSum(ytdYear, 'YTD', `${ytdYear} YTD`);
+  if(!py) return annualPeriods;
+  const ytdPeriod = { label: `${ytdYear} YTD${py.star}`, ...py.sum, isPartial: true, isYear: false, isYTD: true };
+  const monthly = (typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY) || {};
+  const monthRows = c => (monthly[c] || []).filter(r => r.ym.startsWith(String(ytdYear)) && elecBarsComplete(r));
+  const withMonths = countries.filter(c => monthRows(c).length);
   if(withMonths.length < 0.8 * countries.length) return [...annualPeriods, ytdPeriod];
   const byMonth = {};
-  withMonths.forEach(c => COUNTRY_MONTHLY[c].filter(r => r.ym.startsWith(String(ytdYear)) && full(r)).forEach(r => { add(byMonth[r.ym] || (byMonth[r.ym] = { n: 0 }), r); byMonth[r.ym].n++; }));
+  withMonths.forEach(c => monthRows(c).forEach(r => { add(byMonth[r.ym] || (byMonth[r.ym] = { n: 0 }), r); byMonth[r.ym].n++; }));
   const monthPeriods = Object.keys(byMonth).sort().filter(ym => byMonth[ym].n >= 0.8 * withMonths.length).map(ym => {
     const mm = parseInt(ym.slice(5, 7), 10), m = byMonth[ym];
     return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${String(ytdYear).slice(2)}`, bev: m.bev, phev: m.phev, hev: m.hev, petrol: m.petrol, diesel: m.diesel, total: m.total, isPartial: false, isYear: false };
   });
   return [...annualPeriods, ytdPeriod, ...monthPeriods];
+}
+// the sentences under the chart about what the sum leaves out
+function elecBarsMultiNote(){
+  const cap = (a, n) => a.length > n ? a.slice(0, n).join(', ') + ` and ${a.length - n} more` : a.join(', ');
+  const star = elecBarsMultiInfo.starred.map(h => `${h.label}* leaves out ${cap(h.names, 6)} (no powertrain split for it on this site)`);
+  const hid = elecBarsMultiInfo.hidden.map(h => `${h.label} is not shown: ${cap(h.names, 6)} ${h.names.length > 1 ? 'have' : 'has'} no powertrain split for it on this site`);
+  return ' Sum of the countries listed above; a country counts for a period when its powertrain split adds up to its total, and a month appears once at least 80% of them have reported it.' + star.concat(hid).map(x => ' ' + x + '.').join('');
 }
 
 // compact numbers for the bar labels and the axis when the full ones would overlap: 1.2M, 345K, 12.5K
@@ -203,7 +249,7 @@ function renderElectrificationBarsChart(country){
     if(multi) listEl.innerHTML = `<b>${country.length} countries:</b> ${country.slice().sort((a, b) => a.localeCompare(b)).join(', ')}.`;
   }
   document.getElementById('elec-bars-note').textContent = ELEC_BARS_NOTE +
-    (multi ? ' Sum of the countries listed above: only countries with a full fuel-type split for a period are added, and a month appears once at least 80% of them have reported it.' : '') +
+    (multi ? elecBarsMultiNote() : '') +
     (country === 'Canada' ? ' Statistics Canada reports quarterly, not monthly -- each "month" bar here is really its whole quarter, labeled at the quarter\'s first month.' : '');
   document.getElementById('elec-bars-legend').innerHTML = ELEC_BARS_ALL_KEYS.map(k => `
     <div class="legend-chip${elecBarsHidden.has(k) ? ' dimmed' : ''}" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
