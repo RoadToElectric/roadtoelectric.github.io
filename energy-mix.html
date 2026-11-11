@@ -125,29 +125,9 @@
         <div class="em-leg" id="es-leg"></div>
       </div>
 
-      <!-- 2. electricity -->
-      <div class="card chart-card" id="el-card">
-        <h2>2 · Electricity: how it is generated</h2>
-        <p class="em-note" id="el-note"></p>
-        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="el-mode"><button type="button" data-v="abs" class="active">Electricity (TWh)</button><button type="button" data-v="pct">% of generation</button></div></div></div>
-        <div class="em-kpis" id="el-kpis"></div>
-        <div class="em-chart" id="el-chart"></div>
-        <div class="em-leg" id="el-leg"></div>
-      </div>
-
-      <!-- 3. final consumption -->
-      <div class="card chart-card" id="fc-card">
-        <h2>3 · What is actually used: final consumption by source</h2>
-        <p class="em-note" id="fc-note"></p>
-        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="fc-mode"><button type="button" data-v="abs" class="active">Energy (EJ)</button><button type="button" data-v="pct">% of final consumption</button></div></div></div>
-        <div class="em-kpis" id="fc-kpis"></div>
-        <div class="em-chart" id="fc-chart"></div>
-        <div class="em-leg" id="fc-leg"></div>
-      </div>
-
-      <!-- 4. ranking -->
+      <!-- 2. ranking -->
       <div class="card chart-card" id="rk-card">
-        <h2>4 · Country ranking</h2>
+        <h2>2 · Country ranking</h2>
         <p class="em-note" id="rk-note"></p>
         <div class="em-filters" id="rk-f">
           <div class="em-frow"><label class="em-fl" for="rk-metric">Rank by</label>
@@ -163,6 +143,26 @@
         </div>
         <div class="em-bars" id="rk-bars"></div>
         <div class="em-more"><button type="button" class="em-mini" id="rk-more"></button></div>
+      </div>
+
+      <!-- 3. electricity -->
+      <div class="card chart-card" id="el-card">
+        <h2>3 · Electricity: how it is generated</h2>
+        <p class="em-note" id="el-note"></p>
+        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="el-mode"><button type="button" data-v="abs" class="active">Electricity (TWh)</button><button type="button" data-v="pct">% of generation</button></div></div></div>
+        <div class="em-kpis" id="el-kpis"></div>
+        <div class="em-chart" id="el-chart"></div>
+        <div class="em-leg" id="el-leg"></div>
+      </div>
+
+      <!-- 4. final consumption -->
+      <div class="card chart-card" id="fc-card">
+        <h2>4 · What is actually used: final consumption by source</h2>
+        <p class="em-note" id="fc-note"></p>
+        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="fc-mode"><button type="button" data-v="abs" class="active">Energy (EJ)</button><button type="button" data-v="pct">% of final consumption</button></div></div></div>
+        <div class="em-kpis" id="fc-kpis"></div>
+        <div class="em-chart" id="fc-chart"></div>
+        <div class="em-leg" id="fc-leg"></div>
       </div>
 
       <!-- 5. EVs vs grid -->
@@ -384,7 +384,7 @@ $('ev-min').addEventListener('change', e => { EV.min = +e.target.value; renderEv
 // ---------- notes + drawing ----------
 function notes(){
   const a = A.get(st.area), li = lastIdx(a, 'tes'), ll = lastIdx(a, 'el');
-  $('es-note').innerHTML = `Total energy supply of <b>${a.n}</b> by source, ${st.y0}–${Math.min(st.y1, Y0 + li)}${a.last === 2024 && Y1 === 2025 ? ' (the IEA has not published 2025 for this area yet)' : ''}. Click the chart to pick a year: the figures and the other two charts follow. Click a source in the legend to hide or show it (in % mode the shares stay shares of the whole, so hiding a source leaves the stack below 100%). Supply counts primary energy, so fossil fuels weigh more than wind or solar here — the next section compares power grids kilowatt-hour for kilowatt-hour.`;
+  $('es-note').innerHTML = `Total energy supply of <b>${a.n}</b> by source, ${st.y0}–${Math.min(st.y1, Y0 + li)}${a.last === 2024 && Y1 === 2025 ? ' (the IEA has not published 2025 for this area yet)' : ''}. Click the chart to pick a year: the figures and the other two charts follow. Click a source in the legend to hide or show it (in % mode the shares stay shares of the whole, so hiding a source leaves the stack below 100%). Supply counts primary energy, so fossil fuels weigh more than wind or solar here — section 3 compares power grids kilowatt-hour for kilowatt-hour.`;
   $('el-note').innerHTML = `Electricity generated in <b>${a.n}</b> by source${ll >= 0 ? `, ${st.y0}–${Math.min(st.y1, Y0 + ll)}` : ''}. Low-carbon = renewables + nuclear.`;
   $('fc-note').innerHTML = `Energy used by end users in <b>${a.n}</b>. The blue part, electricity, is what grows with electric cars, heat pumps and industry electrification; the brown part, oil products, is mostly transport.`;
 }
