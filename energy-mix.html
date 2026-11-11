@@ -42,6 +42,10 @@
   .em-chart text.ut{ font-weight:800; font-size:11px; } .em-chart text.pl{ font-size:10px; font-weight:700; fill:var(--text); text-anchor:middle; }
   .em-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.45; min-width:210px; transition:opacity .1s; }
   .em-tip .r{ display:flex; justify-content:space-between; gap:14px; } .em-tip .r i{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
+  .em-chip{ appearance:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:4px 11px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+  .em-chip i{ width:11px; height:11px; border-radius:3px; margin:0; }
+  .em-chip.off{ opacity:.45; text-decoration:line-through; } .em-chip:hover{ border-color:var(--accent); }
+  .em-chip-act{ appearance:none; border:1px dashed var(--border); background:transparent; color:var(--text-muted); border-radius:999px; padding:4px 10px; font:inherit; font-size:11.5px; font-weight:800; cursor:pointer; } .em-chip-act:hover{ color:var(--accent); border-color:var(--accent); }
   .em-leg{ display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:12px; color:var(--text-muted); } .em-leg i{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
   .em-bars{ display:grid; gap:6px; margin-top:6px; }
   .em-brow{ display:grid; grid-template-columns:26px minmax(120px,210px) 1fr 92px; align-items:center; gap:10px; font-size:12.5px; border-radius:8px; padding:1px 4px; }
@@ -197,6 +201,7 @@
 <script>
 const E = ENERGY_MIX, Y0 = E.y0, Y1 = E.y1, NY = Y1 - Y0 + 1, A = new Map(E.areas.map(a => [a.id, a]));
 const $ = id => document.getElementById(id), yi = y => y - Y0;
+const HIDE = { tes: new Set(), el: new Set(), tfc: new Set() };            // sources switched off with the legend buttons, per chart
 const st = { area: 'WORLD', year: 2024, y0: 1990, y1: Y1, esMode: 'abs', elMode: 'abs', fcMode: 'abs' };
 const fmtN = (v, d = 1) => v == null ? '–' : v >= 100 ? d3.format(',.0f')(v) : v.toFixed(d);
 const fmtP = (v, d = 1) => v == null ? '–' : v.toFixed(d) + '%';
@@ -241,10 +246,12 @@ const untip = box => { const t = box.querySelector('.em-tip'); if(t) t.style.opa
 
 // ---------- stacked area ----------
 function stacked(boxId, legId, sec, mode){
-  const a = A.get(st.area), box = $(boxId), keys = E[sec], lg = $(legId);
+  const a = A.get(st.area), box = $(boxId), allKeys = E[sec], keys = allKeys.filter(k => !HIDE[sec].has(k.k)), lg = $(legId);
+  lg.innerHTML = allKeys.map(k => `<button type="button" class="em-chip${HIDE[sec].has(k.k) ? ' off' : ''}" data-k="${k.k}" title="Click to show or hide ${k.label}"><i style="background:${k.color}"></i>${k.label}</button>`).join('') + '<button type="button" class="em-chip-act" data-act="all">All</button><button type="button" class="em-chip-act" data-act="none">None</button>';
   box.innerHTML = '<svg class="chart"></svg><div class="em-tip"></div>';
   const li = lastIdx(a, sec);
   if(li < 0){ box.innerHTML = '<div class="em-load">No data published for this area.</div>'; lg.innerHTML = ''; return null; }
+  if(!keys.length){ box.innerHTML = '<div class="em-load">Every source is switched off: click a button below to show it.</div>'; return null; }
   const from = Math.max(st.y0, Y0), to = Math.min(st.y1, Y0 + li);
   const idx = d3.range(yi(from), yi(to) + 1).filter(i => tot(a, sec, i) != null);
   const svgEl = box.querySelector('svg'), nv = nativeSize(svgEl, 900, 360, { h: 300 }), W = nv.W, H = nv.H, m = nv.mobile ? { t: 10, r: 8, b: 26, l: 42 } : { t: 14, r: 14, b: 30, l: 58 };
@@ -252,7 +259,7 @@ function stacked(boxId, legId, sec, mode){
   const data = idx.map(i => { const r = { y: Y0 + i, i, t: tot(a, sec, i) }; keys.forEach(k => { const v = val(a, sec, k.k, i) || 0; r[k.k] = pct ? 100 * v / r.t : v / div; }); return r; });
   if(data.length < 2){ box.innerHTML = '<div class="em-load">Not enough years for this area.</div>'; return null; }
   const x = d3.scaleLinear([data[0].y, data[data.length - 1].y], [m.l, W - m.r]);
-  const yMax = pct ? 100 : d3.max(data, d => d3.sum(keys, k => d[k.k])), y = d3.scaleLinear([0, yMax], [H - m.b, m.t]).nice();
+  const yMax = pct ? Math.max(5, d3.max(data, d => d3.sum(keys, k => d[k.k]))) : d3.max(data, d => d3.sum(keys, k => d[k.k])), y = d3.scaleLinear([0, yMax], [H - m.b, m.t]).nice();
   const svg = d3.select(svgEl); svg.attr('role', 'img').attr('aria-label', `${sec} by source, ${a.n}`);
   y.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)));
   const stack = d3.stack().keys(keys.map(k => k.k))(data), area = d3.area().x(d => x(d.data.y)).y0(d => y(d[0])).y1(d => y(d[1]));
@@ -267,10 +274,9 @@ function stacked(boxId, legId, sec, mode){
   svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent').style('cursor', 'crosshair')
     .on('pointermove', ev => { const yr = yearAt(ev), d = data.find(q => q.y === yr); if(!d) return; hov.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
       const raw = k => (val(a, sec, k.k, d.i) || 0) / div, share = k => 100 * (val(a, sec, k.k, d.i) || 0) / d.t;
-      tip(box, `<b>${a.n} · ${yr}</b><div class="r"><span>Total</span><b>${fmtN(d.t / div)} ${SEC_LABEL[sec]}</b></div>` + keys.slice().reverse().filter(k => (val(a, sec, k.k, d.i) || 0) > 0).map(k => `<div class="r"><span><i style="background:${k.color}"></i>${k.label}</span><span><b>${fmtN(raw(k))}</b> · ${share(k).toFixed(1)}%</span></div>`).join(''), ev); })
+      tip(box, `<b>${a.n} · ${yr}</b><div class="r"><span>Total (all sources)</span><b>${fmtN(d.t / div)} ${SEC_LABEL[sec]}</b></div>` + keys.slice().reverse().filter(k => (val(a, sec, k.k, d.i) || 0) > 0).map(k => `<div class="r"><span><i style="background:${k.color}"></i>${k.label}</span><span><b>${fmtN(raw(k))}</b> · ${share(k).toFixed(1)}%</span></div>`).join(''), ev); })
     .on('pointerleave', () => { untip(box); hov.attr('opacity', 0); })
     .on('click', ev => { st.year = yearAt(ev); renderKpis(); renderBars(); drawAll(true); });
-  lg.innerHTML = keys.map(k => `<span><i style="background:${k.color}"></i>${k.label}</span>`).join('');
   return { from, to };
 }
 
@@ -363,10 +369,16 @@ $('ev-min').addEventListener('change', e => { EV.min = +e.target.value; renderEv
 // ---------- notes + drawing ----------
 function notes(){
   const a = A.get(st.area), li = lastIdx(a, 'tes'), ll = lastIdx(a, 'el');
-  $('es-note').innerHTML = `Total energy supply of <b>${a.n}</b> by source, ${st.y0}–${Math.min(st.y1, Y0 + li)}${a.last === 2024 && Y1 === 2025 ? ' (the IEA has not published 2025 for this area yet)' : ''}. Click the chart to pick a year: the figures and the other two charts follow. Supply counts primary energy, so fossil fuels weigh more than wind or solar here — the next section compares power grids kilowatt-hour for kilowatt-hour.`;
+  $('es-note').innerHTML = `Total energy supply of <b>${a.n}</b> by source, ${st.y0}–${Math.min(st.y1, Y0 + li)}${a.last === 2024 && Y1 === 2025 ? ' (the IEA has not published 2025 for this area yet)' : ''}. Click the chart to pick a year: the figures and the other two charts follow. Click a source in the legend to hide or show it (in % mode the shares stay shares of the whole, so hiding a source leaves the stack below 100%). Supply counts primary energy, so fossil fuels weigh more than wind or solar here — the next section compares power grids kilowatt-hour for kilowatt-hour.`;
   $('el-note').innerHTML = `Electricity generated in <b>${a.n}</b> by source${ll >= 0 ? `, ${st.y0}–${Math.min(st.y1, Y0 + ll)}` : ''}. Low-carbon = renewables + nuclear.`;
   $('fc-note').innerHTML = `Energy used by end users in <b>${a.n}</b>. The blue part, electricity, is what grows with electric cars, heat pumps and industry electrification; the brown part, oil products, is mostly transport.`;
 }
+[['es-leg', 'tes'], ['el-leg', 'el'], ['fc-leg', 'tfc']].forEach(([id, sec]) => $(id).addEventListener('click', e => {
+  const c = e.target.closest('.em-chip'), act = e.target.closest('.em-chip-act'); if(!c && !act) return;
+  if(c){ const k = c.dataset.k; if(HIDE[sec].has(k)) HIDE[sec].delete(k); else HIDE[sec].add(k); }
+  else if(act.dataset.act === 'all') HIDE[sec].clear(); else E[sec].forEach(k => HIDE[sec].add(k.k));
+  drawAll();
+}));
 function drawAll(keepKpis){
   stacked('es-chart', 'es-leg', 'tes', st.esMode); stacked('el-chart', 'el-leg', 'el', st.elMode); stacked('fc-chart', 'fc-leg', 'tfc', st.fcMode);
 }
@@ -380,7 +392,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 
 $('em-area').value = 'WORLD'; render(); renderBars(); renderEv();
 
-FilterMemory.auto({ extra: [{ key: 'year', type: 'fn', get: () => st.year, set: v => { st.year = +v; render(); renderEv(); return true; } }] });
+FilterMemory.auto({ extra: [{ key: 'hide', type: 'fn', get: () => ['tes', 'el', 'tfc'].map(s => [...HIDE[s]].join(',')).join('|'), set: v => { v.split('|').forEach((p, n) => { const s = ['tes', 'el', 'tfc'][n]; HIDE[s].clear(); p.split(',').filter(Boolean).forEach(k => HIDE[s].add(k)); }); drawAll(); return true; } }, { key: 'year', type: 'fn', get: () => st.year, set: v => { st.year = +v; render(); renderEv(); return true; } }] });
 FilterMemory.restore();
 </script>
 </body>
