@@ -7,6 +7,7 @@
 // (always, for the URL country),
 // individual-country.html (only while a country is focused), and powertrain-mix-by-country.html
 // (only while a country is focused).
+// powertrain-mix-by-country.html also passes a LIST of countries (two or more selected): the chart then shows their sum, with the list of countries under the title.
 // Requires COUNTRY_YEARLY, optionally COUNTRY_MONTHLY, FUEL_COLORS, FUEL_LABELS, and d3 already
 // loaded, plus a card in the host page shaped like:
 //   <div class="card chart-card" id="elec-bars-card">
@@ -78,6 +79,50 @@ function buildElectrificationBarsSeries(country){
   return ytdPeriod ? [...annualPeriods, ytdPeriod, ...monthPeriods] : [...annualPeriods, ...monthPeriods];
 }
 
+// the sum of several countries: only rows with a full fuel-type split are added (so the sum never understates ICE, the Motorisation Trends rule); the YTD bar takes the countries'
+// latest-year YTD rows; the monthly bars of that year appear only when at least 80% of the countries have a monthly series and, month by month, when at least 80% of those have
+// reported it (the newest months are usually in for a few countries only, which would swing the mix), each month being the sum of the countries that reported it
+function buildElectrificationBarsSeriesMulti(countries){
+  const KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'total'];
+  const add = (acc, r) => { KEYS.forEach(k => { acc[k] = (acc[k] || 0) + (r[k] || 0); }); return acc; };
+  const full = r => r.petrol != null && r.diesel != null;
+  const yearly = c => ((typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[c]) || []).filter(full);
+  const years = [...new Set(countries.flatMap(c => yearly(c).filter(r => r.period_type === 'ANNUAL').map(r => r.year)))].sort((a, b) => a - b).slice(-ELEC_BARS_YEAR_COUNT);
+  const annualPeriods = years.map(y => ({ label: String(y), ...countries.reduce((acc, c) => { const r = yearly(c).find(x => x.year === y && x.period_type === 'ANNUAL'); return r ? add(acc, r) : acc; }, {}), isPartial: false, isYear: true }));
+  const ytdYear = Math.max(0, ...countries.flatMap(c => yearly(c).filter(r => r.period_type === 'YTD').map(r => r.year)));
+  if(!ytdYear) return annualPeriods;
+  const ytdPeriod = { label: `${ytdYear} YTD`, ...countries.reduce((acc, c) => { const r = yearly(c).find(x => x.year === ytdYear && x.period_type === 'YTD'); return r ? add(acc, r) : acc; }, {}), isPartial: true, isYear: false, isYTD: true };
+  const withMonths = countries.filter(c => typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[c] && COUNTRY_MONTHLY[c].some(r => r.ym.startsWith(String(ytdYear)) && full(r)));
+  if(withMonths.length < 0.8 * countries.length) return [...annualPeriods, ytdPeriod];
+  const byMonth = {};
+  withMonths.forEach(c => COUNTRY_MONTHLY[c].filter(r => r.ym.startsWith(String(ytdYear)) && full(r)).forEach(r => { add(byMonth[r.ym] || (byMonth[r.ym] = { n: 0 }), r); byMonth[r.ym].n++; }));
+  const monthPeriods = Object.keys(byMonth).sort().filter(ym => byMonth[ym].n >= 0.8 * withMonths.length).map(ym => {
+    const mm = parseInt(ym.slice(5, 7), 10), m = byMonth[ym];
+    return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${String(ytdYear).slice(2)}`, bev: m.bev, phev: m.phev, hev: m.hev, petrol: m.petrol, diesel: m.diesel, total: m.total, isPartial: false, isYear: false };
+  });
+  return [...annualPeriods, ytdPeriod, ...monthPeriods];
+}
+
+// compact numbers for the bar labels and the axis when the full ones would overlap: 1.2M, 345K, 12.5K
+function elecBarsShort(v){
+  const a = Math.abs(v), t = (x, d) => String(+x.toFixed(d));       // +toFixed drops a trailing .0
+  if(a >= 1e6 - 500) return t(v / 1e6, 1) + 'M';
+  if(a >= 1e5) return Math.round(v / 1e3) + 'K';
+  if(a >= 1e3) return t(v / 1e3, 1) + 'K';
+  return String(Math.round(v));
+}
+
+// the list of the countries behind a multi-country chart, between the title and the legend (a plain paragraph, so a picture of the card carries it)
+function ensureElecBarsCountries(){
+  let el = document.getElementById('elec-bars-countries');
+  if(el) return el;
+  const legend = document.getElementById('elec-bars-legend');
+  if(!legend) return null;
+  el = document.createElement('p'); el.id = 'elec-bars-countries'; el.className = 'note'; el.style.margin = '0 0 10px';
+  legend.parentNode.insertBefore(el, legend);
+  return el;
+}
+
 // variable-width x positions: year bars wider than month/YTD bars, scaled to fill innerW
 function elecBarsLayout(periods, innerW){
   const gapFrac = 0.4; // gap between bars, as a fraction of one narrow (month) bar's width
@@ -130,8 +175,10 @@ function ensureElecBarsModeToggle(){
 function renderElectrificationBarsChart(country){
   const card = document.getElementById('elec-bars-card');
   if(!card) return;
+  if(Array.isArray(country) && country.length === 1) country = country[0];
+  const multi = Array.isArray(country);               // two or more countries: their sum
   elecBarsCountry = country;
-  const series = buildElectrificationBarsSeries(country).filter(d => d.total);
+  const series = (multi ? buildElectrificationBarsSeriesMulti(country) : buildElectrificationBarsSeries(country)).filter(d => d.total);
   if(series.length === 0){ card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
   ensureElecBarsModeToggle();
@@ -149,8 +196,14 @@ function renderElectrificationBarsChart(country){
     return row;
   });
 
-  document.getElementById('elec-bars-title').textContent = `Electrification Mix — ${country}`;
+  document.getElementById('elec-bars-title').textContent = `Electrification Mix — ${multi ? country.length + ' countries' : country}`;
+  const listEl = multi ? ensureElecBarsCountries() : document.getElementById('elec-bars-countries');
+  if(listEl){
+    listEl.style.display = multi ? '' : 'none';
+    if(multi) listEl.innerHTML = `<b>${country.length} countries:</b> ${country.slice().sort((a, b) => a.localeCompare(b)).join(', ')}.`;
+  }
   document.getElementById('elec-bars-note').textContent = ELEC_BARS_NOTE +
+    (multi ? ' Sum of the countries listed above: only countries with a full fuel-type split for a period are added, and a month appears once at least 80% of them have reported it.' : '') +
     (country === 'Canada' ? ' Statistics Canada reports quarterly, not monthly -- each "month" bar here is really its whole quarter, labeled at the quarter\'s first month.' : '');
   document.getElementById('elec-bars-legend').innerHTML = ELEC_BARS_ALL_KEYS.map(k => `
     <div class="legend-chip${elecBarsHidden.has(k) ? ' dimmed' : ''}" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
@@ -184,7 +237,7 @@ function renderElectrificationBarsChart(country){
 
   // y axis
   const yAxis = elecBarsMode === 'raw'
-    ? d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('~s'))
+    ? d3.axisLeft(yScale).ticks(5).tickFormat(elecBarsShort)
     : d3.axisLeft(yScale).tickValues([0, 20, 40, 60, 80, 100]).tickFormat(d => d + '%');
   g.append('g').attr('class', 'bubble-axis').call(yAxis);
 
@@ -242,6 +295,9 @@ function renderElectrificationBarsChart(country){
   // uses), positioned above the top of the visible stack, only when BEV itself is shown
   if(visibleKeys.includes('bev')){
     // on a phone only as many bar labels as fit side by side (about 38 px each, the latest bar always kept), in a short format
+    // raw units: the full number (12,345) unless two neighbouring labels would touch (about 6.4 px per character at this size), then 12.3K / 1.2M for the whole chart
+    const fullTxt = laidOut.map(d => Math.round(d.bev).toLocaleString('en-US'));
+    const crowded = elecBarsMode === 'raw' && laidOut.some((d, i) => i < laidOut.length - 1 && (fullTxt[i].length + fullTxt[i + 1].length) / 2 * 6.4 > (laidOut[i + 1].x0 + laidOut[i + 1].w / 2) - (d.x0 + d.w / 2) - 3);
     const lblStep = nv.mobile ? Math.max(1, Math.ceil(38 / Math.max(1, d3.mean(laidOut, d => d.w)))) : 1;
     g.selectAll('.elec-bar-bev-label')
       .data(laidOut.filter((d, i) => (laidOut.length - 1 - i) % lblStep === 0))
@@ -255,7 +311,7 @@ function renderElectrificationBarsChart(country){
       .style('font-variant-numeric', 'tabular-nums')
       .style('fill', 'var(--text)')
       .style('pointer-events', 'none')
-      .text(d => elecBarsMode === 'raw' ? (nv.mobile ? d3.format('~s')(d.bev) : d.bev.toLocaleString('en-US')) : d.bev.toFixed(1) + '%');
+      .text(d => elecBarsMode === 'raw' ? (nv.mobile || crowded ? elecBarsShort(d.bev) : Math.round(d.bev).toLocaleString('en-US')) : d.bev.toFixed(1) + '%');
   }
 }
 if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { if(typeof renderElectrificationBars === 'function') renderElectrificationBars(); });

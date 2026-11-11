@@ -556,7 +556,7 @@
 <script src="assets/manufacturer-model-yearly-data.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
-<script src="assets/electrification-bars.js?v=3"></script>
+<script src="assets/electrification-bars.js?v=4"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
 <script src="assets/country-ev-regulations-data.js"></script>
 <script>
@@ -3471,12 +3471,15 @@ function renderFocusStats(){
   if(momentumData) wireMomentumCardClicks(body);
 }
 
-// wraps the shared electrification-bars.js renderer: hidden unless a country is focused,
-// same pattern as renderFocusStats above
+// wraps the shared electrification-bars.js renderer: one focused country, or the sum of the selected ones when there are two or more
+// (hidden for none / not enough data)
 function renderElectrificationBars(){
   const card = document.getElementById('elec-bars-card');
-  if(!focusedCountry){ card.classList.add('hidden'); return; }
-  renderElectrificationBarsChart(focusedCountry);
+  if(focusedCountry){ renderElectrificationBarsChart(focusedCountry); return; }
+  // two or more countries selected: the chart of their sum, with the list of the countries
+  const selectedElecCountries = ALL_COUNTRIES.filter(c => COUNTRY_YEARLY[c] && selectedCountries.has(c) && selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c));
+  if(selectedElecCountries.length < 2){ card.classList.add('hidden'); return; }
+  renderElectrificationBarsChart(selectedElecCountries);
 }
 
 // Non-BEV on-road fleet (2018-2041): only meaningful once a single country is focused, and only
