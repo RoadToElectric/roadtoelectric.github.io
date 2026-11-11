@@ -58,7 +58,7 @@
       <button type="button" class="st-btn" data-days="7">7 days</button>
       <button type="button" class="st-btn" data-days="30">30 days</button>
       <button type="button" class="st-btn" data-days="90">90 days</button>
-      <button type="button" class="st-btn" data-days="0">All</button>
+      <button type="button" class="st-btn" data-days="0" title="Every month since the start (daily detail is kept for 90 days, older months are kept as monthly numbers)">All · monthly</button>
       <button type="button" class="st-btn" id="st-refresh" title="Load the numbers again">↻</button>
       <button type="button" class="st-btn" id="st-lock" title="Forget the passphrase on this device">Lock</button>
     </div>
@@ -77,7 +77,7 @@
     <div class="st-kpis" id="kpis"></div>
 
     <section class="st-card" id="st-days">
-      <h2>Views per day</h2>
+      <h2 id="days-title">Views per day</h2>
       <p class="st-note" id="days-note"></p>
       <div id="days-chart"></div>
     </section>
@@ -150,25 +150,31 @@
   function show(d){
     $('lock').hidden = true; $('dash').hidden = false; $('st-bar').hidden = false;
     document.querySelectorAll('#st-bar [data-days]').forEach(function(b){ b.classList.toggle('on', +b.dataset.days === days); });
-    var t = d.totals, det = d.detail, inPeriod = d.by_day.reduce(function(s, x){ return s + x.views; }, 0);
+    var t = d.totals, det = d.detail, inPeriod = (d.days <= 0 ? d.by_month : d.by_day).reduce(function(s, x){ return s + x.views; }, 0);
     $('kpis').innerHTML = [['Today', t.today, ''], ['Yesterday', t.yesterday, ''], ['Last 7 days', t.last7, ''], ['Last 30 days', t.last30, ''], ['All time', t.all, 'since ' + (t.since || '—')],
       ['Visits in period', det.sessions, 'browser sessions, detailed log']].map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v">' + fmt(k[1]) + '</div><div class="s">' + esc(k[2] || ' ') + '</div></div>'; }).join('');
 
-    // views per day
-    var map = {}; d.by_day.forEach(function(x){ map[x.day] = x.views; });
-    var start = new Date(d.from + 'T12:00:00'), end = new Date(d.today + 'T12:00:00');
-    if(d.days <= 0 && d.by_day.length) start = new Date(d.by_day[0].day + 'T12:00:00');
-    var list = []; for(var c = new Date(start); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10); list.push({ day:k, v:map[k] || 0 }); }
-    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '';
+    // views per day (7 / 30 / 90 days) or per month ("All": daily detail is kept for 90 days, older months only as monthly numbers)
+    var monthly = d.days <= 0, list = [];
+    if(monthly){
+      list = d.by_month.map(function(x){ return { day:x.month.slice(0, 7), v:x.views, unit:'month' }; });
+    } else {
+      var map = {}; d.by_day.forEach(function(x){ map[x.day] = x.views; });
+      var start = new Date(d.from + 'T12:00:00'), end = new Date(d.today + 'T12:00:00');
+      for(var c = new Date(start); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10); list.push({ day:k, v:map[k] || 0, unit:'day' }); }
+    }
+    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }).concat([0]))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '';
     var step = Math.ceil(list.length / 12);
     list.forEach(function(x, i){
       var h = Math.round((H - 26) * x.v / max), xx = pad + i * bw;
       svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - 18 - h) + '" width="' + Math.max(1, bw - 2).toFixed(1) + '" height="' + h + '" rx="2" fill="var(--accent)"><title>' + x.day + ': ' + fmt(x.v) + ' views</title></rect>';
-      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + x.day.slice(5) + '</text>';
+      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + (monthly ? x.day : x.day.slice(5)) + '</text>';
     });
     svg += '<text x="0" y="12">' + fmt(max) + '</text><text x="0" y="' + (H - 18) + '">0</text>';
-    $('days-chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Views per day">' + svg + '</svg>';
-    $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session (a reader who opens three pages makes three views and one visit). Days are Toronto days.';
+    $('days-chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + (monthly ? 'Views per month' : 'Views per day') + '">' + svg + '</svg>';
+    $('days-title').textContent = monthly ? 'Views per month' : 'Views per day';
+    $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session (a reader who opens three pages makes three views and one visit). ' +
+      (monthly ? 'Daily detail is kept for 90 days; a month older than that is kept as one monthly number.' : 'Days are Toronto days.');
 
     // pages
     var pm = {}; det.by_page.forEach(function(x){ pm[x.page] = x; });
@@ -183,7 +189,7 @@
       var tot = Object.keys(labels).reduce(function(s, k){ return s + (by[k] ? by[k].views : 0); }, 0); if(!tot) return '<p class="st-note">No detailed visits in this period yet.</p>';       // visits from before the log (unknown mode) are left out
       var keys = Object.keys(labels).filter(function(k){ return by[k]; });
       return '<div class="st-split">' + keys.map(function(k){ return '<i style="width:' + pct(by[k].views, tot) + '%;background:' + colors[k] + '" title="' + labels[k] + '"></i>'; }).join('') + '</div><div class="st-leg">' +
-        keys.map(function(k){ return '<span><i style="background:' + colors[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views · ' + fmt(by[k].sessions) + ' visits</span></span>'; }).join('') + '</div>';
+        keys.map(function(k){ return '<span><i style="background:' + colors[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views</span></span>'; }).join('') + '</div>';
     };
     $('mode').innerHTML = split(det.by_mode, { mobile:'Mobile view', desktop:'Desktop view' }, { mobile:'#2fae4e', desktop:'#0a80d0' });
     $('device').innerHTML = split(det.by_device, { phone:'Phone', tablet:'Tablet', desktop:'Desktop' }, { phone:'#2fae4e', tablet:'#f4a742', desktop:'#0a80d0' });
@@ -199,7 +205,7 @@
       : '<p class="st-note">No detailed visits in this period yet.</p>';
 
     $('foot').textContent = 'Detailed log (country, mode, device, referrers) starts ' + (det.since ? new Date(det.since).toISOString().slice(0, 10) : 'with the first visit') + '; the totals and the pages above also include earlier visits. ' +
-      'Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
+      'Daily detail is kept for 90 days; older months are kept as monthly numbers. Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
     clearInterval(timer); timer = setInterval(function(){ if(!document.hidden && key) load(); }, 60000);
   }
 
