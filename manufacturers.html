@@ -1789,7 +1789,7 @@ const CMP_TIPS = { all:'Every vehicle sold', bev:'Battery-electric vehicles only
 function renderCmpBars(){
   const md = mode();
   document.querySelectorAll('[data-cmpbar]').forEach(el => {
-    if(md === 'market'){ el.classList.add('hidden'); el.innerHTML = ''; return; }
+    if(md === 'market' && !ctry){ el.classList.add('hidden'); el.innerHTML = ''; return; }
     el.classList.remove('hidden');
     const b = (k, t) => `<button type="button" data-cmp="${k}" class="${cmpMode === k ? 'active' : ''}" title="${CMP_TIPS[k]}">${t}</button>`;
     const on = splitOn && cmpMode === 'all';
@@ -2001,28 +2001,36 @@ function renderContinentBars(){
     // sales the source does not attribute to a brand: shown at the bottom, never ranked, but part of the market the shares are taken from
     const otherAgg = { bev:0, phev:0, other:0, total:0 };
     Object.values(view()).forEach(d => d.list.forEach(a => { if(isOtherName(a.name)){ otherAgg.bev += a.bev; otherAgg.phev += a.phev; otherAgg.other += a.other; otherAgg.total += a.total; } }));
-    const worldTotal = [...world.values()].reduce((s, e) => s + e.total, 0) + otherAgg.total;
+    const cv = e => cmpValue(e);                                       // units compared: all sales, BEV only or non-BEV only (the Compare toggle)
+    const worldTotal = [...world.values()].reduce((s, e) => s + cv(e), 0) + cv(otherAgg);
     // companies with a reported worldwide total are ranked by it: tracked countries plus the hatched "All other countries" remainder
-    const finOn = !filtersActive() && !ctry;
-    const rankedAll = [...world.entries()].map(([name, e]) => {
+    const finOn = !filtersActive() && !ctry && cmpMode === 'all';
+    const rankedAll = [...world.entries()].filter(([, e]) => cv(e) > 0).map(([name, e]) => {
       const f = finOn ? finFor(name) : null, gap = f ? Math.max(0, f.units - e.total) : 0;
-      return { name, e, f, gap, eff:e.total + gap };
+      return { name, e, f, gap, eff:cv(e) + gap };
     }).sort((a, b) => b.eff - a.eff).map((r, i) => ({ ...r, rank:i + 1 }));
+    const barParts = (e, mk) => {                                       // the bar of one row for the active toggles
+      const u = sideU(e), P = (v, color, label) => ({ value:v, color, label:`${label}: ${fmt(v)}` });
+      if(cmpMode === 'bev') return [P(u.bev, COLORS.bev, 'BEV')];
+      if(cmpMode === 'nonbev') return [P(u.non, COLORS.other, 'Non-BEV')];
+      if(splitOn) return [P(u.bev, COLORS.bev, 'BEV'), P(u.non, COLORS.other, NONBEV_LABEL)];
+      return [P(e.bev, COLORS.bev, 'BEV'), P(e.phev, COLORS.phev, 'PHEV'), P(e.other, COLORS.other, 'HEV + ICE + Diesel')];
+    };
+    const sw = (c, t) => `<span><i class="sw" style="background:${c}"></i>${t}</span>`;
+    const fuelLegend = cmpMode === 'bev' ? sw(COLORS.bev, 'BEV only') : cmpMode === 'nonbev' ? sw(COLORS.other, NONBEV_LABEL + ' only')
+      : splitOn ? sw(COLORS.bev, 'BEV') + sw(COLORS.other, NONBEV_LABEL) : sw(COLORS.bev, 'BEV') + sw(COLORS.phev, 'PHEV') + sw(COLORS.other, 'HEV + ICE + Diesel');
+    const cmpTag = cmpMode === 'bev' ? ', BEV only' : cmpMode === 'nonbev' ? ', non-BEV only' : '';
     const pickNames = ctry ? [mfr, mfr2].filter(Boolean) : [];
     const ranked = rankedAll.slice(0, WORLD_LIST_CAP).concat(rankedAll.slice(WORLD_LIST_CAP).filter(r => pickNames.includes(r.name)));     // a picked brand outside the cap still shows, with its real rank
     const anyFin = ranked.some(r => r.gap > 0);
-    legend.innerHTML = `<span><i class="sw" style="background:${COLORS.bev}"></i>BEV</span><span><i class="sw" style="background:${COLORS.phev}"></i>PHEV</span><span><i class="sw" style="background:${COLORS.other}"></i>HEV + ICE + Diesel</span>` +
+    legend.innerHTML = fuelLegend +
       (anyFin ? `<span><i class="sw" style="background:${HATCH}"></i>All other countries = reported worldwide sales minus the tracked countries</span>` : '');
-    const widthDenom = Math.max(ranked.length ? ranked[0].eff : 1, otherAgg.total);
+    const widthDenom = Math.max(ranked.length ? ranked[0].eff : 1, cv(otherAgg));
     rows.innerHTML = ranked.map(({ name, e, f, gap, eff, rank }) => {
-      const parts = [
-        { value:e.bev, color:COLORS.bev, label:`BEV: ${fmt(e.bev)}` },
-        { value:e.phev, color:COLORS.phev, label:`PHEV: ${fmt(e.phev)}` },
-        { value:e.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(e.other)}` },
-      ];
+      const parts = barParts(e);
       if(gap > 0) parts.push({ value:gap, color:HATCH, label:`All other countries: ${fmt(gap)} (reported ${fmt(f.units)} minus tracked ${fmt(e.total)})` });
       const { bar, outside } = segmentsHTML(parts, widthDenom);
-      const pct = worldTotal ? `<span class="pct-of-total">${(100 * e.total / worldTotal).toFixed(1)}%</span>` : '';
+      const pct = worldTotal ? `<span class="pct-of-total">${(100 * cv(e) / worldTotal).toFixed(1)}%</span>` : '';
       const totalTip = gap > 0 ? `Reported worldwide ${fmt(f.units)} = tracked countries ${fmt(e.total)} + all other countries ${fmt(gap)}` : `Total sales in the tracked countries`;
       return `<div class="rank-row${pickNames.includes(name) ? ' is-sel' : ''}" data-hov="brand" data-key="${esc(name)}" data-total="${Math.round(eff)}"${f ? ` title="${esc(finTip(f))}"` : ''}>
         ${brandRankBadgeHTML(rank, name, `${esc(name)}: #${rank} in this ranking`)}
@@ -2032,17 +2040,17 @@ function renderContinentBars(){
         <span class="total-label" title="${esc(totalTip)}">${fmt(eff)}</span>
       </div>`;
     }).join('');
-    if(otherAgg.total > 0){
-      const seg = segmentsHTML([{ value:otherAgg.bev, color:COLORS.bev, label:`BEV: ${fmt(otherAgg.bev)}` }, { value:otherAgg.phev, color:COLORS.phev, label:`PHEV: ${fmt(otherAgg.phev)}` }, { value:otherAgg.other, color:COLORS.other, label:`HEV + ICE + Diesel: ${fmt(otherAgg.other)}` }], widthDenom);
-      rows.insertAdjacentHTML('beforeend', `<div class="rank-row is-other" title="Sales the source does not attribute to a brand: shown at the bottom and never ranked"><span class="world-rank-badge"></span><span class="country-label">Other (unclassified)</span><span class="pct-of-total">${worldTotal ? (100 * otherAgg.total / worldTotal).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(otherAgg.total)}</span></div>`);
+    if(cv(otherAgg) > 0){
+      const seg = segmentsHTML(barParts(otherAgg), widthDenom);
+      rows.insertAdjacentHTML('beforeend', `<div class="rank-row is-other" title="Sales the source does not attribute to a brand: shown at the bottom and never ranked"><span class="world-rank-badge"></span><span class="country-label">Other (unclassified)</span><span class="pct-of-total">${worldTotal ? (100 * cv(otherAgg) / worldTotal).toFixed(1) + '%' : ''}</span><span class="bar-track">${seg.bar}${seg.outside}</span><span class="total-label">${fmt(cv(otherAgg))}</span></div>`);
     }
-    if(ctry) note.textContent = `Top ${WORLD_LIST_CAP} ${what}s in ${ctry} by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of ${ctry}'s market.` +
+    if(ctry) note.textContent = `Top ${WORLD_LIST_CAP} ${what}s in ${ctry} by volume, ${periodLabel(period)}${cmpTag}: rank on the left, ${cmpMode === 'all' ? 'total sales' : 'the compared units'} on the right. ${cmpMode !== 'all' ? 'Bars show only the compared units' : splitOn ? 'Bars are split into BEV and non-BEV' : 'Bars are split into BEV, PHEV and HEV + ICE + Diesel'}; the % is the share of ${ctry}'s ${cmpMode === 'bev' ? 'BEV' : cmpMode === 'nonbev' ? 'non-BEV' : ''} market.` +
       (pickNames.length ? ` Your selection (${pickNames.map(esc).join(', ')}) is highlighted.` : ' Pick a manufacturer above to see how it does here year by year.') + ' Click the country on the map again, or remove its chip, to go back to every country.';
-    else note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} worldwide by volume, ${periodLabel(period)}: rank on the left, total sales on the right. Bars are split into BEV, PHEV and HEV + ICE + Diesel; the % is the share of the volume in the tracked countries.` +
+    else note.textContent = `Top ${WORLD_LIST_CAP} ${byGroup ? 'parent groups' : 'brands'} ${cont ? 'in ' + CONTINENT_LABELS[cont] : 'worldwide'} by volume, ${periodLabel(period)}${cmpTag}: rank on the left, ${cmpMode === 'all' ? 'total sales' : 'the compared units'} on the right. ${cmpMode !== 'all' ? 'Bars show only the compared units' : splitOn ? 'Bars are split into BEV and non-BEV' : 'Bars are split into BEV, PHEV and HEV + ICE + Diesel'}; the % is the share of the volume in the tracked countries.` +
       (period.type === 'month' ? ` Monthly figures come from the ${Object.keys(byCountry).length} markets that report brand data for ${periodLabel(period)}, not from every country, so they do not include all world sales.` : '') +
       (anyFin ? ` Where the company's financial reports give a worldwide total, the bar is extended by a hatched "All other countries" segment (reported worldwide minus tracked countries) and the list is ranked by the reported figure; hover a row for the source.` : '') +
       ` Pick a manufacturer above to focus this chart on one market instead.`;
-    if(otherAgg.total > 0) note.textContent += ' "Other (unclassified)" is the part of the sales the sources do not attribute to a brand: it sits at the bottom, is never ranked, and is counted in the % shares.';
+    if(cv(otherAgg) > 0) note.textContent += ' "Other (unclassified)" is the part of the sales the sources do not attribute to a brand: it sits at the bottom, is never ranked, and is counted in the % shares.';
     return;
   }
 
