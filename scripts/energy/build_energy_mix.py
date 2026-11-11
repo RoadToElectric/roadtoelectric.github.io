@@ -3,7 +3,7 @@
 Inputs (downloaded once, kept next to this script):  all_TESbySource.json, all_TFCbySource.json, all_ElecGenByFuel.json
   curl -s "https://api.iea.org/stats/indicator/TESbySource" -o all_TESbySource.json     (same for TFCbySource, ElecGenByFuel; no key needed; add ?countries=WORLD for one area)
 Country names / ISO2 codes come from assets/world-population-data.js (UN names, the same spelling as the rest of the site).
-Output: const ENERGY_MIX = { y0, y1, tes:[{k,label,color}], tfc:[...], el:[...], areas:[{id (IEA code), iso3, n, k:'world'|'region'|'country', iso2, last, tes:{key:[per year]}, tfc:{...}, el:{...}}] }
+Output: const ENERGY_MIX = { y0, y1, tes:[{k,label,color}], tfc:[...], el:[...], areas:[{id (IEA code), iso3, n, k:'world'|'region'|'country', iso2, last, pop:[persons per year] (world + countries), tes:{key:[per year]}, tfc:{...}, el:{...}}] }
   supply and final consumption in PJ (1 PJ = 1000 TJ), electricity in TWh; null = not published for that year.
 Usage: python scripts/energy/build_energy_mix.py"""
 import json, re
@@ -32,6 +32,9 @@ EXTRA_NAMES = {'XKX': 'Kosovo', 'UNK': 'Kosovo', 'CUW': 'Curaçao', 'GIB': 'Gibr
 wp = (ROOT / 'assets' / 'world-population-data.js').read_text(encoding='utf-8')
 wp = json.loads(wp[wp.index('{'):wp.rindex('}') + 1])
 names = {l['iso3']: (l['n'], l.get('iso2')) for l in wp['locs'] if l['k'] == 'country' and l.get('iso3')}
+# population (persons, 1 July, UN WPP 2024; 2024+ are projections) for per-capita figures: countries by ISO3 (Kosovo is not a separate UN series) and the world
+POP = {l['iso3']: l['p'] for l in wp['locs'] if l['k'] == 'country' and l.get('iso3')}
+POP['WORLD'] = next(l['p'] for l in wp['locs'] if l['k'] == 'world')
 
 
 def load(fn): return json.loads((HERE / fn).read_text(encoding='utf-8'))
@@ -77,6 +80,8 @@ for code in sorted(tes):
     a = {'id': code, 'iso3': iso3 if kind == 'country' else None, 'n': name, 'k': kind, 'iso2': iso2}
     t = tes[code]; last = max((i for i in range(NY) if any(t[k][i] is not None for k in t)), default=None)
     a['last'] = None if last is None else Y0 + last
+    pk = 'WORLD' if kind == 'world' else iso3 if kind == 'country' else None
+    if pk in POP: a['pop'] = POP[pk][Y0 - wp['y0']:Y1 - wp['y0'] + 1]
     a['tes'] = pack(t, TES_KEYS, 1000, 1)
     if code in tfc: a['tfc'] = pack(tfc[code], TFC_KEYS, 1000, 1)
     if code in el: a['el'] = pack(el[code], EL_KEYS, 1000, 2)

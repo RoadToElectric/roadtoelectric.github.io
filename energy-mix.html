@@ -134,10 +134,11 @@
             <select class="em-sel" id="rk-metric">
               <option value="elLow">Low-carbon share of electricity</option><option value="elRen">Renewable share of electricity</option><option value="elNuc">Nuclear share of electricity</option>
               <option value="elWind">Wind + solar share of electricity</option><option value="elCoal">Coal share of electricity</option><option value="elFossil">Fossil share of electricity</option>
-              <option value="elecFC">Electricity share of final consumption</option><option value="fossilTES">Fossil share of total energy supply</option><option value="elTWh">Electricity generated (TWh)</option><option value="tesEJ">Total energy supply (EJ)</option>
+              <option value="elecFC">Electricity share of final consumption</option><option value="fossilTES">Fossil share of total energy supply</option><option value="elTWh">Electricity generated (TWh)</option><option value="tesEJ">Total energy supply (EJ)</option><option value="tesPC">Total energy supply per person (GJ)</option>
             </select>
             <label class="em-fl" for="rk-year" style="min-width:0">Year</label><select class="em-sel" id="rk-year"></select>
-            <label class="em-fl" for="rk-dir" style="min-width:0">Order</label><div class="em-seg" id="rk-dir"><button type="button" data-v="hi" class="active">Highest first</button><button type="button" data-v="lo">Lowest first</button></div></div>
+            <label class="em-fl" for="rk-dir" style="min-width:0">Order</label><div class="em-seg" id="rk-dir"><button type="button" data-v="hi" class="active">Highest first</button><button type="button" data-v="lo">Lowest first</button></div>
+            <span id="rk-unit-w" style="display:none"><label class="em-fl" for="rk-unit" style="min-width:0">Show</label> <div class="em-seg" id="rk-unit"><button type="button" data-v="abs" class="active">EJ</button><button type="button" data-v="share">% of world</button></div></span></div>
           <div class="em-frow"><label class="em-fl" for="rk-min">Ignore areas under</label><select class="em-sel" id="rk-min"><option value="0">no limit</option><option value="1" selected>1 TWh of electricity</option><option value="10">10 TWh of electricity</option><option value="50">50 TWh of electricity</option></select>
             <label class="em-fl" for="rk-n" style="min-width:0">Show</label><select class="em-sel" id="rk-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select></div>
         </div>
@@ -196,7 +197,7 @@
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="assets/energy-mix-data.js?v=2"></script>
+<script src="assets/energy-mix-data.js?v=3"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/filter-memory.js?v=5"></script>
 <script>
@@ -228,7 +229,8 @@ const METRICS = {
   elecFC:   { f: (a, i) => { const t = tot(a, 'tfc', i); return t > 0 ? 100 * part(a, 'tfc', ['elec'], i) / t : null; }, label: 'Electricity share of final consumption', unit: '%', color: '#0a80d0' },
   fossilTES:{ f: (a, i) => { const t = tot(a, 'tes', i); return t > 0 ? 100 * part(a, 'tes', FOS, i) / t : null; }, label: 'Fossil share of total energy supply', unit: '%', color: '#2b2b2b' },
   elTWh:    { f: (a, i) => tot(a, 'el', i), label: 'Electricity generated', unit: ' TWh', color: '#0a80d0' },
-  tesEJ:    { f: (a, i) => { const t = tot(a, 'tes', i); return t == null ? null : t / 1000; }, label: 'Total energy supply', unit: ' EJ', color: '#6b7280' }
+  tesEJ:    { f: (a, i) => { const t = tot(a, 'tes', i); return t == null ? null : t / 1000; }, label: 'Total energy supply', unit: ' EJ', color: '#6b7280' },
+  tesPC:    { f: (a, i) => { const t = tot(a, 'tes', i), p = a.pop && a.pop[i]; return t == null || !p ? null : t * 1e6 / p; }, label: 'Total energy supply per person', unit: ' GJ', color: '#6b7280' }   // PJ -> GJ per person
 };
 
 // ---------- area selector ----------
@@ -322,23 +324,32 @@ function sectionKpis(){
 }
 
 // ---------- ranking ----------
-const RK = { metric: 'elLow', year: 2024, dir: 'hi', min: 1, n: 15, all: false };
+const RK = { metric: 'elLow', year: 2024, dir: 'hi', min: 1, n: 15, all: false, share: false };
+const SHAREABLE = { tesEJ: 'EJ', elTWh: 'TWh' };   // absolute metrics that can also be shown as a share of the world total
 $('rk-year').innerHTML = d3.range(Y1, Y0 - 1, -1).map(y => `<option value="${y}"${y === 2024 ? ' selected' : ''}>${y}</option>`).join('');
 function renderBars(){
-  const M = METRICS[RK.metric];
-  let rows = rankRows(RK.metric, RK.year, RK.min);
+  const M = METRICS[RK.metric], canShare = RK.metric in SHAREABLE, share = canShare && RK.share, W = A.get('WORLD');
+  $('rk-unit-w').style.display = canShare ? '' : 'none';
+  if(canShare){ const bs = document.querySelectorAll('#rk-unit button'); bs[0].textContent = SHAREABLE[RK.metric]; bs.forEach(x => x.classList.toggle('active', (x.dataset.v === 'share') === share)); }
+  // the world total is published up to W.last only, so a share is computed on that year at the latest
+  const yr = share ? Math.min(RK.year, W.last || RK.year) : RK.year;
+  let rows = rankRows(RK.metric, yr, RK.min);
+  if(share) rows.forEach(r => { const w = M.f(W, yi(r.yr)); r.v = w ? 100 * r.v / w : null; });
+  rows = rows.filter(r => r.v != null);
   rows.sort((x, y) => RK.dir === 'hi' ? y.v - x.v : x.v - y.v);
   const nAll = rows.length; if(!RK.all) rows = rows.slice(0, RK.n);
-  const mx = M.unit === '%' ? 100 : d3.max(rows, r => r.v) || 1, fmtV = v => M.unit === '%' ? fmtP(v) : fmtN(v) + M.unit;
-  $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span>${r.yr !== RK.year ? `<small style="color:var(--text-muted);font-weight:600">${r.yr}</small>` : ''}</span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
-  $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { st.year = Math.min(RK.year, (A.get(b.dataset.id).last || RK.year)); setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  const pctU = share || M.unit === '%', mx = pctU && !share ? 100 : d3.max(rows, r => r.v) || 1, fmtV = v => share ? v.toFixed(v < 1 ? 2 : 1) + '%' : M.unit === '%' ? fmtP(v) : fmtN(v) + M.unit;
+  $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span>${r.yr !== yr ? `<small style="color:var(--text-muted);font-weight:600">${r.yr}</small>` : ''}</span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
+  $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { st.year = Math.min(yr, (A.get(b.dataset.id).last || yr)); setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const b = $('rk-more'); b.style.display = nAll > RK.n ? '' : 'none'; b.textContent = RK.all ? `Shrink to ${RK.n}` : `Show all ${nAll}`;
-  $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${M.label.toLowerCase()}</b> in ${RK.year}, among the ${nAll} countries with data${rows.some(r => r.yr !== RK.year) ? ` (countries that have not yet published ${RK.year} are ranked on their latest earlier year, shown beside the name)` : ''}${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}. Click a row to open that country above.`;
+  const lbl = share ? `${M.label.toLowerCase()}, as a share of the world total` : M.label.toLowerCase();
+  $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${lbl}</b> in ${yr}, among the ${nAll} countries with data${yr !== RK.year ? ` (the world total is published up to ${yr}, so shares are computed on ${yr})` : ''}${rows.some(r => r.yr !== yr) ? ` (countries that have not yet published ${yr} are ranked on their latest earlier year, shown beside the name)` : ''}${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}.${RK.metric === 'tesPC' ? ' Population: UN World Population Prospects 2024 (Kosovo is not a separate UN series, so it is not ranked here).' : ''} Click a row to open that country above.`;
 }
 $('rk-metric').addEventListener('change', e => { RK.metric = e.target.value; RK.all = false; renderBars(); });
 $('rk-year').addEventListener('change', e => { RK.year = +e.target.value; renderBars(); });
 $('rk-min').addEventListener('change', e => { RK.min = +e.target.value; renderBars(); });
 $('rk-n').addEventListener('change', e => { RK.n = +e.target.value; RK.all = false; renderBars(); });
+document.querySelectorAll('#rk-unit button').forEach(b => b.addEventListener('click', () => { RK.share = b.dataset.v === 'share'; RK.all = false; renderBars(); }));
 $('rk-more').addEventListener('click', () => { RK.all = !RK.all; renderBars(); });
 document.querySelectorAll('#rk-dir button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#rk-dir button').forEach(x => x.classList.toggle('active', x === b)); RK.dir = b.dataset.v; RK.all = false; renderBars(); }));
 
