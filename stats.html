@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Site stats — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  /* private stats page: not linked from the site, nothing is shown without the passphrase (assets/page-views.js writes the visits, the database function site_stats checks the passphrase) */
+  body{ margin:0; background:var(--bg); color:var(--text); }
+  .st{ max-width:1040px; margin:0 auto; padding:18px 16px 48px; }
+  .st h1{ font-size:22px; margin:0; font-weight:900; letter-spacing:-.01em; }
+  .st h1 small{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); border:1px solid var(--border); border-radius:999px; padding:2px 8px; margin-left:8px; vertical-align:middle; }
+  .st-top{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px; margin-bottom:14px; }
+  .st-top a{ color:var(--accent); font-weight:700; text-decoration:none; font-size:13px; }
+  .st-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  [hidden]{ display:none !important; }
+  .st-card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .st-card h2{ font-size:15px; margin:0 0 4px; font-weight:800; }
+  .st-note{ font-size:12.5px; color:var(--text-muted); margin:0 0 12px; line-height:1.45; }
+  .st-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+  .st-kpi{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+  .st-kpi .l{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+  .st-kpi .v{ font-size:26px; font-weight:900; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .st-kpi .s{ font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+  .st-lock{ max-width:420px; margin:48px auto; text-align:center; }
+  .st-lock input{ width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font:inherit; margin:10px 0; }
+  .st-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; padding:6px 12px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .st-btn.on, .st-btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .st-err{ color:var(--accent-strong); font-size:13px; font-weight:700; min-height:18px; }
+  .st-cols{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  .st-cols > .st-card{ margin-bottom:0; }
+  table.st-t{ width:100%; border-collapse:collapse; font-size:13px; }
+  .st-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:4px 6px; border-bottom:1px solid var(--border); }
+  .st-t td{ padding:6px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .st-t td.n, .st-t th.n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .st-t tr:last-child td{ border-bottom:0; }
+  .st-t .bar{ display:block; height:7px; border-radius:4px; background:var(--accent); min-width:2px; }
+  .st-t .barw{ width:34%; min-width:60px; }
+  .st-flag{ width:20px; height:15px; border-radius:2px; vertical-align:-3px; margin-right:6px; object-fit:cover; background:var(--surface-alt); }
+  .st-split{ display:flex; height:26px; border-radius:8px; overflow:hidden; margin:8px 0 6px; background:var(--surface-alt); }
+  .st-split i{ display:block; height:100%; }
+  .st-leg{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:12.5px; }
+  .st-leg b{ font-variant-numeric:tabular-nums; }
+  .st-leg i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; }
+  #st-days svg{ width:100%; height:auto; display:block; }
+  #st-days text{ fill:var(--text-muted); font-size:10px; }
+  .st-muted{ color:var(--text-muted); }
+</style>
+</head>
+<body>
+<main class="st">
+  <div class="st-top">
+    <h1>Site stats<small>private</small></h1>
+    <div class="st-bar" id="st-bar" hidden>
+      <button type="button" class="st-btn" data-days="7">7 days</button>
+      <button type="button" class="st-btn" data-days="30">30 days</button>
+      <button type="button" class="st-btn" data-days="90">90 days</button>
+      <button type="button" class="st-btn" data-days="0">All</button>
+      <button type="button" class="st-btn" id="st-refresh" title="Load the numbers again">↻</button>
+      <button type="button" class="st-btn" id="st-lock" title="Forget the passphrase on this device">Lock</button>
+    </div>
+    <a href="index.html">← Road to Electric</a>
+  </div>
+
+  <section class="st-card st-lock" id="lock">
+    <h2>Passphrase</h2>
+    <p class="st-note">Nothing is shown without it. It is kept on this device only, until you press Lock.</p>
+    <input type="password" id="key" autocomplete="current-password" placeholder="Passphrase" aria-label="Passphrase">
+    <div class="st-err" id="err"></div>
+    <button type="button" class="st-btn primary" id="go">Show the stats</button>
+  </section>
+
+  <div id="dash" hidden>
+    <div class="st-kpis" id="kpis"></div>
+
+    <section class="st-card" id="st-days">
+      <h2>Views per day</h2>
+      <p class="st-note" id="days-note"></p>
+      <div id="days-chart"></div>
+    </section>
+
+    <section class="st-card">
+      <h2>Pages</h2>
+      <p class="st-note">Views in the period, and the share of them seen in the mobile view (from the detailed log).</p>
+      <div id="pages"></div>
+    </section>
+
+    <div class="st-cols">
+      <section class="st-card">
+        <h2>Reading mode</h2>
+        <p class="st-note">The view the page was shown in: the site's own mobile / desktop view (a phone that chose the desktop view counts as desktop).</p>
+        <div id="mode"></div>
+        <h2 style="margin-top:16px">Device</h2>
+        <p class="st-note">What the reader holds: phone and tablet are touch screens, the rest a mouse and keyboard.</p>
+        <div id="device"></div>
+      </section>
+      <section class="st-card">
+        <h2>Where they come from</h2>
+        <p class="st-note">Websites that sent the reader here (direct visits and your own pages are not listed).</p>
+        <div id="refs"></div>
+      </section>
+    </div>
+
+    <section class="st-card" style="margin-top:14px">
+      <h2>Countries</h2>
+      <p class="st-note">Read from the request by the database, the IP address itself is never stored.</p>
+      <div id="countries"></div>
+    </section>
+
+    <p class="st-note" id="foot"></p>
+  </div>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var RPC = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/site_stats', API = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP';
+  var PAGES = { 'index.html':'Home', 'powertrain-mix-by-country.html':'Mix by Country', 'manufacturers.html':'Manufacturers', 'world-car-sales.html':'World Car Sales', 'biggest-movers.html':'Biggest Movers',
+    'charging-stations.html':'Charging Stations', 'ev-trucking.html':'EV Trucking', 'world-oil.html':'World Oil', 'world-population.html':'World Population', 'population-energy.html':'Population & Energy',
+    'energy-mix.html':'Energy Mix', 'country.html':'Country', 'contact.html':'Contact', 'comments.html':'Comments', 'powertrain-mix-by-country-copy.html':'Mix by Country (copy)' };
+  var $ = function(id){ return document.getElementById(id); };
+  var key = '', days = 30, timer = null;
+  try{ key = localStorage.getItem('rte-stats-key') || ''; days = +localStorage.getItem('rte-stats-days'); if([0, 7, 30, 90].indexOf(days) < 0) days = 30; }catch(e){}
+  var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var fmt = function(n){ return Number(n || 0).toLocaleString('en-US'); };
+  var pct = function(a, b){ return b ? Math.round(1000 * a / b) / 10 : 0; };
+  var names = null; try{ names = new Intl.DisplayNames(['en'], { type:'region' }); }catch(e){}
+  var cname = function(c){ if(c === '??') return 'Unknown'; try{ return (names && names.of(c)) || c; }catch(e){ return c; } };
+
+  function load(){
+    $('err').textContent = '';
+    return fetch(RPC, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:API, Authorization:'Bearer ' + API }, body:JSON.stringify({ p_key:key, p_days:days }) })
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+      .then(function(d){
+        if(!d || d.error){ lockUI(d && d.error === 'locked' ? 'Wrong passphrase.' : 'Could not read the stats.'); return; }
+        try{ localStorage.setItem('rte-stats-key', key); localStorage.setItem('rte-notrack', '1'); }catch(e){}       // this browser is the owner's: its own visits are not counted
+        show(d);
+      })
+      .catch(function(e){ $('err').textContent = 'Could not reach the database (' + e.message + ').'; });
+  }
+  function lockUI(msg){
+    try{ localStorage.removeItem('rte-stats-key'); }catch(e){}
+    key = ''; $('dash').hidden = true; $('st-bar').hidden = true; $('lock').hidden = false; $('err').textContent = msg || ''; clearInterval(timer);
+  }
+  function rows(list, max, f){ return list.map(function(r){ return f(r, max ? Math.max(2, 100 * r.views / max) : 0); }).join(''); }
+
+  function show(d){
+    $('lock').hidden = true; $('dash').hidden = false; $('st-bar').hidden = false;
+    document.querySelectorAll('#st-bar [data-days]').forEach(function(b){ b.classList.toggle('on', +b.dataset.days === days); });
+    var t = d.totals, det = d.detail, inPeriod = d.by_day.reduce(function(s, x){ return s + x.views; }, 0);
+    $('kpis').innerHTML = [['Today', t.today, ''], ['Yesterday', t.yesterday, ''], ['Last 7 days', t.last7, ''], ['Last 30 days', t.last30, ''], ['All time', t.all, 'since ' + (t.since || '—')],
+      ['Visits in period', det.sessions, 'browser sessions, detailed log']].map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v">' + fmt(k[1]) + '</div><div class="s">' + esc(k[2] || ' ') + '</div></div>'; }).join('');
+
+    // views per day
+    var map = {}; d.by_day.forEach(function(x){ map[x.day] = x.views; });
+    var start = new Date(d.from + 'T12:00:00'), end = new Date(d.today + 'T12:00:00');
+    if(d.days <= 0 && d.by_day.length) start = new Date(d.by_day[0].day + 'T12:00:00');
+    var list = []; for(var c = new Date(start); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10); list.push({ day:k, v:map[k] || 0 }); }
+    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '';
+    var step = Math.ceil(list.length / 12);
+    list.forEach(function(x, i){
+      var h = Math.round((H - 26) * x.v / max), xx = pad + i * bw;
+      svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - 18 - h) + '" width="' + Math.max(1, bw - 2).toFixed(1) + '" height="' + h + '" rx="2" fill="var(--accent)"><title>' + x.day + ': ' + fmt(x.v) + ' views</title></rect>';
+      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + x.day.slice(5) + '</text>';
+    });
+    svg += '<text x="0" y="12">' + fmt(max) + '</text><text x="0" y="' + (H - 18) + '">0</text>';
+    $('days-chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Views per day">' + svg + '</svg>';
+    $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session (a reader who opens three pages makes three views and one visit). Days are Toronto days.';
+
+    // pages
+    var pm = {}; det.by_page.forEach(function(x){ pm[x.page] = x; });
+    var pmax = d.by_page.length ? d.by_page[0].views : 0;
+    $('pages').innerHTML = '<table class="st-t"><thead><tr><th>Page</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Mobile view</th></tr></thead><tbody>' +
+      d.by_page.map(function(p){ var m = pm[p.page]; return '<tr><td>' + esc(PAGES[p.page] || p.page) + ' <span class="st-muted">' + esc(p.page) + '</span></td><td class="n">' + fmt(p.views) + '</td><td class="n">' + pct(p.views, inPeriod) + '%</td>' +
+        '<td class="barw"><i class="bar" style="width:' + (pmax ? Math.max(2, 100 * p.views / pmax) : 0) + '%"></i></td><td class="n">' + (m && m.known ? pct(m.mobile, m.known) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>' + (d.by_page.length ? '' : '<p class="st-note">No views in this period yet.</p>');
+
+    // reading mode + device
+    var split = function(list, labels, colors){
+      var by = {}; list.forEach(function(x){ by[x.k] = x; });
+      var tot = Object.keys(labels).reduce(function(s, k){ return s + (by[k] ? by[k].views : 0); }, 0); if(!tot) return '<p class="st-note">No detailed visits in this period yet.</p>';       // visits from before the log (unknown mode) are left out
+      var keys = Object.keys(labels).filter(function(k){ return by[k]; });
+      return '<div class="st-split">' + keys.map(function(k){ return '<i style="width:' + pct(by[k].views, tot) + '%;background:' + colors[k] + '" title="' + labels[k] + '"></i>'; }).join('') + '</div><div class="st-leg">' +
+        keys.map(function(k){ return '<span><i style="background:' + colors[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views · ' + fmt(by[k].sessions) + ' visits</span></span>'; }).join('') + '</div>';
+    };
+    $('mode').innerHTML = split(det.by_mode, { mobile:'Mobile view', desktop:'Desktop view' }, { mobile:'#2fae4e', desktop:'#0a80d0' });
+    $('device').innerHTML = split(det.by_device, { phone:'Phone', tablet:'Tablet', desktop:'Desktop' }, { phone:'#2fae4e', tablet:'#f4a742', desktop:'#0a80d0' });
+
+    // referrers
+    $('refs').innerHTML = det.by_referrer.length ? '<table class="st-t"><tbody>' + det.by_referrer.map(function(r){ return '<tr><td>' + esc(r.k) + '</td><td class="n">' + fmt(r.views) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="st-note">None yet: every visit so far came directly or from the site itself.</p>';
+
+    // countries
+    var cmax = det.by_country.length ? det.by_country[0].views : 0, ctot = det.by_country.reduce(function(s, x){ return s + x.views; }, 0);
+    $('countries').innerHTML = det.by_country.length ? '<table class="st-t"><thead><tr><th>Country</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Visits</th><th class="n">Mobile view</th></tr></thead><tbody>' +
+      det.by_country.map(function(r){ var flag = r.k === '??' ? '' : '<img class="st-flag" alt="" loading="lazy" src="https://flagcdn.com/24x18/' + esc(r.k.toLowerCase()) + '.png">';
+        return '<tr><td>' + flag + esc(cname(r.k)) + '</td><td class="n">' + fmt(r.views) + '</td><td class="n">' + pct(r.views, ctot) + '%</td><td class="barw"><i class="bar" style="width:' + Math.max(2, 100 * r.views / cmax) + '%"></i></td><td class="n">' + fmt(r.sessions) + '</td><td class="n">' + (r.known ? pct(r.mobile, r.known) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>'
+      : '<p class="st-note">No detailed visits in this period yet.</p>';
+
+    $('foot').textContent = 'Detailed log (country, mode, device, referrers) starts ' + (det.since ? new Date(det.since).toISOString().slice(0, 10) : 'with the first visit') + '; the totals and the pages above also include earlier visits. ' +
+      'Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
+    clearInterval(timer); timer = setInterval(function(){ if(!document.hidden && key) load(); }, 60000);
+  }
+
+  $('go').addEventListener('click', function(){ key = $('key').value.trim(); if(key) load(); });
+  $('key').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('go').click(); });
+  $('st-refresh').addEventListener('click', load);
+  $('st-lock').addEventListener('click', function(){ lockUI(''); $('key').value = ''; });
+  $('st-bar').addEventListener('click', function(e){ var b = e.target.closest('[data-days]'); if(!b) return; days = +b.dataset.days; try{ localStorage.setItem('rte-stats-days', days); }catch(e2){} load(); });
+  if(key) load();
+})();
+</script>
+</body>
+</html>
