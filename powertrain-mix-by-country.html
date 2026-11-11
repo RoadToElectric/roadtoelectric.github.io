@@ -251,6 +251,7 @@
             </div>
           </div>
           <p class="note" id="bars-note">Each bar is 100% of the selected powertrains for that country. Sorted by BEV share, high to low. % labels show inside wide-enough segments (a narrow BEV slice shows its value to the right instead of hiding it). The dotted line marks 75% — a country whose colored segments reach past it has combined Petrol+Diesel (plus any small Others slice, stacked last) under 25%. Click a legend swatch or any segment to isolate that powertrain across every bar. YoY/3Y are that country's BEV registration growth — hover any segment for exact figures. Press the round play button to run the bars through the annual results (2020-2025), then the months of the current year, and ends on the current year projected to a full year (the 3Y column is blank while it plays).</p>
+          <p class="note" id="bars-diesel-note" style="display:none"></p>
           <div class="elec-timeline" id="elec-timeline">
             <button type="button" class="elec-play" id="elec-play" aria-label="Play through time" title="Play: the bars re-rank through the annual results, then the months of the current year">▶</button>
             <div class="elec-tl-label" id="elec-tl-label"></div>
@@ -556,7 +557,7 @@
 <script src="assets/manufacturer-model-yearly-data.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
-<script src="assets/electrification-bars.js?v=6"></script>
+<script src="assets/electrification-bars.js?v=7"></script>
 <script src="assets/country-cars-on-road-data.js"></script>
 <script src="assets/country-ev-regulations-data.js"></script>
 <script>
@@ -4006,9 +4007,11 @@ function trendsSeriesForCountry(name){
   })) };
 }
 
-// only countries/years with a full fuel-type split are summed, so the aggregate never silently understates ICE
+// only countries/years whose powertrain split adds up to the total are summed (elecBarsComplete, assets/electrification-bars.js), so the aggregate never silently understates ICE;
+// China and the US publish all combustion cars as petrol and leave diesel empty -- they count, the old "petrol and diesel both present" test left them out of every year
+const trendsAggregateCountries = () => [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c) && COUNTRY_YEARLY[c]);
 function trendsSeriesAggregate(){
-  const countries = [...selectedCountries].filter(c => selectedContinents.has(COUNTRY_CONTINENT[c] || "OTHER") && passesRankFilter(c) && COUNTRY_YEARLY[c]);
+  const countries = trendsAggregateCountries();
   // the current (latest) year across the whole dataset is the only one allowed to be "partial" —
   // a single country reporting an early/partial cut of an otherwise-finished past year (e.g. the
   // Philippines' Jan-Nov-only 2025 row) shouldn't mislabel that whole year's aggregate as YTD
@@ -4016,7 +4019,7 @@ function trendsSeriesAggregate(){
   const byYear = {};
   countries.forEach(c => {
     (COUNTRY_YEARLY[c] || []).forEach(r => {
-      if(r.petrol == null || r.diesel == null) return;
+      if(!elecBarsComplete(r)) return;
       if(r.period_type === 'PROJECTED') return;                                                  // real data only: the trend chart draws no projections
       if(r.period_type === 'YTD' && r.year !== latestYear) return;
       const y = byYear[r.year] || (byYear[r.year] = {year:r.year, bev:0, phev:0, hev:0, petrol:0, diesel:0, others:0, total:0, isPartial:false});
@@ -4048,7 +4051,12 @@ function renderTrendsChart(){
     ? (isMonthly
         ? `Powertrain mix for ${focusedCountry}: one point per month for the last ${TREND_MONTHS} months, and one point per year (drawn 12 months wide, so the time axis is to scale) before that${focusedCountry === 'Canada' ? ' (Statistics Canada reports quarterly — one point per quarter, not per month)' : ''}. Click "Show all filtered countries" to go back to the aggregate view.`
         : `Year-by-year powertrain mix for ${focusedCountry}. Click "Show all filtered countries" to go back to the aggregate view.`)
-    : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years with a full fuel-type split are included). Click a country — on the map, in the table, or in Momentum below — to focus every chart on this page on it: European countries and Canada switch to monthly/quarterly points here once focused, since real data at that granularity exists for them.';
+    : 'Share of new registrations by powertrain, year by year, summed across every country matching the sidebar filters (only countries/years whose powertrain split adds up to the total are included, so the mix can step when a large market enters the data — China from 2021, for example). Click a country — on the map, in the table, or in Momentum below — to focus every chart on this page on it: European countries and Canada switch to monthly/quarterly points here once focused, since real data at that granularity exists for them.';
+
+  if(activeKeys.includes('petrol') || activeKeys.includes('diesel')){        // Petrol / Diesel drawn: say which countries publish no diesel
+    const nd = elecBarsNoDieselNote(isFocused ? [focusedCountry] : trendsAggregateCountries());
+    if(nd) trendsNote.textContent += ' ' + nd;
+  }
 
   trendsLegend.innerHTML = activeKeys.map(k => `
     <div class="legend-chip" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
@@ -4359,6 +4367,9 @@ function renderBars(){
     return bv - av;
   });
   const fuels = FUEL_KEYS.filter(k => selectedFuels.has(k));
+  const barsDieselNote = document.getElementById('bars-diesel-note');
+  barsDieselNote.textContent = (fuels.includes('petrol') || fuels.includes('diesel')) ? elecBarsNoDieselNote(sorted.map(d => d.country)) : '';
+  barsDieselNote.style.display = barsDieselNote.textContent ? '' : 'none';
   const denoms = sorted.map(d => fuels.reduce((s,k) => s + d[k], 0));
   const globalMax = Math.max(1, ...denoms);
   rankRows.innerHTML = sorted.map((d,i) => {

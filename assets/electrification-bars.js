@@ -95,6 +95,28 @@ function elecBarsComplete(r){
   const parts = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'others'].reduce((a, k) => a + (r[k] || 0), 0);
   return Math.abs(parts - r.total) <= 0.02 * r.total;
 }
+// countries that publish no separate diesel figure (Diesel is empty or 0 in every row they have, while Petrol is not): all their combustion cars are counted as Petrol.
+// China and the United States are the big ones; the note is for any chart that draws Petrol or Diesel (Motorisation Trends, Electrification Mix, Electrified Share by Country)
+let elecBarsNoDieselSet = null;
+function elecBarsNoDieselNote(countries){
+  if(!elecBarsNoDieselSet){
+    const st = {};
+    [typeof COUNTRY_YEARLY !== 'undefined' ? COUNTRY_YEARLY : {}, typeof COUNTRY_MONTHLY !== 'undefined' ? COUNTRY_MONTHLY : {}].forEach(obj => Object.keys(obj).forEach(c => obj[c].forEach(r => {
+      const e = st[c] || (st[c] = { petrol: false, diesel: false });
+      if(r.petrol > 0) e.petrol = true;
+      if(r.diesel > 0) e.diesel = true;
+    })));
+    elecBarsNoDieselSet = new Set(Object.keys(st).filter(c => st[c].petrol && !st[c].diesel));
+  }
+  const big = ['China', 'United States'];
+  const names = [...new Set(countries)].filter(c => elecBarsNoDieselSet.has(c)).sort((a, b) => (big.indexOf(a) < 0 ? 9 : big.indexOf(a)) - (big.indexOf(b) < 0 ? 9 : big.indexOf(b)) || a.localeCompare(b));
+  if(!names.length) return '';
+  const nm = c => c === 'United States' ? 'the United States' : c;
+  const shown = names.slice(0, 6).map(nm), more = names.length - shown.length;
+  const list = more > 0 ? shown.join(', ') + ` and ${more} more` : shown.length > 1 ? shown.slice(0, -1).join(', ') + ' and ' + shown[shown.length - 1] : shown[0];
+  const many = names.length > 1;
+  return `${list} ${many ? 'do' : 'does'} not report diesel separately: ${many ? 'their' : 'its'} combustion cars are all counted as Petrol, so Diesel is empty (not zero) for ${many ? 'them' : 'it'}.`;
+}
 function buildElectrificationBarsSeriesMulti(countries){
   const KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'total'];
   const add = (acc, r) => { KEYS.forEach(k => { acc[k] = (acc[k] || 0) + (r[k] || 0); }); return acc; };
@@ -250,6 +272,7 @@ function renderElectrificationBarsChart(country){
   }
   document.getElementById('elec-bars-note').textContent = ELEC_BARS_NOTE +
     (multi ? elecBarsMultiNote() : '') +
+    ((visibleKeys.includes('petrol') || visibleKeys.includes('diesel')) ? (' ' + elecBarsNoDieselNote(multi ? country : [country])).trimEnd() : '') +
     (country === 'Canada' ? ' Statistics Canada reports quarterly, not monthly -- each "month" bar here is really its whole quarter, labeled at the quarter\'s first month.' : '');
   document.getElementById('elec-bars-legend').innerHTML = ELEC_BARS_ALL_KEYS.map(k => `
     <div class="legend-chip${elecBarsHidden.has(k) ? ' dimmed' : ''}" data-fuel="${k}" style="cursor:pointer"><span class="swatch" style="background:${FUEL_COLORS[k]}"></span>${FUEL_LABELS[k]}</div>
