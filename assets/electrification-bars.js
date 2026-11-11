@@ -2,8 +2,8 @@
 // the raw count) of each period's total registrations. Hybrid (HEV), Petrol and Diesel are also
 // available but start hidden (dimmed in the legend) -- click a chip (or "# of Units"/"%" mode toggle)
 // to reveal them stacked on top. Periods are the last 5 full annual years (fewer if a country's history is
-// shorter), then the current year's YTD bar, then each real month of the current year so far (just
-// the YTD bar, on its own, if no monthly breakdown exists for that country). Shared by country.html
+// shorter), then the current year PROJECTED to a full year (the YTD bar for a country with no projection), then each real month of the current year so far (just
+// that bar, on its own, if no monthly breakdown exists for that country). Shared by country.html
 // (always, for the URL country),
 // individual-country.html (only while a country is focused), and powertrain-mix-by-country.html
 // (only while a country is focused).
@@ -24,7 +24,7 @@ const ELEC_BARS_KEYS = ['bev', 'phev']; // shown by default
 const ELEC_BARS_EXTRA_KEYS = ['hev', 'petrol', 'diesel']; // start hidden/dimmed in the legend -- click to reveal
 const ELEC_BARS_ALL_KEYS = [...ELEC_BARS_KEYS, ...ELEC_BARS_EXTRA_KEYS];
 const ELEC_BARS_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ELEC_BARS_NOTE = "Battery Electric and Plug-in Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Hybrid, Petrol and Diesel start dimmed in the legend; click any of them (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year's YTD total, then each month of the current year so far (just the YTD bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
+const ELEC_BARS_NOTE = "Battery Electric and Plug-in Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Hybrid, Petrol and Diesel start dimmed in the legend; click any of them (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year projected to a full year (its year-to-date figures carried on to December, the same projection as the rest of the site), then each month of the current year so far (just the projected bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
 // how many full annual years (immediately preceding the current one) to show, history permitting
 const ELEC_BARS_YEAR_COUNT = 5;
 // width ratios, relative to a single narrow bar (width 1) -- years widest, the current year's
@@ -57,9 +57,13 @@ function buildElectrificationBarsSeries(country){
   // YTD left in place alongside the current year's) -- always take the most recent one, not
   // just the first match, so this chart's monthly breakdown looks up the right year
   const ytdRow = yearly.filter(r => r.period_type === 'YTD').sort((a, b) => b.year - a.year)[0];
-  const ytdPeriod = ytdRow
-    ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
-    : null;
+  // the bar of the running year is its projection to a full year when there is one, the year-to-date figures otherwise
+  const projRow = ytdRow && yearly.find(r => r.period_type === 'PROJECTED' && r.year === ytdRow.year);
+  const ytdPeriod = projRow
+    ? { label: `${projRow.year} Proj.`, bev: projRow.bev, phev: projRow.phev, hev: projRow.hev, petrol: projRow.petrol, diesel: projRow.diesel, total: projRow.total, isPartial: true, isYear: false, isYTD: true, isProjected: true }
+    : ytdRow
+      ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
+      : null;
 
   let monthPeriods = [];
   if(ytdRow && typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY[country]){
@@ -80,7 +84,7 @@ function buildElectrificationBarsSeries(country){
 }
 
 // the sum of several countries. A row counts when its powertrain parts add up to its total (within 2%): China and the US publish petrol and diesel together and leave diesel empty,
-// a country with only some of the parts (a missing hybrid column) would understate the others. Six years (2020-2025 now) + the latest YTD + the monthly bars of that year.
+// a country with only some of the parts (a missing hybrid column) would understate the others. Six years (2020-2025 now) + the running year projected to a full year (its YTD bar when too few countries have a projection) + the monthly bars of that year.
 // Every period is compared with the same panel: the countries that have a usable row somewhere in that window, each weighted by its latest annual total. The countries of the panel
 // with no usable row for a period (a gap, or a series that starts later, like China in 2021) are its missing share: up to 5% the bar is drawn as it is, up to 25% it is drawn
 // with a star and the note names who is left out, above that it is not drawn (a sum without China is not a sum). The monthly bars appear only when at least 80% of the countries
@@ -133,12 +137,12 @@ function buildElectrificationBarsSeriesMulti(countries){
   });
   const panelTotal = [...weight.values()].reduce((a, b) => a + b, 0);
   // one period: the rows of the countries that have it, who is missing, and what to do about it
-  const periodSum = (y, pt, label) => {
+  const periodSum = (y, pt, label, quiet) => {
     const have = [], missing = [];
     weight.forEach((w, c) => { const r = rowOf(c, y, pt); if(r) have.push(r); else missing.push({ c, w }); });
     const share = panelTotal ? missing.reduce((a, m) => a + m.w, 0) / panelTotal : 1;
     const names = missing.sort((a, b) => b.w - a.w).map(m => m.c);
-    if(!have.length || share > ELEC_BARS_MISSING_HIDE){ elecBarsMultiInfo.hidden.push({ label, names }); return null; }
+    if(!have.length || share > ELEC_BARS_MISSING_HIDE){ if(!quiet) elecBarsMultiInfo.hidden.push({ label, names }); return null; }
     if(share > ELEC_BARS_MISSING_STAR) elecBarsMultiInfo.starred.push({ label, names });
     return { sum: have.reduce(add, {}), star: share > ELEC_BARS_MISSING_STAR ? '*' : '' };
   };
@@ -148,9 +152,10 @@ function buildElectrificationBarsSeriesMulti(countries){
     if(p) annualPeriods.push({ label: String(y) + p.star, ...p.sum, isPartial: false, isYear: true });
   });
   if(!ytdYear) return annualPeriods;
-  const py = periodSum(ytdYear, 'YTD', `${ytdYear} YTD`);
+  const pj = periodSum(ytdYear, 'PROJECTED', `${ytdYear} Proj.`, true);       // the projected full year; the YTD bar when too few of the countries have a projection
+  const py = pj || periodSum(ytdYear, 'YTD', `${ytdYear} YTD`);
   if(!py) return annualPeriods;
-  const ytdPeriod = { label: `${ytdYear} YTD${py.star}`, ...py.sum, isPartial: true, isYear: false, isYTD: true };
+  const ytdPeriod = { label: `${ytdYear} ${pj ? 'Proj.' : 'YTD'}${py.star}`, ...py.sum, isPartial: true, isYear: false, isYTD: true, isProjected: !!pj };
   const monthly = (typeof COUNTRY_MONTHLY !== 'undefined' && COUNTRY_MONTHLY) || {};
   const monthRows = c => (monthly[c] || []).filter(r => r.ym.startsWith(String(ytdYear)) && elecBarsComplete(r));
   const withMonths = countries.filter(c => monthRows(c).length);
@@ -256,7 +261,7 @@ function renderElectrificationBarsChart(country){
   // one row per period, carrying both the raw units (under _raw) and whichever unit the current
   // mode displays (% of total, or the raw count itself) under each fuel key directly
   const displaySeries = series.map(d => {
-    const row = { label: d.label, total: d.total, isPartial: d.isPartial, isYear: d.isYear, isYTD: !!d.isYTD, _raw: d };
+    const row = { label: d.label, total: d.total, isPartial: d.isPartial, isYear: d.isYear, isYTD: !!d.isYTD, isProjected: !!d.isProjected, _raw: d };
     ELEC_BARS_ALL_KEYS.forEach(k => {
       const raw = d[k] || 0;
       row[k] = elecBarsMode === 'raw' ? raw : (d.total ? raw / d.total * 100 : 0);
@@ -352,7 +357,7 @@ function renderElectrificationBarsChart(country){
         tooltip.style.left = (e.clientX - rect.left) + 'px';
         tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
         tooltip.style.opacity = 1;
-        tooltip.innerHTML = `<strong>${d.label}${d.isPartial ? ' (YTD)' : ''}</strong><br>` +
+        tooltip.innerHTML = `<strong>${d.label}${d.isProjected ? ' (projected full year, not a measurement)' : d.isPartial ? ' (YTD)' : ''}</strong><br>` +
           visibleKeys.map(k => `${FUEL_LABELS[k]}: <strong>${d._raw[k].toLocaleString('en-US')}</strong> (${(d._raw.total ? d._raw[k] / d._raw.total * 100 : 0).toFixed(1)}%)`).join('<br>') +
           `<br>Total: ${d.total.toLocaleString('en-US')}`;
       })
