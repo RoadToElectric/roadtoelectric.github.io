@@ -311,14 +311,16 @@ const RK = { metric: 'elLow', year: 2024, dir: 'hi', min: 1, n: 15, all: false }
 $('rk-year').innerHTML = d3.range(Y1, Y0 - 1, -1).map(y => `<option value="${y}"${y === 2024 ? ' selected' : ''}>${y}</option>`).join('');
 function renderBars(){
   const M = METRICS[RK.metric], i = yi(RK.year);
-  let rows = E.areas.filter(a => a.k === 'country').map(a => ({ a, v: M.f(a, i), el: tot(a, 'el', i) })).filter(r => r.v != null && (RK.min === 0 || (r.el != null && r.el >= RK.min)));
+  // a country that has not published the chosen year yet is ranked on its latest earlier year (up to 3 years back), tagged with that year
+  const rowOf = a => { for(let g = 0; g < 4 && i - g >= 0; g++){ const v = M.f(a, i - g); if(v != null) return { a, v, el: tot(a, 'el', i - g), yr: RK.year - g }; } return { a, v: null }; };
+  let rows = E.areas.filter(a => a.k === 'country').map(rowOf).filter(r => r.v != null && (RK.min === 0 || (r.el != null && r.el >= RK.min)));
   rows.sort((x, y) => RK.dir === 'hi' ? y.v - x.v : x.v - y.v);
   const nAll = rows.length; if(!RK.all) rows = rows.slice(0, RK.n);
   const mx = M.unit === '%' ? 100 : d3.max(rows, r => r.v) || 1, fmtV = v => M.unit === '%' ? fmtP(v) : fmtN(v) + M.unit;
-  $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span></span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
+  $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span>${r.yr !== RK.year ? `<small style="color:var(--text-muted);font-weight:600">${r.yr}</small>` : ''}</span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
   $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const b = $('rk-more'); b.style.display = nAll > RK.n ? '' : 'none'; b.textContent = RK.all ? `Shrink to ${RK.n}` : `Show all ${nAll}`;
-  $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${M.label.toLowerCase()}</b> in ${RK.year}, among the ${nAll} countries with data${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}. Click a row to open that country above.`;
+  $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${M.label.toLowerCase()}</b> in ${RK.year}, among the ${nAll} countries with data${rows.some(r => r.yr !== RK.year) ? ` (countries that have not yet published ${RK.year} are ranked on their latest earlier year, shown beside the name)` : ''}${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}. Click a row to open that country above.`;
 }
 $('rk-metric').addEventListener('change', e => { RK.metric = e.target.value; RK.all = false; renderBars(); });
 $('rk-year').addEventListener('change', e => { RK.year = +e.target.value; renderBars(); });
