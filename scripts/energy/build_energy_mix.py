@@ -16,12 +16,12 @@ TES_MAP = {'COAL': 'coal', 'MTOTOIL': 'oil', 'NATGAS': 'gas', 'NUCLEAR': 'nuclea
 TFC_MAP = {'COAL': 'coal', 'TOTPRODS': 'oil', 'CRNGFEED': 'oil', 'NATGAS': 'gas', 'COMRENEW': 'bio', 'GEOTHERM': 'swo', 'ELECTR': 'elec', 'HEAT': 'heat'}
 EL_MAP = {'EHCOAL': 'coal', 'EHOIL': 'oil', 'EHNATGAS': 'gas', 'EHNUCLEAR': 'nuclear', 'EHYDRO': 'hydro', 'EWIND': 'wind', 'ESOLARPV': 'solar', 'EHSOLARTH': 'solar',
           'EHBIOMASS': 'bio', 'EHWASTE': 'bio', 'EHGEOTHERM': 'geo', 'ETIDE': 'geo', 'EHOTHER': 'oth'}
-TES_KEYS = [('coal', 'Coal', '#4b5563'), ('oil', 'Oil', '#92400e'), ('gas', 'Natural gas', '#f59e0b'), ('nuclear', 'Nuclear', '#a855f7'),
-            ('hydro', 'Hydropower', '#0ea5e9'), ('bio', 'Biofuels and waste', '#84cc16'), ('swo', 'Solar, wind and other renewables', '#22c55e')]
-TFC_KEYS = [('coal', 'Coal', '#4b5563'), ('oil', 'Oil products', '#92400e'), ('gas', 'Natural gas', '#f59e0b'), ('bio', 'Biofuels and waste', '#84cc16'),
-            ('swo', 'Solar, wind and other renewables', '#22c55e'), ('heat', 'Heat', '#f97316'), ('elec', 'Electricity', '#0a80d0')]
-EL_KEYS = [('coal', 'Coal', '#4b5563'), ('oil', 'Oil', '#92400e'), ('gas', 'Natural gas', '#f59e0b'), ('nuclear', 'Nuclear', '#a855f7'), ('hydro', 'Hydropower', '#0ea5e9'),
-           ('wind', 'Wind', '#14b8a6'), ('solar', 'Solar', '#facc15'), ('bio', 'Bioenergy and waste', '#84cc16'), ('geo', 'Geothermal and ocean', '#fb7185'), ('oth', 'Other sources', '#9ca3af')]
+TES_KEYS = [('coal', 'Coal', '#59606a'), ('oil', 'Oil', '#111111'), ('gas', 'Natural gas', '#b87333'), ('nuclear', 'Nuclear', '#a855f7'),
+            ('hydro', 'Hydropower', '#0ea5e9'), ('bio', 'Biofuels and waste', '#7a4a21'), ('swo', 'Solar, wind and other renewables', '#22c55e')]
+TFC_KEYS = [('coal', 'Coal', '#59606a'), ('oil', 'Oil products', '#111111'), ('gas', 'Natural gas', '#b87333'), ('bio', 'Biofuels and waste', '#7a4a21'),
+            ('swo', 'Solar, wind and other renewables', '#22c55e'), ('heat', 'Heat', '#ef4444'), ('elec', 'Electricity', '#0a80d0')]
+EL_KEYS = [('coal', 'Coal', '#59606a'), ('oil', 'Oil', '#111111'), ('gas', 'Natural gas', '#b87333'), ('nuclear', 'Nuclear', '#a855f7'), ('hydro', 'Hydropower', '#0ea5e9'),
+           ('wind', 'Wind', '#14b8a6'), ('solar', 'Solar', '#facc15'), ('bio', 'Bioenergy and waste', '#7a4a21'), ('geo', 'Geothermal and ocean', '#fb7185'), ('oth', 'Other sources', '#9ca3af')]
 REGIONS = {'WORLD': 'World', 'OECDTOT': 'OECD', 'NONOECDTOT': 'Non-OECD', 'EU27_2020': 'European Union (27)', 'AFRICA': 'Africa', 'ASIA': 'Asia (excl. China)', 'EURASIA': 'Eurasia',
            'LATINAMERI': 'Latin America', 'MIDDLEEAST': 'Middle East', 'OECDAM': 'OECD Americas', 'OECDEUR': 'OECD Europe', 'OECDAO': 'OECD Asia Oceania'}
 EXTRA_NAMES = {'XKX': 'Kosovo', 'UNK': 'Kosovo', 'CUW': 'Curaçao', 'GIB': 'Gibraltar', 'HKG': 'Hong Kong', 'TWN': 'Taiwan', 'SSD': 'South Sudan', 'COD': 'Democratic Republic of the Congo',

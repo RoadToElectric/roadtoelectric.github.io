@@ -191,7 +191,7 @@
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="assets/energy-mix-data.js"></script>
+<script src="assets/energy-mix-data.js?v=2"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/filter-memory.js?v=5"></script>
 <script>
@@ -217,10 +217,10 @@ const METRICS = {
   elRen:    { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', REN, i) / t : null; }, label: 'Renewable share of electricity', unit: '%', color: '#14b8a6' },
   elNuc:    { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['nuclear'], i) / t : null; }, label: 'Nuclear share of electricity', unit: '%', color: '#a855f7' },
   elWind:   { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['wind', 'solar'], i) / t : null; }, label: 'Wind + solar share of electricity', unit: '%', color: '#22d3ee' },
-  elCoal:   { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['coal'], i) / t : null; }, label: 'Coal share of electricity', unit: '%', color: '#4b5563' },
-  elFossil: { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', FOS, i) / t : null; }, label: 'Fossil share of electricity', unit: '%', color: '#92400e' },
+  elCoal:   { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['coal'], i) / t : null; }, label: 'Coal share of electricity', unit: '%', color: '#59606a' },
+  elFossil: { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', FOS, i) / t : null; }, label: 'Fossil share of electricity', unit: '%', color: '#2b2b2b' },
   elecFC:   { f: (a, i) => { const t = tot(a, 'tfc', i); return t > 0 ? 100 * part(a, 'tfc', ['elec'], i) / t : null; }, label: 'Electricity share of final consumption', unit: '%', color: '#0a80d0' },
-  fossilTES:{ f: (a, i) => { const t = tot(a, 'tes', i); return t > 0 ? 100 * part(a, 'tes', FOS, i) / t : null; }, label: 'Fossil share of total energy supply', unit: '%', color: '#92400e' },
+  fossilTES:{ f: (a, i) => { const t = tot(a, 'tes', i); return t > 0 ? 100 * part(a, 'tes', FOS, i) / t : null; }, label: 'Fossil share of total energy supply', unit: '%', color: '#2b2b2b' },
   elTWh:    { f: (a, i) => tot(a, 'el', i), label: 'Electricity generated', unit: ' TWh', color: '#0a80d0' },
   tesEJ:    { f: (a, i) => { const t = tot(a, 'tes', i); return t == null ? null : t / 1000; }, label: 'Total energy supply', unit: ' EJ', color: '#6b7280' }
 };
@@ -284,7 +284,7 @@ function renderKpis(){
   $('em-hero').innerHTML = `<div class="em-hero-h"><div><div class="em-eyebrow">${a.n} · ${st.year}${a.last && st.year >= a.last && a.last === Y1 ? '' : ''}</div><div class="em-hero-t">${a.k === 'country' ? flag(a) : ''} ${a.n}</div></div></div>` +
     `<div class="em-kpis big">` + kpiHTML([
       ['#6b7280', 'Total energy supply', t == null ? '–' : fmtN(t / 1000) + ' <small>EJ</small>', 'primary energy', t != null && t0 ? `${sgn(100 * (t / t0 - 1), 0, '%')} since 2000` : ''],
-      ['#92400e', 'Fossil fuels in supply', fmtP(m('fossilTES')), 'coal + oil + gas', dd('fossilTES')],
+      ['#2b2b2b', 'Fossil fuels in supply', fmtP(m('fossilTES')), 'coal + oil + gas', dd('fossilTES')],
       ['#16a34a', 'Low-carbon electricity', fmtP(m('elLow')), 'renewables + nuclear', dd('elLow')],
       ['#22d3ee', 'Wind + solar electricity', fmtP(m('elWind')), 'share of generation', dd('elWind')],
       ['#0a80d0', 'Electricity in final use', fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')]]) + '</div>';
@@ -294,9 +294,9 @@ function sectionKpis(){
   const dd = k => { const v = m(k), v0 = m0(k); return v == null || v0 == null ? '' : `${sgn(v - v0, 1, ' pts')} since 2000`; };
   const tw = tot(a, 'el', i);
   $('el-kpis').innerHTML = kpiHTML([['#16a34a', `Low-carbon · ${st.year}`, fmtP(m('elLow')), 'renewables + nuclear', dd('elLow')], ['#14b8a6', 'Renewables', fmtP(m('elRen')), 'hydro, wind, solar, bio, geothermal', dd('elRen')],
-    ['#92400e', 'Fossil', fmtP(m('elFossil')), 'coal, oil, gas', dd('elFossil')], ['#0a80d0', 'Generated', tw == null ? '–' : fmtN(tw) + ' <small>TWh</small>', 'all sources', '']]);
+    ['#2b2b2b', 'Fossil', fmtP(m('elFossil')), 'coal, oil, gas', dd('elFossil')], ['#0a80d0', 'Generated', tw == null ? '–' : fmtN(tw) + ' <small>TWh</small>', 'all sources', '']]);
   const fs = tot(a, 'tfc', i), ev = part(a, 'tfc', ['elec'], i), oil = part(a, 'tfc', ['oil'], i);
-  $('fc-kpis').innerHTML = kpiHTML([['#0a80d0', `Electricity · ${st.year}`, fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')], ['#92400e', 'Oil products', fs ? fmtP(100 * oil / fs) : '–', 'transport, industry, petrochemicals', ''],
+  $('fc-kpis').innerHTML = kpiHTML([['#0a80d0', `Electricity · ${st.year}`, fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')], ['#111111', 'Oil products', fs ? fmtP(100 * oil / fs) : '–', 'transport, industry, petrochemicals', ''],
     ['#6b7280', 'Final consumption', fs == null ? '–' : fmtN(fs / 1000) + ' <small>EJ</small>', 'all energy used by end users', '']]);
 }
 
