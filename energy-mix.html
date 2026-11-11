@@ -28,6 +28,7 @@
   .em-kpi .v{ font-size:24px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .em-kpi .v small{ font-size:13px; font-weight:700; opacity:.7; margin-left:3px; }
   .em-kpi .s{ font-size:12px; color:var(--text-muted); } .em-kpis.big .em-kpi .s{ color:#cfe3f5; }
+  .em-kpi .rkl{ display:flex; flex-wrap:wrap; gap:2px 10px; margin-top:5px; padding-top:5px; border-top:1px solid rgba(128,128,128,.25); font-size:11.5px; font-weight:700; color:var(--text-muted); } .em-kpis.big .em-kpi .rkl{ color:#cfe3f5; border-top-color:rgba(255,255,255,.18); } .em-kpi .rkl b{ color:var(--text); } .em-kpis.big .em-kpi .rkl b{ color:#fff; }
   .em-kpi .d{ font-size:11.5px; font-weight:800; margin-top:2px; color:var(--accent); } .em-kpis.big .em-kpi .d{ color:#8fe3ff; }
   .em-filters{ display:grid; gap:8px; margin:6px 0 10px; }
   .em-frow{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; }
@@ -281,7 +282,21 @@ function stacked(boxId, legId, sec, mode){
 }
 
 // ---------- KPI cards ----------
-function kpiHTML(list){ return list.map(([c, t, v, s, d]) => `<div class="em-kpi" style="--c:${c}"><div class="t">${t}</div><div class="v">${v}</div><div class="s">${s}</div>${d ? `<div class="d">${d}</div>` : ''}</div>`).join(''); }
+function kpiHTML(list){ return list.map(([c, t, v, s, d, r]) => `<div class="em-kpi" style="--c:${c}"><div class="t">${t}</div><div class="v">${v}</div><div class="s">${s}</div>${d ? `<div class="d">${d}</div>` : ''}${r ? `<div class="rkl">${r}</div>` : ''}</div>`).join(''); }
+// countries ranked on a metric; a country that has not published the year is ranked on its latest earlier year (up to 3 back), yr = the year used
+function rankRows(mk, yr, min){
+  const M = METRICS[mk], i = yi(yr);
+  return E.areas.filter(a => a.k === 'country').map(a => { for(let g = 0; g < 4 && i - g >= 0; g++){ const v = M.f(a, i - g); if(v != null) return { a, v, el: tot(a, 'el', i - g), yr: yr - g }; } return { a, v: null }; })
+    .filter(r => r.v != null && (min === 0 || (r.el != null && r.el >= min)));
+}
+// "#71 of 142 countries · 2024" for the area on screen (highest value = 1); regions only get the year
+function rankTag(mk){
+  const a = A.get(st.area), M = METRICS[mk], v = M.f(a, yi(st.year));
+  if(v == null) return '';
+  if(a.k !== 'country') return `<span>${st.year}</span>`;
+  const rows = rankRows(mk, st.year, 1).sort((x, y) => y.v - x.v), k = rows.findIndex(r => r.a.id === a.id);
+  return k < 0 ? `<span>${st.year}</span>` : `<span>🌍 <b>#${k + 1}</b> of ${rows.length} countries</span><span>${st.year}</span>`;
+}
 function renderKpis(){
   const a = A.get(st.area), i = yi(st.year), j = yi(2000);
   const m = k => METRICS[k].f(a, i), m0 = k => METRICS[k].f(a, j);
@@ -289,11 +304,11 @@ function renderKpis(){
   const t = tot(a, 'tes', i), t0 = tot(a, 'tes', j);
   $('em-hero').innerHTML = `<div class="em-hero-h"><div><div class="em-eyebrow">${a.n} · ${st.year}${a.last && st.year >= a.last && a.last === Y1 ? '' : ''}</div><div class="em-hero-t">${a.k === 'country' ? flag(a) : ''} ${a.n}</div></div></div>` +
     `<div class="em-kpis big">` + kpiHTML([
-      ['#6b7280', 'Total energy supply', t == null ? '–' : fmtN(t / 1000) + ' <small>EJ</small>', 'primary energy', t != null && t0 ? `${sgn(100 * (t / t0 - 1), 0, '%')} since 2000` : ''],
-      ['#2b2b2b', 'Fossil fuels in supply', fmtP(m('fossilTES')), 'coal + oil + gas', dd('fossilTES')],
-      ['#16a34a', 'Low-carbon electricity', fmtP(m('elLow')), 'renewables + nuclear', dd('elLow')],
-      ['#22d3ee', 'Wind + solar electricity', fmtP(m('elWind')), 'share of generation', dd('elWind')],
-      ['#0a80d0', 'Electricity in final use', fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')]]) + '</div>';
+      ['#6b7280', 'Total energy supply', t == null ? '–' : fmtN(t / 1000) + ' <small>EJ</small>', 'primary energy', t != null && t0 ? `${sgn(100 * (t / t0 - 1), 0, '%')} since 2000` : '', rankTag('tesEJ')],
+      ['#2b2b2b', 'Fossil fuels in supply', fmtP(m('fossilTES')), 'coal + oil + gas', dd('fossilTES'), rankTag('fossilTES')],
+      ['#16a34a', 'Low-carbon electricity', fmtP(m('elLow')), 'renewables + nuclear', dd('elLow'), rankTag('elLow')],
+      ['#22d3ee', 'Wind + solar electricity', fmtP(m('elWind')), 'share of generation', dd('elWind'), rankTag('elWind')],
+      ['#0a80d0', 'Electricity in final use', fmtP(m('elecFC')), 'share of final consumption', dd('elecFC'), rankTag('elecFC')]]) + '</div>';
 }
 function sectionKpis(){
   const a = A.get(st.area), i = yi(st.year), j = yi(2000), m = k => METRICS[k].f(a, i), m0 = k => METRICS[k].f(a, j);
@@ -310,15 +325,13 @@ function sectionKpis(){
 const RK = { metric: 'elLow', year: 2024, dir: 'hi', min: 1, n: 15, all: false };
 $('rk-year').innerHTML = d3.range(Y1, Y0 - 1, -1).map(y => `<option value="${y}"${y === 2024 ? ' selected' : ''}>${y}</option>`).join('');
 function renderBars(){
-  const M = METRICS[RK.metric], i = yi(RK.year);
-  // a country that has not published the chosen year yet is ranked on its latest earlier year (up to 3 years back), tagged with that year
-  const rowOf = a => { for(let g = 0; g < 4 && i - g >= 0; g++){ const v = M.f(a, i - g); if(v != null) return { a, v, el: tot(a, 'el', i - g), yr: RK.year - g }; } return { a, v: null }; };
-  let rows = E.areas.filter(a => a.k === 'country').map(rowOf).filter(r => r.v != null && (RK.min === 0 || (r.el != null && r.el >= RK.min)));
+  const M = METRICS[RK.metric];
+  let rows = rankRows(RK.metric, RK.year, RK.min);
   rows.sort((x, y) => RK.dir === 'hi' ? y.v - x.v : x.v - y.v);
   const nAll = rows.length; if(!RK.all) rows = rows.slice(0, RK.n);
   const mx = M.unit === '%' ? 100 : d3.max(rows, r => r.v) || 1, fmtV = v => M.unit === '%' ? fmtP(v) : fmtN(v) + M.unit;
   $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span>${r.yr !== RK.year ? `<small style="color:var(--text-muted);font-weight:600">${r.yr}</small>` : ''}</span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
-  $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { st.year = Math.min(RK.year, (A.get(b.dataset.id).last || RK.year)); setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const b = $('rk-more'); b.style.display = nAll > RK.n ? '' : 'none'; b.textContent = RK.all ? `Shrink to ${RK.n}` : `Show all ${nAll}`;
   $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${M.label.toLowerCase()}</b> in ${RK.year}, among the ${nAll} countries with data${rows.some(r => r.yr !== RK.year) ? ` (countries that have not yet published ${RK.year} are ranked on their latest earlier year, shown beside the name)` : ''}${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}. Click a row to open that country above.`;
 }
@@ -336,9 +349,9 @@ function evPoints(){
   E.areas.filter(a => a.k === 'country').forEach(a => {
     const rows = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[a.n]) || []; const r = rows.filter(q => q.period_type === 'ANNUAL' && q.year >= 2024 && q.total > 0 && q.bev != null).sort((p, q) => q.year - p.year)[0];
     if(!r || r.total < EV.min) return;
-    let gi = Math.min(yi(r.year), yi(a.last || r.year)), gx = null; for(let k = 0; k < 3 && gx == null && gi - k >= 0; k++) gx = METRICS[EV.x].f(a, gi - k);
+    let gi = Math.min(yi(r.year), yi(a.last || r.year)), gx = null; for(let k = 0; k < 3 && gx == null && gi - k >= 0; k++){ gx = METRICS[EV.x].f(a, gi - k); if(gx != null){ gi -= k; break; } }
     const el = tot(a, 'el', gi); if(gx == null || !el) return;
-    out.push({ a, x: gx, y: 100 * r.bev / r.total, cars: r.total, el, year: r.year });
+    out.push({ a, x: gx, y: 100 * r.bev / r.total, cars: r.total, el, year: r.year, gyear: Y0 + gi });
   });
   return out;
 }
@@ -357,12 +370,12 @@ function renderEv(){
   svg.append('text').attr('class', 'ut').attr('x', m.l + 4).attr('y', m.t + 8).text('↑ BEV share of new-car sales');
   const sorted = pts.slice().sort((p, q) => q.el - p.el);
   sorted.forEach(p => { svg.append('circle').attr('cx', x(p.x)).attr('cy', y(p.y)).attr('r', r(p.el)).attr('fill', METRICS.elLow.color).attr('fill-opacity', .35).attr('stroke', METRICS.elLow.color).attr('stroke-width', 1.2).style('cursor', 'pointer')
-    .on('pointermove', ev => tip(box, `<b>${p.a.n}</b><div class="r"><span>${METRICS[EV.x].label}</span><b>${fmtP(p.x)}</b></div><div class="r"><span>BEV share of new cars (${p.year})</span><b>${fmtP(p.y)}</b></div><div class="r"><span>New cars a year</span><b>${fmtN(p.cars)}</b></div><div class="r"><span>Electricity generated</span><b>${fmtN(p.el)} TWh</b></div>`, ev))
+    .on('pointermove', ev => tip(box, `<b>${p.a.n}</b><div class="r"><span>${METRICS[EV.x].label} (${p.gyear})</span><b>${fmtP(p.x)}</b></div><div class="r"><span>BEV share of new cars (${p.year})</span><b>${fmtP(p.y)}</b></div><div class="r"><span>New cars (${p.year})</span><b>${fmtN(p.cars)}</b></div><div class="r"><span>Electricity generated (${p.gyear})</span><b>${fmtN(p.el)} TWh</b></div>`, ev))
     .on('pointerleave', () => untip(box)).on('click', () => { setArea(p.a.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
   const lab = pts.slice().sort((p, q) => q.cars - p.cars).slice(0, nv.mobile ? 9 : 16);
   lab.forEach(p => svg.append('text').attr('x', x(p.x)).attr('y', y(p.y) - r(p.el) - 3).attr('text-anchor', 'middle').attr('class', 'pl').text(p.a.n.length > 14 ? p.a.n.slice(0, 13) + '…' : p.a.n));
   const n = pts.length, mx = d3.mean(pts, p => p.x), my = d3.mean(pts, p => p.y), cov = d3.sum(pts, p => (p.x - mx) * (p.y - my)), rr = cov / Math.sqrt(d3.sum(pts, p => (p.x - mx) ** 2) * d3.sum(pts, p => (p.y - my) ** 2));
-  $('ev-note').innerHTML = `Each bubble is a country: horizontal = ${METRICS[EV.x].label.toLowerCase()}, vertical = the share of new cars that are battery-electric (this site's latest full-year figure, 2024 or later), size = electricity generated. ${n} countries with at least ${fmtN(EV.min)} new cars a year. Correlation across these countries: <b>r = ${rr.toFixed(2)}</b> — ${Math.abs(rr) < .25 ? 'almost none: policy and prices matter more than the grid' : rr > 0 ? 'EVs sell somewhat more where the grid is cleaner' : 'EVs sell somewhat more where the grid is dirtier'} (a correlation is not a cause). Click a bubble to open the country above.`;
+  $('ev-note').innerHTML = `Each bubble is a country: horizontal = ${METRICS[EV.x].label.toLowerCase()}, vertical = the share of new cars that are battery-electric (this site's latest full-year figure, 2024 or later), size = electricity generated. The year of each figure is shown in brackets in the pop-up: the grid figure is the same year as the car sales when the IEA has published it, otherwise the latest earlier year (up to 3 years back). ${n} countries with at least ${fmtN(EV.min)} new cars a year. Correlation across these countries: <b>r = ${rr.toFixed(2)}</b> — ${Math.abs(rr) < .25 ? 'almost none: policy and prices matter more than the grid' : rr > 0 ? 'EVs sell somewhat more where the grid is cleaner' : 'EVs sell somewhat more where the grid is dirtier'} (a correlation is not a cause). Click a bubble to open the country above.`;
   $('ev-leg').innerHTML = '<span><i style="background:#16a34a;opacity:.5"></i>one country · size = electricity generated</span>';
 }
 $('ev-x').addEventListener('change', e => { EV.x = e.target.value; renderEv(); });
