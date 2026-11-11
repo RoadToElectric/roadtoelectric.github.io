@@ -58,6 +58,7 @@
   .em-brow .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
   @media (max-width:700px){ .em-brow{ grid-template-columns:22px minmax(90px,150px) 1fr 80px; } }
   .em-more{ text-align:center; margin:10px 0 2px; } .em-mini{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:9px; padding:7px 18px; font:inherit; font-size:12px; font-weight:800; cursor:pointer; } .em-mini:hover{ border-color:var(--accent); color:var(--accent); }
+  #rk-f .em-frow{ gap:6px 10px; } #rk-f .em-sel{ max-width:215px; padding:6px 8px; } #rk-f .em-seg button{ padding:7px 9px; }
   .em-load{ color:var(--text-muted); font-size:13px; padding:30px 0; text-align:center; }
   .em-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .em-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .em-method li{ margin:5px 0; }
 </style>
@@ -138,10 +139,10 @@
             </select>
             <label class="em-fl" for="rk-where" style="min-width:0">Where</label><select class="em-sel" id="rk-where"></select>
             <label class="em-fl" for="rk-year" style="min-width:0">Year</label><select class="em-sel" id="rk-year"></select>
-            <label class="em-fl" for="rk-dir" style="min-width:0">Order</label><div class="em-seg" id="rk-dir"><button type="button" data-v="hi" class="active">Highest first</button><button type="button" data-v="lo">Lowest first</button></div>
-            <span id="rk-unit-w" style="display:none"><label class="em-fl" for="rk-unit" style="min-width:0">Show</label> <div class="em-seg" id="rk-unit"><button type="button" data-v="abs" class="active">EJ</button><button type="button" data-v="share">% of world</button></div></span></div>
+            <label class="em-fl" for="rk-dir" style="min-width:0">Order</label><div class="em-seg" id="rk-dir"><button type="button" data-v="hi" class="active">Highest first</button><button type="button" data-v="lo">Lowest first</button></div></div>
           <div class="em-frow"><label class="em-fl" for="rk-min">Ignore areas under</label><select class="em-sel" id="rk-min"><option value="0">no limit</option><option value="1" selected>1 TWh of electricity</option><option value="10">10 TWh of electricity</option><option value="50">50 TWh of electricity</option></select>
-            <label class="em-fl" for="rk-n" style="min-width:0">Show</label><select class="em-sel" id="rk-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select></div>
+            <label class="em-fl" for="rk-n" style="min-width:0">Rows</label><select class="em-sel" id="rk-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select>
+            <span id="rk-unit-w" style="display:none;margin-left:auto"><label class="em-fl" for="rk-unit" style="min-width:0">Show</label> <div class="em-seg" id="rk-unit"><button type="button" data-v="abs" class="active">EJ</button><button type="button" data-v="share">% of world</button></div></span></div>
         </div>
         <div class="em-bars" id="rk-bars"></div>
         <div class="em-more"><button type="button" class="em-mini" id="rk-more"></button></div>
