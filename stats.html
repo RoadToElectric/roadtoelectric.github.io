@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
 <style>
-  /* private stats page: not linked from the site, nothing is shown without the passphrase (assets/page-views.js writes the visits, the database function site_stats checks the passphrase) */
+  /* private stats page: not linked from the site, nothing is shown without the passphrase (assets/page-views.js adds the counters, the database function site_stats checks the passphrase) */
   body{ margin:0; background:var(--bg); color:var(--text); }
   .st{ max-width:1040px; margin:0 auto; padding:18px 16px 48px; }
   .st h1{ font-size:22px; margin:0; font-weight:900; letter-spacing:-.01em; }
@@ -20,7 +20,7 @@
   .st-card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow); }
   .st-card h2{ font-size:15px; margin:0 0 4px; font-weight:800; }
   .st-note{ font-size:12.5px; color:var(--text-muted); margin:0 0 12px; line-height:1.45; }
-  .st-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+  .st-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:14px; }
   .st-kpi{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
   .st-kpi .l{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
   .st-kpi .v{ font-size:26px; font-weight:900; font-variant-numeric:tabular-nums; margin-top:2px; }
@@ -30,7 +30,7 @@
   .st-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px; padding:6px 12px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
   .st-btn.on, .st-btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
   .st-err{ color:var(--accent-strong); font-size:13px; font-weight:700; min-height:18px; }
-  .st-cols{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  .st-cols{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-bottom:14px; }
   .st-cols > .st-card{ margin-bottom:0; }
   table.st-t{ width:100%; border-collapse:collapse; font-size:13px; }
   .st-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:4px 6px; border-bottom:1px solid var(--border); }
@@ -45,8 +45,8 @@
   .st-leg{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:12.5px; }
   .st-leg b{ font-variant-numeric:tabular-nums; }
   .st-leg i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; }
-  #st-days svg{ width:100%; height:auto; display:block; }
-  #st-days text{ fill:var(--text-muted); font-size:10px; }
+  #days-chart svg{ width:100%; height:auto; display:block; }
+  #days-chart text{ fill:var(--text-muted); font-size:10px; }
   .st-muted{ color:var(--text-muted); }
 </style>
 </head>
@@ -58,7 +58,7 @@
       <button type="button" class="st-btn" data-days="7">7 days</button>
       <button type="button" class="st-btn" data-days="30">30 days</button>
       <button type="button" class="st-btn" data-days="90">90 days</button>
-      <button type="button" class="st-btn" data-days="0" title="Every month since the start (daily detail is kept for 90 days, older months are kept as monthly numbers)">All · monthly</button>
+      <button type="button" class="st-btn" data-days="0" title="Every month since the start (daily numbers are kept for 90 days, older months only as monthly numbers)">All · monthly</button>
       <button type="button" class="st-btn" id="st-refresh" title="Load the numbers again">↻</button>
       <button type="button" class="st-btn" id="st-lock" title="Forget the passphrase on this device">Lock</button>
     </div>
@@ -76,39 +76,44 @@
   <div id="dash" hidden>
     <div class="st-kpis" id="kpis"></div>
 
-    <section class="st-card" id="st-days">
+    <section class="st-card">
       <h2 id="days-title">Views per day</h2>
       <p class="st-note" id="days-note"></p>
       <div id="days-chart"></div>
+      <div class="st-leg" style="margin-top:6px"><span><i style="background:#2fae4e"></i>Mobile view</span><span><i style="background:#0a80d0"></i>Desktop view</span><span><i style="background:var(--border)"></i>Mode not recorded (before the breakdown started)</span></div>
     </section>
+
+    <div class="st-cols">
+      <section class="st-card">
+        <h2>Per year</h2>
+        <p class="st-note">Views and the share seen in the mobile view.</p>
+        <div id="years"></div>
+      </section>
+      <section class="st-card">
+        <h2>Reading mode</h2>
+        <p class="st-note">The view the page was shown in: the site's own mobile / desktop view (a phone that chose the desktop view counts as desktop).</p>
+        <div id="mode"></div>
+      </section>
+    </div>
 
     <section class="st-card">
       <h2>Pages</h2>
-      <p class="st-note">Views in the period, and the share of them seen in the mobile view (from the detailed log).</p>
+      <p class="st-note">Views in the period, and the share of them seen in the mobile view.</p>
       <div id="pages"></div>
     </section>
 
     <div class="st-cols">
       <section class="st-card">
-        <h2>Reading mode</h2>
-        <p class="st-note">The view the page was shown in: the site's own mobile / desktop view (a phone that chose the desktop view counts as desktop).</p>
-        <div id="mode"></div>
-        <h2 style="margin-top:16px">Device</h2>
-        <p class="st-note">What the reader holds: phone and tablet are touch screens, the rest a mouse and keyboard.</p>
-        <div id="device"></div>
+        <h2>Countries</h2>
+        <p class="st-note">Read from the request by the database, the IP address itself is never stored.</p>
+        <div id="countries"></div>
       </section>
       <section class="st-card">
-        <h2>Where they come from</h2>
-        <p class="st-note">Websites that sent the reader here (direct visits and your own pages are not listed).</p>
-        <div id="refs"></div>
+        <h2>States and provinces</h2>
+        <p class="st-note" id="regions-note"></p>
+        <div id="regions"></div>
       </section>
     </div>
-
-    <section class="st-card" style="margin-top:14px">
-      <h2>Countries</h2>
-      <p class="st-note">Read from the request by the database, the IP address itself is never stored.</p>
-      <div id="countries"></div>
-    </section>
 
     <p class="st-note" id="foot"></p>
   </div>
@@ -121,6 +126,7 @@
   var PAGES = { 'index.html':'Home', 'powertrain-mix-by-country.html':'Mix by Country', 'manufacturers.html':'Manufacturers', 'world-car-sales.html':'World Car Sales', 'biggest-movers.html':'Biggest Movers',
     'charging-stations.html':'Charging Stations', 'ev-trucking.html':'EV Trucking', 'world-oil.html':'World Oil', 'world-population.html':'World Population', 'population-energy.html':'Population & Energy',
     'energy-mix.html':'Energy Mix', 'country.html':'Country', 'contact.html':'Contact', 'comments.html':'Comments', 'powertrain-mix-by-country-copy.html':'Mix by Country (copy)' };
+  var MODE = { mobile:'#2fae4e', desktop:'#0a80d0' };
   var $ = function(id){ return document.getElementById(id); };
   var key = '', days = 30, timer = null;
   try{ key = localStorage.getItem('rte-stats-key') || ''; days = +localStorage.getItem('rte-stats-days'); if([0, 7, 30, 90].indexOf(days) < 0) days = 30; }catch(e){}
@@ -129,6 +135,7 @@
   var pct = function(a, b){ return b ? Math.round(1000 * a / b) / 10 : 0; };
   var names = null; try{ names = new Intl.DisplayNames(['en'], { type:'region' }); }catch(e){}
   var cname = function(c){ if(c === '??') return 'Unknown'; try{ return (names && names.of(c)) || c; }catch(e){ return c; } };
+  var mob = function(m, known){ return known ? pct(m, known) + '%' : '—'; };
 
   function load(){
     $('err').textContent = '';
@@ -145,67 +152,66 @@
     try{ localStorage.removeItem('rte-stats-key'); }catch(e){}
     key = ''; $('dash').hidden = true; $('st-bar').hidden = true; $('lock').hidden = false; $('err').textContent = msg || ''; clearInterval(timer);
   }
-  function rows(list, max, f){ return list.map(function(r){ return f(r, max ? Math.max(2, 100 * r.views / max) : 0); }).join(''); }
 
   function show(d){
     $('lock').hidden = true; $('dash').hidden = false; $('st-bar').hidden = false;
     document.querySelectorAll('#st-bar [data-days]').forEach(function(b){ b.classList.toggle('on', +b.dataset.days === days); });
-    var t = d.totals, det = d.detail, inPeriod = (d.days <= 0 ? d.by_month : d.by_day).reduce(function(s, x){ return s + x.views; }, 0);
-    $('kpis').innerHTML = [['Today', t.today, ''], ['Yesterday', t.yesterday, ''], ['Last 7 days', t.last7, ''], ['Last 30 days', t.last30, ''], ['All time', t.all, 'since ' + (t.since || '—')],
-      ['Visits in period', det.sessions, 'browser sessions, detailed log']].map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v">' + fmt(k[1]) + '</div><div class="s">' + esc(k[2] || ' ') + '</div></div>'; }).join('');
+    var t = d.totals, det = d.detail, monthly = d.days <= 0, series = monthly ? d.by_month : d.by_day, inPeriod = series.reduce(function(s, x){ return s + x.views; }, 0);
+    $('kpis').innerHTML = [['Today', t.today, ''], ['Yesterday', t.yesterday, ''], ['Last 7 days', t.last7, ''], ['Last 30 days', t.last30, ''], ['This year', t.this_year, ''], ['All time', t.all, 'since ' + (t.since ? t.since.slice(0, 7) : '—')]]
+      .map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v">' + fmt(k[1]) + '</div><div class="s">' + esc(k[2] || ' ') + '</div></div>'; }).join('');
 
-    // views per day (7 / 30 / 90 days) or per month ("All": daily detail is kept for 90 days, older months only as monthly numbers)
-    var monthly = d.days <= 0, list = [];
+    // views per day (7 / 30 / 90 days) or per month ("All": daily numbers are kept for 90 days, older months only as monthly numbers); each bar: mobile / desktop / not recorded
+    var list = [];
     if(monthly){
-      list = d.by_month.map(function(x){ return { day:x.month.slice(0, 7), v:x.views, unit:'month' }; });
+      list = series.map(function(x){ return { label:x.month.slice(0, 7), v:x.views, m:x.mobile, k:x.known }; });
     } else {
-      var map = {}; d.by_day.forEach(function(x){ map[x.day] = x.views; });
-      var start = new Date(d.from + 'T12:00:00'), end = new Date(d.today + 'T12:00:00');
-      for(var c = new Date(start); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10); list.push({ day:k, v:map[k] || 0, unit:'day' }); }
+      var map = {}; series.forEach(function(x){ map[x.day] = x; });
+      for(var c = new Date(d.from + 'T12:00:00'), end = new Date(d.today + 'T12:00:00'); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10), x = map[k]; list.push({ label:k, v:x ? x.views : 0, m:x ? x.mobile : 0, k:x ? x.known : 0 }); }
     }
-    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }).concat([0]))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '';
-    var step = Math.ceil(list.length / 12);
+    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }).concat([0]))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '', step = Math.ceil(list.length / 12), plot = H - 26;
     list.forEach(function(x, i){
-      var h = Math.round((H - 26) * x.v / max), xx = pad + i * bw;
-      svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - 18 - h) + '" width="' + Math.max(1, bw - 2).toFixed(1) + '" height="' + h + '" rx="2" fill="var(--accent)"><title>' + x.day + ': ' + fmt(x.v) + ' views</title></rect>';
-      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + (monthly ? x.day : x.day.slice(5)) + '</text>';
+      var xx = pad + i * bw, w = Math.max(1, bw - 2).toFixed(1), unk = Math.max(0, x.v - x.k), desk = Math.max(0, x.k - x.m), y = H - 18, tip = '<title>' + x.label + ': ' + fmt(x.v) + ' views' + (x.k ? ' (' + fmt(x.m) + ' mobile, ' + fmt(desk) + ' desktop)' : '') + '</title>';
+      [[x.m, MODE.mobile], [desk, MODE.desktop], [unk, 'var(--border)']].forEach(function(p){ if(p[0] > 0){ var h = Math.max(1, Math.round(plot * p[0] / max)); y -= h; svg += '<rect x="' + xx.toFixed(1) + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + p[1] + '">' + tip + '</rect>'; } });
+      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + (monthly ? x.label : x.label.slice(5)) + '</text>';
     });
     svg += '<text x="0" y="12">' + fmt(max) + '</text><text x="0" y="' + (H - 18) + '">0</text>';
     $('days-chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + (monthly ? 'Views per month' : 'Views per day') + '">' + svg + '</svg>';
     $('days-title').textContent = monthly ? 'Views per month' : 'Views per day';
-    $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session (a reader who opens three pages makes three views and one visit). ' +
-      (monthly ? 'Daily detail is kept for 90 days; a month older than that is kept as one monthly number.' : 'Days are Toronto days.');
+    $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session. ' + (monthly ? 'Daily numbers are kept for 90 days; a month older than that is kept as one monthly number.' : 'Days are Toronto days.');
+
+    // per year
+    $('years').innerHTML = '<table class="st-t"><thead><tr><th>Year</th><th class="n">Views</th><th class="n">Mobile view</th></tr></thead><tbody>' +
+      d.by_year.slice().reverse().map(function(y){ return '<tr><td>' + esc(y.year.slice(0, 4)) + '</td><td class="n">' + fmt(y.views) + '</td><td class="n">' + mob(y.mobile, y.known) + '</td></tr>'; }).join('') + '</tbody></table>';
+
+    // reading mode
+    var by = {}; det.by_mode.forEach(function(x){ by[x.k] = x; });
+    var tot = ['mobile', 'desktop'].reduce(function(s, k){ return s + (by[k] ? by[k].views : 0); }, 0), labels = { mobile:'Mobile view', desktop:'Desktop view' };
+    $('mode').innerHTML = !tot ? '<p class="st-note">No recorded views in this period yet.</p>' :
+      '<div class="st-split">' + ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<i style="width:' + pct(by[k].views, tot) + '%;background:' + MODE[k] + '" title="' + labels[k] + '"></i>'; }).join('') + '</div><div class="st-leg">' +
+      ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<span><i style="background:' + MODE[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views</span></span>'; }).join('') + '</div>';
 
     // pages
     var pm = {}; det.by_page.forEach(function(x){ pm[x.page] = x; });
     var pmax = d.by_page.length ? d.by_page[0].views : 0;
-    $('pages').innerHTML = '<table class="st-t"><thead><tr><th>Page</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Mobile view</th></tr></thead><tbody>' +
+    $('pages').innerHTML = d.by_page.length ? '<table class="st-t"><thead><tr><th>Page</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Mobile view</th></tr></thead><tbody>' +
       d.by_page.map(function(p){ var m = pm[p.page]; return '<tr><td>' + esc(PAGES[p.page] || p.page) + ' <span class="st-muted">' + esc(p.page) + '</span></td><td class="n">' + fmt(p.views) + '</td><td class="n">' + pct(p.views, inPeriod) + '%</td>' +
-        '<td class="barw"><i class="bar" style="width:' + (pmax ? Math.max(2, 100 * p.views / pmax) : 0) + '%"></i></td><td class="n">' + (m && m.known ? pct(m.mobile, m.known) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>' + (d.by_page.length ? '' : '<p class="st-note">No views in this period yet.</p>');
-
-    // reading mode + device
-    var split = function(list, labels, colors){
-      var by = {}; list.forEach(function(x){ by[x.k] = x; });
-      var tot = Object.keys(labels).reduce(function(s, k){ return s + (by[k] ? by[k].views : 0); }, 0); if(!tot) return '<p class="st-note">No detailed visits in this period yet.</p>';       // visits from before the log (unknown mode) are left out
-      var keys = Object.keys(labels).filter(function(k){ return by[k]; });
-      return '<div class="st-split">' + keys.map(function(k){ return '<i style="width:' + pct(by[k].views, tot) + '%;background:' + colors[k] + '" title="' + labels[k] + '"></i>'; }).join('') + '</div><div class="st-leg">' +
-        keys.map(function(k){ return '<span><i style="background:' + colors[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views</span></span>'; }).join('') + '</div>';
-    };
-    $('mode').innerHTML = split(det.by_mode, { mobile:'Mobile view', desktop:'Desktop view' }, { mobile:'#2fae4e', desktop:'#0a80d0' });
-    $('device').innerHTML = split(det.by_device, { phone:'Phone', tablet:'Tablet', desktop:'Desktop' }, { phone:'#2fae4e', tablet:'#f4a742', desktop:'#0a80d0' });
-
-    // referrers
-    $('refs').innerHTML = det.by_referrer.length ? '<table class="st-t"><tbody>' + det.by_referrer.map(function(r){ return '<tr><td>' + esc(r.k) + '</td><td class="n">' + fmt(r.views) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="st-note">None yet: every visit so far came directly or from the site itself.</p>';
+        '<td class="barw"><i class="bar" style="width:' + (pmax ? Math.max(2, 100 * p.views / pmax) : 0) + '%"></i></td><td class="n">' + (m ? mob(m.mobile, m.known) : '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="st-note">No views in this period yet.</p>';
 
     // countries
     var cmax = det.by_country.length ? det.by_country[0].views : 0, ctot = det.by_country.reduce(function(s, x){ return s + x.views; }, 0);
-    $('countries').innerHTML = det.by_country.length ? '<table class="st-t"><thead><tr><th>Country</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Visits</th><th class="n">Mobile view</th></tr></thead><tbody>' +
+    $('countries').innerHTML = det.by_country.length ? '<table class="st-t"><thead><tr><th>Country</th><th class="n">Views</th><th class="n">Share</th><th></th><th class="n">Mobile view</th></tr></thead><tbody>' +
       det.by_country.map(function(r){ var flag = r.k === '??' ? '' : '<img class="st-flag" alt="" loading="lazy" src="https://flagcdn.com/24x18/' + esc(r.k.toLowerCase()) + '.png">';
-        return '<tr><td>' + flag + esc(cname(r.k)) + '</td><td class="n">' + fmt(r.views) + '</td><td class="n">' + pct(r.views, ctot) + '%</td><td class="barw"><i class="bar" style="width:' + Math.max(2, 100 * r.views / cmax) + '%"></i></td><td class="n">' + fmt(r.sessions) + '</td><td class="n">' + (r.known ? pct(r.mobile, r.known) + '%' : '—') + '</td></tr>'; }).join('') + '</tbody></table>'
-      : '<p class="st-note">No detailed visits in this period yet.</p>';
+        return '<tr><td>' + flag + esc(cname(r.k)) + '</td><td class="n">' + fmt(r.views) + '</td><td class="n">' + pct(r.views, ctot) + '%</td><td class="barw"><i class="bar" style="width:' + Math.max(2, 100 * r.views / cmax) + '%"></i></td><td class="n">' + mob(r.mobile, r.known) + '</td></tr>'; }).join('') + '</tbody></table>'
+      : '<p class="st-note">No recorded views in this period yet.</p>';
 
-    $('foot').textContent = 'Detailed log (country, mode, device, referrers) starts ' + (det.since ? new Date(det.since).toISOString().slice(0, 10) : 'with the first visit') + '; the totals and the pages above also include earlier visits. ' +
-      'Daily detail is kept for 90 days; older months are kept as monthly numbers. Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
+    // states / provinces
+    $('regions-note').textContent = det.by_region.length ? 'Country › state or province, from the request.' : 'Not available yet: the request only carries the country. A state or province needs a location lookup, which is not set up.';
+    var rmax = det.by_region.length ? det.by_region[0].views : 0;
+    $('regions').innerHTML = det.by_region.length ? '<table class="st-t"><thead><tr><th>Place</th><th class="n">Views</th><th></th><th class="n">Mobile view</th></tr></thead><tbody>' +
+      det.by_region.map(function(r){ return '<tr><td>' + esc(cname(r.country)) + ' › ' + esc(r.region) + '</td><td class="n">' + fmt(r.views) + '</td><td class="barw"><i class="bar" style="width:' + Math.max(2, 100 * r.views / rmax) + '%"></i></td><td class="n">' + mob(r.mobile, r.known) + '</td></tr>'; }).join('') + '</tbody></table>' : '';
+
+    $('foot').textContent = 'Totals and pages go back to ' + (t.since ? t.since.slice(0, 7) : 'the first visit') + '; the mobile / desktop and country breakdown starts ' + (det.since || 'with the first visit') + '. Daily numbers are kept for 90 days, older months as monthly numbers. ' +
+      'Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
     clearInterval(timer); timer = setInterval(function(){ if(!document.hidden && key) load(); }, 60000);
   }
 
