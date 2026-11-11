@@ -40,7 +40,7 @@
   .em-range{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-muted); } .em-range input{ width:160px; accent-color:var(--accent); } .em-range b{ color:var(--text); min-width:34px; font-variant-numeric:tabular-nums; }
   .em-chart{ position:relative; width:100%; } .em-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
   .em-chart text{ fill:var(--text-muted); font-size:11px; } .em-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; } .em-chart .ax path, .em-chart .ax line{ stroke:var(--border); }
-  .em-chart text.ut{ font-weight:800; font-size:11px; } .em-chart text.pl{ font-size:10px; font-weight:700; fill:var(--text); text-anchor:middle; }
+  .em-chart text.ut{ font-weight:800; font-size:11px; } .em-chart text.pl{ font-size:10px; font-weight:700; fill:var(--text); stroke:var(--surface); stroke-width:3px; paint-order:stroke; stroke-linejoin:round; }
   .em-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.45; min-width:210px; transition:opacity .1s; }
   .em-tip .r{ display:flex; justify-content:space-between; gap:14px; } .em-tip .r i{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
   .em-chip{ appearance:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:4px 11px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
@@ -381,7 +381,7 @@ function renderEv(){
   const box = $('ev-chart'); box.innerHTML = '<svg class="chart"></svg><div class="em-tip"></div>';
   const pts = evPoints(), svgEl = box.querySelector('svg');
   if(pts.length < 4){ box.innerHTML = '<div class="em-load">Not enough countries with both series.</div>'; return; }
-  const nv = nativeSize(svgEl, 900, 480, { h: 400 }), W = nv.W, H = nv.H, m = nv.mobile ? { t: 12, r: 12, b: 42, l: 40 } : { t: 16, r: 24, b: 48, l: 58 };
+  const nv = nativeSize(svgEl, 900, 600, { h: 400 }), W = nv.W, H = nv.H, m = nv.mobile ? { t: 12, r: 12, b: 42, l: 40 } : { t: 16, r: 24, b: 48, l: 58 };
   const x = d3.scaleLinear([0, 100], [m.l, W - m.r]), ymax = Math.max(10, Math.ceil(d3.max(pts, p => p.y) / 10) * 10), y = d3.scaleLinear([0, ymax], [H - m.b, m.t]);
   const r = d3.scaleSqrt([0, d3.max(pts, p => p.el)], [3, nv.mobile ? 20 : 30]), svg = d3.select(svgEl);
   x.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('y1', m.t).attr('y2', H - m.b).attr('x1', x(t)).attr('x2', x(t)));
@@ -394,8 +394,24 @@ function renderEv(){
   sorted.forEach(p => { svg.append('circle').attr('cx', x(p.x)).attr('cy', y(p.y)).attr('r', r(p.el)).attr('fill', METRICS.elLow.color).attr('fill-opacity', .35).attr('stroke', METRICS.elLow.color).attr('stroke-width', 1.2).style('cursor', 'pointer')
     .on('pointermove', ev => tip(box, `<b>${p.a.n}</b><div class="r"><span>${METRICS[EV.x].label} (${p.gyear})</span><b>${fmtP(p.x)}</b></div><div class="r"><span>BEV share of new cars (${p.year})</span><b>${fmtP(p.y)}</b></div><div class="r"><span>New cars (${p.year})</span><b>${fmtN(p.cars)}</b></div><div class="r"><span>Electricity generated (${p.gyear})</span><b>${fmtN(p.el)} TWh</b></div>`, ev))
     .on('pointerleave', () => untip(box)).on('click', () => { setArea(p.a.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
-  const lab = pts.slice().sort((p, q) => q.cars - p.cars).slice(0, nv.mobile ? 9 : 16);
-  lab.forEach(p => svg.append('text').attr('x', x(p.x)).attr('y', y(p.y) - r(p.el) - 3).attr('text-anchor', 'middle').attr('class', 'pl').text(p.a.n.length > 14 ? p.a.n.slice(0, 13) + '…' : p.a.n));
+  // every country is named: the biggest markets get the larger type, the small ones a smaller one. Each name takes the free spot closest to its bubble (around it first, then further out with a thin line back to the bubble)
+  const placed = [], hit = (b, o) => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0;
+  const discs = pts.map(p => ({ p, x0: x(p.x) - r(p.el), x1: x(p.x) + r(p.el), y0: y(p.y) - r(p.el), y1: y(p.y) + r(p.el) }));
+  const DIRS = [[0, -1, 'middle'], [0, 1, 'middle'], [1, 0, 'start'], [-1, 0, 'end'], [.7, -.7, 'start'], [-.7, -.7, 'end'], [.7, .7, 'start'], [-.7, .7, 'end']];
+  pts.slice().sort((p, q) => q.cars - p.cars).forEach((p, rank) => {
+    const fs = rank < (nv.mobile ? 8 : 14) ? (nv.mobile ? 9 : 12) : (nv.mobile ? 7.5 : 9.5), nm = p.a.n.length > 16 ? p.a.n.slice(0, 15) + '…' : p.a.n, tw = nm.length * fs * .56, th = fs, rr = r(p.el), cx = x(p.x), cy = y(p.y);
+    let best = null;
+    [3, 14, 28, 46, 70].forEach((d, lv) => DIRS.forEach(([dx, dy, an]) => {
+      const px = cx + dx * (rr + d), py = cy + dy * (rr + d) + (dy > 0 ? th * .85 : dy === 0 ? th * .3 : 0);
+      const x0 = an === 'middle' ? px - tw / 2 : an === 'start' ? px : px - tw, bx = { x0, x1: x0 + tw, y0: py - th * .85, y1: py + th * .2 };
+      const out = bx.x0 < 0 || bx.x1 > W || bx.y0 < 0 || bx.y1 > H ? 1000 : 0;
+      const cost = out + placed.filter(o => hit(bx, o)).length * 40 + discs.filter(q => q.p !== p && hit(bx, q)).length * 12 + lv * 3;
+      if(!best || cost < best.cost) best = { cost, px, py, an, bx, lv, dx, dy };
+    }));
+    placed.push(best.bx);
+    if(best.lv > 0) svg.append('line').attr('x1', cx + best.dx * rr).attr('y1', cy + best.dy * rr).attr('x2', best.px).attr('y2', best.py - th * .3).attr('stroke', '#94a3b8').attr('stroke-width', .7).style('pointer-events', 'none');
+    svg.append('text').attr('x', best.px).attr('y', best.py).attr('class', 'pl').style('text-anchor', best.an).style('font-size', fs + 'px').style('pointer-events', 'none').text(nm);
+  });
   const n = pts.length, mx = d3.mean(pts, p => p.x), my = d3.mean(pts, p => p.y), cov = d3.sum(pts, p => (p.x - mx) * (p.y - my)), rr = cov / Math.sqrt(d3.sum(pts, p => (p.x - mx) ** 2) * d3.sum(pts, p => (p.y - my) ** 2));
   $('ev-note').innerHTML = `Each bubble is a country: horizontal = ${METRICS[EV.x].label.toLowerCase()}, vertical = the share of new cars that are battery-electric (this site's latest full-year figure, 2024 or later), size = electricity generated. The year of each figure is shown in brackets in the pop-up: the grid figure is the same year as the car sales when the IEA has published it, otherwise the latest earlier year (up to 3 years back). ${n} countries with at least ${fmtN(EV.min)} new cars a year. Correlation across these countries: <b>r = ${rr.toFixed(2)}</b> — ${Math.abs(rr) < .25 ? 'almost none: policy and prices matter more than the grid' : rr > 0 ? 'EVs sell somewhat more where the grid is cleaner' : 'EVs sell somewhat more where the grid is dirtier'} (a correlation is not a cause). Click a bubble to open the country above.`;
   $('ev-leg').innerHTML = '<span><i style="background:#16a34a;opacity:.5"></i>one country · size = electricity generated</span>';
