@@ -115,6 +115,13 @@
       </section>
     </div>
 
+    <section class="st-card" id="x-card">
+      <h2>X posts <span class="st-muted" style="font-weight:600">@RoadToElectrik</span></h2>
+      <p class="st-note" id="x-note"></p>
+      <div id="x-kpis" class="st-kpis" style="margin-bottom:10px"></div>
+      <div id="x-posts"></div>
+    </section>
+
     <p class="st-note" id="foot"></p>
   </div>
 </main>
@@ -122,7 +129,7 @@
 <script>
 (function(){
   'use strict';
-  var RPC = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/site_stats', API = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP';
+  var RPC = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/site_stats', RPCX = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/x_stats', API = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP';
   var PAGES = { 'index.html':'Home', 'powertrain-mix-by-country.html':'Mix by Country', 'manufacturers.html':'Manufacturers', 'world-car-sales.html':'World Car Sales', 'biggest-movers.html':'Biggest Movers',
     'charging-stations.html':'Charging Stations', 'ev-trucking.html':'EV Trucking', 'world-oil.html':'World Oil', 'world-population.html':'World Population', 'population-energy.html':'Population & Energy',
     'energy-mix.html':'Energy Mix', 'country.html':'Country', 'contact.html':'Contact', 'comments.html':'Comments', 'powertrain-mix-by-country-copy.html':'Mix by Country (copy)' };
@@ -213,6 +220,25 @@
     $('foot').textContent = 'Totals and pages go back to ' + (t.since ? t.since.slice(0, 7) : 'the first visit') + '; the mobile / desktop and country breakdown starts ' + (det.since || 'with the first visit') + '. Daily numbers are kept for 90 days, older months as monthly numbers. ' +
       'Not counted: crawlers, localhost, and any browser where this page was unlocked (so your own visits stay out). Updated ' + new Date(d.generated).toLocaleTimeString() + '.';
     clearInterval(timer); timer = setInterval(function(){ if(!document.hidden && key) load(); }, 60000);
+    loadX();
+  }
+
+  // posts of the X account: snapshots of the public numbers, read from the account's page (see the note in the card)
+  function loadX(){
+    fetch(RPCX, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:API, Authorization:'Bearer ' + API }, body:JSON.stringify({ p_key:key }) })
+      .then(function(r){ return r.ok ? r.json() : null; }).then(function(x){ if(x && !x.error) showX(x); }).catch(function(){});
+  }
+  function showX(x){
+    var P = x.posts || [], sum = function(k){ return P.reduce(function(s, p){ return s + (p[k] || 0); }, 0); }, acc = x.account || [], a = acc[acc.length - 1] || {}, a0 = acc.length > 1 ? acc[acc.length - 2] : null;
+    var delta = function(now, prev){ return prev == null ? '' : (now - prev === 0 ? '' : ' <span class="' + (now - prev > 0 ? '' : 'st-muted') + '" style="color:' + (now - prev > 0 ? '#2fae4e' : 'inherit') + ';font-size:11px">' + (now - prev > 0 ? '+' : '') + fmt(now - prev) + '</span>'); };
+    $('x-note').textContent = P.length ? 'Public numbers of ' + P.length + ' posts, read from the account page by hand (not automatic): last reading ' + new Date(x.last_reading).toLocaleString() + ', ' + x.readings + ' reading' + (x.readings > 1 ? 's' : '') + '. The green figures are the change since the reading before. Ask Claude to read the page again to refresh.' : 'No reading yet.';
+    var views = sum('views'), eng = sum('likes') + sum('reposts') + sum('replies');
+    $('x-kpis').innerHTML = [['Followers', a.followers, a0 ? delta(a.followers, a0.followers) : ''], ['Posts read', P.length, ''], ['Views', views, delta(views, P.some(function(p){ return p.views_prev != null; }) ? P.reduce(function(s, p){ return s + (p.views_prev || 0); }, 0) : null)],
+      ['Likes', sum('likes'), ''], ['Reposts', sum('reposts'), ''], ['Replies', sum('replies'), ''], ['Engagement', views ? pct(eng, views) + '%' : '—', '']]
+      .map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v" style="font-size:22px">' + (typeof k[1] === 'number' ? fmt(k[1]) : (k[1] == null ? '—' : k[1])) + k[2] + '</div></div>'; }).join('');
+    $('x-posts').innerHTML = P.length ? '<table class="st-t"><thead><tr><th>Posted</th><th>Post</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Reposts</th><th class="n">Replies</th></tr></thead><tbody>' +
+      P.map(function(p){ return '<tr><td class="st-muted" style="white-space:nowrap">' + esc(new Date(p.posted_at).toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' + new Date(p.posted_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })) + '</td>' +
+        '<td><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(p.excerpt) + '…</a></td><td class="n">' + fmt(p.views) + delta(p.views, p.views_prev) + '</td><td class="n">' + fmt(p.likes) + delta(p.likes, p.likes_prev) + '</td><td class="n">' + fmt(p.reposts) + delta(p.reposts, p.reposts_prev) + '</td><td class="n">' + fmt(p.replies) + delta(p.replies, p.replies_prev) + '</td></tr>'; }).join('') + '</tbody></table>' : '';
   }
 
   $('go').addEventListener('click', function(){ key = $('key').value.trim(); if(key) load(); });
