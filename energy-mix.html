@@ -134,7 +134,7 @@
             <select class="em-sel" id="rk-metric">
               <option value="elLow">Low-carbon share of electricity</option><option value="elRen">Renewable share of electricity</option><option value="elNuc">Nuclear share of electricity</option>
               <option value="elWind">Wind + solar share of electricity</option><option value="elCoal">Coal share of electricity</option><option value="elFossil">Fossil share of electricity</option>
-              <option value="elecFC">Electricity share of final consumption</option><option value="fossilTES">Fossil share of total energy supply</option><option value="elTWh">Electricity generated (TWh)</option><option value="tesEJ">Total energy supply (EJ)</option><option value="tesPC">Total energy supply per person (GJ)</option>
+              <option value="elecFC">Electricity share of final consumption</option><option value="fossilTES">Fossil share of total energy supply</option><option value="elTWh">Electricity generated (TWh)</option><option value="tesEJ">Total energy supply (EJ)</option><option value="tesPC">Total energy supply per person (GJ)</option><option value="oilEJ">Oil supply (EJ)</option><option value="coalEJ">Coal supply (EJ)</option>
             </select>
             <label class="em-fl" for="rk-where" style="min-width:0">Where</label><select class="em-sel" id="rk-where"></select>
             <label class="em-fl" for="rk-year" style="min-width:0">Year</label><select class="em-sel" id="rk-year"></select>
@@ -231,6 +231,8 @@ const METRICS = {
   fossilTES:{ f: (a, i) => { const t = tot(a, 'tes', i); return t > 0 ? 100 * part(a, 'tes', FOS, i) / t : null; }, label: 'Fossil share of total energy supply', unit: '%', color: '#2b2b2b' },
   elTWh:    { f: (a, i) => tot(a, 'el', i), label: 'Electricity generated', unit: ' TWh', color: '#0a80d0' },
   tesEJ:    { f: (a, i) => { const t = tot(a, 'tes', i); return t == null ? null : t / 1000; }, label: 'Total energy supply', unit: ' EJ', color: '#6b7280' },
+  oilEJ:    { f: (a, i) => tot(a, 'tes', i) == null ? null : part(a, 'tes', ['oil'], i) / 1000, label: 'Oil supply', unit: ' EJ', color: '#111111' },
+  coalEJ:   { f: (a, i) => tot(a, 'tes', i) == null ? null : part(a, 'tes', ['coal'], i) / 1000, label: 'Coal supply', unit: ' EJ', color: '#59606a' },
   tesPC:    { f: (a, i) => { const t = tot(a, 'tes', i), p = a.pop && a.pop[i]; return t == null || !p ? null : t * 1e6 / p; }, label: 'Total energy supply per person', unit: ' GJ', color: '#6b7280' }   // PJ -> GJ per person
 };
 
@@ -331,7 +333,7 @@ function sectionKpis(){
 
 // ---------- ranking ----------
 const RK = { metric: 'elLow', where: 'all', year: 2024, dir: 'hi', min: 1, n: 15, all: false, share: false };
-const SHAREABLE = { tesEJ: 'EJ', elTWh: 'TWh' };   // absolute metrics that can also be shown as a share of the world total
+const SHAREABLE = { tesEJ: 'EJ', oilEJ: 'EJ', coalEJ: 'EJ', elTWh: 'TWh' };   // absolute metrics that can also be shown as a share of the world total
 $('rk-where').innerHTML = '<option value="all">World (all countries)</option><optgroup label="Regions">' + REGS.map(r => `<option value="r:${r}">${r}</option>`).join('') + '</optgroup><optgroup label="Subregions">' + SUBS.map(r => `<option value="s:${r}">${r}</option>`).join('') + '</optgroup>';
 $('rk-year').innerHTML = d3.range(Y1, Y0 - 1, -1).map(y => `<option value="${y}"${y === 2024 ? ' selected' : ''}>${y}</option>`).join('');
 function renderBars(){
