@@ -610,12 +610,14 @@ const MONTHLY_DATA = {
       // PROVISIONAL BEV/PHEV/HEV split: INEGI RAIAVL report of 2026-11-09 gives October 2026 sales of 137,395 (revised; +3.1% y/y, Jan-Oct 1,287,225) but the hybrid/electric breakdown exists only in the open-data CSV, still at September on 2026-11-10. BEV 2,651 / PHEV 3,472 / HEV 11,758 apply September's shares of the total (1.93% / 2.53% / 8.56%); petrol = remainder (diesel not published). REPLACE with the INEGI CSV figures when updated (the September CSV followed the press release by a few days).
       "Mexico": [2651,3472,11758,0,119514,0,137395],
       // PROVISIONAL: CPCA PRELIMINARY figures of 2026-11-04 via CnEVPost: passenger-vehicle retail 1,693,000 (-25% y/y), NEV retail 1,148,000 (penetration 67.8%). The BEV / PHEV(+EREV) split of the NEV is not published yet: it uses September's ratio (BEV 70.5% of NEV = 809,000; PHEV+EREV 339,000); petrol/ICE = total - NEV = 545,000. REPLACE with the CPCA final figures (CnEVPost final monthly article, ~8th-12th) when out.
-      "China": [770000,340000,0,0,533000,0,1643000]
+      "China": [770000,340000,0,0,533000,0,1643000],
+      // JADA registered passenger cars only (登録車), excludes kei-cars and commercial vehicles. Source: JADA fuel-type-by-manufacturer grid (燃料別メーカー別登録台数 Jan-Oct 2026 xlsx, sheet 2026年10月, published 2026-11-05), 乗用車計 row: gasoline 57,863, HEV 135,257, PHEV 5,584, diesel 5,282, EV 12,733, FCV 38 (others = FCV 38 + LPG/other 0); total 216,757.
+      "Japan": [12733,5584,135257,38,57863,5282,216757]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000},
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000}
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000,      "Japan":214454}
   },
   "2026-09": {
     label: "September 2026",
@@ -1823,7 +1825,7 @@ const MONTHLY_DATA = {
       // source: Vahan Dashboard, monthly, Jan-Aug 2026 summed
       "India": [257521,25,335636,942564,1735475,709350,3980571],
       // source: JADA — registered passenger cars only, excludes kei-cars (~35-40% of Japan's market) and commercial vehicles
-      "Japan": [82881,33792,1216604,374,573156,80561,1987368],
+      "Japan": [95614,39376,1351861,412,631019,85843,2204125],
       // source: FCAI (VFACTS) — light-vehicle market only (excludes heavy trucks/buses), Jan-Aug 2026 summed from monthly
       "Australia": [205384,97008,178502,0,293296,258363,1032553],
       // source: ANFAVEA — "Carta da Anfavea"; Brazil's dominant Flex-fuel (gasoline/ethanol) vehicles mapped into petrol
@@ -1898,7 +1900,7 @@ const MONTHLY_DATA = {
       "Colombia":"through Sep 2026",
       "Mexico":"through Oct 2026",
       "India":"through Sep 2026",
-      "Japan":"through Sep 2026",
+      "Japan":"through Oct 2026",
       "Australia":"through Oct 2026",
       "Brazil":"through Oct 2026",
       "Argentina":"through Jul 2026",
@@ -1947,7 +1949,8 @@ const MONTHLY_DATA = {
       "Singapore":16278,
       "Turkey":146773,
           "Bosnia-Herzegovina":46,
-      "Brazil":61532
+      "Brazil":61532,
+      "Japan": 31576
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
@@ -1965,7 +1968,8 @@ const MONTHLY_DATA = {
       "Singapore":37937,
       "Turkey":833382,
           "Bosnia-Herzegovina":8594,
-      "Brazil":2057270
+      "Brazil":2057270,
+      "Japan": 2149896
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -1999,7 +2003,7 @@ const MONTHLY_DATA = {
       "Iceland": [8004, 2389, 2724, 0, 661, 616, 14394],
       "Ireland": [43601, 23894, 38963, 729, 30628, 19332, 157147],
       "Italy": [132102, 166622, 828892, 94260, 353387, 108966, 1684229],
-      "Japan": [114734, 45363, 1623140, 531, 764208, 107415, 2655391],
+      "Japan": [118630, 48351, 1622233, 519, 757223, 103012, 2649968],
       "Latvia": [2823, 3422, 0, 653, 14619, 2589, 24106],
       "Lithuania": [4434, 6812, 25382, 898, 7969, 4303, 49798],
       "Luxembourg": [15487, 3082, 16291, 84, 11184, 3889, 50017],
