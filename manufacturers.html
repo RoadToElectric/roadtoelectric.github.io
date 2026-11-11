@@ -162,6 +162,9 @@
   .world-explain .we-list b{ color:var(--text); }
   .rank-row.is-sel{ background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:8px; box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent); }
   .map-svg .country.has-data{ cursor:pointer; }
+  .cont-chips{ display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 10px; }
+  .cont-chip{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text-muted); border-radius:999px; padding:4px 12px; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+  .cont-chip:hover{ border-color:var(--accent); color:var(--accent); } .cont-chip.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
   .ctry-sub-note{ margin:6px 0 2px; font-size:12px; color:var(--text-muted); }
   .bw-hr{ border:0; border-top:1px solid var(--border); margin:6px 0; }
   .bw-lg .bw-who{ font-weight:800; }
@@ -326,7 +329,7 @@
 
   <main class="main">
     <div class="content-with-filters">
-      <aside class="filters-panel mfr-side" data-rte-drawer="Filters" data-rte-summary="#f-period,#f-country,#f-mfr-search,#f-model-search">
+      <aside class="filters-panel mfr-side" data-rte-drawer="Filters" data-rte-summary="#f-period,#f-continent,#f-country,#f-mfr-search,#f-model-search">
       <section class="fx-panel mfr-filters" id="fx-panel">
         <div class="fx-head">
           <div class="fx-brand"><span class="fx-pulse"></span><div><div class="fx-kicker">Explore</div><div class="fx-title">Pick a brand or a model, or set two head to head</div></div></div>
@@ -335,6 +338,9 @@
               <select id="f-period" class="fx-select"></select>
             </label>
             <div class="mfr-tl" data-tl="chips"></div>
+            <label class="fx-field"><span class="fx-label">Continent</span>
+              <select id="f-continent" class="fx-select" title="Show one continent only: every card, the map and the country lists follow it. The Country list below then offers only that continent's countries."></select>
+            </label>
             <label class="fx-field"><span class="fx-label">Country</span>
               <select id="f-country" class="fx-select" title="Show one country only: the spotlight, the brand ranking and the yearly chart follow it. You can also click a country on the map."></select>
             </label>
@@ -522,6 +528,7 @@
         <h2 id="bars-title">Sales by country</h2>
         <div class="mfr-tl" data-tl="full"></div>
         <div class="cmp-bar hidden" data-cmpbar></div>
+        <div class="cont-chips" id="bars-cont" role="group" aria-label="Continent"></div>
         <p class="note" id="bars-note" style="display:block"></p>
         <div class="rank-rows-header">
           <span class="rrh-spacer"></span>
@@ -676,6 +683,10 @@ const classPass = r => !clsSel.size || clsSel.has(classOf(r));
 
 // ---------- data access ----------
 const COUNTRIES = [...new Set([...Object.keys(MANUFACTURER_MONTHLY), ...Object.keys(MANUFACTURER_YEARLY)])].sort();
+let cont = '';        // Continent filter: '' = every continent. Otherwise only that continent's countries feed every card, the map and the country list
+const scopedC = () => cont ? COUNTRIES.filter(c => continentOf(c) === cont) : COUNTRIES;
+const CONT_ORDER = ['EU', 'NAC', 'SA', 'ASIA', 'MIDEAST', 'AFRICA', 'OCEANIA', 'OTHER'];
+const contsPresent = () => CONT_ORDER.filter(k => COUNTRIES.some(c => continentOf(c) === k));
 const MONTHS = [...new Set(Object.values(MANUFACTURER_MONTHLY).flat().map(r => r.year_month))].sort().reverse();
 const YEARS = [...new Set(Object.values(MANUFACTURER_YEARLY).flat().map(r => r.year))].sort((a, b) => b - a);
 const CUR_YEAR = YEARS[0];
@@ -891,7 +902,7 @@ function readPeriod(){
 function buildMfrSelect(){
   // every entity with sales in at least one country for the period (grouped lists built by groupedOptions)
   const tot = new Map();
-  COUNTRIES.forEach(c => aggregateBrands(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  scopedC().forEach(c => aggregateBrands(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v > 0).map(([k]) => k).sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
   if(kind === 'brand'){ if(mfr && !tot.has(mfr)) mfr = ''; if(mfr2 && !tot.has(mfr2)) mfr2 = ''; }
   window.__topBrands = [...tot.entries()].filter(([k, v]) => !isOtherName(k) && v > 0).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k]) => k);
@@ -915,7 +926,7 @@ function syncModel2Enabled(){
 }
 function buildModelSelect(){
   const tot = new Map();
-  COUNTRIES.forEach(c => aggregateModels(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
+  scopedC().forEach(c => aggregateModels(c, period, true).forEach((a, k) => tot.set(k, (tot.get(k) || 0) + a.total)));
   const names = [...tot.entries()].filter(([, v]) => v >= 100).map(([k]) => k);
   const top = [...names].sort((a, b) => tot.get(b) - tot.get(a)).slice(0, 100);
   const az = [...names].sort((a, b) => a.localeCompare(b, 'en', { sensitivity:'base' }));
@@ -1000,7 +1011,16 @@ document.getElementById('zoom-reset').onclick = () => svg.transition().duration(
 let byCountry = {};   // country -> {list:[entities sorted], total, sel, sel2}
 let ctry = '';        // Country filter: '' = every country. Otherwise only that country feeds the spotlight, the brand ranking and the yearly chart (the map keeps showing all)
 const view = () => ctry ? (byCountry[ctry] ? { [ctry]: byCountry[ctry] } : {}) : byCountry;
-const selCountry = document.getElementById('f-country');
+const selCountry = document.getElementById('f-country'), selCont = document.getElementById('f-continent');
+const esc0 = v => String(v).replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch]));
+function buildContinentSelect(){ selCont.innerHTML = '<option value="">All continents</option>' + contsPresent().map(k => `<option value="${k}">${esc0(CONTINENT_LABELS[k])}</option>`).join(''); }
+function buildCountrySelect(){ const keep = selCountry.value; selCountry.innerHTML = '<option value="">All countries</option>' + scopedC().map(c => `<option value="${esc0(c)}">${esc0(c)}</option>`).join(''); selCountry.value = keep; if(selCountry.value !== keep) selCountry.value = ''; }
+function setContinent(k){ selCont.value = k; if(selCont.value !== k) selCont.value = ''; cont = selCont.value; buildCountrySelect(); tlStop(false); refresh(true); }
+function renderContChips(){
+  const host = document.getElementById('bars-cont'); if(!host) return;
+  host.innerHTML = ['', ...contsPresent()].map(k => `<button type="button" class="cont-chip${cont === k ? ' active' : ''}" data-cont="${k}">${k ? esc0(CONTINENT_LABELS[k]) : 'All continents'}</button>`).join('');
+}
+document.getElementById('bars-cont').addEventListener('click', e => { const b = e.target.closest('[data-cont]'); if(b) setContinent(b.dataset.cont); });
 function setCountry(c){ selCountry.value = c; if(selCountry.value !== c) selCountry.value = ''; tlStop(false); refresh(false); }
 let colorFn = () => null;
 // 'market' = no manufacturer picked (shade by total market size)
@@ -1010,7 +1030,7 @@ function mode(){ return (mfr && mfr2 && mfr2 !== mfr) ? 'match' : (mfr ? 'rank' 
 
 function compute(){
   byCountry = {};
-  COUNTRIES.forEach(c => {
+  scopedC().forEach(c => {
     const m = aggregate(c, period);
     if(!m.size) return;
     const list = [...m.values()].sort((a, b) => (isOtherName(a.name) - isOtherName(b.name)) || b.total - a.total);     // "Other (unclassified)" last: it is never ranked
@@ -1232,6 +1252,7 @@ function renderChipBar(){
   if(mfr && mfr2) h += `<span class="fx-chipvs">VS</span>` + chip(mfr2, 2);
   if(clsSel.size) h += `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>`;
   if(motSel.size) h += `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>`;
+  if(cont) h += `<span class="fx-chip neutral">${esc(CONTINENT_LABELS[cont])}<button type="button" data-clear="continent" title="Back to every continent">×</button></span>`;
   if(ctry) h += `<span class="fx-chip neutral">${esc(ctry)}<button type="button" data-clear="country" title="Back to every country">×</button></span>`;
   if(!mfr) h += `<span class="fx-chipvs" style="margin-left:6px">All manufacturers — pick a brand or a model above, or click a quick pick</span>`;
   else h += `<button type="button" class="fx-clear" data-clear="all">Clear selection</button>`;
@@ -1240,6 +1261,7 @@ function renderChipBar(){
 document.getElementById('fx-chipbar').addEventListener('click', e => {
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;
+  if(w === 'continent'){ setContinent(''); return; }
   if(w === 'country'){ setCountry(''); return; }
   if(w === 'cls' || w === 'mot'){ (w === 'cls' ? clsSel : motSel).clear(); renderSegUI(); refresh(false); return; }
   if(w === '2') M2.value = ''; else { M1.value = ''; M2.value = ''; }
@@ -1359,7 +1381,7 @@ function renderSpotMonths(names){
   host.innerHTML = '';
   const ms = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-')).slice().sort();
   if(!names.length || ms.length < 2) return;
-  const monthly = COUNTRIES.filter(c => MANUFACTURER_MONTHLY[c]);
+  const monthly = scopedC().filter(c => MANUFACTURER_MONTHLY[c]);
   const sers = names.map((name, i) => ({ name, color:names.length > 1 ? matchColor(i + 1) : brandColor(name), rows:ms.map(m => {
     let v = 0, n = 0; monthly.forEach(c => { const a = aggregate(c, { type:'month', ym:m }).get(name); if(a && a.total > 0){ v += a.total; n++; } });
     const mn = MONTH_NAMES[+m.slice(5) - 1];
@@ -1897,7 +1919,7 @@ function fieldRank(list, name, f){
 }
 // what "World (tracked countries)" covers, from our country database: the countries with brand-level data for this period, and the ones that have brand data in other periods but not in this one
 function worldExplainHTML(fin){
-  const incl = Object.keys(byCountry).sort(), missing = COUNTRIES.filter(c => !byCountry[c]);
+  const incl = Object.keys(byCountry).sort(), missing = scopedC().filter(c => !byCountry[c]);
   const group = list => { const g = {}; list.forEach(c => (g[CONTINENT_LABELS[continentOf(c)] || continentOf(c)] = g[CONTINENT_LABELS[continentOf(c)] || continentOf(c)] || []).push(c));
     return Object.entries(g).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => `<b>${esc(k)}</b> (${v.length}): ${v.map(esc).join(', ')}`).join('<br>'); };
   return `<details class="world-explain"><summary>What does “World (tracked countries)” cover?</summary>` +
@@ -1950,7 +1972,7 @@ function renderContinentBars(){
     toggle.classList.remove('hidden');
     const byGroup = groupMode === 'group';
     const what = kind === 'model' ? 'model' : byGroup ? 'parent group' : 'brand';
-    title.textContent = ctry ? `Sales by ${what} in ${ctry}` : byGroup ? 'World sales by parent group' : 'World sales by brand';
+    title.textContent = ctry ? `Sales by ${what} in ${ctry}` : byGroup ? `${cont ? CONTINENT_LABELS[cont] : 'World'} sales by parent group` : `${cont ? CONTINENT_LABELS[cont] : 'World'} sales by brand`;
     const world = new Map();
     Object.values(view()).forEach(d => d.list.forEach(a => {
       if(isOtherName(a.name)) return;
@@ -2225,7 +2247,7 @@ function barsHTML(years, series){
   return `<div class="history"><div class="history-bars">${bars}</div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">peak ${compactN(max)} · *${CUR_YEAR}: dark = year to date, light = projected rest of the year</div></div>`;
 }
 function entityHistory(name, asGroup){
-  const years = years10(), cs = ctry ? [ctry] : COUNTRIES, f = CUR_YEAR_MONTHS_ELAPSED / 12;
+  const years = years10(), cs = ctry ? [ctry] : scopedC(), f = CUR_YEAR_MONTHS_ELAPSED / 12;
   const rep = ctry ? years.map(() => null) : years.map(y => withGroupMode(asGroup ? 'group' : 'brand', () => reportedUnits(name, y)));
   if(rep.some(v => v != null)) return { basis:'company reports / world-history series', pts:years.map((y, i) => rep[i] == null ? { top:null } : { top:rep[i], val:y === CUR_YEAR ? rep[i] * f : rep[i] }) };
   const pts = years.map(y => {
@@ -2237,7 +2259,7 @@ function entityHistory(name, asGroup){
 }
 function modelHistory(label){
   const years = years10(), f = CUR_YEAR_MONTHS_ELAPSED / 12;
-  const pts = years.map(y => { let v = 0, any = false; COUNTRIES.forEach(c => { if(ctry && c !== ctry) return; const m = modelMapFor(c, { type:'year', year:y }); if(!m.size) return; any = true; const a = m.get(label); if(a) v += a.total; }); return any ? { val:v, top:y === CUR_YEAR ? v / f : v } : { top:null }; });
+  const pts = years.map(y => { let v = 0, any = false; scopedC().forEach(c => { if(ctry && c !== ctry) return; const m = modelMapFor(c, { type:'year', year:y }); if(!m.size) return; any = true; const a = m.get(label); if(a) v += a.total; }); return any ? { val:v, top:y === CUR_YEAR ? v / f : v } : { top:null }; });
   return { basis:ctry ? ctry : 'tracked markets, coverage varies by year', pts };
 }
 function marketHistory(country){
@@ -2330,7 +2352,7 @@ function renderGrowth(){
   document.querySelectorAll('#gr-toggle [data-gr]').forEach(b => b.classList.toggle('active', b.dataset.gr === growthMode));
   document.querySelectorAll('#gr-span [data-gs]').forEach(b => { b.hidden = b.dataset.gs === 'mom' && period.type !== 'month'; b.classList.toggle('active', b.dataset.gs === String(effSpan())); });
   const rows = [];
-  COUNTRIES.forEach(c => {
+  scopedC().forEach(c => {
     const per = series.map(n => { const cur = growthVal(c, pr.cur, n), prev = growthVal(c, pr.prev, n); if(cur == null || prev == null || !(prev > 0)) return null; return { cur, prev, pct:100 * (cur / prev - 1), d:cur - prev, cagr:pr.n > 1 ? 100 * (Math.pow(cur / prev, 1 / pr.n) - 1) : null }; });
     if(per.some(Boolean)) rows.push({ country:c, per });
   });
@@ -2404,7 +2426,7 @@ function renderExtras(){
   if(market){ renderWorldModels(); renderWorldCountries(); }
   if(picked){ renderGroupBrands(); renderGroupModels(); }
 }
-const modelCountries = () => COUNTRIES.filter(c => (typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c]) || (typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' && MANUFACTURER_MODEL_MONTHLY[c]));
+const modelCountries = () => scopedC().filter(c => (typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' && MANUFACTURER_MODEL_YEARLY[c]) || (typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' && MANUFACTURER_MODEL_MONTHLY[c]));
 function renderWorldModels(){
   const host = document.getElementById('wm-rows'), note = document.getElementById('wm-note');
   if(!MODEL_LABEL){ host.innerHTML = ''; note.textContent = 'The model files (about 24 MB) load when this section comes into view…'; watchModels(); return; }
@@ -2492,7 +2514,7 @@ function renderEntityHover(hov, key, row){
     right = `<div class="mdl-title">Top 10 ${groupMode === 'group' ? 'groups' : 'brands'} · ${esc(per)}</div>` + list.map((a, i) => rowHTML(i + 1, a, max, a.name === mfr || a.name === mfr2)).join('');
   } else if(hov === 'model'){
     const h = modelHistory(key), arr = [];
-    COUNTRIES.forEach(c => { if(ctry && c !== ctry) return; const a = modelMapFor(c, period).get(key); if(a && a.total > 0) arr.push({ name:c, bev:a.bev, phev:a.phev, other:a.other, total:a.total }); });
+    scopedC().forEach(c => { if(ctry && c !== ctry) return; const a = modelMapFor(c, period).get(key); if(a && a.total > 0) arr.push({ name:c, bev:a.bev, phev:a.phev, other:a.other, total:a.total }); });
     arr.sort((a, b) => b.total - a.total);
     const top = arr.slice(0, 10), max = top[0] ? top[0].total : 0;
     left = `<div class="mdl-title">Last 10 years (${esc(h.basis)})</div>` + barsHTML(years10(), [{ label:key, color:brandColor(MODEL_BRAND[key] || key), pts:h.pts }]);
@@ -2740,6 +2762,8 @@ function renderWorldBars(){
 
 function refresh(rebuildMfr){
   readPeriod();
+  cont = selCont.value;
+  if(ctry && cont && continentOf(selCountry.value) !== cont) selCountry.value = '';
   ctry = selCountry.value;
   if(rebuildMfr){ buildMfrSelect(); if(MODEL_LABEL) buildModelSelect(); }
   if(selModel.value && MODEL_LABEL){
@@ -2764,6 +2788,7 @@ function refresh(rebuildMfr){
   shareBtn.disabled = !rankMode; shareBtn.style.opacity = rankMode ? 1 : .45;
   if(!rankMode && metric === 'share'){ metric = 'units'; setActive('#metric-toggle', 'metric', 'units'); }
   renderQuick(window.__topBrands || [], MODEL_LABEL ? window.__topModels : []);
+  renderContChips();
   renderMap();
   renderWorldBars();
   saveFilters();
@@ -2771,12 +2796,13 @@ function refresh(rebuildMfr){
 // the selections are remembered between pages (assets/filter-memory.js): period, brand / model (and the second one), country, group mode, metric, class, motorization, compare toggles
 function saveFilters(){
   if(!window.FilterMemory) return;
-  FilterMemory.save({ period:selPeriod.value, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, country:selCountry.value,
+  FilterMemory.save({ period:selPeriod.value, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, continent:selCont.value, country:selCountry.value,
     group:groupMode, metric, cls:[...clsSel], mot:[...motSel], cmp:cmpMode, split:splitOn, gms:gmScope });
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
 selPeriod.onchange = () => refresh(true);
 selCountry.onchange = () => { tlStop(false); refresh(false); };
+selCont.onchange = () => setContinent(selCont.value);
 selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; if(selMfr.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
 selMfr2.onchange = () => { if(selMfr2.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
 selModel.onchange = () => { if(selModel2.value === selModel.value) selModel2.value = ''; if(selModel.value){ selMfr.value = ''; selMfr2.value = ''; } refresh(false); };
@@ -2807,14 +2833,14 @@ const tlMonthKeys = MONTHS_SHOWN.filter(m => m.startsWith(CUR_YEAR + '-')).slice
 const tlFrameList = () => tlYearKeys.filter(k => k.startsWith('y:') && k !== 'y:' + CUR_YEAR).concat(tlMonthKeys, tlYearKeys.filter(k => k.startsWith('yp:')));
 // does the selection have sales in this period? (tested for every button only where that is cheap: brand view, no car class)
 function tlAvail(key, force){
-  const sig = [kind, groupMode, mfr, mfr2, ctry, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
+  const sig = [kind, groupMode, mfr, mfr2, cont, ctry, [...clsSel].sort().join(), [...motSel].sort().join()].join('|');
   if(sig !== tlSig){ tlSig = sig; tlCache.clear(); }
   let a = tlCache.get(key);
   if(a) return a;
   if(!mfr || (!force && !(kind === 'brand' && !clsSel.size))) return { has:true, n:null };
   const p = tlParse(key);
   let n = 0;
-  (ctry ? [ctry] : COUNTRIES).forEach(c => { const m = aggregate(c, p), x = m.get(mfr), y = mfr2 && mfr2 !== mfr ? m.get(mfr2) : null; if((x && x.total > 0) || (y && y.total > 0)) n++; });
+  (ctry ? [ctry] : scopedC()).forEach(c => { const m = aggregate(c, p), x = m.get(mfr), y = mfr2 && mfr2 !== mfr ? m.get(mfr2) : null; if((x && x.total > 0) || (y && y.total > 0)) n++; });
   a = { has:n > 0, n };
   tlCache.set(key, a);
   return a;
@@ -2953,10 +2979,11 @@ function updateSegStatus(nCountries){
 
 if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderWorldBars(); renderGrowth(); });      // phone: the charts are drawn at the screen width, so redraw after a rotation or a view switch
 buildPeriodSelect();
-selCountry.innerHTML = '<option value="">All countries</option>' + COUNTRIES.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+buildContinentSelect(); buildCountrySelect();
 const savedFilters = window.FilterMemory ? FilterMemory.load() : null;
 if(savedFilters){        // put the visitor's last selections back (anything that no longer exists is ignored)
   if([...selPeriod.options].some(o => o.value === savedFilters.period)) selPeriod.value = savedFilters.period;
+  if([...selCont.options].some(o => o.value === savedFilters.continent)){ selCont.value = savedFilters.continent; cont = selCont.value; buildCountrySelect(); }
   if([...selCountry.options].some(o => o.value === savedFilters.country)) selCountry.value = savedFilters.country;
   if(savedFilters.group === 'group'){ groupMode = 'group'; setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode); }
   if(savedFilters.gms === 'group') gmScope = 'group';
