@@ -700,7 +700,13 @@ const CUR_YEAR_MONTHS_ELAPSED = MONTHS.filter(m => m.startsWith(CUR_YEAR + '-'))
 const FIRST_MONTH_SHOWN = '2026-01';
 const MONTHS_SHOWN = MONTHS.filter(m => m >= FIRST_MONTH_SHOWN);
 
+function comboYearsLabel(ys){       // 2022, 2023, 2024, 2026 -> "2022–2024 + 2026 YTD"
+  const a = [...ys].sort((x, y) => x - y), runs = [];
+  a.forEach(y => { const r = runs[runs.length - 1]; if(r && y === r[1] + 1 && y !== CUR_YEAR) r[1] = y; else runs.push([y, y]); });
+  return runs.map(([x, y]) => (x === y ? String(x) : `${x}–${y}`) + (y === CUR_YEAR ? ' YTD' : '')).join(' + ');
+}
 function periodLabel(p){
+  if(p.years) return comboYearsLabel(p.years);
   if(p.type === 'year') return p.projected ? `${p.year} (Projected)` : p.year === CUR_YEAR ? `${p.year} year-to-date` : String(p.year);
   const [y, m] = p.ym.split('-').map(Number); return `${MONTH_NAMES[m - 1]} ${y}`;
 }
@@ -742,6 +748,7 @@ function entityOf(brand, year){
 
 // rows of a country for the active period: [{brand,bev,phev,hev,petrol,diesel,total}]
 function rowsFor(country, p){
+  if(p.years) return p.years.flatMap(y => rowsFor(country, { type:'year', year:y }));
   if(p.type === 'month') return (MANUFACTURER_MONTHLY[country] || []).filter(r => r.year_month === p.ym);
   const y = (MANUFACTURER_YEARLY[country] || []).filter(r => r.year === p.year);
   if(y.length) return y;
@@ -806,6 +813,7 @@ function buildModelLabels(){
   });
 }
 function modelRowsForPeriod(country, p){
+  if(p.years) return p.years.flatMap(y => modelRowsForPeriod(country, { type:'year', year:y }));
   const MM = MANUFACTURER_MODEL_MONTHLY[country] || [], MY = MANUFACTURER_MODEL_YEARLY[country] || [];
   if(p.type === 'month') return MM.filter(r => r.year_month === p.ym);
   const y = MY.filter(r => r.year === p.year);
@@ -895,7 +903,17 @@ function buildPeriodSelect(){
   selPeriod.innerHTML = h;
   selPeriod.value = `yp:${YEARS[0]}`; // current year, projected full-year run-rate
 }
+let multiKeys = [];      // several years combined with Ctrl+click on the year buttons: ['y:2022', 'y:2023', ...] (the running year counts as year to date). [] = a single period
+function setMulti(keys){
+  multiKeys = keys.slice().sort((a, b) => +a.slice(2) - +b.slice(2));
+  [...selPeriod.querySelectorAll('option[value="mx:"]')].forEach(o => o.remove());
+  if(multiKeys.length > 1){
+    const o = document.createElement('option'); o.value = 'mx:'; o.textContent = comboYearsLabel(multiKeys.map(k => +k.slice(2))); selPeriod.insertBefore(o, selPeriod.firstChild);
+    selPeriod.value = 'mx:';
+  } else multiKeys = [];
+}
 function readPeriod(){
+  if(multiKeys.length > 1){ const ys = multiKeys.map(k => +k.slice(2)); period = { type:'year', year:Math.max(...ys), years:ys }; return; }
   const [t, v] = selPeriod.value.split(':');
   period = t === 'yp' ? { type:'year', year:+v, projected:true } : t === 'y' ? { type:'year', year:+v } : { type:'month', ym:v };
 }
@@ -1795,7 +1813,7 @@ const FIN_BRAND_ALIAS = { 'Tesla':'Tesla', 'Kia':'Kia', 'Volvo':'Volvo Cars', 'M
 const finActive = () => cmpMode === 'all' && !filtersActive();      // a reported total only compares with unfiltered all-sales volumes
 const HATCH = 'repeating-linear-gradient(135deg,#6b7384 0 6px,#99a2b2 6px 12px)';
 function finFor(name){
-  if(kind !== 'brand' || !period || period.type !== 'year') return null;
+  if(kind !== 'brand' || !period || period.type !== 'year' || period.years) return null;        // a company's reported total only exists per single year
   if(!period.projected){
     const e = groupMode === 'group' ? FIN_BY_SITE.get(name) : FIN_ENT.get(FIN_BRAND_ALIAS[name]);
     const y = e && e.years[String(period.year)];
@@ -2135,6 +2153,7 @@ function loadModelData(){
   return modelDataPromise;
 }
 function modelRowsFor(country){
+  if(period.years) return period.years.flatMap(y => { const MM = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' ? MANUFACTURER_MODEL_MONTHLY : {}, MY = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? MANUFACTURER_MODEL_YEARLY : {}; const yy = (MY[country] || []).filter(r => r.year === y); return yy.length ? yy : (MM[country] || []).filter(r => +r.year_month.slice(0, 4) === y); });
   const MM = typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' ? MANUFACTURER_MODEL_MONTHLY : {}, MY = typeof MANUFACTURER_MODEL_YEARLY !== 'undefined' ? MANUFACTURER_MODEL_YEARLY : {};
   if(period.type === 'month') return (MM[country] || []).filter(r => r.year_month === period.ym);
   const y = (MY[country] || []).filter(r => r.year === period.year);
@@ -2329,7 +2348,8 @@ function growthPeriods(){
     const prev = { type:'month', ym:`${y - gs}-${String(m).padStart(2, '0')}` };
     return { cur:p, prev, n:gs, label:`${periodLabel(p)} vs ${periodLabel(prev)} (${gs} year${gs > 1 ? 's' : ''} earlier)` };
   }
-  const y = p.year, n = gs, cur = y === CUR_YEAR ? { type:'year', year:y, projected:true } : p, prev = { type:'year', year:y - n };
+  const q = p.years ? { type:'year', year:p.year } : p;       // several years combined: the growth chart follows the latest one
+  const y = q.year, n = gs, cur = y === CUR_YEAR ? { type:'year', year:y, projected:true } : q, prev = { type:'year', year:y - n };
   return { cur, prev, n, label:`${y === CUR_YEAR ? `${y} projected (year to date x 12 / ${CUR_YEAR_MONTHS_ELAPSED})` : y} vs ${y - n}${n > 1 ? ` (${n} years earlier)` : ''}` };
 }
 function growthVal(c, p, name){
@@ -2437,6 +2457,7 @@ function renderWorldModels(){
 // the country-level market total (assets/country-yearly-data.js, the Mix page's series) for the period, when the brand rows do not cover all of it
 function countryMarketTotal(c, p){
   if(typeof COUNTRY_YEARLY === 'undefined' || !p || p.type !== 'year') return null;
+  if(p.years){ let sum = 0; for(const y of p.years){ const v = countryMarketTotal(c, { type:'year', year:y }); if(v == null) return null; sum += v; } return sum; }
   const t = p.projected ? 'PROJECTED' : (p.year === CUR_YEAR ? 'YTD' : 'ANNUAL');
   const r = (COUNTRY_YEARLY[c] || []).find(x => x.year === p.year && x.period_type === t);
   return r ? r.total : null;
@@ -2796,11 +2817,11 @@ function refresh(rebuildMfr){
 // the selections are remembered between pages (assets/filter-memory.js): period, brand / model (and the second one), country, group mode, metric, class, motorization, compare toggles
 function saveFilters(){
   if(!window.FilterMemory) return;
-  FilterMemory.save({ period:selPeriod.value, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, continent:selCont.value, country:selCountry.value,
+  FilterMemory.save({ period:selPeriod.value, years:multiKeys, mfr:selMfr.value, mfr2:selMfr2.value, model:selModel.value, model2:selModel2.value, continent:selCont.value, country:selCountry.value,
     group:groupMode, metric, cls:[...clsSel], mot:[...motSel], cmp:cmpMode, split:splitOn, gms:gmScope });
 }
 function setActive(sel, attr, val){ document.querySelectorAll(`${sel} .mode-btn`).forEach(b => { if(attr in b.dataset) b.classList.toggle('active', b.dataset[attr] === val); }); }
-selPeriod.onchange = () => refresh(true);
+selPeriod.onchange = () => { if(selPeriod.value !== 'mx:') setMulti([]); refresh(true); };
 selCountry.onchange = () => { tlStop(false); refresh(false); };
 selCont.onchange = () => setContinent(selCont.value);
 selMfr.onchange = () => { if(selMfr2.value === selMfr.value) selMfr2.value = ''; if(selMfr.value){ selModel.value = ''; selModel2.value = ''; } refresh(false); };
@@ -2852,12 +2873,14 @@ function selMarketCount(){
   return es.filter(d => (d.sel && d.sel.total > 0) || (md === 'match' && d.sel2 && d.sel2.total > 0)).length;
 }
 function tlName(key, n){
-  const p = tlParse(key), mk = n ? ` · ${n} market${n === 1 ? '' : 's'}` : '';
+  const mk = n ? ` · ${n} market${n === 1 ? '' : 's'}` : '';
+  if(key === 'mx:') return { big:comboYearsLabel(multiKeys.map(k => +k.slice(2))), small:'years combined' + mk };
+  const p = tlParse(key);
   if(p.type === 'month') return { big:periodLabel(p), small:'month' + mk };
   return { big:String(p.year), small:(p.projected ? 'projected full year' : p.year === CUR_YEAR ? 'year to date' : 'full year') + mk };
 }
 const tlChip = k => `<button type="button" class="tl-chip${k.startsWith('yp:') ? ' proj' : ''}" data-tl-key="${k}">${tlChipLabel(k)}</button>`;
-const tlChipsHTML = `<div class="tl-chips"><span class="tl-chips-lbl">Year</span><span class="tl-chip-group">${tlYearKeys.map(tlChip).join('')}</span>` +
+const tlChipsHTML = `<div class="tl-chips"><span class="tl-chips-lbl" title="Ctrl+click (Cmd+click on a Mac) several years to add them together">Year · Ctrl+click to combine</span><span class="tl-chip-group">${tlYearKeys.map(tlChip).join('')}</span>` +
   (tlMonthKeys.length ? `<span class="tl-chips-lbl">${CUR_YEAR} by month</span><span class="tl-chip-group">${tlMonthKeys.map(tlChip).join('')}</span>` : '') + `</div>`;
 tlHosts.forEach(h => {
   h.innerHTML = h.dataset.tl === 'chips' ? tlChipsHTML :
@@ -2876,7 +2899,7 @@ function syncStrips(){
     }
     h.querySelectorAll('[data-tl-key]').forEach(c => {
       const k = c.dataset.tlKey, a = tlAvail(k);
-      c.classList.toggle('on', k === key); c.classList.toggle('gone', !a.has && k !== key);
+      const sel = k === key || multiKeys.includes(k); c.classList.toggle('on', sel); c.classList.toggle('gone', !a.has && !sel);
       c.title = a.n != null ? `${periodLabel(tlParse(k))}: ${a.n} market${a.n === 1 ? '' : 's'} with sales` : periodLabel(tlParse(k));
     });
   });
@@ -2914,6 +2937,7 @@ function flipRender(fn){
 }
 // rebuild = true does what picking the period in the dropdown does (the manufacturer lists follow the period); a playing frame skips that and the page catches up when the play stops
 function tlShow(key, rebuild){
+  if(multiKeys.length) setMulti([]);
   flipRender(() => { selPeriod.value = key; refresh(rebuild); });
   tlDirty = !rebuild;
 }
@@ -2938,9 +2962,19 @@ function tlPlay(){
   tlTimer = setInterval(step, 1300);
   step();
 }
+function multiToggle(key){
+  const k = key.replace(/^yp:/, 'y:');
+  let cur = multiKeys.length ? multiKeys.slice() : (/^yp?:/.test(selPeriod.value) ? [selPeriod.value.replace(/^yp:/, 'y:')] : []);
+  cur = cur.includes(k) ? cur.filter(x => x !== k) : cur.concat(k);
+  if(!cur.length) return;                         // keep at least one year
+  tlStop(false);
+  if(cur.length === 1){ setMulti([]); selPeriod.value = cur[0]; } else setMulti(cur);
+  flipRender(() => refresh(true));
+}
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-tl-key]');
-  if(c){ tlStop(false); tlShow(c.dataset.tlKey, true); return; }
+  if(c && (e.ctrlKey || e.metaKey) && /^yp?:/.test(c.dataset.tlKey)){ e.preventDefault(); multiToggle(c.dataset.tlKey); return; }
+  if(c){ tlStop(false); setMulti([]); tlShow(c.dataset.tlKey, true); return; }
   if(e.target.closest('[data-tl-play]')) tlPlay();
 });
 document.addEventListener('input', e => {
@@ -2983,6 +3017,7 @@ buildContinentSelect(); buildCountrySelect();
 const savedFilters = window.FilterMemory ? FilterMemory.load() : null;
 if(savedFilters){        // put the visitor's last selections back (anything that no longer exists is ignored)
   if([...selPeriod.options].some(o => o.value === savedFilters.period)) selPeriod.value = savedFilters.period;
+  if(Array.isArray(savedFilters.years) && savedFilters.years.length > 1 && savedFilters.years.every(k => /^y:\d{4}$/.test(k) && [...selPeriod.options].some(o => o.value === k))) setMulti(savedFilters.years);
   if([...selCont.options].some(o => o.value === savedFilters.continent)){ selCont.value = savedFilters.continent; cont = selCont.value; buildCountrySelect(); }
   if([...selCountry.options].some(o => o.value === savedFilters.country)) selCountry.value = savedFilters.country;
   if(savedFilters.group === 'group'){ groupMode = 'group'; setActive('.mfr-filters', 'group', groupMode); setActive('#bars-card', 'group', groupMode); }
