@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy Mix — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/mobile.css?v=9">
+<script src="assets/view-mode.js?v=6"></script>
+<script src="assets/page-views.js?v=1" defer></script>
+<script src="assets/tooltip-fit.js" defer></script>
+<script src="assets/section-link.js?v=2" defer></script>
+<script src="assets/deeplink.js?v=2"></script>
+<style>
+  .em-page{ --em-green:#16a34a; }
+  .em-note{ font-size:12.5px; color:var(--text-muted); line-height:1.5; margin:4px 0 10px; }
+  .em-hero{ border:1px solid var(--border); border-radius:18px; padding:16px 16px 6px; background:linear-gradient(135deg,#031a38,#0a3a72 60%,#0f6a56); color:#fff; }
+  .em-hero-h{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .em-eyebrow{ font-size:11.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:#8fe3ff; }
+  .em-hero-t{ font-size:clamp(24px,5vw,36px); font-weight:900; letter-spacing:-.02em; display:flex; align-items:center; gap:10px; }
+  .em-hero-t img{ width:34px; height:24px; border-radius:3px; object-fit:cover; box-shadow:0 0 0 1px rgba(255,255,255,.3); }
+  .em-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:8px 0 12px; }
+  .em-kpi{ border:1px solid var(--border); border-left:4px solid var(--c,var(--accent)); background:var(--surface); border-radius:14px; padding:10px 14px; }
+  .em-kpis.big .em-kpi{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); border-left:4px solid var(--c,#22d3ee); }
+  .em-kpi .t{ font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+  .em-kpis.big .em-kpi .t{ color:#b9d6ee; }
+  .em-kpi .v{ font-size:24px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .em-kpi .v small{ font-size:13px; font-weight:700; opacity:.7; margin-left:3px; }
+  .em-kpi .s{ font-size:12px; color:var(--text-muted); } .em-kpis.big .em-kpi .s{ color:#cfe3f5; }
+  .em-kpi .d{ font-size:11.5px; font-weight:800; margin-top:2px; color:var(--accent); } .em-kpis.big .em-kpi .d{ color:#8fe3ff; }
+  .em-filters{ display:grid; gap:8px; margin:6px 0 10px; }
+  .em-frow{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; }
+  .em-fl{ font-size:11.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  .em-seg{ display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .em-seg button{ appearance:none; border:0; background:var(--surface); color:var(--text-muted); font:inherit; font-size:12.5px; font-weight:800; padding:7px 12px; cursor:pointer; }
+  .em-seg button + button{ border-left:1px solid var(--border); } .em-seg button.active{ background:var(--accent); color:#fff; }
+  .em-sel{ border:1px solid var(--border); border-radius:10px; padding:7px 10px; font:inherit; font-size:13px; font-weight:700; background:var(--surface); color:var(--text); max-width:300px; }
+  .em-range{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-muted); } .em-range input{ width:160px; accent-color:var(--accent); } .em-range b{ color:var(--text); min-width:34px; font-variant-numeric:tabular-nums; }
+  .em-chart{ position:relative; width:100%; } .em-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .em-chart text{ fill:var(--text-muted); font-size:11px; } .em-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; } .em-chart .ax path, .em-chart .ax line{ stroke:var(--border); }
+  .em-chart text.ut{ font-weight:800; font-size:11px; } .em-chart text.pl{ font-size:10px; font-weight:700; fill:var(--text); text-anchor:middle; }
+  .em-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.45; min-width:210px; transition:opacity .1s; }
+  .em-tip .r{ display:flex; justify-content:space-between; gap:14px; } .em-tip .r i{ display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:6px; }
+  .em-leg{ display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:8px; font-size:12px; color:var(--text-muted); } .em-leg i{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+  .em-bars{ display:grid; gap:6px; margin-top:6px; }
+  .em-brow{ display:grid; grid-template-columns:26px minmax(120px,210px) 1fr 92px; align-items:center; gap:10px; font-size:12.5px; border-radius:8px; padding:1px 4px; }
+  .em-brow.click{ cursor:pointer; } .em-brow.click:hover{ background:var(--surface-alt); }
+  .em-brow .rk{ font-weight:900; color:var(--text-muted); text-align:right; font-variant-numeric:tabular-nums; }
+  .em-brow .n{ font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:7px; }
+  .em-brow .n img{ width:20px; height:14px; border-radius:2px; object-fit:cover; flex:none; box-shadow:0 0 0 1px var(--border); }
+  .em-brow .t{ position:relative; height:17px; border-radius:6px; background:var(--surface-alt); overflow:hidden; } .em-brow .t i{ position:absolute; left:0; top:0; bottom:0; border-radius:6px; }
+  .em-brow .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  @media (max-width:700px){ .em-brow{ grid-template-columns:22px minmax(90px,150px) 1fr 80px; } }
+  .em-more{ text-align:center; margin:10px 0 2px; } .em-mini{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:9px; padding:7px 18px; font:inherit; font-size:12px; font-weight:800; cursor:pointer; } .em-mini:hover{ border-color:var(--accent); color:var(--accent); }
+  .em-load{ color:var(--text-muted); font-size:13px; padding:30px 0; text-align:center; }
+  .em-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .em-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .em-method li{ margin:5px 0; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="world-oil.html"><span class="dot"></span>World Oil</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
+      <a href="energy-mix.html" aria-current="page"><span class="dot"></span>Energy Mix</a>
+
+      <div class="nav-heading">Trends</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">About</div>
+      <a href="contact.html"><span class="dot"></span>Contact</a>
+      <a href="comments.html"><span class="dot"></span>Comments</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page em-page">
+      <header class="page-header">
+        <div class="eyebrow">Markets · Energy Mix</div>
+        <h1>The energy mix — and the grid your EV plugs into</h1>
+        <p class="subtitle">How the world, each region and each country gets its energy: supply by source, electricity generation, final consumption — 1990 to 2025 (IEA). Then the link with this site's car data: do electric cars sell where the electricity is clean?</p>
+      </header>
+
+      <section class="em-hero" id="em-hero"></section>
+
+      <!-- 1. supply -->
+      <div class="card chart-card" id="es-card">
+        <h2>1 · Where the energy comes from: total energy supply by source</h2>
+        <p class="em-note" id="es-note"></p>
+        <div class="em-filters" id="es-f">
+          <div class="em-frow"><label class="em-fl" for="em-area">Where</label><select class="em-sel" id="em-area"></select>
+            <div class="em-seg" id="es-mode"><button type="button" data-v="abs" class="active">Energy (EJ)</button><button type="button" data-v="pct">% of supply</button></div></div>
+          <div class="em-frow"><label class="em-fl">Years</label>
+            <div class="em-range"><b id="em-y0l">1990</b><input type="range" id="em-y0" min="1990" max="2015" value="1990"></div>
+            <div class="em-range"><input type="range" id="em-y1" min="2016" max="2025" value="2025"><b id="em-y1l">2025</b></div></div>
+        </div>
+        <div class="em-chart" id="es-chart"></div>
+        <div class="em-leg" id="es-leg"></div>
+      </div>
+
+      <!-- 2. electricity -->
+      <div class="card chart-card" id="el-card">
+        <h2>2 · Electricity: how it is generated</h2>
+        <p class="em-note" id="el-note"></p>
+        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="el-mode"><button type="button" data-v="abs" class="active">Electricity (TWh)</button><button type="button" data-v="pct">% of generation</button></div></div></div>
+        <div class="em-kpis" id="el-kpis"></div>
+        <div class="em-chart" id="el-chart"></div>
+        <div class="em-leg" id="el-leg"></div>
+      </div>
+
+      <!-- 3. final consumption -->
+      <div class="card chart-card" id="fc-card">
+        <h2>3 · What is actually used: final consumption by source</h2>
+        <p class="em-note" id="fc-note"></p>
+        <div class="em-filters"><div class="em-frow"><div class="em-seg" id="fc-mode"><button type="button" data-v="abs" class="active">Energy (EJ)</button><button type="button" data-v="pct">% of final consumption</button></div></div></div>
+        <div class="em-kpis" id="fc-kpis"></div>
+        <div class="em-chart" id="fc-chart"></div>
+        <div class="em-leg" id="fc-leg"></div>
+      </div>
+
+      <!-- 4. ranking -->
+      <div class="card chart-card" id="rk-card">
+        <h2>4 · Country ranking</h2>
+        <p class="em-note" id="rk-note"></p>
+        <div class="em-filters" id="rk-f">
+          <div class="em-frow"><label class="em-fl" for="rk-metric">Rank by</label>
+            <select class="em-sel" id="rk-metric">
+              <option value="elLow">Low-carbon share of electricity</option><option value="elRen">Renewable share of electricity</option><option value="elNuc">Nuclear share of electricity</option>
+              <option value="elWind">Wind + solar share of electricity</option><option value="elCoal">Coal share of electricity</option><option value="elFossil">Fossil share of electricity</option>
+              <option value="elecFC">Electricity share of final consumption</option><option value="fossilTES">Fossil share of total energy supply</option><option value="elTWh">Electricity generated (TWh)</option><option value="tesEJ">Total energy supply (EJ)</option>
+            </select>
+            <label class="em-fl" for="rk-year" style="min-width:0">Year</label><select class="em-sel" id="rk-year"></select>
+            <label class="em-fl" for="rk-dir" style="min-width:0">Order</label><div class="em-seg" id="rk-dir"><button type="button" data-v="hi" class="active">Highest first</button><button type="button" data-v="lo">Lowest first</button></div></div>
+          <div class="em-frow"><label class="em-fl" for="rk-min">Ignore areas under</label><select class="em-sel" id="rk-min"><option value="0">no limit</option><option value="1" selected>1 TWh of electricity</option><option value="10">10 TWh of electricity</option><option value="50">50 TWh of electricity</option></select>
+            <label class="em-fl" for="rk-n" style="min-width:0">Show</label><select class="em-sel" id="rk-n"><option>10</option><option selected>15</option><option>25</option><option>40</option></select></div>
+        </div>
+        <div class="em-bars" id="rk-bars"></div>
+        <div class="em-more"><button type="button" class="em-mini" id="rk-more"></button></div>
+      </div>
+
+      <!-- 5. EVs vs grid -->
+      <div class="card chart-card" id="ev-card">
+        <h2>5 · Electric cars and the grid: do EVs sell where the electricity is clean?</h2>
+        <p class="em-note" id="ev-note"></p>
+        <div class="em-filters"><div class="em-frow"><label class="em-fl" for="ev-x">Grid measure</label>
+          <select class="em-sel" id="ev-x"><option value="elLow">Low-carbon share of electricity</option><option value="elRen">Renewable share of electricity</option><option value="elFossil">Fossil share of electricity</option><option value="elCoal">Coal share of electricity</option></select>
+          <label class="em-fl" for="ev-min" style="min-width:0">Ignore markets under</label><select class="em-sel" id="ev-min"><option value="0">no limit</option><option value="20000">20 000 cars a year</option><option value="100000" selected>100 000 cars a year</option><option value="500000">500 000 cars a year</option></select></div></div>
+        <div class="em-chart" id="ev-chart"></div>
+        <div class="em-leg" id="ev-leg"></div>
+      </div>
+
+      <details class="em-method" id="method" open>
+        <summary>How these numbers are built — read before quoting them</summary>
+        <ol>
+          <li><b>Source:</b> International Energy Agency (IEA), Energy Statistics Data Browser — World Energy Balances (supply, final consumption) and Electricity Information (generation), licence CC BY 4.0, downloaded 2026-11-10. 163 areas: the world, 11 regional aggregates and 151 countries and territories. Years run 1990 to 2025; <b>the latest year (2025) exists only for the 48 countries and regions that have already reported it</b>, the others stop in 2024 and are shown up to their last year.</li>
+          <li><b>Total energy supply (TES)</b> = production + imports − exports ± stock changes, in petajoules (1 EJ = 1000 PJ). It counts primary energy: a nuclear or fossil power plant counts for the fuel it burns, wind and solar for the electricity they produce (so a TWh of fossil power weighs about 2.5 times more in supply than a TWh of wind). Use the electricity section to compare grids.</li>
+          <li><b>Final consumption (TFC)</b> is what end users buy: oil products for transport and industry, gas and electricity for buildings, heat, and so on. <b>Electricity's share of final consumption</b> measures how far each country has electrified; EVs are one of the levers that push it up.</li>
+          <li><b>Definitions used on this page.</b> Renewables = hydropower, wind, solar (PV and thermal), bioenergy and waste, geothermal, tide. Low-carbon = renewables + nuclear. Fossil = coal, oil, natural gas. “Other sources” (the IEA's own catch-all, mostly non-renewable waste and heat) is shown but counted in none of these. Bioenergy and waste count as renewable although a part of waste is not.</li>
+          <li><b>Cars and the grid (section 5):</b> BEV share of new-car sales is this site's own series (annual, latest full year from 2024 on; projected years are not used). A country appears only if both series exist. The bubble size is the electricity generated. This compares markets, it does not measure the emissions of one car: that depends on the hours the car is charged and on the marginal power plant.</li>
+          <li><b>Regional aggregates</b> follow the IEA's own definitions (for example “Asia (excl. China)”, “OECD Americas”); they are shown beside countries but are not added to them.</li>
+          <li><b>Rebuild:</b> <code>scripts/energy/build_energy_mix.py</code> reads the three IEA downloads kept in <code>scripts/energy/</code> and writes <code>assets/energy-mix-data.js</code>. The IEA publishes a new year every spring.</li>
+        </ol>
+      </details>
+
+      <footer class="page-footer">
+        Data: IEA (2026), Energy Statistics Data Browser, CC BY 4.0 — <a href="https://www.iea.org/data-and-statistics" target="_blank" rel="noopener">iea.org/data-and-statistics</a>. Road to Electric — analyzing the current shift to EVs.
+      </footer>
+    </div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="assets/energy-mix-data.js"></script>
+<script src="assets/country-yearly-data.js"></script>
+<script src="assets/filter-memory.js?v=5"></script>
+<script>
+const E = ENERGY_MIX, Y0 = E.y0, Y1 = E.y1, NY = Y1 - Y0 + 1, A = new Map(E.areas.map(a => [a.id, a]));
+const $ = id => document.getElementById(id), yi = y => y - Y0;
+const st = { area: 'WORLD', year: 2024, y0: 1990, y1: Y1, esMode: 'abs', elMode: 'abs', fcMode: 'abs' };
+const fmtN = (v, d = 1) => v == null ? '–' : v >= 100 ? d3.format(',.0f')(v) : v.toFixed(d);
+const fmtP = (v, d = 1) => v == null ? '–' : v.toFixed(d) + '%';
+const sgn = (v, d = 1, u = '') => v == null ? '' : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + u;
+const flag = a => a.iso2 ? `<img src="https://flagcdn.com/w20/${a.iso2}.png" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+const nativeSize = (svg, w, h, o) => (window.RTEView && RTEView.native) ? RTEView.native(svg, w, h, o) : { mobile: false, W: w, H: h };
+
+// ---------- series helpers ----------
+const SEC_UNIT = { tes: 1000, tfc: 1000, el: 1 };           // PJ -> EJ; TWh stays
+const SEC_LABEL = { tes: 'EJ', tfc: 'EJ', el: 'TWh' };
+const val = (a, sec, k, i) => { const s = a[sec] && a[sec][k]; return s ? s[i] : null; };
+function tot(a, sec, i){ if(!a[sec]) return null; let s = 0, any = false; for(const k in a[sec]){ const v = a[sec][k][i]; if(v != null){ s += v; any = true; } } return any ? s : null; }
+const part = (a, sec, ks, i) => { let s = 0; for(const k of ks){ const v = val(a, sec, k, i); if(v != null) s += v; } return s; };
+function lastIdx(a, sec){ if(!a[sec]) return -1; for(let i = NY - 1; i >= 0; i--) if(tot(a, sec, i) != null) return i; return -1; }
+const REN = ['hydro', 'wind', 'solar', 'bio', 'geo'], LOW = REN.concat(['nuclear']), FOS = ['coal', 'oil', 'gas'];
+const METRICS = {
+  elLow:    { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', LOW, i) / t : null; }, label: 'Low-carbon share of electricity', unit: '%', color: '#16a34a' },
+  elRen:    { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', REN, i) / t : null; }, label: 'Renewable share of electricity', unit: '%', color: '#14b8a6' },
+  elNuc:    { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['nuclear'], i) / t : null; }, label: 'Nuclear share of electricity', unit: '%', color: '#a855f7' },
+  elWind:   { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['wind', 'solar'], i) / t : null; }, label: 'Wind + solar share of electricity', unit: '%', color: '#22d3ee' },
+  elCoal:   { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', ['coal'], i) / t : null; }, label: 'Coal share of electricity', unit: '%', color: '#4b5563' },
+  elFossil: { f: (a, i) => { const t = tot(a, 'el', i); return t > 0 ? 100 * part(a, 'el', FOS, i) / t : null; }, label: 'Fossil share of electricity', unit: '%', color: '#92400e' },
+  elecFC:   { f: (a, i) => { const t = tot(a, 'tfc', i); return t > 0 ? 100 * part(a, 'tfc', ['elec'], i) / t : null; }, label: 'Electricity share of final consumption', unit: '%', color: '#0a80d0' },
+  fossilTES:{ f: (a, i) => { const t = tot(a, 'tes', i); return t > 0 ? 100 * part(a, 'tes', FOS, i) / t : null; }, label: 'Fossil share of total energy supply', unit: '%', color: '#92400e' },
+  elTWh:    { f: (a, i) => tot(a, 'el', i), label: 'Electricity generated', unit: ' TWh', color: '#0a80d0' },
+  tesEJ:    { f: (a, i) => { const t = tot(a, 'tes', i); return t == null ? null : t / 1000; }, label: 'Total energy supply', unit: ' EJ', color: '#6b7280' }
+};
+
+// ---------- area selector ----------
+function areaOptions(){
+  const o = a => `<option value="${a.id}">${a.n}</option>`, g = k => E.areas.filter(a => a.k === k);
+  return g('world').map(o).join('') + `<optgroup label="Regions">${g('region').map(o).join('')}</optgroup><optgroup label="Countries and territories">${g('country').map(o).join('')}</optgroup>`;
+}
+$('em-area').innerHTML = areaOptions();
+function defYear(a){ return Math.min(2024, (a.last || 2024)); }
+function setArea(id){ if(!A.has(id)) return; st.area = id; $('em-area').value = id; const a = A.get(id); if(st.year > (a.last || Y1)) st.year = a.last; render(); }
+$('em-area').addEventListener('change', e => setArea(e.target.value));
+
+// ---------- tooltip ----------
+const tip = (box, html, ev) => { const t = box.querySelector('.em-tip'); t.innerHTML = html; t.style.opacity = 1; const r = box.getBoundingClientRect(); let x = ev.clientX - r.left + 14; if(x + t.offsetWidth > r.width) x = ev.clientX - r.left - t.offsetWidth - 14; t.style.left = Math.max(0, x) + 'px'; t.style.top = Math.max(0, ev.clientY - r.top - 20) + 'px'; };
+const untip = box => { const t = box.querySelector('.em-tip'); if(t) t.style.opacity = 0; };
+
+// ---------- stacked area ----------
+function stacked(boxId, legId, sec, mode){
+  const a = A.get(st.area), box = $(boxId), keys = E[sec], lg = $(legId);
+  box.innerHTML = '<svg class="chart"></svg><div class="em-tip"></div>';
+  const li = lastIdx(a, sec);
+  if(li < 0){ box.innerHTML = '<div class="em-load">No data published for this area.</div>'; lg.innerHTML = ''; return null; }
+  const from = Math.max(st.y0, Y0), to = Math.min(st.y1, Y0 + li);
+  const idx = d3.range(yi(from), yi(to) + 1).filter(i => tot(a, sec, i) != null);
+  const svgEl = box.querySelector('svg'), nv = nativeSize(svgEl, 900, 360, { h: 300 }), W = nv.W, H = nv.H, m = nv.mobile ? { t: 10, r: 8, b: 26, l: 42 } : { t: 14, r: 14, b: 30, l: 58 };
+  const pct = mode === 'pct', div = SEC_UNIT[sec];
+  const data = idx.map(i => { const r = { y: Y0 + i, i, t: tot(a, sec, i) }; keys.forEach(k => { const v = val(a, sec, k.k, i) || 0; r[k.k] = pct ? 100 * v / r.t : v / div; }); return r; });
+  if(data.length < 2){ box.innerHTML = '<div class="em-load">Not enough years for this area.</div>'; return null; }
+  const x = d3.scaleLinear([data[0].y, data[data.length - 1].y], [m.l, W - m.r]);
+  const yMax = pct ? 100 : d3.max(data, d => d3.sum(keys, k => d[k.k])), y = d3.scaleLinear([0, yMax], [H - m.b, m.t]).nice();
+  const svg = d3.select(svgEl); svg.attr('role', 'img').attr('aria-label', `${sec} by source, ${a.n}`);
+  y.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)));
+  const stack = d3.stack().keys(keys.map(k => k.k))(data), area = d3.area().x(d => x(d.data.y)).y0(d => y(d[0])).y1(d => y(d[1]));
+  stack.forEach((s, j) => svg.append('path').attr('d', area(s)).attr('fill', keys[j].color).attr('opacity', .9));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(nv.mobile ? 5 : 9).tickFormat(d3.format('d')));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(pct ? d => d + '%' : d => fmtN(d, 0)));
+  svg.append('text').attr('class', 'ut').attr('x', m.l).attr('y', m.t - 2).text(pct ? '% of total' : SEC_LABEL[sec]);
+  const sel = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', '#0f172a').attr('stroke-width', 1.5);
+  const sy = Math.min(Math.max(st.year, data[0].y), data[data.length - 1].y); sel.attr('x1', x(sy)).attr('x2', x(sy));
+  const hov = svg.append('line').attr('y1', m.t).attr('y2', H - m.b).attr('stroke', '#64748b').attr('stroke-dasharray', '3 3').attr('opacity', 0);
+  const yearAt = ev => { const r = svgEl.getBoundingClientRect(); return Math.max(data[0].y, Math.min(data[data.length - 1].y, Math.round(x.invert((ev.clientX - r.left) / r.width * W)))); };
+  svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', H - m.t - m.b).attr('fill', 'transparent').style('cursor', 'crosshair')
+    .on('pointermove', ev => { const yr = yearAt(ev), d = data.find(q => q.y === yr); if(!d) return; hov.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+      const raw = k => (val(a, sec, k.k, d.i) || 0) / div, share = k => 100 * (val(a, sec, k.k, d.i) || 0) / d.t;
+      tip(box, `<b>${a.n} · ${yr}</b><div class="r"><span>Total</span><b>${fmtN(d.t / div)} ${SEC_LABEL[sec]}</b></div>` + keys.slice().reverse().filter(k => (val(a, sec, k.k, d.i) || 0) > 0).map(k => `<div class="r"><span><i style="background:${k.color}"></i>${k.label}</span><span><b>${fmtN(raw(k))}</b> · ${share(k).toFixed(1)}%</span></div>`).join(''), ev); })
+    .on('pointerleave', () => { untip(box); hov.attr('opacity', 0); })
+    .on('click', ev => { st.year = yearAt(ev); renderKpis(); renderBars(); drawAll(true); });
+  lg.innerHTML = keys.map(k => `<span><i style="background:${k.color}"></i>${k.label}</span>`).join('');
+  return { from, to };
+}
+
+// ---------- KPI cards ----------
+function kpiHTML(list){ return list.map(([c, t, v, s, d]) => `<div class="em-kpi" style="--c:${c}"><div class="t">${t}</div><div class="v">${v}</div><div class="s">${s}</div>${d ? `<div class="d">${d}</div>` : ''}</div>`).join(''); }
+function renderKpis(){
+  const a = A.get(st.area), i = yi(st.year), j = yi(2000);
+  const m = k => METRICS[k].f(a, i), m0 = k => METRICS[k].f(a, j);
+  const dd = (k, u = ' pts') => { const v = m(k), v0 = m0(k); return v == null || v0 == null ? '' : `${sgn(v - v0, 1, u)} since 2000`; };
+  const t = tot(a, 'tes', i), t0 = tot(a, 'tes', j);
+  $('em-hero').innerHTML = `<div class="em-hero-h"><div><div class="em-eyebrow">${a.n} · ${st.year}${a.last && st.year >= a.last && a.last === Y1 ? '' : ''}</div><div class="em-hero-t">${a.k === 'country' ? flag(a) : ''} ${a.n}</div></div></div>` +
+    `<div class="em-kpis big">` + kpiHTML([
+      ['#6b7280', 'Total energy supply', t == null ? '–' : fmtN(t / 1000) + ' <small>EJ</small>', 'primary energy', t != null && t0 ? `${sgn(100 * (t / t0 - 1), 0, '%')} since 2000` : ''],
+      ['#92400e', 'Fossil fuels in supply', fmtP(m('fossilTES')), 'coal + oil + gas', dd('fossilTES')],
+      ['#16a34a', 'Low-carbon electricity', fmtP(m('elLow')), 'renewables + nuclear', dd('elLow')],
+      ['#22d3ee', 'Wind + solar electricity', fmtP(m('elWind')), 'share of generation', dd('elWind')],
+      ['#0a80d0', 'Electricity in final use', fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')]]) + '</div>';
+}
+function sectionKpis(){
+  const a = A.get(st.area), i = yi(st.year), j = yi(2000), m = k => METRICS[k].f(a, i), m0 = k => METRICS[k].f(a, j);
+  const dd = k => { const v = m(k), v0 = m0(k); return v == null || v0 == null ? '' : `${sgn(v - v0, 1, ' pts')} since 2000`; };
+  const tw = tot(a, 'el', i);
+  $('el-kpis').innerHTML = kpiHTML([['#16a34a', `Low-carbon · ${st.year}`, fmtP(m('elLow')), 'renewables + nuclear', dd('elLow')], ['#14b8a6', 'Renewables', fmtP(m('elRen')), 'hydro, wind, solar, bio, geothermal', dd('elRen')],
+    ['#92400e', 'Fossil', fmtP(m('elFossil')), 'coal, oil, gas', dd('elFossil')], ['#0a80d0', 'Generated', tw == null ? '–' : fmtN(tw) + ' <small>TWh</small>', 'all sources', '']]);
+  const fs = tot(a, 'tfc', i), ev = part(a, 'tfc', ['elec'], i), oil = part(a, 'tfc', ['oil'], i);
+  $('fc-kpis').innerHTML = kpiHTML([['#0a80d0', `Electricity · ${st.year}`, fmtP(m('elecFC')), 'share of final consumption', dd('elecFC')], ['#92400e', 'Oil products', fs ? fmtP(100 * oil / fs) : '–', 'transport, industry, petrochemicals', ''],
+    ['#6b7280', 'Final consumption', fs == null ? '–' : fmtN(fs / 1000) + ' <small>EJ</small>', 'all energy used by end users', '']]);
+}
+
+// ---------- ranking ----------
+const RK = { metric: 'elLow', year: 2024, dir: 'hi', min: 1, n: 15, all: false };
+$('rk-year').innerHTML = d3.range(Y1, Y0 - 1, -1).map(y => `<option value="${y}"${y === 2024 ? ' selected' : ''}>${y}</option>`).join('');
+function renderBars(){
+  const M = METRICS[RK.metric], i = yi(RK.year);
+  let rows = E.areas.filter(a => a.k === 'country').map(a => ({ a, v: M.f(a, i), el: tot(a, 'el', i) })).filter(r => r.v != null && (RK.min === 0 || (r.el != null && r.el >= RK.min)));
+  rows.sort((x, y) => RK.dir === 'hi' ? y.v - x.v : x.v - y.v);
+  const nAll = rows.length; if(!RK.all) rows = rows.slice(0, RK.n);
+  const mx = M.unit === '%' ? 100 : d3.max(rows, r => r.v) || 1, fmtV = v => M.unit === '%' ? fmtP(v) : fmtN(v) + M.unit;
+  $('rk-bars').innerHTML = rows.map((r, k) => `<div class="em-brow click" data-id="${r.a.id}"><span class="rk">${k + 1}</span><span class="n">${flag(r.a)}<span>${r.a.n}</span></span><span class="t"><i style="width:${Math.max(.6, 100 * r.v / mx)}%;background:${M.color}"></i></span><span class="v">${fmtV(r.v)}</span></div>`).join('') || '<div class="em-load">Nothing to show for these filters.</div>';
+  $('rk-bars').querySelectorAll('.em-brow').forEach(b => b.addEventListener('click', () => { setArea(b.dataset.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  const b = $('rk-more'); b.style.display = nAll > RK.n ? '' : 'none'; b.textContent = RK.all ? `Shrink to ${RK.n}` : `Show all ${nAll}`;
+  $('rk-note').innerHTML = `${RK.dir === 'hi' ? 'Highest' : 'Lowest'} <b>${M.label.toLowerCase()}</b> in ${RK.year}, among the ${nAll} countries with data${RK.min ? ` (areas under ${RK.min} TWh of electricity are left out)` : ''}. Click a row to open that country above.`;
+}
+$('rk-metric').addEventListener('change', e => { RK.metric = e.target.value; RK.all = false; renderBars(); });
+$('rk-year').addEventListener('change', e => { RK.year = +e.target.value; renderBars(); });
+$('rk-min').addEventListener('change', e => { RK.min = +e.target.value; renderBars(); });
+$('rk-n').addEventListener('change', e => { RK.n = +e.target.value; RK.all = false; renderBars(); });
+$('rk-more').addEventListener('click', () => { RK.all = !RK.all; renderBars(); });
+document.querySelectorAll('#rk-dir button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#rk-dir button').forEach(x => x.classList.toggle('active', x === b)); RK.dir = b.dataset.v; RK.all = false; renderBars(); }));
+
+// ---------- EVs vs the grid ----------
+const EV = { x: 'elLow', min: 100000 };
+function evPoints(){
+  const out = [];
+  E.areas.filter(a => a.k === 'country').forEach(a => {
+    const rows = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[a.n]) || []; const r = rows.filter(q => q.period_type === 'ANNUAL' && q.year >= 2024 && q.total > 0 && q.bev != null).sort((p, q) => q.year - p.year)[0];
+    if(!r || r.total < EV.min) return;
+    let gi = Math.min(yi(r.year), yi(a.last || r.year)), gx = null; for(let k = 0; k < 3 && gx == null && gi - k >= 0; k++) gx = METRICS[EV.x].f(a, gi - k);
+    const el = tot(a, 'el', gi); if(gx == null || !el) return;
+    out.push({ a, x: gx, y: 100 * r.bev / r.total, cars: r.total, el, year: r.year });
+  });
+  return out;
+}
+function renderEv(){
+  const box = $('ev-chart'); box.innerHTML = '<svg class="chart"></svg><div class="em-tip"></div>';
+  const pts = evPoints(), svgEl = box.querySelector('svg');
+  if(pts.length < 4){ box.innerHTML = '<div class="em-load">Not enough countries with both series.</div>'; return; }
+  const nv = nativeSize(svgEl, 900, 480, { h: 400 }), W = nv.W, H = nv.H, m = nv.mobile ? { t: 12, r: 12, b: 42, l: 40 } : { t: 16, r: 24, b: 48, l: 58 };
+  const x = d3.scaleLinear([0, 100], [m.l, W - m.r]), ymax = Math.max(10, Math.ceil(d3.max(pts, p => p.y) / 10) * 10), y = d3.scaleLinear([0, ymax], [H - m.b, m.t]);
+  const r = d3.scaleSqrt([0, d3.max(pts, p => p.el)], [3, nv.mobile ? 20 : 30]), svg = d3.select(svgEl);
+  x.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('y1', m.t).attr('y2', H - m.b).attr('x1', x(t)).attr('x2', x(t)));
+  y.ticks(5).forEach(t => svg.append('line').attr('class', 'gl').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => d + '%'));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%'));
+  svg.append('text').attr('class', 'ut').attr('x', W - m.r).attr('y', H - 6).attr('text-anchor', 'end').text(METRICS[EV.x].label + ' →');
+  svg.append('text').attr('class', 'ut').attr('x', m.l + 4).attr('y', m.t + 8).text('↑ BEV share of new-car sales');
+  const sorted = pts.slice().sort((p, q) => q.el - p.el);
+  sorted.forEach(p => { svg.append('circle').attr('cx', x(p.x)).attr('cy', y(p.y)).attr('r', r(p.el)).attr('fill', METRICS.elLow.color).attr('fill-opacity', .35).attr('stroke', METRICS.elLow.color).attr('stroke-width', 1.2).style('cursor', 'pointer')
+    .on('pointermove', ev => tip(box, `<b>${p.a.n}</b><div class="r"><span>${METRICS[EV.x].label}</span><b>${fmtP(p.x)}</b></div><div class="r"><span>BEV share of new cars (${p.year})</span><b>${fmtP(p.y)}</b></div><div class="r"><span>New cars a year</span><b>${fmtN(p.cars)}</b></div><div class="r"><span>Electricity generated</span><b>${fmtN(p.el)} TWh</b></div>`, ev))
+    .on('pointerleave', () => untip(box)).on('click', () => { setArea(p.a.id); $('es-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); }); });
+  const lab = pts.slice().sort((p, q) => q.cars - p.cars).slice(0, nv.mobile ? 9 : 16);
+  lab.forEach(p => svg.append('text').attr('x', x(p.x)).attr('y', y(p.y) - r(p.el) - 3).attr('text-anchor', 'middle').attr('class', 'pl').text(p.a.n.length > 14 ? p.a.n.slice(0, 13) + '…' : p.a.n));
+  const n = pts.length, mx = d3.mean(pts, p => p.x), my = d3.mean(pts, p => p.y), cov = d3.sum(pts, p => (p.x - mx) * (p.y - my)), rr = cov / Math.sqrt(d3.sum(pts, p => (p.x - mx) ** 2) * d3.sum(pts, p => (p.y - my) ** 2));
+  $('ev-note').innerHTML = `Each bubble is a country: horizontal = ${METRICS[EV.x].label.toLowerCase()}, vertical = the share of new cars that are battery-electric (this site's latest full-year figure, 2024 or later), size = electricity generated. ${n} countries with at least ${fmtN(EV.min)} new cars a year. Correlation across these countries: <b>r = ${rr.toFixed(2)}</b> — ${Math.abs(rr) < .25 ? 'almost none: policy and prices matter more than the grid' : rr > 0 ? 'EVs sell somewhat more where the grid is cleaner' : 'EVs sell somewhat more where the grid is dirtier'} (a correlation is not a cause). Click a bubble to open the country above.`;
+  $('ev-leg').innerHTML = '<span><i style="background:#16a34a;opacity:.5"></i>one country · size = electricity generated</span>';
+}
+$('ev-x').addEventListener('change', e => { EV.x = e.target.value; renderEv(); });
+$('ev-min').addEventListener('change', e => { EV.min = +e.target.value; renderEv(); });
+
+// ---------- notes + drawing ----------
+function notes(){
+  const a = A.get(st.area), li = lastIdx(a, 'tes'), ll = lastIdx(a, 'el');
+  $('es-note').innerHTML = `Total energy supply of <b>${a.n}</b> by source, ${st.y0}–${Math.min(st.y1, Y0 + li)}${a.last === 2024 && Y1 === 2025 ? ' (the IEA has not published 2025 for this area yet)' : ''}. Click the chart to pick a year: the figures and the other two charts follow. Supply counts primary energy, so fossil fuels weigh more than wind or solar here — the next section compares power grids kilowatt-hour for kilowatt-hour.`;
+  $('el-note').innerHTML = `Electricity generated in <b>${a.n}</b> by source${ll >= 0 ? `, ${st.y0}–${Math.min(st.y1, Y0 + ll)}` : ''}. Low-carbon = renewables + nuclear.`;
+  $('fc-note').innerHTML = `Energy used by end users in <b>${a.n}</b>. The blue part, electricity, is what grows with electric cars, heat pumps and industry electrification; the brown part, oil products, is mostly transport.`;
+}
+function drawAll(keepKpis){
+  stacked('es-chart', 'es-leg', 'tes', st.esMode); stacked('el-chart', 'el-leg', 'el', st.elMode); stacked('fc-chart', 'fc-leg', 'tfc', st.fcMode);
+}
+function render(){ notes(); renderKpis(); sectionKpis(); drawAll(); }
+function seg(id, key){ $(id).addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; [...$(id).children].forEach(c => c.classList.toggle('active', c === b)); st[key] = b.dataset.v; drawAll(); }); }
+seg('es-mode', 'esMode'); seg('el-mode', 'elMode'); seg('fc-mode', 'fcMode');
+$('em-y0').addEventListener('input', e => { st.y0 = +e.target.value; $('em-y0l').textContent = st.y0; notes(); drawAll(); });
+$('em-y1').addEventListener('input', e => { st.y1 = +e.target.value; $('em-y1l').textContent = st.y1; notes(); drawAll(); });
+if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { drawAll(); renderEv(); });
+let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { drawAll(); renderEv(); }, 200); });
+
+$('em-area').value = 'WORLD'; render(); renderBars(); renderEv();
+
+FilterMemory.auto({ extra: [{ key: 'year', type: 'fn', get: () => st.year, set: v => { st.year = +v; render(); renderEv(); return true; } }] });
+FilterMemory.restore();
+</script>
+</body>
+</html>
