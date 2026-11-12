@@ -40,6 +40,10 @@
   .sd-sec{ font-size:16px; font-weight:900; margin:26px 0 4px; }
   .sd-sync{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 12px; font-size:12.5px; color:var(--text-muted); }
   .sd-sync input{ font:inherit; padding:5px 8px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); }
+  .sd-img{ display:flex; flex-wrap:wrap; gap:12px 16px; align-items:flex-start; margin:6px 0 10px; }
+  .sd-img img{ width:260px; max-width:100%; aspect-ratio:16/9; border:1px solid var(--border); border-radius:8px; background:var(--surface-alt); }
+  .sd-img > div{ flex:1; min-width:200px; }
+  .sd-order{ font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--accent); margin-bottom:3px; }
   .sd-done{ opacity:.92; }
   .sd-done textarea{ background:var(--surface-alt); }
   .sd-date{ font-size:12px; color:var(--text-muted); margin-left:6px; font-weight:600; }
@@ -51,7 +55,7 @@
     <h1>Post drafts<small>private</small></h1>
     <span><a href="stats.html">Site stats</a> · <a href="index.html">← Road to Electric</a></span>
   </div>
-  <p class="sd-note">Ready-to-edit posts for X, written from the latest numbers on the site. Edit the text, check the length, then <b>Post on X</b> opens X with the text filled in (nothing is posted for you). For the picture: open the chart link and press its 📷 button, then paste the image into the post.</p>
+  <p class="sd-note">Ready-to-edit posts for X, written from the latest numbers on the site. Edit the text, check the length, then <b>Post on X</b> opens X with the text filled in (nothing is posted for you). For the picture: open the chart link and press its 📷 button, then paste the image into the post. A draft in several parts lists the <b>last part first</b>: post them from top to bottom and the thread reads in order on X (newest on top).</p>
 
   <div class="sd-ctl">
     <label>Month <select id="ctl-month"></select></label>
@@ -137,7 +141,8 @@
     var lb = T.slice().sort(function(a, b){ return b.s - a.s; }).slice(0, 10);
     var lines = lb.map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + pct1(x.s) + '%'; });
     var hdr = 'BEV share of new car sales, ' + mn + (minU > 0 ? ' (markets above ' + fmt(minU) + ' cars)' : '') + ':';       // no size limit: no description of one
-    D.push({ title:'BEV share leaderboard', tag:'ranking', why:'Rankings get opened and quoted: a hook, ten lines, the link.', posts: thread(hdr, lines, linkMix(ym) + tags()), chart:{ ym:ym } });
+    D.push({ title:'BEV share leaderboard', tag:'ranking', why:'Rankings get opened and quoted: a hook, ten lines, the link.', posts: thread(hdr, lines, linkMix(ym) + tags()), chart:{ ym:ym },
+      img:{ type:'bars', title:'BEV share of new car sales', sub:mn + (minU > 0 ? ' · markets above ' + fmt(minU) + ' cars' : ''), max:100, rows:lb.map(function(x){ return { label:short(x.c), v:x.s, text:pct1(x.s) + '%' }; }) } });
 
     // 2. the tracked markets together (same markets a year ago)
     var pair = T.filter(function(x){ return x.prev && x.prev.total; });
@@ -145,7 +150,8 @@
       var b = pair.reduce(function(s, x){ return s + x.r.bev; }, 0), t = pair.reduce(function(s, x){ return s + x.r.total; }, 0), bp = pair.reduce(function(s, x){ return s + x.prev.bev; }, 0), tp = pair.reduce(function(s, x){ return s + x.prev.total; }, 0);
       var now = 100 * b / t, was = 100 * bp / tp;
       D.push({ title:'The tracked markets together', tag:'big picture', why:'One number for the whole panel, compared with the same markets a year ago (a fair comparison).',
-        posts:[ 'EV share across the ' + pair.length + ' markets with a like-for-like comparison (' + compact(t) + ' new cars), ' + mn + ': BEV ' + pct1(now) + '%.\nSame markets, ' + py + ': ' + pct1(was) + '% (' + (now >= was ? '+' : '') + pct1(now - was) + ' pp).\nBEV units ' + (b >= bp ? '+' : '') + Math.round(100 * (b / bp - 1)) + '% year on year.\n' + linkMix(ym) + tags() ], chart:{ ym:ym } });
+        posts:[ 'EV share across the ' + pair.length + ' markets with a like-for-like comparison (' + compact(t) + ' new cars), ' + mn + ': BEV ' + pct1(now) + '%.\nSame markets, ' + py + ': ' + pct1(was) + '% (' + (now >= was ? '+' : '') + pct1(now - was) + ' pp).\nBEV units ' + (b >= bp ? '+' : '') + Math.round(100 * (b / bp - 1)) + '% year on year.\n' + linkMix(ym) + tags() ], chart:{ ym:ym },
+        img:{ type:'duo', title:'EV share across ' + pair.length + ' markets', sub:'Like for like with a year ago · ' + compact(t) + ' new cars in ' + mn, a:{ label:mn, v:now }, b:{ label:py, v:was }, foot:'BEV units ' + (b >= bp ? '+' : '') + Math.round(100 * (b / bp - 1)) + '% year on year · ' + (now >= was ? '+' : '') + pct1(now - was) + ' pp' } });
     }
 
     // 3. biggest movers vs a year ago
@@ -153,7 +159,8 @@
     if(mv.length >= 6){
       var up = mv.slice(0, 5).map(function(x){ return flag(x.c) + ' ' + short(x.c) + ' +' + pct1(x.d) + ' pp (' + pct1(x.ps) + '% → ' + pct1(x.s) + '%)'; });
       var dn = mv.slice(-3).reverse().filter(function(x){ return x.d < 0; }).map(function(x){ return flag(x.c) + ' ' + short(x.c) + ' ' + pct1(x.d) + ' pp'; });
-      D.push({ title:'Biggest movers', tag:'trend', why:'Change versus the same month last year, in share points: avoids the month-to-month noise.', posts: thread('Biggest BEV share gains vs ' + py + ':', up.concat(dn.length ? ['Going the other way: ' + dn.join(', ')] : []), linkMix(ym) + tags()), chart:{ ym:ym } });
+      D.push({ title:'Biggest movers', tag:'trend', why:'Change versus the same month last year, in share points: avoids the month-to-month noise.', posts: thread('Biggest BEV share gains vs ' + py + ':', up.concat(dn.length ? ['Going the other way: ' + dn.join(', ')] : []), linkMix(ym) + tags()), chart:{ ym:ym },
+        img:{ type:'bars', signed:true, title:'BEV share change vs ' + py, sub:mn + ' · share points', rows:mv.slice(0, 5).concat(mv.slice(-3).filter(function(x){ return x.d < 0; })).map(function(x){ return { label:short(x.c), v:x.d, text:(x.d >= 0 ? '+' : '') + pct1(x.d) + ' pp', note:pct1(x.ps) + '% → ' + pct1(x.s) + '%' }; }) } });
     }
 
     // 4. new monthly records
@@ -165,13 +172,15 @@
     if(rec.length){
       rec.sort(function(a, b){ return b.s - a.s; });
       D.push({ title:'New monthly records', tag:'record', why:'"Record" posts travel: the markets whose BEV share this month is the highest in their own monthly history on the site.',
-        posts: thread('New BEV share records, ' + mn + ':', rec.slice(0, 6).map(function(x){ return flag(x.c) + ' ' + short(x.c) + ' ' + pct1(x.s) + '% (best before: ' + pct1(x.best) + '%, ' + monthName(x.bm).slice(0, 3) + ' ' + x.bm.slice(2, 4) + ')'; }), linkMix(ym) + tags()), chart:{ ym:ym } });
+        posts: thread('New BEV share records, ' + mn + ':', rec.slice(0, 6).map(function(x){ return flag(x.c) + ' ' + short(x.c) + ' ' + pct1(x.s) + '% (best before: ' + pct1(x.best) + '%, ' + monthName(x.bm).slice(0, 3) + ' ' + x.bm.slice(2, 4) + ')'; }), linkMix(ym) + tags()), chart:{ ym:ym },
+        img:{ type:'bars', title:'New BEV share records', sub:mn + ' · the tick marks the previous best', max:100, rows:rec.slice(0, 6).map(function(x){ return { label:short(x.c), v:x.s, text:pct1(x.s) + '%', marker:x.best, note:'was ' + pct1(x.best) + '%' }; }) } });
     }
 
     // 5. biggest markets
     var bg = T.slice().sort(function(a, b){ return b.r.total - a.r.total; }).slice(0, 10);
     D.push({ title:'Biggest markets and their BEV share', tag:'ranking', why:'Your "Top 10 markets" format, as a single post.',
-      posts: thread('Top 10 markets in ' + mn + ' (cars sold · BEV share):', bg.map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + compact(x.r.total) + ' · ' + pct1(x.s) + '%'; }), linkMix(ym) + tags()), chart:{ ym:ym } });
+      posts: thread('Top 10 markets in ' + mn + ' (cars sold · BEV share):', bg.map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + compact(x.r.total) + ' · ' + pct1(x.s) + '%'; }), linkMix(ym) + tags()), chart:{ ym:ym },
+      img:{ type:'stack', title:'Top 10 markets', sub:mn + ' · cars sold, the BEV part in green', rows:bg.map(function(x){ return { label:short(x.c), total:x.r.total, bev:x.r.bev, text:compact(x.r.total) + ' · ' + pct1(x.s) + '%' }; }) } });
 
     // 6. one post per big market
     bg.slice(0, 12).forEach(function(x){
@@ -180,7 +189,9 @@
       var txt = flag(x.c) + ' ' + x.c + ', ' + mn + ': ' + fmt(x.r.total) + ' new cars, BEV ' + pct1(x.s) + '% (' + fmt(x.r.bev) + ' units).' +
         (x.ps !== null && x.prev ? '\nA year ago: ' + pct1(x.ps) + '% (' + (x.s >= x.ps ? '+' : '') + pct1(x.s - x.ps) + ' pp), sales ' + (x.r.total >= x.prev.total ? '+' : '') + Math.round(100 * (x.r.total / x.prev.total - 1)) + '%.' : '') +
         (ytdRows.length > 1 && yt ? '\nYear to date: ' + pct1(100 * yb / yt) + '% BEV.' : '') + '\n' + linkMix(ym, x.c) + tags();
-      D.push({ title:x.c, tag:'country' + (x.prov ? ' · provisional' : ''), warn:x.prov, why:'Country snapshot: the month, the share, the year-ago comparison, the year to date.', posts:[txt], chart:{ ym:ym, c:x.c } });
+      D.push({ title:x.c, tag:'country' + (x.prov ? ' · provisional' : ''), warn:x.prov, why:'Country snapshot: the month, the share, the year-ago comparison, the year to date.', posts:[txt], chart:{ ym:ym, c:x.c },
+        img:{ type:'trend', title:x.c, sub:mn + ' · BEV share of new car sales', big:pct1(x.s) + '%', bigSub:fmt(x.r.total) + ' new cars' + (x.ps !== null && x.prev ? ' · ' + (x.s >= x.ps ? '+' : '') + pct1(x.s - x.ps) + ' pp vs ' + py : ''),
+          series:Object.keys(BY[x.c]).filter(function(m){ return m <= ym && BY[x.c][m].total > 0; }).sort().slice(-13).map(function(m){ return { m:m, v:share(BY[x.c][m]) }; }) } });
     });
     // identity of a draft = its kind + month (+ country): once posted it is not offered again, whatever the size limit or the wording
     var KIND = { 'BEV share leaderboard':'leaderboard', 'The tracked markets together':'panel', 'Biggest movers':'movers', 'New monthly records':'records', 'Biggest markets and their BEV share':'markets' };
@@ -237,18 +248,81 @@
     });
   }
 
+  // ---- the picture of a draft: a 1200 x 675 card (16:9, what X shows best) drawn on a canvas, copied to the clipboard when "Post on X" is pressed
+  var FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', GREEN = '#1e8f5f', BLUE = '#0a80d0', RED = '#b3261e', INK = '#06182e', MUTED = '#52677d', TRACK = '#e6eef6';
+  function drawCard(img){
+    var W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var c = cv.getContext('2d');
+    c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+    var g = c.createLinearGradient(0, 0, W, 0); g.addColorStop(0, BLUE); g.addColorStop(1, '#2fae4e'); c.fillStyle = g; c.fillRect(0, 0, W, 10);
+    c.textBaseline = 'alphabetic'; c.fillStyle = INK; c.font = '800 46px ' + FONT; c.fillText(img.title, 56, 86);
+    c.fillStyle = MUTED; c.font = '500 25px ' + FONT; c.fillText(img.sub, 56, 126);
+    c.fillStyle = INK; c.font = '800 24px ' + FONT; c.fillText('Road to Electric', 56, H - 30);
+    c.fillStyle = MUTED; c.font = '600 22px ' + FONT; c.textAlign = 'right'; c.fillText('roadtoelectric.github.io', W - 56, H - 30); c.textAlign = 'left';
+    var top = 160, bottom = H - 78;
+    if(img.type === 'bars' || img.type === 'stack'){
+      var rows = img.rows, n = rows.length, rh = (bottom - top) / n, x0 = 300, x1 = W - 300, bh = Math.min(38, rh * 0.62);
+      var vals = rows.map(function(r){ return img.type === 'stack' ? r.total : r.v; }), mx = img.max || Math.max.apply(null, vals.map(Math.abs)), mn0 = img.signed ? Math.min(0, Math.min.apply(null, vals)) : 0, mx0 = img.signed ? Math.max(0, Math.max.apply(null, vals)) * 1.38 : mx;       // signed: headroom on the right for the value text
+      var X = function(v){ return x0 + (x1 - x0) * (v - mn0) / ((mx0 - mn0) || 1); };
+      rows.forEach(function(r, i){
+        var cy = top + i * rh + rh / 2, y = cy - bh / 2;
+        c.fillStyle = INK; c.font = '700 ' + Math.round(Math.min(30, rh * 0.56)) + 'px ' + FONT; c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(r.label, x0 - 20, cy);
+        c.fillStyle = TRACK; c.fillRect(x0, y, x1 - x0, bh);
+        if(img.type === 'stack'){ var w = X(r.total) - x0; c.fillStyle = '#9fb3c8'; c.fillRect(x0, y, w, bh); c.fillStyle = GREEN; c.fillRect(x0, y, w * r.bev / r.total, bh); c.fillStyle = INK; c.textAlign = 'left'; c.font = '700 ' + Math.round(Math.min(26, rh * 0.5)) + 'px ' + FONT; c.fillText(r.text, Math.min(x0 + w + 14, x1 - 40), cy); return; }
+        var z = X(0), e = X(r.v); c.fillStyle = r.v < 0 ? RED : GREEN; c.fillRect(Math.min(z, e), y, Math.abs(e - z), bh);
+        if(r.marker != null){ c.fillStyle = INK; c.fillRect(X(r.marker) - 2, y - 6, 4, bh + 12); }
+        c.fillStyle = INK; c.textAlign = 'left'; c.font = '800 ' + Math.round(Math.min(30, rh * 0.58)) + 'px ' + FONT; c.fillText(r.text, (r.v < 0 ? z + 14 : Math.max(z, e) + 14), cy);
+        if(r.note){ c.fillStyle = MUTED; c.font = '500 ' + Math.round(Math.min(22, rh * 0.42)) + 'px ' + FONT; c.textAlign = 'left'; c.fillText(r.note, x1 + 16, cy); }
+      });
+      if(img.signed){ c.fillStyle = INK; c.fillRect(X(0) - 1, top - 6, 2, bottom - top + 6); }
+    } else if(img.type === 'duo'){
+      [[img.b, 200, '#9fb3c8'], [img.a, 700, GREEN]].forEach(function(p){
+        c.fillStyle = p[2]; c.font = '800 150px ' + FONT; c.textAlign = 'center'; c.fillText(pct1(p[0].v) + '%', p[1] + 150, 330);
+        c.fillStyle = MUTED; c.font = '600 30px ' + FONT; c.fillText(p[0].label, p[1] + 150, 380);
+      });
+      c.fillStyle = INK; c.font = '800 34px ' + FONT; c.fillText(img.foot, W / 2, 520); c.textAlign = 'left';
+    } else if(img.type === 'trend'){
+      c.fillStyle = GREEN; c.font = '800 130px ' + FONT; c.fillText(img.big, 56, 290); c.fillStyle = MUTED; c.font = '600 28px ' + FONT; c.fillText(img.bigSub, 56, 340);
+      var s = img.series, n2 = s.length, cx0 = 56, cx1 = W - 56, cy0 = 420, cy1 = bottom - 34, mx2 = Math.max(10, Math.max.apply(null, s.map(function(p){ return p.v; })) * 1.1), bw = (cx1 - cx0) / Math.max(1, n2);
+      s.forEach(function(p, i){ var h = (cy1 - cy0 + 110) * p.v / mx2, x = cx0 + i * bw + 6, y = cy1 - h; c.fillStyle = i === n2 - 1 ? GREEN : '#9fc7e8'; c.fillRect(x, y, bw - 12, h);
+        c.fillStyle = INK; c.font = '700 20px ' + FONT; c.textAlign = 'center'; if(i === n2 - 1 || i === 0 || i === n2 - 13) c.fillText(pct1(p.v) + '%', x + (bw - 12) / 2, y - 8);
+        c.fillStyle = MUTED; c.font = '500 18px ' + FONT; c.fillText(MON[+p.m.slice(5) - 1].slice(0, 3), x + (bw - 12) / 2, cy1 + 24); });
+      c.textAlign = 'left';
+    }
+    return cv;
+  }
+  function makeImage(d){ return new Promise(function(ok, no){ try{ drawCard(d.img).toBlob(function(b){ b ? ok(b) : no(new Error('image')); }, 'image/png'); }catch(e){ no(e); } }); }
+  function copyImage(d){
+    var p = d.blob ? Promise.resolve(d.blob) : d.blobPromise;
+    if(!(navigator.clipboard && window.ClipboardItem)) return Promise.reject(new Error('no clipboard'));
+    return p.then(function(b){ return navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]); });
+  }
+  function downloadImage(d){ (d.blob ? Promise.resolve(d.blob) : d.blobPromise).then(function(b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'road-to-electric-' + d.key.replace(/[^a-z0-9]+/gi, '-') + '.png'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500); }); }
+
   function render(){
     var D = build().filter(function(d){ return !posted[d.key]; }), host = $('cards'); host.innerHTML = '';
     D.forEach(function(d){
       var card = document.createElement('section'); card.className = 'sd-card';
       var h = '<h2>' + d.title.replace(/&/g, '&amp;') + '<span class="sd-tag' + (d.warn ? ' sd-warn' : '') + '">' + d.tag + '</span></h2><p class="sd-why">' + d.why + '</p>';
       card.innerHTML = h; host.appendChild(card);
-      d.posts.forEach(function(text, i){
+      // the picture that goes with the post (part 1 of a thread): drawn now, copied to the clipboard when Post on X is pressed
+      var imgRow = document.createElement('div'); imgRow.className = 'sd-img';
+      var im = document.createElement('img'); im.alt = 'Image for the post'; var side = document.createElement('div');
+      var cpi = btn('Copy image'), dli = btn('Download image'), hint = document.createElement('div'); hint.className = 'sd-why'; hint.textContent = 'Pressing "Post on X" (part 1) copies this image: press Ctrl+V in the X window to attach it.';
+      d.blobPromise = makeImage(d).then(function(b){ d.blob = b; im.src = URL.createObjectURL(b); return b; });
+      cpi.addEventListener('click', function(){ copyImage(d).then(function(){ cpi.textContent = '✓ Image copied'; setTimeout(function(){ cpi.textContent = 'Copy image'; }, 1600); }, function(){ downloadImage(d); }); });
+      dli.addEventListener('click', function(){ downloadImage(d); });
+      side.appendChild(hint); var br = document.createElement('div'); br.className = 'sd-row'; br.appendChild(cpi); br.appendChild(dli); side.appendChild(br); imgRow.appendChild(im); imgRow.appendChild(side); card.appendChild(imgRow);
+      var parts = d.posts.length, order = d.posts.map(function(t, i){ return i; });
+      if(parts > 1) order.reverse();          // a thread is posted last part first: the newest post is on top on X, so the thread then reads 1/n ... n/n
+      order.forEach(function(i, pos){
+        var text = d.posts[i];
         var wrap = document.createElement('div'); wrap.className = 'sd-post';
+        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts; wrap.appendChild(cap); }
         var ta = document.createElement('textarea'); ta.value = text; ta.spellcheck = false; ta.rows = Math.min(14, text.split('\n').length + 1);
         var row = document.createElement('div'); row.className = 'sd-row';
         var cp = btn('Copy text'), go = document.createElement('a'); go.className = 'sd-btn primary'; go.target = '_blank'; go.rel = 'noopener'; go.textContent = 'Post on X';
         var ch = document.createElement('a'); ch.className = 'sd-btn'; ch.target = '_blank'; ch.rel = 'noopener'; ch.textContent = 'Open the chart'; ch.href = linkMix(d.chart.ym, d.chart.c);
+        if(i === 0) go.addEventListener('click', function(){ copyImage(d).then(function(){ hint.textContent = '✓ Image copied: press Ctrl+V in the X window to attach it.'; }, function(){ hint.textContent = 'Could not copy the image: use Download image and attach it in X.'; }); });
         var len = document.createElement('span'); len.className = 'sd-len';
         var upd = function(){ var w = weight(ta.value); len.textContent = w + ' / 280'; len.classList.toggle('over', w > 280); go.href = 'https://x.com/intent/post?text=' + encodeURIComponent(ta.value); };
         ta.addEventListener('input', upd); upd();
@@ -256,7 +330,8 @@
         row.appendChild(cp); row.appendChild(go); row.appendChild(ch); row.appendChild(len); wrap.appendChild(ta); wrap.appendChild(row); card.appendChild(wrap);
       });
       var foot = document.createElement('div'); foot.className = 'sd-row'; var mk = btn('✓ Mark as posted'); mk.title = 'I posted it on X: move it to the Posted list and do not offer it again';
-      mk.addEventListener('click', function(){ mark(d, [].slice.call(card.querySelectorAll('textarea')).map(function(t){ return t.value; }).join('\n\n— next post —\n\n')); });
+      mk.addEventListener('click', function(){ var texts = [].slice.call(card.querySelectorAll('textarea')).map(function(t){ return t.value; }); if(texts.length > 1) texts.reverse();     // stored in reading order, part 1 first
+        mark(d, texts.join('\n\n— next post —\n\n')); });
       foot.appendChild(mk); card.appendChild(foot);
     });
     if(!D.length) host.innerHTML = '<p class="sd-note">Every draft for this month is already marked as posted (or no market matches the filters).</p>';
@@ -290,6 +365,7 @@
       loadPosted(); best();
     }).catch(function(){ $('sync-err').textContent = 'Could not reach the database.'; });
   });
+  window.RteDrafts = { build: build, drawCard: drawCard };       // for checking the drafts and their pictures from the console
   render(); loadPosted(); best();
 })();
 </script>
