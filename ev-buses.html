@@ -201,7 +201,6 @@
       <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
       <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
       <a href="ev-buses.html" aria-current="page"><span class="dot"></span>EV Buses</a>
-      <a href="ev-buses.html"><span class="dot"></span>EV Buses</a>
       <a href="world-oil.html"><span class="dot"></span>World Oil</a>
 
       <div class="nav-heading">Markets</div>
@@ -291,6 +290,20 @@
         <div class="tk-callout" id="bus-call"></div>
       </div>
 
+      <div class="card chart-card" id="bus-2026">
+        <h2 id="b26-h">Europe's buses in 2026 so far</h2>
+        <p class="note" style="display:block" id="b26-note"></p>
+        <div class="tk-kpis" id="b26-kpis" style="margin:10px 0"></div>
+        <h3 style="font-size:14px;margin:16px 0 2px">City buses: battery-electric share of registrations, first half of each year</h3>
+        <div class="tk-bars" id="b26-city"></div>
+        <h3 style="font-size:14px;margin:18px 0 2px" id="b26-h3c">Battery-electric buses registered by country, first half of 2026</h3>
+        <div class="tk-bars" id="b26-ctry"></div>
+        <h3 style="font-size:14px;margin:18px 0 2px">Who builds them: battery-electric bus registrations, first half of 2026</h3>
+        <div class="tk-bars" id="b26-mk"></div>
+        <p class="tk-note" id="b26-foot"></p>
+        <div class="tk-callout" id="b26-call"></div>
+      </div>
+
       <div class="card chart-card" id="icct-card">
         <h2 id="icct-h">Zero-emission buses sold, country by country (ICCT)</h2>
         <p class="note" style="display:block" id="icct-note"></p>
@@ -309,6 +322,7 @@
           <ul class="note" style="display:block;padding-left:18px;line-height:1.6">
             <li><strong>IEA numbers.</strong> Electric bus sales, stock (buses on the road) and shares: IEA Global EV Data Explorer, Global EV Outlook 2026 (CC BY 4.0), pulled from its public API. Electric = battery-electric + plug-in hybrid + fuel cell, all bus types (city, intercity, coaches, minibuses). The IEA rounds to two or three significant digits, so small countries can show the same figure in two years and shares are approximate.</li>
             <li><strong>City buses.</strong> Transport &amp; Environment (T&amp;E, Feb 2026), built on DVV Media's <i>Alternative Drivelines for City Buses 2025</i>: shares of new city bus registrations by powertrain for 29 European countries, read from T&amp;E's published charts (a few thin, unlabelled slivers are estimated and marked ≈). Hybrids are not zero-emission. Edition and numbers are in <code>assets/city-bus-data.js</code>.</li>
+            <li><strong>2026 so far.</strong> DVV Media Group (battery-electric buses above 8 tonnes in the EU27, UK, Iceland, Norway and Switzerland; city bus segment counted separately), ACEA (EU27 buses and coaches, electrically-chargeable = battery-electric + plug-in hybrid + fuel cell) and the ICCT (EU zero-emission buses and coaches) measure different things and do not add up. Numbers are in <code>assets/bus-2026-data.js</code>.</li>
             <li><strong>ICCT.</strong> Zero-emission buses sold per country (battery-electric and fuel cell), from the ICCT Global ZE Market Monitor (34 countries including the United States, India, Brazil and Mexico), a separate count from the IEA's.</li>
             <li><strong>Fleet.</strong> "Share of fleet" is the IEA's electric share of all buses on the road. China's electric buses are mostly city buses, so its fleet share is far higher than anywhere else.</li>
             <li><strong>Trucks and vans.</strong> They have their own page: <a href="ev-trucking.html">EV Trucking</a>.</li>
@@ -326,6 +340,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="assets/city-bus-data.js"></script>
+<script src="assets/bus-2026-data.js"></script>
 <script src="assets/ev-trucks-data.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
@@ -486,6 +501,27 @@ function cityBuses(){
     (eu != null ? `<br><br><b>Why not the same number as the IEA ranking above?</b> The IEA's electric share of <i>all</i> new buses (${pct(eu)} in the European Union in ${Y[LAST]}) includes coaches and intercity buses, which are far less electric; T&amp;E and DVV Media count city buses only.` : '');
 }
 
+
+// ---------- Europe's buses in 2026 so far (assets/bus-2026-data.js) ----------
+function so2026(){
+  const D = BUS_2026, V = D.dvv, A = D.acea, I = D.icct, sg = (a, b) => (a >= b ? '+' : '') + Math.round(100 * (a / b - 1)) + '%';
+  document.getElementById('b26-h').textContent = `Europe's buses in 2026 so far: ${fmt(V.bevH1[2026])} battery-electric registrations in six months`;
+  document.getElementById('b26-note').innerHTML = `Three sources, three different counts: DVV Media (battery-electric buses, Europe), ACEA (all EU buses and coaches, by power source) and the ICCT (EU zero-emission buses and coaches). Read ${esc(D.asOf)}; they do not add up to each other.`;
+  const cs = V.cityBevShareH1;
+  const kp = [[fmt(V.bevH1[2026]), `battery-electric buses registered in Europe, first half of 2026 (${sg(V.bevH1[2026], V.bevH1[2025])} on ${fmt(V.bevH1[2025])}; DVV)`],
+    [cs[2026] + '%', `of the first-half city bus market was battery-electric (${cs[2025]}% a year earlier; DVV)`],
+    [A.q3.share + '%', `of EU buses and coaches sold in Q1–Q3 2026 were electrically-chargeable, up from ${A.q3.shareYearAgo}%; ${A.h1.share}% in the first half (ACEA)`],
+    [fmt(I.zeUnits[0]), `zero-emission buses and coaches sold in the EU in Q1–Q2 2026, ${sg(I.zeUnits[0], I.zeUnits[1])} on ${fmt(I.zeUnits[1])} (ICCT)`]];
+  document.getElementById('b26-kpis').innerHTML = kp.map(k => `<div class="tk-kpi" style="background:var(--surface-alt);border-color:var(--border)"><div class="v">${k[0]}</div><div class="l" style="color:var(--text-muted)">${k[1]}</div></div>`).join('');
+  bars('b26-city', Object.keys(cs).map(y => ({ l:`H1 ${y}`, v:cs[y], c:y == 2026 ? '#16a34a' : '#86efac', t:cs[y] + '%' })));
+  const ct = V.countries.slice().sort((a, b) => b[1] - a[1]);
+  bars('b26-ctry', ct.map(r => ({ l:esc(nm(r[0])), v:r[1], c:colOf(r[0]), t:`${fmt(r[1])}${r[2] ? ` (${sg(r[1], r[2])})` : ''}` })));
+  bars('b26-mk', V.makers.map(r => ({ l:esc(r[0]), v:r[1], c:'#0ea5e9', t:fmt(r[1]) + (r[0] === 'Solaris' ? ` (+${V.solarisFuelCell} hydrogen)` : '') })));
+  const a = V.alt;
+  document.getElementById('b26-foot').innerHTML = `Country bars: first-half 2026 registrations, change on first-half 2025 in brackets where the source gives it (Lithuania covers January–March only). Other drivelines in H1 2026 (DVV): hybrid ${fmt(a.hybrid[0])} (${fmt(a.hybrid[1])}), CNG ${fmt(a.cng[0])} (${fmt(a.cng[1])}), hydrogen ${fmt(a.fuelCell[0])} (${fmt(a.fuelCell[1])}). Sources: <a href="${V.url}" target="_blank" rel="noopener">${esc(V.label)}</a> · <a href="${A.h1.url}" target="_blank" rel="noopener">ACEA, ${A.h1.date}</a> · <a href="${A.q3.url}" target="_blank" rel="noopener">ACEA, ${A.q3.date}</a> · <a href="${I.url}" target="_blank" rel="noopener">${esc(I.label)}</a>.`;
+  document.getElementById('b26-call').innerHTML = `<b>Italy took the lead.</b> It registered ${fmt(V.countries[0][1])} battery-electric buses in the first half (${fmt(V.countries[0][2])} a year earlier), ahead of the United Kingdom (${fmt(V.countries[1][1])}, down from ${fmt(V.countries[1][2])}) and Poland (${fmt(V.countries[2][1])}, from ${fmt(V.countries[2][2])}). ACEA says the same: Italy is now the EU's largest bus market and its electrically-chargeable registrations more than doubled over nine months, while diesel still holds ${A.q3.diesel}% of EU bus sales. The city segment is where electrification is furthest: battery-electric buses were ${cs[2026]}% of city bus registrations in the first half and, per the ICCT, more than ${I.cityBusElectricQ2Above}% in the second quarter, the highest share recorded. <br><br><b>Why 61%, 28% and 26%?</b> DVV counts the city bus segment only; ACEA and the ICCT count all buses and coaches, and ACEA includes plug-in hybrids. The ICCT quotes 28.3% in its summary and 28.6% further in its report for the first half. These figures are provisional and come from press summaries of the DVV report; ACEA's share slipped from ${A.h1.share}% (first half) to ${A.q3.share}% (nine months) as coaches and diesel buses sold more in the summer.`;
+}
+
 // ---------- ICCT: zero-emission buses sold by country ----------
 function icct(){
   const rows = Object.keys(ICCT).map(c => ({ c, v:(ICCT[c]['2025'] || {}).buses, p:(ICCT[c]['2024'] || {}).buses })).filter(r => r.v > 0).sort((a, b) => b.v - a.v).slice(0, 18);
@@ -513,7 +549,7 @@ playBtn.addEventListener('click', () => {
 });
 document.getElementById('sp-sel').addEventListener('change', spotlight);
 
-hero(); insights(); rank(); takeoff(); spotlight(); cityBuses(); icct(); counting();
+hero(); insights(); rank(); takeoff(); spotlight(); cityBuses(); so2026(); icct(); counting();
 })();
 </script>
 <script src="assets/filter-memory.js?v=5"></script>

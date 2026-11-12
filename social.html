@@ -11,6 +11,7 @@
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-iso2.js"></script>
 <script src="assets/city-bus-data.js"></script>
+<script src="assets/bus-2026-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
 <style>
@@ -363,7 +364,28 @@
       Object.keys(ms).forEach(function(m){ var d = brandDraft(c, m); if(d) bm.push(d); });
     });
     var bySize = function(a, b){ return b.size - a.size; };
-    return D.concat(busDrafts(), cm.sort(bySize), bm.sort(bySize));
+    return D.concat(busDrafts(), busDrafts26(), cm.sort(bySize), bm.sort(bySize));
+  }
+
+
+  // ---- Europe's buses in 2026 so far (assets/bus-2026-data.js, BUS_2026): a 2-part thread per edition (key 'bus26|<edition>')
+  function busDrafts26(){
+    if(typeof BUS_2026 === 'undefined') return [];
+    var D = BUS_2026, V = D.dvv, A = D.acea, ct = V.countries.slice().sort(function(a, b){ return b[1] - a[1]; }), link = SITE + 'ev-buses.html#bus-2026', tail = '\n' + link + tags();
+    var ch = function(a, b){ return (a >= b ? '+' : '') + Math.round(100 * (a / b - 1)) + '%'; };
+    var cs = V.cityBevShareH1, fl = function(c){ var f = flag(c); return (f ? f + ' ' : '') + short(c); };
+    var p1 = '\uD83D\uDE8C Europe registered ' + fmt(V.bevH1[2026]) + ' battery-electric buses in H1 2026, ' + ch(V.bevH1[2026], V.bevH1[2025]) + ' on a year earlier (DVV Media).\nCity buses: ' + cs[2026] + '% battery-electric (' + cs[2025] + '% in H1 2025).\n'
+      + fl(ct[0][0]) + ' leads with ' + fmt(ct[0][1]) + ' (' + fmt(ct[0][2]) + ' a year ago), ahead of ' + fl(ct[1][0]) + ' ' + fmt(ct[1][1]) + ' and ' + fl(ct[2][0]) + ' ' + fmt(ct[2][1]) + ' (1/2)';
+    var mk = V.makers.slice(0, 6).map(function(r){ return r[0] + ' ' + fmt(r[1]); }).join(' · ');
+    var p2 = 'Who builds them (H1 2026, battery-electric): ' + mk + '.\nAll EU buses and coaches, ACEA Q1–Q3 2026: ' + A.q3.share + '% electrically-chargeable vs ' + A.q3.shareYearAgo + '% a year ago; diesel ' + A.q3.diesel + '%.' + tail + ' (2/2)';
+    var rowsC = ct.slice(0, 8).map(function(r){ return { label:short(r[0]), v:r[1], text:fmt(r[1]) + (r[2] ? ' (' + ch(r[1], r[2]) + ')' : '') }; });
+    var rowsM = V.makers.slice(0, 8).map(function(r){ return { label:r[0], v:r[1], text:fmt(r[1]) }; });
+    return [{ sec:'bus', title:'Buses · Europe in the first half of 2026', tag:'buses · H1 2026', why:'New 2026 bus numbers: DVV Media (battery-electric buses, Europe), ACEA (all EU buses and coaches). Provisional press summaries: check against the sources before posting.',
+      key:'bus26|' + D.edition, ym:'', chart:{ ym:'' }, link:link, posts:[p1, p2], size:1e9 - 1,
+      images:[
+        { type:'bars', title:'Battery-electric buses registered, H1 2026', sub:'Europe · DVV Media · change on H1 2025 in brackets', rows:rowsC },
+        { type:'bars', title:'Battery-electric buses by maker, H1 2026', sub:'Europe · DVV Media', rows:rowsM }
+      ] }];
   }
 
   // ---- city buses (assets/city-bus-data.js, CITY_BUS): one thread per edition of the data; a new edition gives a new key, so it shows up again
