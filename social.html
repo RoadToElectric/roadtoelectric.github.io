@@ -276,15 +276,27 @@
   }
 
   // ---- one motorisation thread per country: the month with its year-ago comparison, then the year to date against the full year before (raw units and shares)
+  // ranks used by the country drafts: car market size (the full year before, so every country is measured over the same twelve months) and BEV share of the year to date (same months for every country)
+  var RANKC = {};
+  function rankOf(key, valueOf, c){
+    var R = RANKC[key];
+    if(!R){ R = RANKC[key] = { v:{}, n:0 }; Object.keys(BY).forEach(function(k){ var v = valueOf(k); if(v !== null && isFinite(v)){ R.v[k] = v; R.n++; } }); }
+    if(R.v[c] === undefined) return null;
+    var n = 1; Object.keys(R.v).forEach(function(k){ if(R.v[k] > R.v[c]) n++; });
+    return { rank:n, of:R.n };
+  }
+  function marketRank(c, pyr){ return rankOf('mk' + pyr, function(k){ var f = periodSum(k, pyr, 12); return f && f.total ? f.total : null; }, c); }
+  function ytdShareRank(c, yr, mi){ return rankOf('ys' + yr + '-' + mi, function(k){ var y = periodSum(k, yr, mi); return y && y.total ? y.bev / y.total : null; }, c); }
   function countryDraft(c, m){
     var r = BY[c][m], p = BY[c][prevYear(m)], s = share(r), ps = p && p.total ? share(p) : null, yr = m.slice(0, 4), pyr = String(+yr - 1), mi = +m.slice(5), mn = monthName(m), py = monthName(prevYear(m));
     var ytd = periodSum(c, yr, mi), full = periodSum(c, pyr, 12), lastM = py.slice(0, 3) + ' ' + pyr, nowM = MON[mi - 1].slice(0, 3);
-    var p1 = flag(c) + ' ' + c + ', ' + mn + '\nBEV: ' + fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars = ' + pct1(s) + '%';
+    var mk = marketRank(c, pyr), mkTxt = mk ? ' (#' + mk.rank + ' car market)' : '', yRank = (ytd && mi > 1) ? ytdShareRank(c, yr, mi) : null;
+    var p1 = flag(c) + ' ' + c + mkTxt + ', ' + mn + '\nBEV: ' + fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars = ' + pct1(s) + '%';
     if(ps !== null) p1 += '\n' + lastM + ': ' + fmt(p.bev) + ' of ' + fmt(p.total) + ' = ' + pct1(ps) + '% (' + sgn(s - ps) + ' pp)' +
       '\n' + (p.bev ? 'BEV units ' + sgnI(100 * (r.bev / p.bev - 1)) + '%, ' : '') + 'all new cars ' + sgnI(100 * (r.total / p.total - 1)) + '%';
     var p2 = null;
     if(ytd && mi > 1){
-      p2 = c + ', year to date (Jan–' + nowM + ' ' + yr + ')\nBEV: ' + fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' = ' + pct1(100 * ytd.bev / ytd.total) + '%';
+      p2 = c + ', year to date (Jan–' + nowM + ' ' + yr + ')\nBEV: ' + fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' = ' + pct1(100 * ytd.bev / ytd.total) + '%' + (yRank ? '\nBEV share rank, Jan–' + nowM + ': #' + yRank.rank + ' of ' + yRank.of + ' markets with data' : '');
       if(full && full.total) p2 += '\nFull year ' + pyr + ': ' + fmt(full.bev) + ' of ' + fmt(full.total) + ' = ' + pct1(100 * full.bev / full.total) + '% (' + sgn(100 * ytd.bev / ytd.total - 100 * full.bev / full.total) + ' pp)' + (full.bev ? '\nBEV units so far: ' + Math.round(100 * ytd.bev / full.bev) + '% of all ' + pyr : '');
     }
     var link = linkMix(m, c) + tags(), posts;
@@ -292,8 +304,8 @@
     else posts = [p1 + '\n' + link];
     var prov = isProv(c, m);
     var dr = { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). Part 1 has every month against the same month a year earlier; part 2 has the powertrain mix bars with the change.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
-      img:{ type:'country', title:c, sub:mn + ' · BEV share of new car sales', yr:yr, pyr:pyr, mi:mi, big:pct1(s) + '%', l2:fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars', l3:ps !== null ? lastM + ': ' + pct1(ps) + '% · ' + sgn(s - ps) + ' pp' : '',
-        ytd:(ytd && mi > 1) ? { head:'Year to date, Jan–' + nowM + ' ' + yr, pct:pct1(100 * ytd.bev / ytd.total) + '%', raw:fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' cars', fyHead:full && full.total ? 'Full year ' + pyr + ': ' + pct1(100 * full.bev / full.total) + '%' : '', fyRaw:full && full.total ? fmt(full.bev) + ' of ' + fmt(full.total) + ' cars' : '' } : null,
+      img:{ type:'country', title:c, sub:mn + ' · BEV share of new car sales' + (mk ? ' · #' + mk.rank + ' car market' : ''), yr:yr, pyr:pyr, mi:mi, big:pct1(s) + '%', l2:fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars', l3:ps !== null ? lastM + ': ' + pct1(ps) + '% · ' + sgn(s - ps) + ' pp' : '',
+        ytd:(ytd && mi > 1) ? { head:'Year to date, Jan–' + nowM + ' ' + yr, rank:yRank ? '#' + yRank.rank + ' of ' + yRank.of : '', pct:pct1(100 * ytd.bev / ytd.total) + '%', raw:fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' cars', fyHead:full && full.total ? 'Full year ' + pyr + ': ' + pct1(100 * full.bev / full.total) + '%' : '', fyRaw:full && full.total ? fmt(full.bev) + ' of ' + fmt(full.total) + ' cars' : '' } : null,
         bars:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function(k){ var kk = (k < 10 ? '0' : '') + k, a = BY[c][yr + '-' + kk], b = BY[c][pyr + '-' + kk]; return { m:k, cur:(k <= mi && a && a.total) ? share(a) : null, prev:(b && b.total) ? share(b) : null }; }) } };
     if(posts.length > 1) dr.images = [dr.img, mixImage(c, MON[mi - 1], m, (ytd && mi > 1) ? ytd : null, full, r, p, yr, pyr, nowM)];       // part 2 (year to date) gets its own picture: the mix bars
     return dr;
@@ -692,6 +704,7 @@
         c.fillStyle = TRACK; c.fillRect(56, 358, 440, 3);
         c.fillStyle = MUTED; c.font = '600 24px ' + FONT; c.fillText(img.ytd.head, 56, 398);
         c.fillStyle = GREEN; c.font = '800 62px ' + FONT; c.fillText(img.ytd.pct, 56, 460);
+        if(img.ytd.rank){ c.fillStyle = INK; c.font = '800 28px ' + FONT; c.fillText(img.ytd.rank, 300, 436); c.fillStyle = MUTED; c.font = '600 21px ' + FONT; c.fillText('markets by BEV share', 300, 462); }
         c.fillStyle = INK; c.font = '600 25px ' + FONT; c.fillText(img.ytd.raw, 56, 495);
         if(img.ytd.fyHead){ c.fillStyle = INK; c.font = '800 27px ' + FONT; c.fillText(img.ytd.fyHead, 56, 540); c.fillStyle = MUTED; c.font = '600 24px ' + FONT; c.fillText(img.ytd.fyRaw, 56, 572); }
       }
