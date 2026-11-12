@@ -145,13 +145,24 @@
 
   // BEV and total of one country over the first n months of a year: the monthly rows when all n are there (same basis as the month in the post),
   // otherwise the yearly table (the YTD row of that many months, or the ANNUAL row for a full year); null when neither exists
+  var PTK = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'others'];
   function periodSum(c, year, n){
-    var s = { bev:0, total:0 }, ok = true;
-    for(var m = 1; m <= n; m++){ var r = BY[c][year + '-' + (m < 10 ? '0' : '') + m]; if(!r || !r.total){ ok = false; break; } s.bev += r.bev; s.total += r.total; }
+    var s = { total:0 }, ok = true; PTK.forEach(function(k){ s[k] = 0; });
+    for(var m = 1; m <= n; m++){ var r = BY[c][year + '-' + (m < 10 ? '0' : '') + m]; if(!r || !r.total){ ok = false; break; } PTK.forEach(function(k){ s[k] += r[k] || 0; }); s.total += r.total; }
     if(ok) return s;
     var Y = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[c]) || [], row = null;
     Y.forEach(function(r){ if(String(r.year) === year && ((n === 12 && r.period_type === 'ANNUAL') || (n < 12 && r.period_type === 'YTD' && r.months_covered === n))) row = r; });
-    return row && row.total ? { bev:row.bev, total:row.total } : null;
+    if(!(row && row.total)) return null;
+    var o = { total:row.total }; PTK.forEach(function(k){ o[k] = row[k] || 0; }); return o;
+  }
+  // powertrain mix (each in % of the total) of a row with bev/phev/hev/petrol/diesel/others/total
+  function mixOf(r){ var o = {}; PTK.forEach(function(k){ o[k] = r.total ? 100 * (r[k] || 0) / r.total : 0; }); return o; }
+  // the picture of the second part of a country thread: the powertrain mix (the Electrified Share bar) of the month and of the year to date, each against its comparison, with the change per powertrain
+  function mixImage(c, mnFull, nowYM, ytd, full, r, p, yr, pyr, nowM){
+    var groups = [{ head:mnFull + ' against a year earlier', a:{ label:monthName(nowYM), r:r }, b:p && p.total ? { label:monthName(prevYear(nowYM)), r:p } : null }];
+    if(ytd) groups.push({ head:'Year to date against the full year before', a:{ label:'Jan–' + nowM + ' ' + yr, r:ytd }, b:full && full.total ? { label:'Full year ' + pyr, r:full } : null });
+    groups.forEach(function(g){ g.a.mix = mixOf(g.a.r); if(g.b) g.b.mix = mixOf(g.b.r); });
+    return { type:'mix', title:c, sub:'Powertrain mix of new cars · arrows = change in points (green: towards electric)', groups:groups };
   }
 
   // ---- the drafts: each is { title, why, tag, posts:[text...], chart:{ym,c} }
@@ -277,10 +288,12 @@
     if(p2) posts = weight(p1 + '\n\n' + p2 + '\n' + link) <= 280 ? [p1 + '\n\n' + p2 + '\n' + link] : [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];
     else posts = [p1 + '\n' + link];
     var prov = isProv(c, m);
-    return { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). The picture shows each month against the same month a year earlier.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
+    var dr = { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). Part 1 has every month against the same month a year earlier; part 2 has the powertrain mix bars with the change.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
       img:{ type:'country', title:c, sub:mn + ' · BEV share of new car sales', yr:yr, pyr:pyr, mi:mi, big:pct1(s) + '%', l2:fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars', l3:ps !== null ? lastM + ': ' + pct1(ps) + '% · ' + sgn(s - ps) + ' pp' : '',
         ytd:(ytd && mi > 1) ? { head:'Year to date, Jan–' + nowM + ' ' + yr, pct:pct1(100 * ytd.bev / ytd.total) + '%', raw:fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' cars', fyHead:full && full.total ? 'Full year ' + pyr + ': ' + pct1(100 * full.bev / full.total) + '%' : '', fyRaw:full && full.total ? fmt(full.bev) + ' of ' + fmt(full.total) + ' cars' : '' } : null,
         bars:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function(k){ var kk = (k < 10 ? '0' : '') + k, a = BY[c][yr + '-' + kk], b = BY[c][pyr + '-' + kk]; return { m:k, cur:(k <= mi && a && a.total) ? share(a) : null, prev:(b && b.total) ? share(b) : null }; }) } };
+    if(posts.length > 1) dr.images = [dr.img, mixImage(c, MON[mi - 1], m, (ytd && mi > 1) ? ytd : null, full, r, p, yr, pyr, nowM)];       // part 2 (year to date) gets its own picture: the mix bars
+    return dr;
   }
 
   // ---- brands and models: the monthly tables, indexed once (country -> month -> rows)
@@ -458,6 +471,32 @@
     } else if(img.type === 'bm'){
       var cols = img.cols, cw = cols.length > 1 ? (W - 112 - 40) / 2 : W - 112;
       cols.forEach(function(col, k){ var cx0 = 56 + k * (cw + 40); c.fillStyle = MUTED; c.font = '800 24px ' + FONT; c.textAlign = 'left'; c.fillText(col.head, cx0, 168); drawStack(c, col.rows, cx0, cx0 + cw, 186, bottom, col.labelW + (cols.length > 1 ? 0 : 120), 24); });
+    } else if(img.type === 'mix'){
+      // the Electrified Share bars (each 100% of the powertrains) for the month and the year to date, each next to its comparison; right: the BEV change; below: the change of every powertrain
+      var KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'others'], COL = { bev:'#1e8f5f', phev:'#2563eb', hev:'#f4a742', petrol:'#1a1a1a', diesel:'#6b7280', others:'#8b5cf6' },
+          LAB = { bev:'Battery electric', phev:'Plug-in hybrid', hev:'Hybrid', petrol:'Petrol', diesel:'Diesel', others:'Others' }, SHT = { bev:'BEV', phev:'PHEV', hev:'HEV', petrol:'Petrol', diesel:'Diesel', others:'Others' };
+      var tone = function(k, dv){ if(Math.abs(dv) < 0.05 || k === 'others') return MUTED; return ((k === 'petrol' || k === 'diesel') ? dv < 0 : dv > 0) ? GREEN : RED; };
+      var sg = function(dv){ return (dv >= 0 ? '+' : '−') + Math.abs(dv).toFixed(1); }, arrow = function(dv){ return Math.abs(dv) < 0.05 ? '=' : dv > 0 ? '▲' : '▼'; };
+      c.textAlign = 'left'; c.textBaseline = 'alphabetic'; var lx = 56; c.font = '700 21px ' + FONT;
+      KEYS.forEach(function(k){ c.fillStyle = COL[k]; c.fillRect(lx, 150, 18, 18); c.fillStyle = INK; c.fillText(LAB[k], lx + 26, 166); lx += 26 + c.measureText(LAB[k]).width + 26; });
+      var bx0 = 280, bx1 = 1000, bwid = bx1 - bx0;
+      img.groups.forEach(function(g, gi){
+        var y0 = 212 + gi * 200; c.fillStyle = INK; c.font = '800 24px ' + FONT; c.textAlign = 'left'; c.fillText(g.head, 56, y0);
+        var rows = g.b ? [g.a, g.b] : [g.a];
+        rows.forEach(function(rw, ri){
+          var y = y0 + 16 + ri * 62, cy = y + 21;
+          c.textAlign = 'right'; c.fillStyle = INK; c.font = '700 22px ' + FONT; c.fillText(rw.label, bx0 - 14, cy - 2); c.fillStyle = GREEN; c.font = '800 21px ' + FONT; c.fillText('BEV ' + pct1(rw.mix.bev) + '%', bx0 - 14, cy + 22);
+          var x = bx0; KEYS.forEach(function(k){ var w = bwid * rw.mix[k] / 100; if(w <= 0) return; c.fillStyle = COL[k]; c.fillRect(x, y, w, 42);
+            if(w >= 44){ c.fillStyle = k === 'hev' ? INK : '#ffffff'; c.font = '700 19px ' + FONT; c.textAlign = 'center'; c.fillText(Math.round(rw.mix[k]) + '%', x + w / 2, cy + 7); } x += w; });
+        });
+        if(g.b){
+          var dB = g.a.mix.bev - g.b.mix.bev, my = y0 + 16 + 62 / 2 + 21;
+          c.textAlign = 'left'; c.fillStyle = tone('bev', dB); c.font = '800 34px ' + FONT; c.fillText(arrow(dB) + ' ' + sg(dB), bx1 + 14, my); c.fillStyle = MUTED; c.font = '600 18px ' + FONT; c.fillText('BEV points', bx1 + 14, my + 24);
+          var sx = bx0, sy = y0 + 16 + 62 + 42 + 34; c.font = '700 20px ' + FONT;
+          KEYS.slice(1).forEach(function(k){ var dv = g.a.mix[k] - g.b.mix[k]; if(k === 'others' && Math.abs(dv) < 0.05) return; var t = SHT[k] + ' ' + arrow(dv) + ' ' + sg(dv); c.fillStyle = COL[k]; c.fillRect(sx, sy - 14, 12, 12); c.fillStyle = tone(k, dv); c.fillText(t, sx + 18, sy); sx += 18 + c.measureText(t).width + 26; });
+        }
+      });
+      c.textAlign = 'left';
     } else if(img.type === 'country'){
       // left: the month, then the year to date against the full year before (raw units and shares); right: every month of the year against the same month a year earlier
       c.textAlign = 'left'; c.textBaseline = 'alphabetic';
@@ -512,31 +551,24 @@
       }
       var h = '<h2>' + d.title.replace(/&/g, '&amp;') + '<span class="sd-tag' + (d.warn ? ' sd-warn' : '') + '">' + d.tag + '</span></h2><p class="sd-why">' + d.why + '</p>';
       card.innerHTML = h; host.appendChild(card);
-      // the picture that goes with the post (part 1 of a thread): drawn now, copied to the clipboard when Post on X is pressed
-      var imgRow = document.createElement('div'); imgRow.className = 'sd-img';
-      var im = document.createElement('img'); im.alt = ''; im.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; var side = document.createElement('div');
-      var cpi = btn('Copy image'), dli = btn('Download image'), hint = document.createElement('div'); hint.className = 'sd-why'; hint.textContent = 'Pressing "Post on X" (part 1) copies this image: press Ctrl+V in the X window to attach it.';
-      d.imEl = im; d.blobPromise = null; im.__d = d; if(io) io.observe(im); else ensureImage(d);
-      cpi.addEventListener('click', function(){ copyImage(d).then(function(){ cpi.textContent = '✓ Image copied'; setTimeout(function(){ cpi.textContent = 'Copy image'; }, 1600); }, function(){ downloadImage(d); }); });
-      dli.addEventListener('click', function(){ downloadImage(d); });
-      side.appendChild(hint); var br = document.createElement('div'); br.className = 'sd-row'; br.appendChild(cpi); br.appendChild(dli); side.appendChild(br); imgRow.appendChild(im); imgRow.appendChild(side); card.appendChild(imgRow);
-      var parts = d.posts.length, order = d.posts.map(function(t, i){ return i; });
+      var parts = d.posts.length, order = d.posts.map(function(t, i){ return i; }), imgs = d.images || [d.img];          // imgs[i] = the picture of part i (a part may have none)
       if(parts > 1) order.reverse();          // a thread is posted last part first: the newest post is on top on X, so the thread then reads 1/n ... n/n
       order.forEach(function(i, pos){
         var text = d.posts[i];
         var wrap = document.createElement('div'); wrap.className = 'sd-post';
-        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts + (i === 0 ? ' · this part carries the image' : ''); wrap.appendChild(cap); }
+        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts + (imgs[i] ? ' · with its own image' : ' · no image'); wrap.appendChild(cap); }
+        var ir = imgs[i] ? imageRow(d, i, imgs[i], io) : null; if(ir) wrap.appendChild(ir.row);
         var ta = document.createElement('textarea'); ta.value = text; ta.spellcheck = false; ta.rows = Math.min(14, text.split('\n').length + 1);
         var row = document.createElement('div'); row.className = 'sd-row';
         var cp = btn('Copy text'), go = document.createElement('a'); go.className = 'sd-btn primary'; go.target = '_blank'; go.rel = 'noopener'; go.textContent = 'Post on X';
         var ch = document.createElement('a'); ch.className = 'sd-btn'; ch.target = '_blank'; ch.rel = 'noopener'; ch.textContent = 'Open the chart'; ch.href = linkMix(d.chart.ym, d.chart.c);
-        // the image goes with part 1: copy it FIRST (while this page still has the focus: a new tab takes it away and the browser then refuses the copy), open X after
-        if(i === 0){
+        // a part with a picture: copy it FIRST (while this page still has the focus: a new tab takes it away and the browser then refuses the copy), open X after
+        if(ir){
           go.textContent = 'Post on X + copy image';
           go.addEventListener('click', function(e){
-            e.preventDefault(); var href = go.href;
+            e.preventDefault(); var href = go.href, hint = ir.hint;
             var open = function(){ var w = window.open(href, '_blank'); if(w){ try{ w.opener = null; }catch(x){} } else hint.textContent += ' The pop-up was blocked: allow pop-ups for this page, or use the Copy text button and open X yourself.'; };
-            copyImage(d).then(function(){ hint.textContent = '✓ Image copied: press Ctrl+V in the X window to attach it.'; open(); }, function(){ hint.textContent = 'Could not copy the image: use Download image and attach it in X.'; open(); });
+            copyImage(ir.it).then(function(){ hint.textContent = '✓ Image copied: press Ctrl+V in the X window to attach it.'; open(); }, function(){ hint.textContent = 'Could not copy the image: use Download image and attach it in X.'; open(); });
           });
         }
         var len = document.createElement('span'); len.className = 'sd-len';
@@ -556,6 +588,19 @@
     $('foot').textContent = 'Written from assets/country-monthly-data.js (' + Object.keys(BY).length + ' markets), manufacturer-monthly-data.js and manufacturer-model-monthly-data.js. Regional drafts group ' + Object.keys(regionOf).length + ' known countries' + (noReg.length ? '; in the world draft only (no region draft requested): ' + noReg.join(', ') : '') + '. ' + (Object.keys(PROV).length ? 'Provisional (estimated split) markets are left out of the rankings unless ticked: ' + Object.keys(PROV).join(', ') + '. ' : '') + 'Always read a draft before posting: a market with a late revision can move a few tenths of a point.';
   }
   function btn(t){ var b = document.createElement('button'); b.type = 'button'; b.className = 'sd-btn'; b.textContent = t; return b; }
+  // the picture of one post of a draft: drawn when it comes near the screen, copied to the clipboard by that post's own Post on X button
+  var BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+  function imageRow(d, i, img, io){
+    var it = { img:img, key:d.key + (i ? '-part' + (i + 1) : ''), blob:null, blobPromise:null, imEl:null };
+    var row = document.createElement('div'); row.className = 'sd-img';
+    var im = document.createElement('img'); im.alt = ''; im.src = BLANK; var side = document.createElement('div');
+    var cpi = btn('Copy image'), dli = btn('Download image'), hint = document.createElement('div'); hint.className = 'sd-why'; hint.textContent = 'Pressing "Post on X + copy image" copies this image: press Ctrl+V in the X window to attach it.';
+    it.imEl = im; im.__d = it; if(io) io.observe(im); else ensureImage(it);
+    cpi.addEventListener('click', function(){ copyImage(it).then(function(){ cpi.textContent = '✓ Image copied'; setTimeout(function(){ cpi.textContent = 'Copy image'; }, 1600); }, function(){ downloadImage(it); }); });
+    dli.addEventListener('click', function(){ downloadImage(it); });
+    side.appendChild(hint); var br = document.createElement('div'); br.className = 'sd-row'; br.appendChild(cpi); br.appendChild(dli); side.appendChild(br); row.appendChild(im); row.appendChild(side);
+    return { it:it, row:row, hint:hint };
+  }
 
   // ---- what worked on X so far (needs the stats passphrase on this device)
   function best(){
