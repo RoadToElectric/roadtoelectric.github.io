@@ -28,16 +28,14 @@
   function loadCopyTool(){
     if(window.RteChartCopy) return Promise.resolve();
     return ccP || (ccP = new Promise(function(ok, no){
-      var s = document.createElement('script'); s.src = BASE + 'chart-copy.js?v=7'; s.onload = ok; s.onerror = function(){ ccP = null; no(new Error('could not load the copy tool')); };
+      var s = document.createElement('script'); s.src = BASE + 'chart-copy.js?v=8'; s.onload = ok; s.onerror = function(){ ccP = null; no(new Error('could not load the copy tool')); };
       document.head.appendChild(s);
     }));
   }
   // click = copy the picture to the clipboard, Shift+click = save it as a .png file, Alt+click = leave the notes out of the picture
-  function addCopyButton(card, after){
-    if(card.querySelector(':scope > .rte-copy-chart')) return;
+  function copyButton(card, tip, label){
     var b = document.createElement('button'); b.type = 'button'; b.className = 'rte-copy-chart'; b.textContent = '📷';
-    var tip = 'Copy this chart as an image (Shift+click: save as a PNG file · Alt+click: without the notes)';
-    b.title = tip; b.setAttribute('aria-label', 'Copy this chart as an image');
+    b.title = tip; b.setAttribute('aria-label', label);
     b.addEventListener('click', function(e){
       e.stopPropagation();
       if(b.disabled) return;
@@ -50,7 +48,20 @@
       if(save) return saveIt(canClip ? 'Saved as a PNG file' : 'Saved as a PNG file (this browser cannot copy images here)');
       navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })]).then(function(){ finish('✓', 'Image copied: paste it into your post', true); }, function(){ saveIt('Saved as a PNG file (the browser did not allow copying)'); });
     });
+    return b;
+  }
+  function addCopyButton(card, after){
+    if(card.querySelector(':scope > .rte-copy-chart')) return;
+    var b = copyButton(card, 'Copy this chart as an image (Shift+click: save as a PNG file · Alt+click: without the notes)', 'Copy this chart as an image');
     card.insertBefore(b, after ? after.nextSibling : card.firstChild);
+  }
+  // the header stat block of a data page (the big number and its tiles): one picture of the whole block, same click behaviour
+  var INSIGHTS = '.wo-ins, .wp-ins, .tk-ins', HEROES = '.wo-hero, .em-hero, .tk-hero, .wp-hero, ' + INSIGHTS;      // the big-number block and the row of tiles under it
+  function addHeroButton(h){
+    if(h.querySelector(':scope > .rte-copy-chart') || h.offsetHeight < 60) return;
+    if(getComputedStyle(h).position === 'static') h.style.position = 'relative';
+    var b = copyButton(h, 'Copy these figures as an image (Shift+click: save as a PNG file)', 'Copy these figures as an image');
+    b.classList.add(h.matches(INSIGHTS) ? 'rte-ins-copy' : 'rte-hero-copy'); h.appendChild(b);
   }
   function addButton(card){
     if(card.querySelector(':scope > .rte-sec-link') || !card.querySelector('h2, h3') || card.offsetHeight < 60) return;
@@ -64,12 +75,14 @@
     card.insertBefore(b, card.firstChild);
     addCopyButton(card, b);
   }
-  function scan(){ var all = cards(), i; for(i = 0; i < all.length; i++){ ensureId(all[i]); addButton(all[i]); } }
+  function scan(){ var all = cards(), i; for(i = 0; i < all.length; i++){ ensureId(all[i]); addButton(all[i]); } var hs = document.querySelectorAll(HEROES); for(i = 0; i < hs.length; i++) addHeroButton(hs[i]); }
   var st = document.createElement('style');
   st.textContent = '.rte-sec-link{float:right;margin:0 0 4px 8px;appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:999px;width:30px;height:30px;padding:0;font-size:14px;line-height:1;cursor:pointer;opacity:.75}' +
     '.rte-sec-link:hover,.rte-sec-link.ok{opacity:1;border-color:var(--accent);color:var(--accent)}' +
     '.rte-copy-chart{float:right;margin:0 0 4px 8px;appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:999px;width:30px;height:30px;padding:0;font-size:14px;line-height:1;cursor:pointer;opacity:.75}' +
     '.rte-copy-chart:hover,.rte-copy-chart.ok{opacity:1;border-color:var(--accent);color:var(--accent)}.rte-copy-chart:disabled{cursor:progress}html[data-view="mobile"] .rte-copy-chart{margin-top:-2px}' +
+    '.rte-hero-copy{position:absolute;top:12px;right:12px;float:none;margin:0;z-index:5;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5);color:#fff;opacity:.9}.rte-hero-copy:hover,.rte-hero-copy.ok{background:rgba(255,255,255,.3);border-color:#fff;color:#fff;opacity:1}' +
+    '.rte-ins-copy{position:absolute;top:-15px;right:-6px;float:none;margin:0;z-index:5;box-shadow:0 1px 5px rgba(0,0,0,.14)}' +
     '@keyframes rteFlash{0%,60%{box-shadow:0 0 0 4px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}.rte-sec-flash{animation:rteFlash 2.2s ease-out 1}';
   document.head.appendChild(st);
   var t = null, soon = function(){ clearTimeout(t); t = setTimeout(scan, 400); };

@@ -68,8 +68,9 @@
     });
   }
   function name(card){
-    var h = card.querySelector('h2, h3'), t = (h ? h.textContent : card.id || 'chart').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
-    return 'road-to-electric-' + (t || 'chart') + '.png';
+    var hero = !card.querySelector('h2, h3') && /hero/i.test(card.className + ' ' + card.id), h = hero ? document.querySelector('h1') : card.querySelector('h2, h3');
+    var t = (h ? h.textContent : card.id || 'chart').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70);
+    return 'road-to-electric-' + (t || 'chart') + (hero ? '-headline' : '') + '.png';
   }
   function download(blob, card){
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name(card); document.body.appendChild(a); a.click();
