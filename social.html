@@ -285,7 +285,7 @@
       if(full && full.total) p2 += '\nFull year ' + pyr + ': ' + fmt(full.bev) + ' of ' + fmt(full.total) + ' = ' + pct1(100 * full.bev / full.total) + '% (' + sgn(100 * ytd.bev / ytd.total - 100 * full.bev / full.total) + ' pp)' + (full.bev ? '\nBEV units so far: ' + Math.round(100 * ytd.bev / full.bev) + '% of all ' + pyr : '');
     }
     var link = linkMix(m, c) + tags(), posts;
-    if(p2) posts = weight(p1 + '\n\n' + p2 + '\n' + link) <= 280 ? [p1 + '\n\n' + p2 + '\n' + link] : [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];
+    if(p2) posts = [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];          // always two parts when there is a year to date: each part has its own picture (a country without a year-ago month, like Australia, used to fit in one post and lost the mix picture)
     else posts = [p1 + '\n' + link];
     var prov = isProv(c, m);
     var dr = { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). Part 1 has every month against the same month a year earlier; part 2 has the powertrain mix bars with the change.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
