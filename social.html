@@ -37,6 +37,12 @@
   .sd-warn{ color:var(--accent-strong); border-color:var(--accent-strong); }
   .sd-best{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:14px; font-size:13px; }
   .sd-best b{ font-variant-numeric:tabular-nums; }
+  .sd-sec{ font-size:16px; font-weight:900; margin:26px 0 4px; }
+  .sd-sync{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 12px; font-size:12.5px; color:var(--text-muted); }
+  .sd-sync input{ font:inherit; padding:5px 8px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); }
+  .sd-done{ opacity:.92; }
+  .sd-done textarea{ background:var(--surface-alt); }
+  .sd-date{ font-size:12px; color:var(--text-muted); margin-left:6px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -55,6 +61,16 @@
   </div>
   <div class="sd-best" id="best" hidden></div>
   <div id="cards"></div>
+
+  <h2 class="sd-sec" id="posted-h">Posted on X</h2>
+  <p class="sd-note" id="posted-note"></p>
+  <div class="sd-sync" id="sync" hidden>
+    <span>To keep this list on every device, enter the stats passphrase:</span>
+    <input type="password" id="sync-key" placeholder="Passphrase" autocomplete="current-password" aria-label="Stats passphrase">
+    <button type="button" class="sd-btn" id="sync-go">Save</button>
+    <span id="sync-err"></span>
+  </div>
+  <div id="posted"></div>
   <p class="sd-note" id="foot"></p>
 </main>
 
@@ -166,11 +182,63 @@
         (ytdRows.length > 1 && yt ? '\nYear to date: ' + pct1(100 * yb / yt) + '% BEV.' : '') + '\n' + linkMix(ym, x.c) + tags();
       D.push({ title:x.c, tag:'country' + (x.prov ? ' · provisional' : ''), warn:x.prov, why:'Country snapshot: the month, the share, the year-ago comparison, the year to date.', posts:[txt], chart:{ ym:ym, c:x.c } });
     });
+    // identity of a draft = its kind + month (+ country): once posted it is not offered again, whatever the size limit or the wording
+    var KIND = { 'BEV share leaderboard':'leaderboard', 'The tracked markets together':'panel', 'Biggest movers':'movers', 'New monthly records':'records', 'Biggest markets and their BEV share':'markets' };
+    D.forEach(function(d){ d.ym = d.chart.ym; d.key = (KIND[d.title] || 'country|' + d.title) + '|' + d.ym; });
     return D;
   }
 
+  // ---- which drafts were posted on X (in the database through the stats passphrase, on this device only until the passphrase is given)
+  var RPC = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/', APIKEY = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP', LOCAL = 'rte-drafts-posted';
+  var posted = {};                                   // draft key -> { key, title, month, body, posted_at }
+  var statsKey = function(){ try{ return localStorage.getItem('rte-stats-key') || ''; }catch(e){ return ''; } };
+  var readLocal = function(){ try{ return JSON.parse(localStorage.getItem(LOCAL) || '{}') || {}; }catch(e){ return {}; } };
+  var writeLocal = function(o){ try{ localStorage.setItem(LOCAL, JSON.stringify(o)); }catch(e){} };
+  function rpc(fn, body){ return fetch(RPC + fn, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:APIKEY, Authorization:'Bearer ' + APIKEY }, body:JSON.stringify(body) }).then(function(r){ return r.ok ? r.json() : null; }); }
+  function loadPosted(){
+    var k = statsKey();
+    if(!k){ posted = readLocal(); render(); return Promise.resolve(); }
+    return rpc('x_drafts_list', { p_key:k }).then(function(x){
+      if(!x || x.error){ posted = readLocal(); render(); return; }                                     // wrong passphrase or offline: this device's own list
+      var m = {}; x.posted.forEach(function(p){ m[p.key] = p; });
+      var loc = readLocal(), keys = Object.keys(loc);
+      keys.forEach(function(q){ if(!m[q]){ m[q] = loc[q]; rpc('x_draft_mark', { p_key:k, p_draft_key:q, p_title:loc[q].title, p_month:loc[q].month, p_body:loc[q].body, p_posted_at:loc[q].posted_at }); } });   // marked here before the passphrase was given
+      if(keys.length) writeLocal({});
+      posted = m; render();
+    }).catch(function(){ posted = readLocal(); render(); });
+  }
+  function mark(d, body){
+    var e = { key:d.key, title:d.title, month:d.ym, body:body, posted_at:new Date().toISOString() }, k = statsKey();
+    posted[d.key] = e;
+    if(k) rpc('x_draft_mark', { p_key:k, p_draft_key:d.key, p_title:d.title, p_month:d.ym, p_body:body, p_posted_at:e.posted_at }); else { var l = readLocal(); l[d.key] = e; writeLocal(l); }
+    render();
+  }
+  function unmark(q){
+    delete posted[q]; var k = statsKey(), l = readLocal();
+    if(k) rpc('x_draft_unmark', { p_key:k, p_draft_key:q });
+    if(l[q]){ delete l[q]; writeLocal(l); }
+    render();
+  }
+  function renderPosted(){
+    var list = Object.keys(posted).map(function(q){ return posted[q]; }).sort(function(a, b){ return a.posted_at < b.posted_at ? 1 : -1; }), host = $('posted'); host.innerHTML = '';
+    $('posted-h').textContent = 'Posted on X (' + list.length + ')';
+    $('posted-note').textContent = list.length ? 'Drafts you marked as posted: they are no longer offered above, whatever the month list or the size limit. The text is the one you posted.' : 'Nothing marked as posted yet. After you post a draft on X, press "Mark as posted" under it: it moves here and is not offered again.';
+    $('sync').hidden = !!statsKey();
+    list.forEach(function(p){
+      var card = document.createElement('section'); card.className = 'sd-card sd-done';
+      card.innerHTML = '<h2>' + p.title.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '<span class="sd-tag">' + (p.month ? monthName(p.month) : '') + '</span><span class="sd-date">posted ' + new Date(p.posted_at).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }) + '</span></h2>';
+      var ta = document.createElement('textarea'); ta.value = p.body; ta.readOnly = true; ta.rows = Math.min(14, p.body.split('\n').length + 1);
+      ta.style.cssText = 'width:100%;box-sizing:border-box;margin-top:8px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;color:var(--text);font:inherit;font-size:14px;line-height:1.45;resize:vertical';
+      var row = document.createElement('div'); row.className = 'sd-row';
+      var cp = btn('Copy text'), back = btn('Not posted: back to drafts');
+      cp.addEventListener('click', function(){ (navigator.clipboard ? navigator.clipboard.writeText(p.body) : Promise.reject()).then(function(){ cp.textContent = '✓ Copied'; setTimeout(function(){ cp.textContent = 'Copy text'; }, 1500); }, function(){ ta.select(); }); });
+      back.addEventListener('click', function(){ unmark(p.key); });
+      row.appendChild(cp); row.appendChild(back); card.appendChild(ta); card.appendChild(row); host.appendChild(card);
+    });
+  }
+
   function render(){
-    var D = build(), host = $('cards'); host.innerHTML = '';
+    var D = build().filter(function(d){ return !posted[d.key]; }), host = $('cards'); host.innerHTML = '';
     D.forEach(function(d){
       var card = document.createElement('section'); card.className = 'sd-card';
       var h = '<h2>' + d.title.replace(/&/g, '&amp;') + '<span class="sd-tag' + (d.warn ? ' sd-warn' : '') + '">' + d.tag + '</span></h2><p class="sd-why">' + d.why + '</p>';
@@ -187,8 +255,12 @@
         cp.addEventListener('click', function(){ (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(function(){ cp.textContent = '✓ Copied'; setTimeout(function(){ cp.textContent = 'Copy text'; }, 1500); }, function(){ ta.select(); }); });
         row.appendChild(cp); row.appendChild(go); row.appendChild(ch); row.appendChild(len); wrap.appendChild(ta); wrap.appendChild(row); card.appendChild(wrap);
       });
+      var foot = document.createElement('div'); foot.className = 'sd-row'; var mk = btn('✓ Mark as posted'); mk.title = 'I posted it on X: move it to the Posted list and do not offer it again';
+      mk.addEventListener('click', function(){ mark(d, [].slice.call(card.querySelectorAll('textarea')).map(function(t){ return t.value; }).join('\n\n— next post —\n\n')); });
+      foot.appendChild(mk); card.appendChild(foot);
     });
-    var latest = months[0];
+    if(!D.length) host.innerHTML = '<p class="sd-note">Every draft for this month is already marked as posted (or no market matches the filters).</p>';
+    renderPosted();
     $('foot').textContent = 'Written from assets/country-monthly-data.js (' + Object.keys(BY).length + ' markets). ' + (Object.keys(PROV).length ? 'Provisional (estimated split) markets are left out of the rankings unless ticked: ' + Object.keys(PROV).join(', ') + '. ' : '') + 'Always read a draft before posting: a market with a late revision can move a few tenths of a point.';
   }
   function btn(t){ var b = document.createElement('button'); b.type = 'button'; b.className = 'sd-btn'; b.textContent = t; return b; }
@@ -209,7 +281,16 @@
   months.forEach(function(m){ var o = document.createElement('option'); o.value = m; o.textContent = monthName(m) + ' (' + countOf[m] + ' markets)'; $('ctl-month').appendChild(o); });
   var def = months.filter(function(m){ return countOf[m] >= 20; })[0] || months[0]; if(def) $('ctl-month').value = def;
   ['ctl-month', 'ctl-min', 'ctl-prov', 'ctl-tags'].forEach(function(id){ $(id).addEventListener('change', render); });
-  render(); best();
+  $('sync-go').addEventListener('click', function(){
+    var v = $('sync-key').value.trim(); if(!v) return;
+    $('sync-err').textContent = '';
+    rpc('x_drafts_list', { p_key:v }).then(function(x){
+      if(!x || x.error){ $('sync-err').textContent = x && x.error ? 'Wrong passphrase.' : 'Could not reach the database.'; return; }
+      try{ localStorage.setItem('rte-stats-key', v); }catch(e){}
+      loadPosted(); best();
+    }).catch(function(){ $('sync-err').textContent = 'Could not reach the database.'; });
+  });
+  render(); loadPosted(); best();
 })();
 </script>
 </body>
