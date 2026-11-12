@@ -10,6 +10,8 @@
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-iso2.js"></script>
+<script src="assets/manufacturer-monthly-data.js"></script>
+<script src="assets/manufacturer-model-monthly-data.js"></script>
 <style>
   /* private drafting desk for X posts: not linked from the site; the drafts are written from the same public data as the charts */
   body{ margin:0; background:var(--bg); color:var(--text); }
@@ -62,6 +64,8 @@
     <label>Markets of at least <input type="number" id="ctl-min" value="5000" min="0" step="500"> cars</label>
     <label><input type="checkbox" id="ctl-prov"> include provisional numbers</label>
     <label><input type="checkbox" id="ctl-tags"> add #EV #BEV</label>
+    <label>Country drafts <select id="ctl-cmode"><option value="new">Newest data of each country</option><option value="month">The month above</option></select></label>
+    <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option></select></label>
   </div>
   <div class="sd-best" id="best" hidden></div>
   <div id="cards"></div>
@@ -99,6 +103,14 @@
   var share = function(r){ return r && r.total ? 100 * r.bev / r.total : null; };
   var countOf = {}; Object.keys(BY).forEach(function(c){ Object.keys(BY[c]).forEach(function(m){ countOf[m] = (countOf[m] || 0) + 1; }); });
   var months = Object.keys(countOf).filter(function(m){ return countOf[m] >= 10 && m >= '2025-01'; }).sort().reverse();
+  var WORLD_MIN = 63;          // the world and regional drafts appear for a month once this many markets have it
+  var NEW_WINDOW = 1;          // "newest data of each country" = a country whose newest month is at most this many months behind the newest month anywhere
+  var newest = function(a){ return a.reduce(function(m, k){ return k > m ? k : m; }, ''); };
+  var monthsBack = function(ym, k){ var d = +ym.slice(0, 4) * 12 + (+ym.slice(5) - 1) - k; return Math.floor(d / 12) + '-' + ('0' + (d % 12 + 1)).slice(-2); };
+  var latestOf = {}; Object.keys(BY).forEach(function(c){ latestOf[c] = newest(Object.keys(BY[c])); });
+  var allLatestMonth = null;
+  var allLatest = function(){ if(allLatestMonth) return allLatestMonth; var m = newest(Object.keys(countOf)), ix = typeof MANUFACTURER_MONTHLY !== 'undefined' ? MANUFACTURER_MONTHLY : {}; Object.keys(ix).forEach(function(c){ ix[c].forEach(function(r){ if(r.year_month > m) m = r.year_month; }); }); return (allLatestMonth = m); };
+  var isProv = function(c, m){ return !!PROV[c] && m === latestOf[c]; };          // estimated powertrain split only in the newest month of those countries
 
   // ---- X's length rule: a link counts 23, emoji and CJK 2, the rest 1
   function weight(t){
@@ -126,13 +138,24 @@
     Object.keys(BY).forEach(function(c){
       var r = BY[c][ym]; if(!r || r.total < minUnits) return;
       var p = BY[c][prevYear(ym)];
-      rows.push({ c:c, r:r, s:share(r), prev:p, ps:share(p), prov:!!PROV[c] });
+      rows.push({ c:c, r:r, s:share(r), prev:p, ps:share(p), prov:isProv(c, ym) });
     });
     return rows.filter(function(x){ return prov || !x.prov; });
   }
 
+  // BEV and total of one country over the first n months of a year: the monthly rows when all n are there (same basis as the month in the post),
+  // otherwise the yearly table (the YTD row of that many months, or the ANNUAL row for a full year); null when neither exists
+  function periodSum(c, year, n){
+    var s = { bev:0, total:0 }, ok = true;
+    for(var m = 1; m <= n; m++){ var r = BY[c][year + '-' + (m < 10 ? '0' : '') + m]; if(!r || !r.total){ ok = false; break; } s.bev += r.bev; s.total += r.total; }
+    if(ok) return s;
+    var Y = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY[c]) || [], row = null;
+    Y.forEach(function(r){ if(String(r.year) === year && ((n === 12 && r.period_type === 'ANNUAL') || (n < 12 && r.period_type === 'YTD' && r.months_covered === n))) row = r; });
+    return row && row.total ? { bev:row.bev, total:row.total } : null;
+  }
+
   // ---- the drafts: each is { title, why, tag, posts:[text...], chart:{ym,c} }
-  function build(){
+  function buildRankings(){
     var ym = $('ctl-month').value, minU = +$('ctl-min').value || 0, prov = $('ctl-prov').checked, D = [], T = table(ym, minU, prov), mn = monthName(ym), py = monthName(prevYear(ym));
     var all = table(ym, 0, true);
     if(!T.length) return D;
@@ -182,21 +205,153 @@
       posts: thread('Top 10 markets in ' + mn + ' (cars sold · BEV share):', bg.map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + compact(x.r.total) + ' · ' + pct1(x.s) + '%'; }), linkMix(ym) + tags()), chart:{ ym:ym },
       img:{ type:'stack', title:'Top 10 markets', sub:mn + ' · cars sold, the BEV part in green', rows:bg.map(function(x){ return { label:short(x.c), total:x.r.total, bev:x.r.bev, text:compact(x.r.total) + ' · ' + pct1(x.s) + '%' }; }) } });
 
-    // 6. one post per big market
-    bg.slice(0, 12).forEach(function(x){
-      var ytdRows = Object.keys(BY[x.c]).filter(function(m){ return m.slice(0, 4) === ym.slice(0, 4) && m <= ym; }).map(function(m){ return BY[x.c][m]; });
-      var yb = ytdRows.reduce(function(s, r){ return s + r.bev; }, 0), yt = ytdRows.reduce(function(s, r){ return s + r.total; }, 0);
-      var txt = flag(x.c) + ' ' + x.c + ', ' + mn + ': ' + fmt(x.r.total) + ' new cars, BEV ' + pct1(x.s) + '% (' + fmt(x.r.bev) + ' units).' +
-        (x.ps !== null && x.prev ? '\nA year ago: ' + pct1(x.ps) + '% (' + (x.s >= x.ps ? '+' : '') + pct1(x.s - x.ps) + ' pp), sales ' + (x.r.total >= x.prev.total ? '+' : '') + Math.round(100 * (x.r.total / x.prev.total - 1)) + '%.' : '') +
-        (ytdRows.length > 1 && yt ? '\nYear to date: ' + pct1(100 * yb / yt) + '% BEV.' : '') + '\n' + linkMix(ym, x.c) + tags();
-      D.push({ title:x.c, tag:'country' + (x.prov ? ' · provisional' : ''), warn:x.prov, why:'Country snapshot: the month, the share, the year-ago comparison, the year to date.', posts:[txt], chart:{ ym:ym, c:x.c },
-        img:{ type:'trend', title:x.c, sub:mn + ' · BEV share of new car sales', big:pct1(x.s) + '%', bigSub:fmt(x.r.total) + ' new cars' + (x.ps !== null && x.prev ? ' · ' + (x.s >= x.ps ? '+' : '') + pct1(x.s - x.ps) + ' pp vs ' + py : ''),
-          series:Object.keys(BY[x.c]).filter(function(m){ return m <= ym && BY[x.c][m].total > 0; }).sort().slice(-13).map(function(m){ return { m:m, v:share(BY[x.c][m]) }; }) } });
-    });
-    // identity of a draft = its kind + month (+ country): once posted it is not offered again, whatever the size limit or the wording
     var KIND = { 'BEV share leaderboard':'leaderboard', 'The tracked markets together':'panel', 'Biggest movers':'movers', 'New monthly records':'records', 'Biggest markets and their BEV share':'markets' };
-    D.forEach(function(d){ d.ym = d.chart.ym; d.key = (KIND[d.title] || 'country|' + d.title) + '|' + d.ym; });
+    D.forEach(function(d){ d.sec = 'rank'; d.ym = d.chart.ym; d.key = KIND[d.title] + '|' + d.ym; });
     return D;
+  }
+
+  // ---- world and regional drafts: only once a month has (almost) all its markets, so the totals mean something
+  var REGION = {
+    'Asia': ['China', 'India', 'Indonesia', 'Japan', 'Kazakhstan', 'Malaysia', 'Nepal', 'Singapore', 'South Korea', 'Taiwan', 'Thailand', 'Vietnam', 'Philippines', 'Georgia', 'Hong Kong', 'Israel', 'Saudi Arabia', 'UAE', 'Iran', 'Iraq', 'Kuwait', 'Jordan', 'Bahrain', 'Qatar', 'Oman', 'Pakistan', 'Uzbekistan', 'Azerbaijan', 'Sri Lanka', 'Bangladesh', 'Armenia', 'Lebanon', 'Macau', 'Mongolia', 'Cambodia', 'Brunei'],
+    'Europe': ['Albania', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal', 'Romania', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Turkey', 'United Kingdom', 'Russian Federation', 'Bosnia-Herzegovina', 'Ukraine', 'Belarus', 'Moldova', 'Montenegro', 'North Macedonia', 'Kosovo'],
+    'North & Central America': ['Canada', 'Mexico', 'United States', 'Panama', 'Guatemala', 'Costa Rica', 'El Salvador', 'Honduras', 'Nicaragua', 'Dominican Republic', 'Cuba', 'Jamaica', 'Puerto Rico'],
+    'South America': ['Argentina', 'Brazil', 'Chile', 'Colombia', 'Paraguay', 'Peru', 'Uruguay', 'Ecuador', 'Bolivia', 'Venezuela'],
+    'Oceania': ['Australia', 'New Zealand', 'Fiji', 'French Polynesia', 'New Caledonia']
+  };
+  var REGION_ICON = { 'World':'🌍', 'Asia':'🌏', 'Europe':'🌍', 'North & Central America':'🌎', 'South America':'🌎', 'Oceania':'🌏' };
+  var regionOf = {}; Object.keys(REGION).forEach(function(k){ REGION[k].forEach(function(c){ regionOf[c] = k; }); });
+  var sgn = function(v){ return (v >= 0 ? '+' : '') + pct1(v); }, sgnI = function(v){ return (v >= 0 ? '+' : '') + Math.round(v); };
+  // as many of the lines as still fit in 280
+  function fitPost(hdr, lines, tail, suffix, maxN){
+    var n = Math.min(lines.length, maxN || lines.length), t = '';
+    for(; n >= 0; n--){ t = hdr + (n ? '\n' + lines.slice(0, n).join('\n') : '') + (tail ? '\n' + tail : '') + (suffix ? '\n' + suffix : ''); if(weight(t) <= 280) return t; }
+    return t;
+  }
+  function aggDraft(label, rows, ym){
+    var mn = monthName(ym), py = monthName(prevYear(ym)), icon = REGION_ICON[label] || '🌍', N = rows.length;
+    var t = 0, b = 0, p = 0; rows.forEach(function(x){ t += x.r.total; b += x.r.bev; p += x.r.phev || 0; });
+    var pair = rows.filter(function(x){ return x.prev && x.prev.total; }), bN = 0, tN = 0, bP = 0, tP = 0;
+    pair.forEach(function(x){ bN += x.r.bev; tN += x.r.total; bP += x.prev.bev; tP += x.prev.total; });
+    var now = 100 * b / t, plug = 100 * p / t, likeNow = tN ? 100 * bN / tN : null, likePrev = tP ? 100 * bP / tP : null;
+    var hasCmp = pair.length >= Math.max(1, Math.ceil(N * 0.6)) && likePrev !== null;
+    var cn = pair.filter(function(x){ return x.c === 'China'; })[0], ex = null;
+    if(cn && hasCmp && (label === 'World' || label === 'Asia') && tN - cn.r.total > 0 && tP - cn.prev.total > 0) ex = { now:100 * (bN - cn.r.bev) / (tN - cn.r.total), was:100 * (bP - cn.prev.bev) / (tP - cn.prev.total) };
+    var p1 = icon + ' ' + (label === 'World' ? 'World' : label) + ' EV snapshot, ' + mn + ': ' + N + ' markets, ' + compact(t) + ' new cars.\nBEV ' + pct1(now) + '% (' + compact(b) + ' units), plug-in hybrids ' + pct1(plug) + '%.';
+    var same = pair.length === N;          // otherwise some markets have no year-ago month (China has no monthly rows before 2026): the comparison is then labelled like for like on the others
+    if(hasCmp) p1 += '\n' + (same ? py + ', same markets: BEV ' + pct1(likePrev) + '% (' + sgn(likeNow - likePrev) + ' pp)' : 'Like for like (' + pair.length + ' markets with ' + py + ' data): BEV ' + pct1(likePrev) + '% → ' + pct1(likeNow) + '% (' + sgn(likeNow - likePrev) + ' pp)') + ', BEV units ' + sgnI(100 * (bN / bP - 1)) + '%.';
+    if(ex) p1 += '\nWithout China: ' + pct1(ex.now) + '% (' + pct1(ex.was) + '% a year ago).';
+    var big = rows.slice().sort(function(a, b2){ return b2.r.bev - a.r.bev; });
+    var lines = big.slice(0, 6).map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + compact(x.r.bev) + ' · ' + pct1(x.s) + '%' + (x.ps !== null && x.prev ? ' (' + sgn(x.s - x.ps) + ' pp)' : ''); });
+    var link = linkMix(ym) + tags(), hdr2 = 'Biggest BEV markets, ' + mn + ' (units · share · vs ' + py + '):', posts;
+    if(N <= 1 || !lines.length) posts = [p1 + '\n' + link];
+    else {
+      var whole = fitPost(p1 + '\n' + hdr2, lines, link, '');
+      posts = lines.every(function(l){ return whole.indexOf(l) >= 0; }) ? [whole] : [p1 + '\n(1/2)', fitPost(hdr2, lines, link, '(2/2)')];
+    }
+    var prov = rows.some(function(x){ return x.prov; });
+    return { sec:'rank', title:label === 'World' ? 'World: EV snapshot' : label + ': EV snapshot', tag:label === 'World' ? 'world · ' + N + ' markets' : 'region · ' + N + ' markets' + (prov ? ' · provisional' : ''), warn:prov,
+      why:(label === 'World' ? 'All the markets of the month together' : 'The markets of ' + label + ' together') + ', compared with the same markets a year ago. Appears once a month has ' + WORLD_MIN + '+ markets.', posts:posts, chart:{ ym:ym }, key:'agg|' + label + '|' + ym, ym:ym,
+      img:{ type:'world', title:(label === 'World' ? 'World' : label) + ' EV snapshot', sub:mn + ' · BEV share of new car sales · ' + N + ' markets', big:pct1(now) + '%',
+        l2:compact(t) + ' new cars · plug-in hybrids ' + pct1(plug) + '%', l3:hasCmp ? (same ? py + ': ' + pct1(likePrev) + '% · ' + sgn(likeNow - likePrev) + ' pp' : 'Like for like, ' + pair.length + ' markets:') : '', l4:hasCmp ? (same ? '' : pct1(likePrev) + '% → ' + pct1(likeNow) + '% · ') + 'BEV units ' + sgnI(100 * (bN / bP - 1)) + '% on a year ago' : '', l5:ex ? 'Without China: ' + pct1(ex.now) + '% (' + pct1(ex.was) + '%)' : '',
+        head:'Biggest BEV markets (units · share)', rows:big.slice(0, 8).map(function(x){ return { label:short(x.c), total:x.r.bev, bev:x.r.bev, text:compact(x.r.bev) + ' · ' + pct1(x.s) + '%' }; }) } };
+  }
+  function worldDrafts(ym){
+    var all = table(ym, 0, true), out = [aggDraft('World', all, ym)];
+    ['Asia', 'Europe', 'North & Central America', 'South America', 'Oceania'].forEach(function(reg){
+      var rows = all.filter(function(x){ return regionOf[x.c] === reg; });
+      if(rows.length) out.push(aggDraft(reg, rows, ym));
+    });
+    return out;
+  }
+
+  // ---- one motorisation thread per country: the month with its year-ago comparison, then the year to date against the full year before (raw units and shares)
+  function countryDraft(c, m){
+    var r = BY[c][m], p = BY[c][prevYear(m)], s = share(r), ps = p && p.total ? share(p) : null, yr = m.slice(0, 4), pyr = String(+yr - 1), mi = +m.slice(5), mn = monthName(m), py = monthName(prevYear(m));
+    var ytd = periodSum(c, yr, mi), full = periodSum(c, pyr, 12), lastM = py.slice(0, 3) + ' ' + pyr, nowM = MON[mi - 1].slice(0, 3);
+    var p1 = flag(c) + ' ' + c + ', ' + mn + '\nBEV: ' + fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars = ' + pct1(s) + '%';
+    if(ps !== null) p1 += '\n' + lastM + ': ' + fmt(p.bev) + ' of ' + fmt(p.total) + ' = ' + pct1(ps) + '% (' + sgn(s - ps) + ' pp)' +
+      '\n' + (p.bev ? 'BEV units ' + sgnI(100 * (r.bev / p.bev - 1)) + '%, ' : '') + 'all new cars ' + sgnI(100 * (r.total / p.total - 1)) + '%';
+    var p2 = null;
+    if(ytd && mi > 1){
+      p2 = c + ', year to date (Jan–' + nowM + ' ' + yr + ')\nBEV: ' + fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' = ' + pct1(100 * ytd.bev / ytd.total) + '%';
+      if(full && full.total) p2 += '\nFull year ' + pyr + ': ' + fmt(full.bev) + ' of ' + fmt(full.total) + ' = ' + pct1(100 * full.bev / full.total) + '% (' + sgn(100 * ytd.bev / ytd.total - 100 * full.bev / full.total) + ' pp)' + (full.bev ? '\nBEV units so far: ' + Math.round(100 * ytd.bev / full.bev) + '% of all ' + pyr : '');
+    }
+    var link = linkMix(m, c) + tags(), posts;
+    if(p2) posts = weight(p1 + '\n\n' + p2 + '\n' + link) <= 280 ? [p1 + '\n\n' + p2 + '\n' + link] : [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];
+    else posts = [p1 + '\n' + link];
+    var prov = isProv(c, m);
+    return { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). The picture shows each month against the same month a year earlier.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
+      img:{ type:'country', title:c, sub:mn + ' · BEV share of new car sales', yr:yr, pyr:pyr, mi:mi, big:pct1(s) + '%', l2:fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars', l3:ps !== null ? lastM + ': ' + pct1(ps) + '% · ' + sgn(s - ps) + ' pp' : '',
+        ytd:(ytd && mi > 1) ? { head:'Year to date, Jan–' + nowM + ' ' + yr, pct:pct1(100 * ytd.bev / ytd.total) + '%', raw:fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' cars', fyHead:full && full.total ? 'Full year ' + pyr + ': ' + pct1(100 * full.bev / full.total) + '%' : '', fyRaw:full && full.total ? fmt(full.bev) + ' of ' + fmt(full.total) + ' cars' : '' } : null,
+        bars:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function(k){ var kk = (k < 10 ? '0' : '') + k, a = BY[c][yr + '-' + kk], b = BY[c][pyr + '-' + kk]; return { m:k, cur:(k <= mi && a && a.total) ? share(a) : null, prev:(b && b.total) ? share(b) : null }; }) } };
+  }
+
+  // ---- brands and models: the monthly tables, indexed once (country -> month -> rows)
+  var IDX = null;
+  function index(){
+    if(IDX) return IDX; IDX = { b:{}, m:{} };
+    var put = function(store, data){ if(!data) return; Object.keys(data).forEach(function(c){ var o = store[c] = {}; data[c].forEach(function(r){ (o[r.year_month] = o[r.year_month] || []).push(r); }); }); };
+    put(IDX.b, typeof MANUFACTURER_MONTHLY !== 'undefined' ? MANUFACTURER_MONTHLY : null);
+    put(IDX.m, typeof MANUFACTURER_MODEL_MONTHLY !== 'undefined' ? MANUFACTURER_MODEL_MONTHLY : null);
+    return IDX;
+  }
+  var JUNK = /^\(?\s*(other|others|unknown|unclassified|total|discontinued)\b|^other\b|\(other/i;
+  var VARIANT = /\s+(BEV|PHEV|HEV|MHEV|SHEV|ICE|EV|e-?BOXER(\s+\w+)?|hybrid|plug-in)$/i;      // the same model split by powertrain in some tables: one model again
+  function topBrands(c, m){
+    var rows = (index().b[c] || {})[m] || [], by = {};
+    rows.forEach(function(r){ if(JUNK.test(r.brand)) return; var o = by[r.brand] = by[r.brand] || { name:r.brand, total:0, bev:0 }; o.total += r.total; o.bev += r.bev; });
+    return Object.keys(by).map(function(k){ return by[k]; }).filter(function(o){ return o.total > 0; }).sort(function(a, b){ return b.total - a.total; });
+  }
+  function topModels(c, m){
+    var rows = (index().m[c] || {})[m] || [], by = {};
+    rows.forEach(function(r){
+      if(JUNK.test(r.model)) return; var base = r.model, g; while((g = base.replace(VARIANT, '')) !== base && g) base = g;
+      var name = base.toLowerCase().indexOf(r.brand.toLowerCase()) === 0 ? base : r.brand + ' ' + base, key = name.toLowerCase();
+      var o = by[key] = by[key] || { name:name, total:0, bev:0 }; o.total += r.total; o.bev += r.bev;
+    });
+    return Object.keys(by).map(function(k){ return by[k]; }).filter(function(o){ return o.total > 0; }).sort(function(a, b){ return b.total - a.total; });
+  }
+  var unitsText = function(n){ return n >= 100000 ? compact(n) : fmt(n); };
+  function brandDraft(c, m){
+    var B = topBrands(c, m), M = topModels(c, m); if(B.length < 3 && M.length < 3) return null;
+    var mn = monthName(m), head = flag(c) + ' ' + c + ', ' + mn + ': ';
+    var bl = B.slice(0, 8).map(function(o, i){ return (i + 1) + '. ' + o.name + ' ' + fmt(o.total) + ' · ' + pct1(100 * o.bev / o.total) + '%'; });
+    var ml = M.slice(0, 8).map(function(o, i){ var sb = 100 * o.bev / o.total; return (i + 1) + '. ' + o.name + ' ' + fmt(o.total) + (sb >= 95 ? ' (BEV)' : sb >= 10 ? ' (' + Math.round(sb) + '% BEV)' : ''); });
+    var EVM = M.filter(function(o){ return o.bev >= 20; }).sort(function(a, b){ return b.bev - a.bev; }), el = EVM.slice(0, 8).map(function(o, i){ return (i + 1) + '. ' + o.name + ' ' + fmt(o.bev); });
+    var link = linkMix(m, c) + tags(), parts = [];
+    if(B.length >= 3) parts.push({ hdr:head + 'best-selling brands (cars · BEV share)', lines:bl });
+    if(M.length >= 3) parts.push({ hdr:head + 'best-selling models (cars)', lines:ml });
+    if(EVM.length >= 3) parts.push({ hdr:head + 'best-selling BEV models (units)', lines:el });
+    var posts = parts.map(function(p, i){ return fitPost(p.hdr, p.lines, i === parts.length - 1 ? link : '', parts.length > 1 ? '(' + (i + 1) + '/' + parts.length + ')' : ''); });
+    var prov = isProv(c, m), cols = [];
+    if(B.length >= 3) cols.push({ head:'Brands', labelW:190, rows:B.slice(0, 8).map(function(o){ return { label:o.name, total:o.total, bev:o.bev, text:unitsText(o.total) }; }) });
+    if(M.length >= 3) cols.push({ head:'Models', labelW:240, rows:M.slice(0, 8).map(function(o){ return { label:o.name, total:o.total, bev:o.bev, text:unitsText(o.total) }; }) });
+    return { sec:'bm', title:c + ' · brands and models', tag:'brands & models' + (prov ? ' · provisional' : ''), warn:prov, why:'Best-selling brands and models of the month, with the BEV part of each (green in the picture).' + (parts.length > 1 ? ' Models of the same name are added up across powertrains.' : ''), posts:posts, chart:{ ym:m, c:c }, key:'brands|' + c + '|' + m, ym:m, size:B.reduce(function(s, o){ return s + o.total; }, 0),
+      img:{ type:'bm', title:c, sub:mn + ' · best-selling brands and models · BEV part in green', cols:cols } };
+  }
+
+  function build(){
+    var D = buildRankings(), ym = $('ctl-month').value, mode = $('ctl-cmode').value, latestAny = months[0] || ym, floor = monthsBack(allLatest(), NEW_WINDOW);
+    // world and regions: only for a month with enough markets; otherwise say how far it is
+    if((countOf[ym] || 0) >= WORLD_MIN) worldDrafts(ym).forEach(function(d){ D.push(d); });
+    else {
+      var done = months.filter(function(k){ return (countOf[k] || 0) >= WORLD_MIN; })[0];
+      D.push({ sec:'rank', title:'World and regional drafts', tag:'waiting', info:monthName(ym) + ' has ' + (countOf[ym] || 0) + ' markets so far; the world and regional drafts (World, Asia, Europe, North & Central America, South America, Oceania) appear once a month has ' + WORLD_MIN + ' or more.', switchTo:done, switchLabel:done ? 'Show ' + monthName(done) + ' (' + countOf[done] + ' markets)' : '' });
+    }
+    // one motorisation draft per country: its newest month (loaded within the last couple of months), or the month chosen above
+    var cm = [], bm = [];
+    Object.keys(BY).forEach(function(c){
+      var ms = mode === 'month' ? (BY[c][ym] ? [ym] : []) : [newest(Object.keys(BY[c]))].filter(function(k){ return k >= floor; });
+      ms.forEach(function(m){ if(BY[c][m] && BY[c][m].total > 0) cm.push(countryDraft(c, m)); });
+    });
+    var ix = index(), cs = {}; Object.keys(ix.b).concat(Object.keys(ix.m)).forEach(function(c){ cs[c] = 1; });
+    Object.keys(cs).forEach(function(c){
+      var ms = {}; if(mode === 'month'){ if((ix.b[c] && ix.b[c][ym]) || (ix.m[c] && ix.m[c][ym])) ms[ym] = 1; }
+      else { var b = ix.b[c] ? newest(Object.keys(ix.b[c])) : '', mo = ix.m[c] ? newest(Object.keys(ix.m[c])) : ''; [b, mo].forEach(function(k){ if(k && k >= floor) ms[k] = 1; }); }
+      Object.keys(ms).forEach(function(m){ var d = brandDraft(c, m); if(d) bm.push(d); });
+    });
+    var bySize = function(a, b){ return b.size - a.size; };
+    return D.concat(cm.sort(bySize), bm.sort(bySize));
   }
 
   // ---- which drafts were posted on X (in the database through the stats passphrase, on this device only until the passphrase is given)
@@ -250,6 +405,20 @@
 
   // ---- the picture of a draft: a 1200 x 675 card (16:9, what X shows best) drawn on a canvas, copied to the clipboard when "Post on X" is pressed
   var FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', GREEN = '#1e8f5f', BLUE = '#0a80d0', RED = '#b3261e', INK = '#06182e', MUTED = '#52677d', TRACK = '#e6eef6';
+  // a list of horizontal bars (total in grey, its BEV part in green) with the label on the left and a text after the bar
+  function ellip(c, t, w){ if(c.measureText(t).width <= w) return t; while(t.length > 1 && c.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; }
+  function drawStack(c, rows, x0, x1, top, bottom, labelW, fs){
+    var n = rows.length; if(!n) return;
+    var rh = (bottom - top) / n, bh = Math.min(40, rh * 0.62), bx0 = x0 + labelW, mx = Math.max.apply(null, rows.map(function(r){ return r.total; })) || 1;
+    c.font = '700 ' + (fs - 2) + 'px ' + FONT; var tw = Math.max.apply(null, rows.map(function(r){ return c.measureText(r.text).width; })) + 16, bw = Math.max(40, x1 - bx0 - tw);
+    rows.forEach(function(r, i){
+      var cy = top + i * rh + rh / 2, y = cy - bh / 2, w = Math.max(3, bw * r.total / mx);
+      c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = INK; c.font = '700 ' + fs + 'px ' + FONT; c.fillText(ellip(c, r.label, labelW - 16), bx0 - 12, cy);
+      c.fillStyle = '#9fb3c8'; c.fillRect(bx0, y, w, bh); c.fillStyle = GREEN; c.fillRect(bx0, y, w * (r.total ? r.bev / r.total : 0), bh);
+      c.fillStyle = INK; c.textAlign = 'left'; c.font = '700 ' + (fs - 2) + 'px ' + FONT; c.fillText(r.text, bx0 + w + 10, cy);
+    });
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+  }
   function drawCard(img){
     var W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var c = cv.getContext('2d');
     c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
@@ -280,35 +449,76 @@
         c.fillStyle = MUTED; c.font = '600 30px ' + FONT; c.fillText(p[0].label, p[1] + 150, 380);
       });
       c.fillStyle = INK; c.font = '800 34px ' + FONT; c.fillText(img.foot, W / 2, 520); c.textAlign = 'left';
-    } else if(img.type === 'trend'){
-      c.fillStyle = GREEN; c.font = '800 130px ' + FONT; c.fillText(img.big, 56, 290); c.fillStyle = MUTED; c.font = '600 28px ' + FONT; c.fillText(img.bigSub, 56, 340);
-      var s = img.series, n2 = s.length, cx0 = 56, cx1 = W - 56, cy0 = 420, cy1 = bottom - 34, mx2 = Math.max(10, Math.max.apply(null, s.map(function(p){ return p.v; })) * 1.1), bw = (cx1 - cx0) / Math.max(1, n2);
-      s.forEach(function(p, i){ var h = (cy1 - cy0 + 110) * p.v / mx2, x = cx0 + i * bw + 6, y = cy1 - h; c.fillStyle = i === n2 - 1 ? GREEN : '#9fc7e8'; c.fillRect(x, y, bw - 12, h);
-        c.fillStyle = INK; c.font = '700 20px ' + FONT; c.textAlign = 'center'; if(i === n2 - 1 || i === 0 || i === n2 - 13) c.fillText(pct1(p.v) + '%', x + (bw - 12) / 2, y - 8);
-        c.fillStyle = MUTED; c.font = '500 18px ' + FONT; c.fillText(MON[+p.m.slice(5) - 1].slice(0, 3), x + (bw - 12) / 2, cy1 + 24); });
+    } else if(img.type === 'world'){
+      // left: the share, the year-ago comparison; right: the biggest BEV markets (units, share)
+      c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      c.fillStyle = GREEN; c.font = '800 128px ' + FONT; c.fillText(img.big, 56, 270);
+      c.fillStyle = INK; c.font = '600 27px ' + FONT; c.fillText(img.l2, 56, 318);
+      var ly = 366; [[img.l3, '800 27px '], [img.l4, '700 24px '], [img.l5, '700 24px ']].forEach(function(p){ if(!p[0]) return; c.fillStyle = p[1].indexOf('800') === 0 ? INK : MUTED; c.font = p[1] + FONT; c.fillText(p[0], 56, ly); ly += 44; });
+      c.fillStyle = MUTED; c.font = '700 24px ' + FONT; c.fillText(img.head, 640, 190);
+      drawStack(c, img.rows, 640, W - 56, 206, bottom, 172, 26);
+    } else if(img.type === 'bm'){
+      var cols = img.cols, cw = cols.length > 1 ? (W - 112 - 40) / 2 : W - 112;
+      cols.forEach(function(col, k){ var cx0 = 56 + k * (cw + 40); c.fillStyle = MUTED; c.font = '800 24px ' + FONT; c.textAlign = 'left'; c.fillText(col.head, cx0, 168); drawStack(c, col.rows, cx0, cx0 + cw, 186, bottom, col.labelW + (cols.length > 1 ? 0 : 120), 24); });
+    } else if(img.type === 'country'){
+      // left: the month, then the year to date against the full year before (raw units and shares); right: every month of the year against the same month a year earlier
+      c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      c.fillStyle = GREEN; c.font = '800 112px ' + FONT; c.fillText(img.big, 56, 252);
+      c.fillStyle = INK; c.font = '600 27px ' + FONT; c.fillText(img.l2, 56, 294);
+      if(img.l3){ c.fillStyle = MUTED; c.font = '700 26px ' + FONT; c.fillText(img.l3, 56, 332); }
+      if(img.ytd){
+        c.fillStyle = TRACK; c.fillRect(56, 358, 440, 3);
+        c.fillStyle = MUTED; c.font = '600 24px ' + FONT; c.fillText(img.ytd.head, 56, 398);
+        c.fillStyle = GREEN; c.font = '800 62px ' + FONT; c.fillText(img.ytd.pct, 56, 460);
+        c.fillStyle = INK; c.font = '600 25px ' + FONT; c.fillText(img.ytd.raw, 56, 495);
+        if(img.ytd.fyHead){ c.fillStyle = INK; c.font = '800 27px ' + FONT; c.fillText(img.ytd.fyHead, 56, 540); c.fillStyle = MUTED; c.font = '600 24px ' + FONT; c.fillText(img.ytd.fyRaw, 56, 572); }
+      }
+      var B = img.bars, gx0 = 560, gx1 = W - 56, gy0 = 214, gy1 = bottom - 36, gw = (gx1 - gx0) / 12, bw2 = Math.floor(gw / 2) - 4;
+      var gmax = Math.max(10, Math.max.apply(null, B.map(function(b){ return Math.max(b.cur || 0, b.prev || 0); }))) * 1.12;
+      c.fillStyle = '#9fb3c8'; c.fillRect(gx0, 168, 18, 18); c.fillStyle = INK; c.font = '700 22px ' + FONT; c.fillText(img.pyr, gx0 + 26, 184);
+      c.fillStyle = GREEN; c.fillRect(gx0 + 110, 168, 18, 18); c.fillStyle = INK; c.fillText(img.yr, gx0 + 136, 184);
+      c.fillStyle = INK; c.fillRect(gx0, gy1, gx1 - gx0, 2);
+      B.forEach(function(b, i){
+        var x = gx0 + i * gw + 4;
+        [[b.prev, '#9fb3c8', x], [b.cur, GREEN, x + bw2 + 2]].forEach(function(p){
+          if(p[0] === null) return;
+          var h = (gy1 - gy0) * p[0] / gmax; c.fillStyle = p[1]; c.fillRect(p[2], gy1 - h, bw2, h);
+          c.fillStyle = INK; c.font = (b.m === img.mi && p[1] === GREEN ? '800 ' : '700 ') + '17px ' + FONT; c.textAlign = 'center'; c.fillText(String(Math.round(p[0])), p[2] + bw2 / 2, gy1 - h - 6);
+        });
+        c.fillStyle = b.m === img.mi ? INK : MUTED; c.font = (b.m === img.mi ? '800 ' : '600 ') + '20px ' + FONT; c.textAlign = 'center'; c.fillText(MON[b.m - 1].slice(0, 3), x + bw2 + 2, gy1 + 28);
+      });
       c.textAlign = 'left';
     }
     return cv;
   }
   function makeImage(d){ return new Promise(function(ok, no){ try{ drawCard(d.img).toBlob(function(b){ b ? ok(b) : no(new Error('image')); }, 'image/png'); }catch(e){ no(e); } }); }
+  // drawn when the card comes near the screen (or when a button needs it): there can be well over a hundred drafts
+  function ensureImage(d){ if(!d.blobPromise) d.blobPromise = makeImage(d).then(function(b){ d.blob = b; if(d.imEl) d.imEl.src = URL.createObjectURL(b); return b; }); return d.blobPromise; }
   function copyImage(d){
-    var p = d.blob ? Promise.resolve(d.blob) : d.blobPromise;
     if(!(navigator.clipboard && window.ClipboardItem)) return Promise.reject(new Error('no clipboard'));
-    return p.then(function(b){ return navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]); });
+    return navigator.clipboard.write([new ClipboardItem({ 'image/png': ensureImage(d) })]);       // the write starts now, inside the click; the picture is handed over when it is ready
   }
-  function downloadImage(d){ (d.blob ? Promise.resolve(d.blob) : d.blobPromise).then(function(b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'road-to-electric-' + d.key.replace(/[^a-z0-9]+/gi, '-') + '.png'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500); }); }
+  function downloadImage(d){ ensureImage(d).then(function(b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'road-to-electric-' + d.key.replace(/[^a-z0-9]+/gi, '-') + '.png'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500); }); }
 
   function render(){
-    var D = build().filter(function(d){ return !posted[d.key]; }), host = $('cards'); host.innerHTML = '';
+    var show = $('ctl-show').value, ALL = build(), D = ALL.filter(function(d){ return !d.key || !posted[d.key]; }).filter(function(d){ return show === 'all' || d.sec === show; }), host = $('cards'); host.innerHTML = '';
+    var SECN = { rank:'Rankings, world and regions', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
+    var io = (typeof IntersectionObserver !== 'undefined') ? new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); e.target.__d && ensureImage(e.target.__d); } }); }, { rootMargin:'900px 0px' }) : null;
     D.forEach(function(d){
+      if(d.sec !== lastSec){ lastSec = d.sec; var hh = document.createElement('h2'); hh.className = 'sd-sec'; hh.textContent = SECN[d.sec] + ' (' + (cnt[d.sec] || 0) + ')'; host.appendChild(hh); }
       var card = document.createElement('section'); card.className = 'sd-card';
+      if(d.info){
+        card.innerHTML = '<h2>' + d.title + '<span class="sd-tag">' + d.tag + '</span></h2><p class="sd-why" style="margin:6px 0 0">' + d.info + '</p>';
+        if(d.switchTo){ var sw = btn(d.switchLabel); sw.style.marginTop = '8px'; sw.addEventListener('click', function(){ $('ctl-month').value = d.switchTo; render(); }); card.appendChild(sw); }
+        host.appendChild(card); return;
+      }
       var h = '<h2>' + d.title.replace(/&/g, '&amp;') + '<span class="sd-tag' + (d.warn ? ' sd-warn' : '') + '">' + d.tag + '</span></h2><p class="sd-why">' + d.why + '</p>';
       card.innerHTML = h; host.appendChild(card);
       // the picture that goes with the post (part 1 of a thread): drawn now, copied to the clipboard when Post on X is pressed
       var imgRow = document.createElement('div'); imgRow.className = 'sd-img';
-      var im = document.createElement('img'); im.alt = 'Image for the post'; var side = document.createElement('div');
+      var im = document.createElement('img'); im.alt = ''; im.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='; var side = document.createElement('div');
       var cpi = btn('Copy image'), dli = btn('Download image'), hint = document.createElement('div'); hint.className = 'sd-why'; hint.textContent = 'Pressing "Post on X" (part 1) copies this image: press Ctrl+V in the X window to attach it.';
-      d.blobPromise = makeImage(d).then(function(b){ d.blob = b; im.src = URL.createObjectURL(b); return b; });
+      d.imEl = im; d.blobPromise = null; im.__d = d; if(io) io.observe(im); else ensureImage(d);
       cpi.addEventListener('click', function(){ copyImage(d).then(function(){ cpi.textContent = '✓ Image copied'; setTimeout(function(){ cpi.textContent = 'Copy image'; }, 1600); }, function(){ downloadImage(d); }); });
       dli.addEventListener('click', function(){ downloadImage(d); });
       side.appendChild(hint); var br = document.createElement('div'); br.className = 'sd-row'; br.appendChild(cpi); br.appendChild(dli); side.appendChild(br); imgRow.appendChild(im); imgRow.appendChild(side); card.appendChild(imgRow);
@@ -317,12 +527,20 @@
       order.forEach(function(i, pos){
         var text = d.posts[i];
         var wrap = document.createElement('div'); wrap.className = 'sd-post';
-        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts; wrap.appendChild(cap); }
+        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts + (i === 0 ? ' · this part carries the image' : ''); wrap.appendChild(cap); }
         var ta = document.createElement('textarea'); ta.value = text; ta.spellcheck = false; ta.rows = Math.min(14, text.split('\n').length + 1);
         var row = document.createElement('div'); row.className = 'sd-row';
         var cp = btn('Copy text'), go = document.createElement('a'); go.className = 'sd-btn primary'; go.target = '_blank'; go.rel = 'noopener'; go.textContent = 'Post on X';
         var ch = document.createElement('a'); ch.className = 'sd-btn'; ch.target = '_blank'; ch.rel = 'noopener'; ch.textContent = 'Open the chart'; ch.href = linkMix(d.chart.ym, d.chart.c);
-        if(i === 0) go.addEventListener('click', function(){ copyImage(d).then(function(){ hint.textContent = '✓ Image copied: press Ctrl+V in the X window to attach it.'; }, function(){ hint.textContent = 'Could not copy the image: use Download image and attach it in X.'; }); });
+        // the image goes with part 1: copy it FIRST (while this page still has the focus: a new tab takes it away and the browser then refuses the copy), open X after
+        if(i === 0){
+          go.textContent = 'Post on X + copy image';
+          go.addEventListener('click', function(e){
+            e.preventDefault(); var href = go.href;
+            var open = function(){ var w = window.open(href, '_blank'); if(w){ try{ w.opener = null; }catch(x){} } else hint.textContent += ' The pop-up was blocked: allow pop-ups for this page, or use the Copy text button and open X yourself.'; };
+            copyImage(d).then(function(){ hint.textContent = '✓ Image copied: press Ctrl+V in the X window to attach it.'; open(); }, function(){ hint.textContent = 'Could not copy the image: use Download image and attach it in X.'; open(); });
+          });
+        }
         var len = document.createElement('span'); len.className = 'sd-len';
         var upd = function(){ var w = weight(ta.value); len.textContent = w + ' / 280'; len.classList.toggle('over', w > 280); go.href = 'https://x.com/intent/post?text=' + encodeURIComponent(ta.value); };
         ta.addEventListener('input', upd); upd();
@@ -336,7 +554,8 @@
     });
     if(!D.length) host.innerHTML = '<p class="sd-note">Every draft for this month is already marked as posted (or no market matches the filters).</p>';
     renderPosted();
-    $('foot').textContent = 'Written from assets/country-monthly-data.js (' + Object.keys(BY).length + ' markets). ' + (Object.keys(PROV).length ? 'Provisional (estimated split) markets are left out of the rankings unless ticked: ' + Object.keys(PROV).join(', ') + '. ' : '') + 'Always read a draft before posting: a market with a late revision can move a few tenths of a point.';
+    var noReg = Object.keys(BY).filter(function(c){ return !regionOf[c]; });
+    $('foot').textContent = 'Written from assets/country-monthly-data.js (' + Object.keys(BY).length + ' markets), manufacturer-monthly-data.js and manufacturer-model-monthly-data.js. Regional drafts group ' + Object.keys(regionOf).length + ' known countries' + (noReg.length ? '; in the world draft only (no region draft requested): ' + noReg.join(', ') : '') + '. ' + (Object.keys(PROV).length ? 'Provisional (estimated split) markets are left out of the rankings unless ticked: ' + Object.keys(PROV).join(', ') + '. ' : '') + 'Always read a draft before posting: a market with a late revision can move a few tenths of a point.';
   }
   function btn(t){ var b = document.createElement('button'); b.type = 'button'; b.className = 'sd-btn'; b.textContent = t; return b; }
 
@@ -355,7 +574,7 @@
 
   months.forEach(function(m){ var o = document.createElement('option'); o.value = m; o.textContent = monthName(m) + ' (' + countOf[m] + ' markets)'; $('ctl-month').appendChild(o); });
   var def = months.filter(function(m){ return countOf[m] >= 20; })[0] || months[0]; if(def) $('ctl-month').value = def;
-  ['ctl-month', 'ctl-min', 'ctl-prov', 'ctl-tags'].forEach(function(id){ $(id).addEventListener('change', render); });
+  ['ctl-month', 'ctl-min', 'ctl-prov', 'ctl-tags', 'ctl-cmode', 'ctl-show'].forEach(function(id){ $(id).addEventListener('change', render); });
   $('sync-go').addEventListener('click', function(){
     var v = $('sync-key').value.trim(); if(!v) return;
     $('sync-err').textContent = '';
@@ -365,7 +584,7 @@
       loadPosted(); best();
     }).catch(function(){ $('sync-err').textContent = 'Could not reach the database.'; });
   });
-  window.RteDrafts = { build: build, drawCard: drawCard };       // for checking the drafts and their pictures from the console
+  window.RteDrafts = { build: build, drawCard: drawCard, weight: weight };       // for checking the drafts and their pictures from the console
   render(); loadPosted(); best();
 })();
 </script>
