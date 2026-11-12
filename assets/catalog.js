@@ -44,6 +44,14 @@ const STATS_CATALOG = [
     url: "ev-trucking.html#race-title"
   },
   {
+    title: "EV Buses",
+    subject: "World · Electric buses and city buses",
+    keywords: ["bus", "buses", "ev buses", "electric buses", "city buses", "transit", "public transport", "zero-emission", "china", "europe", "t&e", "transport and environment", "hydrogen", "fleet"],
+    description: "How many electric buses each country sells and runs, their share of new buses and of the fleet, the regional takeoff, which European countries sell only zero-emission city buses (Transport & Environment), and the ICCT's zero-emission bus counts.",
+    tag: "2012–2025",
+    url: "ev-buses.html#rank-card"
+  },
+  {
     title: "World Oil Consumption",
     subject: "World · Oil use and production",
     keywords: ["oil", "petroleum", "crude", "barrels", "consumption", "production", "transport", "cars", "trucks", "aviation", "shipping", "plastics", "petrochemicals", "opec", "saudi", "russia", "mb/d", "iea", "eia", "pie"],

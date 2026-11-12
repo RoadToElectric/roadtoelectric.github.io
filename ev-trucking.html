@@ -192,6 +192,7 @@
       <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
       <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
       <a href="ev-trucking.html" aria-current="page"><span class="dot"></span>EV Trucking</a>
+      <a href="ev-buses.html"><span class="dot"></span>EV Buses</a>
       <a href="world-oil.html"><span class="dot"></span>World Oil</a>
 
       <div class="nav-heading">Markets</div>
@@ -237,7 +238,6 @@
         <div class="tk-seg" id="seg-mode" role="group" aria-label="Vehicle class">
           <button type="button" data-v="Trucks" class="active">🚛 Trucks</button>
           <button type="button" data-v="Vans">🚐 Vans</button>
-          <button type="button" data-v="Buses">🚌 Buses</button>
         </div>
         <div class="tk-seg" id="seg-metric" role="group" aria-label="Metric">
           <button type="button" data-v="sShare" class="active">Share of sales</button>
@@ -332,16 +332,9 @@
         </div>
       </div>
 
-      <div class="card chart-card" id="bus-card">
-        <h2 id="bus-h">City buses</h2>
-        <p class="note" style="display:block" id="bus-src">New <b>city bus</b> registrations (urban buses only, not coaches), 2019–2025. Source: Transport &amp; Environment (Feb 2026), built on DVV Media's <i>Alternative Drivelines for City Buses 2025</i>. EU27 = the European Union; the table below adds the United Kingdom, Norway, Iceland and Switzerland.</p>
-        <div class="tk-lg" id="bus-lg1"></div>
-        <div class="tk-chart" id="bus-line"></div>
-        <h3 id="bus-h3" style="font-size:14px;margin:18px 0 2px">Who leads: share of new city buses by powertrain</h3>
-        <div class="tk-lg" id="bus-lg2"></div>
-        <div class="tk-sb" id="bus-bars"></div>
-        <p class="tk-note" id="bus-note"></p>
-        <div class="tk-callout" id="bus-call"></div>
+      <div class="card chart-card" id="bus-pointer">
+        <h2>Buses have their own page</h2>
+        <p class="note" style="display:block">Electric buses, and city buses in Europe in particular (six out of ten new EU city buses are now zero-emission), are on <a href="ev-buses.html"><b>EV Buses</b></a>: the country ranking, the regional takeoff, Transport &amp; Environment's league table and the ICCT's zero-emission bus counts.</p>
       </div>
 
       <div class="card chart-card">
@@ -395,7 +388,7 @@
             <li><strong>Shares above 100%.</strong> The IEA publishes UAE electric van shares of 200% (2021) to 310% (2023) and 210% (2025): its count of electric vans sold exceeds the total van market it uses for the UAE (about 2,100 vans in 2025 against 4,500 electric vans), so the share is impossible. The page hides those five values rather than show them.</li>
             <li><strong>ICCT.</strong> Zero-emission medium- and heavy-duty trucks and buses by country (34 countries incl. the United States, India, Brazil, Mexico), <a href="https://theicct.org/global-ev-market-monitor-trucks-buses/" target="_blank" rel="noopener">Global EV Market Monitor</a>, August 2026. Definitions differ from the IEA's (US medium-duty = Class 2b-6, 8,501–26,000 lb; the ICCT total includes buses), so those rows are hatched and never mixed with IEA bars.</li>
             <li><strong>Manufacturers.</strong> The IEA publishes market shares by manufacturer group only as a chart; this page quotes its text (incumbent top-5, new entrants, battery supply, trade). No free source gives unit sales for each electric truck brand.</li>
-            <li><strong>Sources:</strong> <a href="https://www.iea.org/reports/global-ev-outlook-2026/trends-in-other-ev-modes" target="_blank" rel="noopener">IEA Global EV Outlook 2026</a> · <a href="https://electrive.com/2026/07/29/acea-reports-strong-growth-for-electric-trucks-and-buses-in-the-eu" target="_blank" rel="noopener">ACEA via electrive, H1 2026</a> · <a href="https://theicct.org/publication/zero-emission-medium-and-heavy-duty-vehicle-market-in-china-a-2025-update-may26/" target="_blank" rel="noopener">ICCT, zero-emission trucks in China</a> · <a href="https://www.sustainable-bus.com/news/electric-buses-city-2025-europe-transport-environment/" target="_blank" rel="noopener">Transport &amp; Environment city bus data (DVV Media), via Sustainable Bus, Feb 2026</a>.</li>
+            <li><strong>Sources:</strong> <a href="https://www.iea.org/reports/global-ev-outlook-2026/trends-in-other-ev-modes" target="_blank" rel="noopener">IEA Global EV Outlook 2026</a> · <a href="https://electrive.com/2026/07/29/acea-reports-strong-growth-for-electric-trucks-and-buses-in-the-eu" target="_blank" rel="noopener">ACEA via electrive, H1 2026</a> · <a href="https://theicct.org/publication/zero-emission-medium-and-heavy-duty-vehicle-market-in-china-a-2025-update-may26/" target="_blank" rel="noopener">ICCT, zero-emission trucks in China</a>.</li>
           </ul>
         </div>
       </div>
@@ -409,7 +402,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
-<script src="assets/city-bus-data.js"></script>
 <script src="assets/ev-trucks-data.js"></script>
 <script src="assets/notes-toggle.js"></script>
 <script>
@@ -836,50 +828,6 @@ function bars(id, rowsData, unitFmt){
   el.innerHTML = rowsData.map(r => `<div class="tk-bar-row"><span>${r.l}</span><span class="tr"><i style="background:${r.c}" data-w="${(100 * r.v / mx).toFixed(1)}"></i></span><span class="v">${r.t || unitFmt(r.v)}</span></div>`).join('');
   requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; })));
 }
-// ---- city buses: data in assets/city-bus-data.js (CITY_BUS: Transport & Environment from DVV Media; shares of new city bus registrations, per cent)
-function cityBuses(){
-  const CB = CITY_BUS, BUS25 = CB.countries, EUS = CB.eu, last = EUS.years.length - 1;
-  const COL = { bev:'#16a34a', fc:'#0ea5e9', hyb:'#fbbf24', dsl:'#9ca3af', gas:'#4b5563' }, LB = { bev:'Battery-electric', fc:'Hydrogen fuel cell', hyb:'Hybrid', dsl:'Diesel', gas:'Gas' };
-  document.getElementById('bus-h').textContent = `City buses: Europe went from ${EUS.values[0]}% to ${EUS.values[last]}% zero-emission in ${EUS.years[last] - EUS.years[0]} years`;
-  document.getElementById('bus-src').innerHTML = `New <b>city bus</b> registrations (urban buses only, not coaches), ${EUS.years[0]}–${EUS.years[last]}. Source: ${esc(CB.label)}, built on DVV Media's <i>${esc(CB.basedOn)}</i>. EU27 = the European Union; the table below adds the United Kingdom, Norway, Iceland and Switzerland.`;
-  document.getElementById('bus-h3').textContent = `Who leads, ${CB.dataYear}: share of new city buses by powertrain`;
-  document.getElementById('bus-lg1').innerHTML = `<span><i style="background:#16a34a"></i>EU27 zero-emission share (actual)</span><span><i style="background:repeating-linear-gradient(90deg,#16a34a 0 4px,transparent 4px 7px)"></i>T&amp;E projection at the 2023–25 pace</span>`;
-  document.getElementById('bus-lg2').innerHTML = Object.keys(COL).map(k => `<span><i class="sq" style="background:${COL[k]}"></i>${LB[k]}</span>`).join('');
-  // line chart
-  const box = document.getElementById('bus-line'); box.innerHTML = '<svg viewBox="0 0 720 270" role="img" aria-label="EU27 zero-emission share of new city buses"></svg>';
-  const W = 720, H = 270, m = { t:16, r:22, b:28, l:40 }, svg = d3.select(box.querySelector('svg')), pj = [[EUS.years[last], EUS.values[last]]].concat(EUS.projection);
-  const x = d3.scaleLinear([EUS.years[0], pj[pj.length - 1][0]], [m.l, W - m.r]), y = d3.scaleLinear([0, 100], [H - m.b, m.t]);
-  [0, 25, 50, 75, 100].forEach(t => svg.append('line').attr('class', 'grid').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--border)').attr('stroke-dasharray', '2 4'));
-  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(10).tickFormat(d3.format('d')));
-  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues([0, 25, 50, 75, 100]).tickFormat(d => d + '%'));
-  const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
-  svg.append('path').attr('d', line(pj)).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 2.5).attr('stroke-dasharray', '5 5').attr('opacity', .7);
-  svg.append('path').attr('d', line(EUS.years.map((yy, i) => [yy, EUS.values[i]]))).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 3.5);
-  EUS.years.forEach((yy, i) => { svg.append('circle').attr('cx', x(yy)).attr('cy', y(EUS.values[i])).attr('r', 4.5).attr('fill', '#16a34a'); svg.append('text').attr('x', x(yy)).attr('y', y(EUS.values[i]) - 10).attr('text-anchor', 'middle').attr('font-size', 11.5).attr('font-weight', 800).attr('fill', 'var(--text)').text(EUS.values[i] + '%'); });
-  EUS.projection.forEach(([yy, v]) => { svg.append('circle').attr('cx', x(yy)).attr('cy', y(v)).attr('r', 4).attr('fill', 'var(--surface)').attr('stroke', '#16a34a').attr('stroke-width', 2); svg.append('text').attr('x', x(yy)).attr('y', y(v) + (v >= 97 ? 18 : -10)).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 700).attr('fill', 'var(--text-muted)').text(v + '%'); });
-  // league table
-  const ze = r => r[1] + r[2], rows = BUS25.slice().sort((a, b) => ze(b) - ze(a));
-  const el = document.getElementById('bus-bars');
-  el.innerHTML = rows.map(r => {
-    const keys = ['bev', 'fc', 'hyb', 'dsl', 'gas'], vals = r.slice(1, 6), tot = vals.reduce((p, q) => p + q, 0) || 1;
-    const tip = keys.map((k, i) => vals[i] ? `${LB[k]} ${vals[i]}%` : '').filter(Boolean).join(' · ') + (r[6] ? ' (thin slivers read off the source chart)' : '');
-    return `<div class="tk-sb-row${r[0] === 'EU27' ? ' eu' : ''}" title="${esc(r[0] + ': ' + tip)}"><span class="n">${esc(r[0])}</span><span class="tr">${vals.map((v, i) => v ? `<i style="background:${COL[keys[i]]}" data-w="${(100 * v / tot).toFixed(2)}"></i>` : '').join('')}</span><span class="v">${ze(r)}%${r[6] ? '≈' : ''}</span></div>`;
-  }).join('');
-  requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; })));
-  const eu = R['European Union'] && R['European Union'].Buses ? R['European Union'].Buses.sShare[LAST] : null;
-  document.getElementById('bus-note').innerHTML = `Right-hand number = zero-emission share (battery-electric + hydrogen) of the country's new city buses in ${CB.dataYear}; ≈ marks a total that includes a thin segment the source chart does not label. Hybrid buses are not zero-emission. Shares are rounded as published.`;
-  // the callout is written from the data, so a new edition updates it
-  const NONEU = ['Norway', 'Iceland', 'Switzerland', 'United Kingdom'], C = Object.fromEntries(BUS25.map(r => [r[0], r])), E = C.EU27, zeOf = n => C[n] ? ze(C[n]) : null;
-  const eus = BUS25.filter(r => r[0] !== 'EU27' && !NONEU.includes(r[0]));
-  const full = eus.filter(r => ze(r) === 100).map(r => r[0]), above90 = eus.filter(r => ze(r) >= 90 && ze(r) < 100).map(r => r[0]);
-  const lag = eus.filter(r => ze(r) <= 25).sort((a, b) => ze(a) - ze(b)).map(r => `${r[0]} (${ze(r)}%)`);
-  const big = ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(n => C[n]).map(n => `${n} ${C[n][6] ? 'about ' : ''}${zeOf(n)}%`);
-  const full100 = EUS.projection.find(p => p[1] >= 100), F = CB.facts || {};
-  const fcHeavy = full.filter(n => C[n][2] > 50);
-  document.getElementById('bus-call').innerHTML = `<b>${Math.round(ze(E) / 10)} out of 10 new EU city buses were zero-emission in ${CB.dataYear}</b> — ${E[1]}% battery-electric and ${E[2]}% hydrogen — against ${EUS.values[0]}% in ${EUS.years[0]}, the year the Clean Vehicles Directive was adopted. ${full.length} EU countries sold only zero-emission city buses (${full.join(', ')}${fcHeavy.length ? '; ' + fcHeavy.join(' and ') + ' mostly hydrogen' : ''})${above90.length ? ` and ${above90.join(', ')} were above 90%` : ''}. Among the big markets: ${big.join(', ')}${F.germanyShareOfEuFuelCellCityBuses ? ` (Germany sold ${F.germanyShareOfEuFuelCellCityBuses}% of the EU's hydrogen city buses)` : ''}. Furthest behind: ${lag.join(', ')}.` +
-    (full100 ? ` T&amp;E calculates that at the 2023–25 pace every new EU city bus would be zero-emission by <b>${full100[0]}</b>${F.cvdTarget2035 ? ', seven years ahead of the 2035 target' : ''}.` : '') +
-    (eu != null ? `<br><br><b>Why not the same number as the map above?</b> The map's electric share of <i>all</i> new buses (IEA: ${pct(eu)} in the EU in 2025) includes coaches and intercity buses, which are far less electric; T&amp;E and DVV Media count city buses only.` : '');
-}
 function segments(){
   bars('seg-bars', [
     { l:'Heavy freight trucks 2024', v:84000, c:'#fbbf24', t:'84k · 3%' }, { l:'Heavy freight trucks 2025', v:230000, c:'#f97316', t:'230k · 9% of sales' },
@@ -1071,7 +1019,7 @@ playBtn.addEventListener('click', () => {
   timer = setInterval(() => { if(yi >= NY){ stop(); return; } yi++; refresh(); }, 950);
 });
 
-hero(); insights(); fillSelect(); spotlight(); takeoff(); compare(); waffle(); cityBuses(); segments(); oil(); fleet(); makers(); refresh();
+hero(); insights(); fillSelect(); spotlight(); takeoff(); compare(); waffle(); segments(); oil(); fleet(); makers(); refresh();
 })();
 </script>
 <script src="assets/filter-memory.js?v=5"></script>

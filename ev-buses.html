@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV Buses — The Electric Bus Race</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/mobile.css?v=9">
+<script src="assets/view-mode.js?v=6"></script>
+<script src="assets/page-views.js?v=3" defer></script>
+<script src="assets/section-link.js?v=3" defer></script>
+<script src="assets/tooltip-fit.js" defer></script>
+<script src="assets/deeplink.js?v=2"></script>
+<style>
+  .tk-page{ --tk-a:#f59e0b; --tk-b:#e11d48; --tk-c:#0ea5e9; --tk-ink:#1b1f3b; }
+  .tk-label{ font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  /* hero */
+  .tk-hero{ position:relative; overflow:hidden; border-radius:22px; padding:28px 30px 22px; margin:6px 0 18px; color:#fff;
+    background:radial-gradient(1200px 400px at 85% -10%, rgba(245,158,11,.55), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(225,29,72,.5), transparent 60%), linear-gradient(135deg,#0f1226,#1b1f3b 55%,#2a1b3b);
+    display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:26px; box-shadow:0 18px 44px rgba(15,18,38,.35); }
+  .tk-hero .tk-eyebrow{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#fcd34d; }
+  .tk-big{ font-size:clamp(48px,8vw,92px); font-weight:900; letter-spacing:-.04em; line-height:1; margin:8px 0 6px; font-variant-numeric:tabular-nums;
+    background:linear-gradient(90deg,#fde68a,#fb923c 55%,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tk-hero-sub{ font-size:15px; color:#d6d9ee; max-width:520px; line-height:1.5; }
+  .tk-hero-sub b{ color:#fff; }
+  #hero-spark{ width:100%; height:92px; margin-top:12px; display:block; }
+  .tk-kpis{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:center; }
+  .tk-kpi{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:14px 16px; backdrop-filter:blur(4px); }
+  .tk-kpi .v{ font-size:30px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .tk-kpi .l{ font-size:12.5px; color:#cfd3ec; line-height:1.4; margin-top:2px; }
+  @media (max-width:900px){ .tk-hero{ grid-template-columns:1fr; padding:22px 18px; } }
+  /* insight tiles */
+  .tk-ins{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:0 0 18px; }
+  .tk-in{ border:1px solid var(--border); background:var(--surface); border-radius:16px; padding:14px 16px; border-left:5px solid var(--tk-a); }
+  .tk-in .e{ font-size:22px; }
+  .tk-in .h{ font-size:20px; font-weight:900; letter-spacing:-.02em; margin:2px 0; }
+  .tk-in .t{ font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+  /* controls */
+  .tk-bar{ position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:12px 16px; padding:10px 14px; margin:0 0 16px; border:1px solid var(--border); border-radius:16px; background:color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter:blur(8px); box-shadow:0 6px 20px rgba(27,31,59,.08); }
+  @media (max-width:700px){ .tk-bar{ position:static; } }
+  .tk-seg{ display:inline-flex; gap:4px; background:var(--surface-alt); border-radius:999px; padding:4px; }
+  .tk-seg button{ appearance:none; border:none; background:transparent; cursor:pointer; padding:7px 12px; border-radius:999px; font-size:12.5px; font-weight:800; color:var(--text-muted); }
+  .tk-seg button:hover{ color:var(--text); }
+  .tk-seg button.active{ background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); color:#fff; box-shadow:0 2px 10px rgba(225,29,72,.3); }
+  .tk-play{ appearance:none; border:none; cursor:pointer; width:42px; height:42px; border-radius:50%; font-size:16px; font-weight:900; color:#fff; background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); box-shadow:0 6px 16px rgba(225,29,72,.35); }
+  .tk-year{ display:flex; align-items:center; gap:12px; flex:1; min-width:230px; }
+  .tk-year .y{ font-size:30px; font-weight:900; letter-spacing:-.03em; min-width:70px; font-variant-numeric:tabular-nums; }
+  .tk-year input[type=range]{ flex:1; accent-color:var(--tk-b); height:6px; }
+  /* layout */
+  .tk-two{ display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:16px; align-items:start; }
+  @media (max-width:1100px){ .tk-two{ grid-template-columns:1fr; } }
+  .tk-map{ position:relative; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:linear-gradient(180deg,#e8f1f8,#f3f7fb); }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tk-map{ background:#0c1424; } }
+  :root[data-theme="dark"] .tk-map{ background:#0c1424; }
+  .tk-map svg{ display:block; width:100%; height:auto; }
+  .tk-map path.c{ stroke:var(--surface); stroke-width:.4; transition:fill .45s ease; cursor:default; }
+  .tk-map path.c.has{ cursor:pointer; }
+  .tk-map path.c.has:hover{ stroke:#1b1f3b; stroke-width:1.2; }
+  .tk-map path.c.sel{ stroke:#1b1f3b; stroke-width:1.8; }
+  .tk-map path.c.nodata{ fill:var(--surface-alt); }
+  .tk-leg{ position:absolute; left:12px; bottom:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:7px 10px; font-size:11px; }
+  .tk-leg .sc{ width:190px; height:10px; border-radius:3px; margin:4px 0 2px; }
+  .tk-leg .nm{ display:flex; justify-content:space-between; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+  .tk-tip{ position:absolute; z-index:8; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:12.5px; line-height:1.45; box-shadow:0 10px 28px rgba(0,0,0,.22); min-width:190px; transition:opacity .08s; }
+  .tk-tip b{ font-variant-numeric:tabular-nums; }
+  .tk-tip svg{ display:block; margin-top:6px; }
+  /* race */
+  .tk-race{ position:relative; }
+  .tk-rr{ position:absolute; left:0; right:0; height:30px; display:grid; grid-template-columns:116px 1fr 64px; gap:10px; align-items:center; font-size:12.5px; transition:transform .7s cubic-bezier(.2,.8,.2,1), opacity .5s; cursor:pointer; }
+  .tk-rr .nm{ font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tk-rr .tr{ height:20px; background:var(--surface-alt); border-radius:6px; overflow:hidden; }
+  .tk-rr .tr i{ display:block; height:100%; width:0; border-radius:6px; transition:width .7s cubic-bezier(.2,.8,.2,1); }
+  .tk-rr .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .tk-rr.sel .nm{ color:var(--tk-b); }
+  .tk-rr:hover .tr{ outline:2px solid var(--tk-a); }
+  .tk-chk{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; margin-top:6px; }
+  /* charts */
+  .tk-chart{ position:relative; }
+  .tk-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .tk-chart .ax text{ fill:var(--text-muted); font-size:11px; }
+  .tk-chart .ax line, .tk-chart .ax path{ stroke:var(--border); }
+  .tk-chart .grid line{ stroke:var(--border); stroke-dasharray:2 4; }
+  .tk-ctip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.5; box-shadow:0 8px 22px rgba(0,0,0,.2); white-space:nowrap; }
+  .tk-lg{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12.5px; font-weight:700; margin:6px 0 4px; }
+  .tk-lg span{ display:inline-flex; align-items:center; gap:6px; cursor:default; }
+  .tk-lg i{ width:14px; height:5px; border-radius:3px; display:inline-block; }
+  .tk-lg i.sq{ width:11px; height:11px; border-radius:3px; }
+  /* spotlight */
+  .tk-sp-head{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin-bottom:10px; }
+  .tk-sp-head select{ padding:9px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:15px; }
+  .tk-sp-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:10px; margin:6px 0 12px; }
+  .tk-sp-kpis div{ background:var(--surface-alt); border-radius:12px; padding:10px 12px; }
+  .tk-sp-kpis b{ display:block; font-size:21px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .tk-sp-kpis span{ font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); }
+  /* waffle */
+  .tk-chips{ display:flex; flex-wrap:wrap; gap:7px; margin:6px 0 14px; }
+  .tk-chips button{ border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:12.5px; padding:6px 13px; border-radius:999px; cursor:pointer; }
+  .tk-chips button.active{ background:linear-gradient(135deg,var(--tk-a),var(--tk-b)); color:#fff; border-color:transparent; }
+  .tk-wf{ display:grid; grid-template-columns:minmax(0,320px) minmax(0,1fr); gap:24px; align-items:center; }
+  @media (max-width:760px){ .tk-wf{ grid-template-columns:1fr; } }
+  .tk-grid{ display:grid; grid-template-columns:repeat(10,1fr); gap:5px; max-width:320px; }
+  .tk-grid i{ display:block; aspect-ratio:1; border-radius:50%; background:var(--surface-alt); transform:scale(.4); opacity:0; animation:tkpop .45s forwards; }
+  @keyframes tkpop{ to{ transform:scale(1); opacity:1; } }
+  .tk-wf-t{ font-size:clamp(20px,3vw,30px); font-weight:900; letter-spacing:-.02em; line-height:1.15; }
+  .tk-wf-l{ display:flex; flex-direction:column; gap:7px; margin-top:12px; font-size:13.5px; }
+  .tk-wf-l span{ display:flex; align-items:center; gap:9px; }
+  .tk-wf-l i{ width:13px; height:13px; border-radius:50%; flex:none; }
+  .tk-wf-l b{ font-variant-numeric:tabular-nums; }
+  /* oil + segments */
+  .tk-bars{ display:flex; flex-direction:column; gap:9px; margin:8px 0; }
+  .tk-bar-row{ display:grid; grid-template-columns:210px 1fr 140px; gap:10px; align-items:center; font-size:13px; }
+  @media (max-width:760px){ .tk-bar-row{ grid-template-columns:120px 1fr 70px; } }
+  .tk-bar-row .tr{ height:22px; background:var(--surface-alt); border-radius:7px; overflow:hidden; }
+  .tk-bar-row .tr i{ display:block; height:100%; border-radius:7px; width:0; transition:width 1.1s cubic-bezier(.2,.8,.2,1); }
+  .tk-bar-row .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  /* city buses */
+  .tk-sb{ display:flex; flex-direction:column; gap:5px; margin:10px 0 4px; }
+  .tk-sb-row{ display:grid; grid-template-columns:112px 1fr 64px; gap:10px; align-items:center; font-size:12.5px; }
+  .tk-sb-row.eu{ font-weight:900; } .tk-sb-row.eu .tr{ outline:2px solid #0f172a; outline-offset:1px; }
+  .tk-sb-row .tr{ display:flex; height:17px; border-radius:6px; overflow:hidden; background:var(--surface-alt); }
+  .tk-sb-row .tr i{ display:block; height:100%; width:0; transition:width 1s cubic-bezier(.2,.8,.2,1); }
+  .tk-sb-row .v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .tk-sb-row .n{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:760px){ .tk-sb-row{ grid-template-columns:92px 1fr 52px; } }
+  .tk-callout{ margin-top:12px; padding:14px 16px; border-radius:14px; background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(225,29,72,.1)); border:1px solid color-mix(in srgb, var(--tk-a) 40%, var(--border)); font-size:13.5px; line-height:1.6; }
+  .tk-callout b{ font-size:15px; }
+  /* makers */
+  .tk-mk{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .tk-mc{ border:1px solid var(--border); border-radius:16px; padding:15px 16px; background:var(--surface); position:relative; overflow:hidden; }
+  .tk-mc::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--c,var(--tk-a)); }
+  .tk-mc h3{ margin:0 0 4px; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .tk-mc .nm{ font-size:13px; font-weight:800; margin:2px 0 6px; }
+  .tk-mc p{ margin:6px 0 0; font-size:12.5px; color:var(--text-muted); line-height:1.55; }
+  .tk-mc .chip{ display:inline-block; margin:3px 5px 0 0; padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:800; background:var(--surface-alt); }
+  /* table */
+  .tk-tw{ overflow-x:auto; }
+  table.tk-t{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  table.tk-t th{ text-align:right; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); padding:8px 8px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
+  table.tk-t th:nth-child(2), table.tk-t td:nth-child(2){ text-align:left; }
+  table.tk-t th.rk, table.tk-t td.rk{ width:1%; color:var(--text-muted); font-weight:800; cursor:default; }
+  table.tk-t th.sorted{ color:var(--text); }
+  table.tk-t th.sorted::after{ content:' ▼'; font-size:9px; }
+  table.tk-t th.sorted.asc::after{ content:' ▲'; }
+  table.tk-t td{ padding:7px 8px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
+  table.tk-t tr{ cursor:pointer; }
+  table.tk-t tr:hover td{ background:var(--surface-alt); }
+  table.tk-t tr.sel td{ background:color-mix(in srgb, var(--tk-a) 16%, transparent); font-weight:800; }
+  table.tk-t td.bar{ background-repeat:no-repeat; background-position:left center; background-size:var(--w,0%) 70%; background-image:linear-gradient(90deg,color-mix(in srgb, var(--tk-a) 35%, transparent),color-mix(in srgb, var(--tk-b) 35%, transparent)); }
+  table.tk-t td.na{ color:var(--text-muted); opacity:.5; }
+  .tk-note{ font-size:12px; color:var(--text-muted); margin:8px 0 0; line-height:1.55; }
+  .tk-zoom{ position:absolute; right:10px; top:10px; display:flex; flex-direction:column; gap:6px; z-index:5; }
+  .tk-zoom button{ width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:18px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .tk-zoom button:hover{ background:var(--surface-alt); }
+  .tk-map svg{ cursor:grab; touch-action:none; }
+  .tk-map svg:active{ cursor:grabbing; }
+  .tk-map path.c{ vector-effect:non-scaling-stroke; }
+  .tk-leg .sw{ display:inline-block; width:10px; height:10px; border-radius:2px; border:1px solid var(--border); vertical-align:-1px; margin-right:5px; }
+  .tk-year .y small{ display:block; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--tk-b); font-weight:800; margin-top:-4px; }
+  .tk-race.proj .tr i{ background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.45) 0 4px, transparent 4px 9px); }
+  .tk-rr.unk .tr i{ background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.55) 0 3px, transparent 3px 7px); background-color:var(--hc,#9aa5b8); opacity:.75; }
+  .tk-rr.unk .nm::after{ content:' ▨'; color:var(--text-muted); font-weight:400; }
+  table.tk-t tr.ex td{ font-style:italic; color:var(--text-muted); }
+  .tk-head2{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; margin-bottom:6px; }
+  .tk-head2 h2{ margin:0; }
+  .tk-bigfleet{ font-size:clamp(34px,6vw,60px); font-weight:900; letter-spacing:-.03em; line-height:1; background:linear-gradient(90deg,#64748b,#334155); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  :root[data-theme="dark"] .tk-bigfleet{ background:linear-gradient(90deg,#cbd5e1,#94a3b8); -webkit-background-clip:text; background-clip:text; }
+  .tk-bar-row .tr .rg{ position:absolute; top:5px; bottom:5px; border-left:2px solid #0f172a; border-right:2px solid #0f172a; background:rgba(15,23,42,.12); }
+  table.tk-mini{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:10px; font-variant-numeric:tabular-nums; }
+  table.tk-mini th{ text-align:right; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px; border-bottom:2px solid var(--border); }
+  table.tk-mini td{ text-align:right; padding:5px 6px; border-bottom:1px solid var(--border); }
+  table.tk-mini th:first-child, table.tk-mini td:first-child{ text-align:left; font-weight:700; }
+  .tk-col{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .tk-sel{ padding:7px 12px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-weight:800; font-size:13px; }
+  .tk-toggle{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:var(--text-muted); cursor:pointer; margin:4px 0; }
+
+  /* EV Buses page */
+  .tk-page.bus{ --tk-a:#16a34a; --tk-b:#0ea5e9; --tk-c:#f59e0b; }
+  .tk-page.bus .tk-hero{ background:radial-gradient(1200px 400px at 85% -10%, rgba(22,163,74,.55), transparent 60%), radial-gradient(900px 500px at -10% 110%, rgba(14,165,233,.5), transparent 60%), linear-gradient(135deg,#0b1d2e,#0e2a3d 55%,#12354a); }
+  .tk-page.bus .tk-hero .tk-eyebrow{ color:#86efac; }
+  .tk-page.bus .tk-big{ background:linear-gradient(90deg,#bbf7d0,#4ade80 55%,#38bdf8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .bus-lbl{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bus-stack{ display:flex; flex-direction:column; gap:3px; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="ev-buses.html" aria-current="page"><span class="dot"></span>EV Buses</a>
+      <a href="ev-buses.html"><span class="dot"></span>EV Buses</a>
+      <a href="world-oil.html"><span class="dot"></span>World Oil</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
+      <a href="energy-mix.html"><span class="dot"></span>Energy Mix</a>
+
+      <div class="nav-heading">Trends</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+
+      <div class="nav-heading">About</div>
+      <a href="contact.html"><span class="dot"></span>Contact</a>
+      <a href="comments.html"><span class="dot"></span>Comments</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page tk-page bus">
+      <header class="page-header">
+        <div class="eyebrow">Markets · EV Buses</div>
+        <h1>The electric bus race</h1>
+        <p class="subtitle">Buses are where electrification is furthest along: China already runs most of the world's electric buses, and six out of ten new city buses in the European Union are zero-emission. Explore how many electric buses each country sells and keeps on the road, how fast their share is climbing, and who leads among European city buses.</p>
+      </header>
+
+      <section class="tk-hero" id="hero">
+        <div>
+          <div class="tk-eyebrow">Electric buses sold worldwide in <span id="hero-year">2025</span></div>
+          <div class="tk-big" id="hero-big">0</div>
+          <div class="tk-hero-sub" id="hero-sub"></div>
+          <svg id="hero-spark" viewBox="0 0 560 92" preserveAspectRatio="none" aria-hidden="true"></svg>
+        </div>
+        <div class="tk-kpis" id="hero-kpis"></div>
+      </section>
+
+      <div class="tk-ins" id="insights"></div>
+
+      <div class="tk-bar" id="tk-bar">
+        <div class="tk-seg" id="seg-metric" role="group" aria-label="Metric">
+          <button type="button" data-v="sShare" class="active">Share of new buses</button>
+          <button type="button" data-v="sales">Units sold</button>
+          <button type="button" data-v="stock">On the road</button>
+          <button type="button" data-v="tShare">Share of fleet</button>
+        </div>
+        <div class="tk-year">
+          <button type="button" class="tk-play" id="play" aria-label="Play through the years" title="Play">▶</button>
+          <div class="y" id="year-lbl">2025</div>
+          <input type="range" id="year" min="0" max="10" value="10" aria-label="Year">
+        </div>
+      </div>
+
+      <div class="card chart-card" id="rank-card">
+        <h2 id="rank-title">Which countries lead</h2>
+        <p class="note" id="rank-note" style="display:block"></p>
+        <div class="tk-bars" id="rank-bars"></div>
+        <p class="tk-note" id="rank-foot"></p>
+      </div>
+
+      <div class="card chart-card">
+        <div class="tk-head2"><h2>The takeoff: electric bus sales by region</h2></div>
+        <p class="note" style="display:block" id="to-note"></p>
+        <div class="tk-lg" id="to-lg"></div>
+        <div class="tk-chart" id="takeoff"></div>
+      </div>
+
+      <div class="card chart-card" id="spot-card">
+        <div class="tk-head2"><h2 style="margin:0">Country spotlight</h2><select class="tk-sel" id="sp-sel" aria-label="Country"></select></div>
+        <div class="tk-kpis" id="sp-kpis" style="margin:10px 0"></div>
+        <div class="tk-lg" id="sp-lg"></div>
+        <div class="tk-chart" id="spot"></div>
+        <p class="tk-note" id="sp-note"></p>
+      </div>
+
+      <div class="card chart-card" id="city-buses">
+        <h2 id="bus-h">City buses</h2>
+        <p class="note" style="display:block" id="bus-src"></p>
+        <div class="tk-lg" id="bus-lg1"></div>
+        <div class="tk-chart" id="bus-line"></div>
+        <h3 id="bus-h3" style="font-size:14px;margin:18px 0 2px">Who leads: share of new city buses by powertrain</h3>
+        <div class="tk-lg" id="bus-lg2"></div>
+        <div class="tk-sb" id="bus-bars"></div>
+        <p class="tk-note" id="bus-note"></p>
+        <div class="tk-callout" id="bus-call"></div>
+      </div>
+
+      <div class="card chart-card" id="icct-card">
+        <h2 id="icct-h">Zero-emission buses sold, country by country (ICCT)</h2>
+        <p class="note" style="display:block" id="icct-note"></p>
+        <div class="tk-bars" id="icct-bars"></div>
+        <p class="tk-note" id="icct-foot"></p>
+      </div>
+
+      <div class="card chart-card">
+        <h2>Three ways to count, three different numbers</h2>
+        <div class="tk-callout" id="count-call" style="margin-top:6px"></div>
+      </div>
+
+      <div class="card chart-card" id="notes-card">
+        <h2>Notes, sources and limits</h2>
+        <div class="notes-body">
+          <ul class="note" style="display:block;padding-left:18px;line-height:1.6">
+            <li><strong>IEA numbers.</strong> Electric bus sales, stock (buses on the road) and shares: IEA Global EV Data Explorer, Global EV Outlook 2026 (CC BY 4.0), pulled from its public API. Electric = battery-electric + plug-in hybrid + fuel cell, all bus types (city, intercity, coaches, minibuses). The IEA rounds to two or three significant digits, so small countries can show the same figure in two years and shares are approximate.</li>
+            <li><strong>City buses.</strong> Transport &amp; Environment (T&amp;E, Feb 2026), built on DVV Media's <i>Alternative Drivelines for City Buses 2025</i>: shares of new city bus registrations by powertrain for 29 European countries, read from T&amp;E's published charts (a few thin, unlabelled slivers are estimated and marked ≈). Hybrids are not zero-emission. Edition and numbers are in <code>assets/city-bus-data.js</code>.</li>
+            <li><strong>ICCT.</strong> Zero-emission buses sold per country (battery-electric and fuel cell), from the ICCT Global ZE Market Monitor (34 countries including the United States, India, Brazil and Mexico), a separate count from the IEA's.</li>
+            <li><strong>Fleet.</strong> "Share of fleet" is the IEA's electric share of all buses on the road. China's electric buses are mostly city buses, so its fleet share is far higher than anywhere else.</li>
+            <li><strong>Trucks and vans.</strong> They have their own page: <a href="ev-trucking.html">EV Trucking</a>.</li>
+            <li><strong>Sources:</strong> <a href="https://www.iea.org/reports/global-ev-outlook-2026/trends-in-other-ev-modes" target="_blank" rel="noopener">IEA Global EV Outlook 2026</a> · <a href="https://www.sustainable-bus.com/news/electric-buses-city-2025-europe-transport-environment/" target="_blank" rel="noopener">Transport &amp; Environment city bus data (DVV Media), via Sustainable Bus, Feb 2026</a> · <a href="https://theicct.org/global-ev-market-monitor/" target="_blank" rel="noopener">ICCT Global EV Market Monitor</a>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer class="page-footer">
+        Electric bus data: IEA Global EV Data Explorer (CC BY 4.0). City buses: Transport &amp; Environment / DVV Media. Zero-emission bus sales: ICCT.
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="assets/city-bus-data.js"></script>
+<script src="assets/ev-trucks-data.js"></script>
+<script src="assets/notes-toggle.js"></script>
+<script>
+(function(){
+const R = EVT.regions, ICCT = EVT.icct || {}, Y = EVT.years, LAST = Y.indexOf(2025);
+const AGG = new Set(['World', 'Advanced Economies', 'Developing Economies excl. China', 'Asia Pacific', 'Europe', 'European Union', 'Latin America', 'Africa', 'Middle East and Caspian', 'Southeast Asia']);
+const CONT = { 'China':'Asia', 'Japan':'Asia', 'Korea':'Asia', 'Malaysia':'Asia', 'Philippines':'Asia', 'Singapore':'Asia', 'India':'Asia', 'Viet Nam':'Asia', 'Uzbekistan':'Asia', 'Israel':'Middle East', 'Jordan':'Middle East',
+  'United Arab Emirates':'Middle East', 'USA':'North America', 'Canada':'North America', 'Mexico':'North America', 'Uruguay':'South America', 'Chile':'South America', 'Colombia':'South America', 'Brazil':'South America',
+  'New Zealand':'Oceania', 'Australia':'Oceania', 'South Africa':'Africa' };
+const CONT_COL = { 'Asia':'#dc2626', 'Europe':'#1e3a8a', 'North America':'#16a34a', 'South America':'#b8860b', 'Oceania':'#14b8a6', 'Middle East':'#d2b48c', 'Africa':'#111827' };
+const colOf = n => CONT_COL[CONT[n] || 'Europe'];
+const SHORT = { 'United Arab Emirates':'UAE', 'United Kingdom':'UK', 'USA':'USA', 'Viet Nam':'Vietnam' };
+const nm = n => SHORT[n] || n;
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const fmt = n => n == null ? '–' : Math.round(n).toLocaleString('en-US');
+const compact = n => n == null ? '–' : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e4 ? 0 : 1).replace(/\.0$/, '') + 'k' : String(Math.round(n));
+const pct = n => n == null ? '–' : (n >= 10 ? Math.round(n) : n >= 1 ? n.toFixed(1).replace(/\.0$/, '') : n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')) + '%';
+const B = reg => R[reg] && R[reg].Buses;
+const at = (reg, f, i) => { const b = B(reg); return b && b[f] ? b[f][i] : null; };
+const COUNTRIES = Object.keys(R).filter(r => B(r) && !AGG.has(r));
+const Y15 = Y.filter(y => y >= 2015);                    // the years offered by the slider
+const W = 'World';
+
+// ---------- hero ----------
+function hero(){
+  const s = at(W, 'sales', LAST), st = at(W, 'stock', LAST), sh = at(W, 'sShare', LAST), cn = at('China', 'sales', LAST), cs = at('China', 'stock', LAST);
+  document.getElementById('hero-year').textContent = Y[LAST];
+  const big = document.getElementById('hero-big'); let t0 = null;
+  const step = ts => { if(t0 == null) t0 = ts; const k = Math.min(1, (ts - t0) / 1200); big.textContent = fmt(s * (1 - Math.pow(1 - k, 3))); if(k < 1) requestAnimationFrame(step); else big.textContent = fmt(s); };
+  requestAnimationFrame(step);
+  document.getElementById('hero-sub').innerHTML = `<b>${pct(sh)}</b> of all new buses sold in ${Y[LAST]} were electric (IEA). China sold <b>${fmt(cn)}</b> of them — ${pct(100 * cn / s)} of the world total — and runs about <b>${compact(st)}</b> electric buses on the road, ${pct(100 * cs / st)} of them in China.`;
+  // sparkline of world sales
+  const sv = d3.select('#hero-spark'), vals = Y15.map(y => at(W, 'sales', Y.indexOf(y))), mx = d3.max(vals) || 1, x = d3.scaleLinear([0, vals.length - 1], [4, 556]), yy = d3.scaleLinear([0, mx], [88, 6]);
+  sv.append('path').attr('d', d3.area().x((d, i) => x(i)).y0(90).y1(d => yy(d || 0))(vals)).attr('fill', 'rgba(134,239,172,.22)');
+  sv.append('path').attr('d', d3.line().x((d, i) => x(i)).y(d => yy(d || 0))(vals)).attr('fill', 'none').attr('stroke', '#4ade80').attr('stroke-width', 2.5);
+  const eu = B('Europe'), c24 = at('Europe', 'sales', LAST - 1), c25 = at('Europe', 'sales', LAST), CB = CITY_BUS, zeEU = CB.countries.find(r => r[0] === 'EU27');
+  const kp = [[fmt(st), 'electric buses on the road'], [pct(100 * cs / st), 'of them in China'], [fmt(c25), `sold in Europe (${c24 ? (c25 >= c24 ? '+' : '') + Math.round(100 * (c25 / c24 - 1)) + '% vs ' + Y[LAST - 1] : ''})`], [zeEU ? (zeEU[1] + zeEU[2]) + '%' : '–', `of new EU city buses zero-emission (${CB.dataYear}, T&E)`]];
+  document.getElementById('hero-kpis').innerHTML = kp.map(k => `<div class="tk-kpi"><div class="v">${k[0]}</div><div class="l">${k[1]}</div></div>`).join('');
+}
+function insights(){
+  const S = c => at(c, 'sales', LAST), S0 = c => at(c, 'sales', LAST - 2), T = c => at(c, 'tShare', LAST), sh = c => at(c, 'sShare', LAST);
+  const euAll = at('European Union', 'sShare', LAST), zeEU = CITY_BUS.countries.find(r => r[0] === 'EU27');
+  const tiles = [
+    ['🚌', `China: ${pct(T('China'))} of its buses are electric`, `${fmt(at('China', 'stock', LAST))} electric buses on the road and ${pct(sh('China'))} of new buses sold in ${Y[LAST]}, a share that swings with the yearly market (${pct(at('China', 'sShare', LAST - 1))} in ${Y[LAST - 1]}).`],
+    ['🌍', `Europe: ${euAll != null ? pct(euAll) : '–'} of all new buses, ${zeEU ? zeEU[1] + zeEU[2] : '–'}% of city buses`, `The IEA counts every bus including coaches; T&E counts city buses only, where batteries and hydrogen have taken six out of ten sales.`],
+    ['🚏', `India: ${fmt(S('India'))} sold in ${Y[LAST]}`, `Up from ${fmt(S0('India'))} two years earlier — ${S0('India') ? '+' + Math.round(100 * (S('India') / S0('India') - 1)) + '%' : ''}, led by city bus tenders; only ${pct(T('India'))} of the fleet is electric so far.`]
+  ];
+  document.getElementById('insights').innerHTML = tiles.map(t => `<div class="tk-in"><div class="e">${t[0]}</div><div class="h">${esc(t[1])}</div><div class="t">${esc(t[2])}</div></div>`).join('');
+}
+
+// ---------- ranking ----------
+const METRIC = {
+  sShare:{ ttl:'Share of new buses that are electric', f:'sShare', fmt:pct, note:'Electric buses as a share of all new buses sold in the year (IEA).' },
+  sales:{ ttl:'Electric buses sold', f:'sales', fmt:fmt, note:'Electric buses sold in the year (IEA).' },
+  stock:{ ttl:'Electric buses on the road', f:'stock', fmt:fmt, note:'Electric buses in the national fleet at the end of the year (IEA).' },
+  tShare:{ ttl:'Share of the bus fleet that is electric', f:'tShare', fmt:pct, note:'Electric buses as a share of all buses on the road (IEA).' }
+};
+let metric = 'sShare', yi = LAST, timer = null;
+function bars(id, rowsData){
+  const mx = Math.max(...rowsData.map(r => r.v), 1), el = document.getElementById(id);
+  el.innerHTML = rowsData.map(r => `<div class="tk-bar-row"><span class="bus-lbl">${r.l}</span><span class="tr"><i style="background:${r.c}" data-w="${(100 * r.v / mx).toFixed(1)}"></i></span><span class="v">${r.t}</span></div>`).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; })));
+}
+function rank(){
+  const M = METRIC[metric], y = Y[yi];
+  const rows = COUNTRIES.map(c => ({ c, v:at(c, M.f, yi) })).filter(r => r.v != null && r.v > 0).sort((a, b) => b.v - a.v);
+  const top = rows.slice(0, 24), w = at(W, M.f, yi), eu = at('European Union', M.f, yi);
+  document.getElementById('rank-title').textContent = `${M.ttl}, ${y}`;
+  document.getElementById('rank-note').textContent = `${M.note} ${rows.length} countries have data; the ${top.length} highest are shown.`;
+  bars('rank-bars', top.map(r => ({ l:esc(nm(r.c)), v:r.v, c:colOf(r.c), t:M.fmt(r.v) })));
+  document.getElementById('rank-foot').innerHTML = `World: <b>${M.fmt(w)}</b>${eu != null ? ` · European Union: <b>${M.fmt(eu)}</b>` : ''}. ` + Object.keys(CONT_COL).map(k => `<span class="tk-lg" style="display:inline-flex;margin:0 10px 0 0"><span><i class="sq" style="background:${CONT_COL[k]}"></i>${k}</span></span>`).join('') + `<span class="tk-lg" style="display:inline-flex"><span><i class="sq" style="background:${CONT_COL['Europe']}"></i>Europe (default)</span></span>`;
+  document.getElementById('year-lbl').textContent = y;
+}
+
+// ---------- takeoff: sales by region ----------
+function takeoff(){
+  const years = Y15, idx = years.map(y => Y.indexOf(y));
+  const g = (reg, i) => at(reg, 'sales', i) || 0;
+  const groups = [{ k:'China', c:'#dc2626', f:i => g('China', i) }, { k:'Europe', c:'#1e3a8a', f:i => g('Europe', i) }, { k:'India', c:'#f59e0b', f:i => g('India', i) },
+    { k:'North America', c:'#16a34a', f:i => g('USA', i) + g('Canada', i) }];
+  const named = groups.slice(); groups.push({ k:'Rest of the world', c:'#94a3b8', f:i => Math.max(0, g(W, i) - named.reduce((s, q) => s + q.f(i), 0)) });
+  const data = years.map((y, j) => { const o = { y }; groups.forEach(q => { o[q.k] = q.f(idx[j]); }); o.total = g(W, idx[j]); return o; });
+  document.getElementById('to-lg').innerHTML = groups.map(q => `<span><i class="sq" style="background:${q.c}"></i>${q.k}</span>`).join('');
+  const box = document.getElementById('takeoff'); box.innerHTML = '<svg viewBox="0 0 760 300" role="img" aria-label="Electric bus sales by region"></svg>';
+  const Wd = 760, H = 300, m = { t:18, r:14, b:28, l:52 }, svg = d3.select(box.querySelector('svg'));
+  const x = d3.scaleBand(years, [m.l, Wd - m.r]).padding(.2), mx = d3.max(data, d => d.total) || 1, y = d3.scaleLinear([0, mx], [H - m.b, m.t]).nice();
+  y.ticks(5).forEach(t => svg.append('line').attr('class', 'grid').attr('x1', m.l).attr('x2', Wd - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--border)').attr('stroke-dasharray', '2 4'));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).tickFormat(d3.format('d')));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => compact(d)));
+  const st = d3.stack().keys(groups.map(q => q.k))(data);
+  st.forEach((s, k) => svg.append('g').attr('fill', groups[k].c).selectAll('rect').data(s).join('rect').attr('x', d => x(d.data.y)).attr('width', x.bandwidth()).attr('y', d => y(d[1])).attr('height', d => Math.max(0, y(d[0]) - y(d[1])))
+    .append('title').text(d => `${groups[k].k} ${d.data.y}: ${fmt(d.data[groups[k].k])} of ${fmt(d.data.total)}`));
+  data.forEach(d => svg.append('text').attr('x', x(d.y) + x.bandwidth() / 2).attr('y', y(d.total) - 5).attr('text-anchor', 'middle').attr('font-size', 10.5).attr('font-weight', 700).attr('fill', 'var(--text-muted)').text(compact(d.total)));
+  const last = data[data.length - 1], first = data.find(d => d.total > 0);
+  const dipY = data.filter((d, i) => i > 0 && d.total < data[i - 1].total).map(d => d.y), dip = dipY.length ? dipY[dipY.length - 1] : null;
+  document.getElementById('to-note').innerHTML = `Electric buses sold per year, IEA. ${Y[LAST]}: <b>${fmt(last.total)}</b> worldwide, of which China ${fmt(last.China)}, Europe ${fmt(last.Europe)}, India ${fmt(last.India)}, North America ${fmt(last['North America'])}.${dip ? ` The only recent dip was ${dip}, when China's market fell.` : ''}`;
+}
+
+// ---------- country spotlight ----------
+function spotlight(){
+  const sel = document.getElementById('sp-sel'), c = sel.value || 'China';
+  const opts = COUNTRIES.slice().sort((a, b) => (at(b, 'sales', LAST) || 0) - (at(a, 'sales', LAST) || 0));
+  if(!sel.options.length){ sel.innerHTML = opts.map(n => `<option value="${esc(n)}">${esc(nm(n))}</option>`).join(''); sel.value = 'China'; }
+  const cur = sel.value;
+  const kp = [[fmt(at(cur, 'sales', LAST)), `electric buses sold in ${Y[LAST]}`], [pct(at(cur, 'sShare', LAST)), 'of new buses'], [fmt(at(cur, 'stock', LAST)), 'electric buses on the road'], [pct(at(cur, 'tShare', LAST)), 'of the fleet']];
+  document.getElementById('sp-kpis').innerHTML = kp.map(k => `<div class="tk-kpi" style="background:var(--surface-alt);border-color:var(--border)"><div class="v">${k[0]}</div><div class="l" style="color:var(--text-muted)">${k[1]}</div></div>`).join('');
+  document.getElementById('sp-lg').innerHTML = `<span><i style="background:#16a34a"></i>Share of new buses</span><span><i style="background:#0ea5e9"></i>Share of the fleet</span>`;
+  const box = document.getElementById('spot'); box.innerHTML = '<svg viewBox="0 0 760 270" role="img" aria-label="Electric share of buses"></svg>';
+  const Wd = 760, H = 270, m = { t:16, r:20, b:28, l:44 }, svg = d3.select(box.querySelector('svg'));
+  const x = d3.scaleLinear([Y15[0], Y15[Y15.length - 1]], [m.l, Wd - m.r]);
+  const series = [['sShare', '#16a34a'], ['tShare', '#0ea5e9']].map(([f, col]) => ({ f, col, pts:Y15.map(yy => [yy, at(cur, f, Y.indexOf(yy))]).filter(p => p[1] != null) }));
+  const mxv = Math.max(10, d3.max(series.flatMap(s => s.pts.map(p => p[1]))) || 10), yv = d3.scaleLinear([0, Math.min(100, Math.ceil(mxv / 10) * 10)], [H - m.b, m.t]);
+  yv.ticks(5).forEach(t => svg.append('line').attr('class', 'grid').attr('x1', m.l).attr('x2', Wd - m.r).attr('y1', yv(t)).attr('y2', yv(t)).attr('stroke', 'var(--border)').attr('stroke-dasharray', '2 4'));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(11).tickFormat(d3.format('d')));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(yv).ticks(5).tickFormat(d => d + '%'));
+  series.forEach(s => { if(s.pts.length > 1) svg.append('path').attr('d', d3.line().x(p => x(p[0])).y(p => yv(p[1]))(s.pts)).attr('fill', 'none').attr('stroke', s.col).attr('stroke-width', 3);
+    s.pts.forEach(p => svg.append('circle').attr('cx', x(p[0])).attr('cy', yv(p[1])).attr('r', 3.5).attr('fill', s.col).append('title').text(`${p[0]}: ${pct(p[1])}`)); });
+  document.getElementById('sp-note').textContent = `${nm(cur)}: IEA electric share of new bus sales and of the bus fleet, ${Y15[0]}–${Y[LAST]}. Where a line is missing the IEA does not publish that figure.`;
+}
+
+// ---------- city buses (Europe): data in assets/city-bus-data.js ----------
+function cityBuses(){
+  const CB = CITY_BUS, BUS25 = CB.countries, EUS = CB.eu, last = EUS.years.length - 1;
+  const COL = { bev:'#16a34a', fc:'#0ea5e9', hyb:'#fbbf24', dsl:'#9ca3af', gas:'#4b5563' }, LB = { bev:'Battery-electric', fc:'Hydrogen fuel cell', hyb:'Hybrid', dsl:'Diesel', gas:'Gas' };
+  document.getElementById('bus-h').textContent = `City buses: Europe went from ${EUS.values[0]}% to ${EUS.values[last]}% zero-emission in ${EUS.years[last] - EUS.years[0]} years`;
+  document.getElementById('bus-src').innerHTML = `New <b>city bus</b> registrations (urban buses only, not coaches), ${EUS.years[0]}–${EUS.years[last]}. Source: ${esc(CB.label)}, built on DVV Media's <i>${esc(CB.basedOn)}</i>. EU27 = the European Union; the table below adds the United Kingdom, Norway, Iceland and Switzerland.`;
+  document.getElementById('bus-h3').textContent = `Who leads, ${CB.dataYear}: share of new city buses by powertrain`;
+  document.getElementById('bus-lg1').innerHTML = `<span><i style="background:#16a34a"></i>EU27 zero-emission share (actual)</span><span><i style="background:repeating-linear-gradient(90deg,#16a34a 0 4px,transparent 4px 7px)"></i>T&amp;E projection at the 2023–25 pace</span>`;
+  document.getElementById('bus-lg2').innerHTML = Object.keys(COL).map(k => `<span><i class="sq" style="background:${COL[k]}"></i>${LB[k]}</span>`).join('');
+  const box = document.getElementById('bus-line'); box.innerHTML = '<svg viewBox="0 0 720 270" role="img" aria-label="EU27 zero-emission share of new city buses"></svg>';
+  const Wd = 720, H = 270, m = { t:16, r:22, b:28, l:40 }, svg = d3.select(box.querySelector('svg')), pj = [[EUS.years[last], EUS.values[last]]].concat(EUS.projection);
+  const x = d3.scaleLinear([EUS.years[0], pj[pj.length - 1][0]], [m.l, Wd - m.r]), y = d3.scaleLinear([0, 100], [H - m.b, m.t]);
+  [0, 25, 50, 75, 100].forEach(t => svg.append('line').attr('class', 'grid').attr('x1', m.l).attr('x2', Wd - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--border)').attr('stroke-dasharray', '2 4'));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(10).tickFormat(d3.format('d')));
+  svg.append('g').attr('class', 'ax').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues([0, 25, 50, 75, 100]).tickFormat(d => d + '%'));
+  const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
+  svg.append('path').attr('d', line(pj)).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 2.5).attr('stroke-dasharray', '5 5').attr('opacity', .7);
+  svg.append('path').attr('d', line(EUS.years.map((yy, i) => [yy, EUS.values[i]]))).attr('fill', 'none').attr('stroke', '#16a34a').attr('stroke-width', 3.5);
+  EUS.years.forEach((yy, i) => { svg.append('circle').attr('cx', x(yy)).attr('cy', y(EUS.values[i])).attr('r', 4.5).attr('fill', '#16a34a'); svg.append('text').attr('x', x(yy)).attr('y', y(EUS.values[i]) - 10).attr('text-anchor', 'middle').attr('font-size', 11.5).attr('font-weight', 800).attr('fill', 'var(--text)').text(EUS.values[i] + '%'); });
+  EUS.projection.forEach(([yy, v]) => { svg.append('circle').attr('cx', x(yy)).attr('cy', y(v)).attr('r', 4).attr('fill', 'var(--surface)').attr('stroke', '#16a34a').attr('stroke-width', 2); svg.append('text').attr('x', x(yy)).attr('y', y(v) + (v >= 97 ? 18 : -10)).attr('text-anchor', 'middle').attr('font-size', 11).attr('font-weight', 700).attr('fill', 'var(--text-muted)').text(v + '%'); });
+  const ze = r => r[1] + r[2], rows = BUS25.slice().sort((a, b) => ze(b) - ze(a)), el = document.getElementById('bus-bars');
+  el.innerHTML = rows.map(r => {
+    const keys = ['bev', 'fc', 'hyb', 'dsl', 'gas'], vals = r.slice(1, 6), tot = vals.reduce((p, q) => p + q, 0) || 1;
+    const tip = keys.map((k, i) => vals[i] ? `${LB[k]} ${vals[i]}%` : '').filter(Boolean).join(' · ') + (r[6] ? ' (thin slivers read off the source chart)' : '');
+    return `<div class="tk-sb-row${r[0] === 'EU27' ? ' eu' : ''}" title="${esc(r[0] + ': ' + tip)}"><span class="n">${esc(r[0])}</span><span class="tr">${vals.map((v, i) => v ? `<i style="background:${COL[keys[i]]}" data-w="${(100 * v / tot).toFixed(2)}"></i>` : '').join('')}</span><span class="v">${ze(r)}%${r[6] ? '≈' : ''}</span></div>`;
+  }).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.querySelectorAll('i[data-w]').forEach(i => { i.style.width = i.dataset.w + '%'; })));
+  const eu = at('European Union', 'sShare', LAST);
+  document.getElementById('bus-note').innerHTML = `Right-hand number = zero-emission share (battery-electric + hydrogen) of the country's new city buses in ${CB.dataYear}; ≈ marks a total that includes a thin segment the source chart does not label. Hybrid buses are not zero-emission. Shares are rounded as published.`;
+  const NONEU = ['Norway', 'Iceland', 'Switzerland', 'United Kingdom'], C = Object.fromEntries(BUS25.map(r => [r[0], r])), E = C.EU27, zeOf = n => C[n] ? ze(C[n]) : null;
+  const eus = BUS25.filter(r => r[0] !== 'EU27' && !NONEU.includes(r[0]));
+  const full = eus.filter(r => ze(r) === 100).map(r => r[0]), above90 = eus.filter(r => ze(r) >= 90 && ze(r) < 100).map(r => r[0]);
+  const lag = eus.filter(r => ze(r) <= 25).sort((a, b) => ze(a) - ze(b)).map(r => `${r[0]} (${ze(r)}%)`);
+  const big = ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(n => C[n]).map(n => `${n} ${C[n][6] ? 'about ' : ''}${zeOf(n)}%`);
+  const full100 = EUS.projection.find(p => p[1] >= 100), F = CB.facts || {}, fcHeavy = full.filter(n => C[n][2] > 50);
+  document.getElementById('bus-call').innerHTML = `<b>${Math.round(ze(E) / 10)} out of 10 new EU city buses were zero-emission in ${CB.dataYear}</b> — ${E[1]}% battery-electric and ${E[2]}% hydrogen — against ${EUS.values[0]}% in ${EUS.years[0]}, the year the Clean Vehicles Directive was adopted. ${full.length} EU countries sold only zero-emission city buses (${full.join(', ')}${fcHeavy.length ? '; ' + fcHeavy.join(' and ') + ' mostly hydrogen' : ''})${above90.length ? ` and ${above90.join(', ')} were above 90%` : ''}. Among the big markets: ${big.join(', ')}${F.germanyShareOfEuFuelCellCityBuses ? ` (Germany sold ${F.germanyShareOfEuFuelCellCityBuses}% of the EU's hydrogen city buses)` : ''}. Furthest behind: ${lag.join(', ')}.` +
+    (full100 ? ` T&amp;E calculates that at the 2023–25 pace every new EU city bus would be zero-emission by <b>${full100[0]}</b>${F.cvdTarget2035 ? ', seven years ahead of the 2035 target' : ''}.` : '') +
+    (eu != null ? `<br><br><b>Why not the same number as the IEA ranking above?</b> The IEA's electric share of <i>all</i> new buses (${pct(eu)} in the European Union in ${Y[LAST]}) includes coaches and intercity buses, which are far less electric; T&amp;E and DVV Media count city buses only.` : '');
+}
+
+// ---------- ICCT: zero-emission buses sold by country ----------
+function icct(){
+  const rows = Object.keys(ICCT).map(c => ({ c, v:(ICCT[c]['2025'] || {}).buses, p:(ICCT[c]['2024'] || {}).buses })).filter(r => r.v > 0).sort((a, b) => b.v - a.v).slice(0, 18);
+  document.getElementById('icct-note').textContent = `Zero-emission buses (battery-electric and fuel cell) sold in 2025 in the countries the ICCT tracks, including markets the IEA does not list separately such as the United States, Brazil and Mexico. Change versus 2024 in brackets.`;
+  bars('icct-bars', rows.map(r => ({ l:esc(nm(r.c)), v:r.v, c:colOf(r.c), t:`${fmt(r.v)}${r.p ? ` (${r.v >= r.p ? '+' : ''}${Math.round(100 * (r.v / r.p - 1))}%)` : ''}` })));
+  document.getElementById('icct-foot').textContent = `ICCT Global ZE Market Monitor, ${Object.keys(ICCT).length} countries. A different count from the IEA's: it covers zero-emission buses only (no plug-in hybrids) and its own country list.`;
+}
+function counting(){
+  const zeEU = CITY_BUS.countries.find(r => r[0] === 'EU27'), euAll = at('European Union', 'sShare', LAST), cn = at('China', 'sShare', LAST);
+  document.getElementById('count-call').innerHTML = `<b>The same bus market gives three numbers.</b> For the European Union in ${Y[LAST]}: <b>${zeEU ? zeEU[1] + zeEU[2] : '–'}%</b> of new <i>city</i> buses were zero-emission (T&amp;E / DVV Media), <b>${pct(euAll)}</b> of <i>all</i> new buses were electric (IEA, coaches and intercity buses included), and the ICCT counts the zero-emission buses sold in units. China sits at ${pct(cn)} of new buses in the IEA data, but ${pct(at('China', 'tShare', LAST))} of its fleet is already electric because it electrified city buses first. When two sources disagree, check what they count: city buses or all buses, battery-only or including plug-in hybrids, registrations or sales.`;
+}
+
+// ---------- controls ----------
+document.getElementById('seg-metric').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; metric = b.dataset.v; document.querySelectorAll('#seg-metric button').forEach(x => x.classList.toggle('active', x === b)); rank(); });
+const yr = document.getElementById('year'); yr.max = Y15.length - 1; yr.value = Y15.length - 1;
+const setYear = i => { yi = Y.indexOf(Y15[i]); yr.value = i; rank(); };
+yr.addEventListener('input', () => { stop(); setYear(+yr.value); });
+const playBtn = document.getElementById('play');
+function stop(){ if(timer){ clearInterval(timer); timer = null; } playBtn.textContent = '▶'; }
+playBtn.addEventListener('click', () => {
+  if(timer){ stop(); return; }
+  playBtn.textContent = '❚❚'; let i = +yr.value >= Y15.length - 1 ? -1 : +yr.value;
+  const tick = () => { i++; if(i >= Y15.length){ stop(); return; } setYear(i); }; tick();
+  timer = setInterval(tick, 900);
+});
+document.getElementById('sp-sel').addEventListener('change', spotlight);
+
+hero(); insights(); rank(); takeoff(); spotlight(); cityBuses(); icct(); counting();
+})();
+</script>
+<script src="assets/filter-memory.js?v=5"></script>
+<script>
+FilterMemory.auto({ extra: [
+  { key:'metric', sel:'#seg-metric', type:'seg' }, { key:'year', sel:'#year', type:'range' }, { key:'sp', sel:'#sp-sel', type:'select' }
+] });
+FilterMemory.restore();
+</script>
+</body>
+</html>

@@ -371,7 +371,7 @@
     if(typeof CITY_BUS === 'undefined') return [];
     var CB = CITY_BUS, EU = CB.eu, n = EU.years.length - 1, ze = function(r){ return r[1] + r[2]; }, by = {};
     CB.countries.forEach(function(r){ by[r[0]] = r; });
-    var link = SITE + 'ev-trucking.html#bus-card', tail = '\n' + link + tags();
+    var link = SITE + 'ev-buses.html#city-buses', tail = '\n' + link + tags();
     var lab = function(c){ var r = by[c], f = flag(c); return (f ? f + ' ' : '') + short(c) + ' ' + (r[6] ? '~' : '') + ze(r) + '%'; };
     var yr = CB.dataYear, E = by.EU27;
     // part 1: the EU trend
