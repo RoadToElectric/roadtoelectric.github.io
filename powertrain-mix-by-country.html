@@ -7280,7 +7280,9 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 <script src="assets/mix-filter-layout.js"></script>
 <script>
 // the core filters (period, country, fuels, continents ...) live in the address by the page's own code; the other selections (brand / model sections, toggles) go in ?fm= through assets/filter-memory.js
-FilterMemory.auto({ exclude:['elec-tl-range'] });
+// The country selects of the three Sales-by sections are NOT remembered: they only mirror the page's country selection (kept in the address by updateURL). Remembering them brought a country back after
+// it had been removed: "Reset all filters" clears the selection but leaves those selects on the last country, and restoring them re-selected that country for the whole page (the "Iran comes back" bug).
+FilterMemory.auto({ exclude:['elec-tl-range', 'mfr-country-select', 'mfr-model-country-select', 'mfr-country-group-country-select'] });
 FilterMemory.restore();
 // phone view: charts that draw at the width of their card are redrawn after a rotation or a view switch
 if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderTrendsChart(); renderBubbleChart(); if(focusedCountry) renderCarsOnRoad(); });
