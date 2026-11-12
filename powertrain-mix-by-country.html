@@ -619,12 +619,14 @@ const MONTHLY_DATA = {
       // source: JPJ (Road Transport Department) new-vehicle registrations, data.gov.my cars_2026.parquet (read 2026-11-12), October 2026: all body types (motokar, jip, MPV, van, pick-up) = 75,004. electric = BEV 4,592; hybrid_petrol = HEV 5,023 (PHEV is inside hybrid and cannot be split); petrol 61,234; diesel = green diesel 4,016 + diesel 138; other 1. Same file and mapping as the 2026 brand/model rows; the earlier months of this country page run 0.2-0.4% above the file as it reads today (late corrections). MAA's own October TIV not out yet.
       "Malaysia": [4592,0,5023,1,61234,4154,75004],
       // source: Vahan public dashboard (analytics.parivahan.gov.in), vehicle category group Four Wheeler, durationWiseRegistrationTable per fuel group, live register read 2026-11-12 (late registrations keep landing, so a month is re-read the following month). BEV = PURE EV + ELECTRIC(BOV); PHEV = PLUG-IN HYBRID EV; HEV = STRONG HYBRID EV + PETROL/HYBRID + DIESEL/HYBRID + PETROL(E20)/HYBRID; petrol = PETROL + PETROL(E20); diesel; others = all-fuel total minus those five (CNG, LPG and other fuels). October 2026 is complete in the register (read 12 days after month end).
-      "India": [37983,2,51319,126368,212942,86180,514794]
+      "India": [37983,2,51319,126368,212942,86180,514794],
+      // source: Luxembourg vehicle registry delta file Operations_Delta_202610.xlsx (data.public.lu, SNCA, posted 2026-11-05): new registrations (CODEOP N), passenger cars M1/M1G, special uses (ambulance, motor-home, emergency, tow, fair) dropped = 4,458. Fuel from the registry's own fuel codes: PEV = BEV 1,799; OVC-HEV = PHEV 263; NOVC-HEV = HEV 1,276; STD 10 petrol 818; STD 20 diesel 297; dual-fuel LPG 5 = others. Exact, same method as the September row (registry 3,542 vs 3,537 stored; August 3,105 vs 3,103). STATEC's own October series (DF_D6122) not out yet.
+      "Luxembourg": [1799,263,1276,5,818,297,4458]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908,      "Malaysia":4345,      "India":20981},
+          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908,      "Malaysia":4345,      "India":20981,      "Luxembourg":922},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000,      "Japan":214454,      "Malaysia":81413,      "India":591282}
+          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":757,      "United Kingdom":144945,      "Netherlands":34724,      "Portugal":16137,      "Ireland":2181,      "Belgium":33955,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000,      "Japan":214454,      "Malaysia":81413,      "India":591282,      "Luxembourg":3800}
   },
   "2026-09": {
     label: "September 2026",
@@ -1812,7 +1814,7 @@ const MONTHLY_DATA = {
       "Italy": [110085,138852,690743,78550,294489,90805,1403524],
       "Latvia": [1831,2318,0,475,10964,1942,17530],
       "Lithuania": [3143,4863,19017,672,5881,3227,36803],
-      "Luxembourg": [11615,2306,12218,42,8388,2917,37486],
+      "Luxembourg": [13414,2569,13494,47,9206,3214,41944],
       "Malta": [2425,563,1754,1,1021,242,6006],
       "Netherlands": [127904,64411,82632,1347,21614,2761,300669],
       "Norway": [128354,658,762,0,200,940,130914],
@@ -1899,7 +1901,7 @@ const MONTHLY_DATA = {
       "Cyprus":"through Sep 2026","Czechia":"through Sep 2026","Denmark":"through Oct 2026","Estonia":"through Sep 2026",
       "Finland":"through Oct 2026","France":"through Oct 2026","Germany":"through Oct 2026","Greece":"through Sep 2026",
       "Hungary":"through Sep 2026","Iceland":"through Oct 2026","Ireland":"through Oct 2026","Italy":"through Oct 2026",
-      "Latvia":"through Sep 2026","Lithuania":"through Sep 2026","Luxembourg":"through Sep 2026","Malta":"through Sep 2026",
+      "Latvia":"through Sep 2026","Lithuania":"through Sep 2026","Luxembourg":"through Oct 2026","Malta":"through Sep 2026",
       "Netherlands":"through Oct 2026","Norway":"through Oct 2026","Poland":"through Oct 2026","Portugal":"through Oct 2026",
       "Romania":"through Sep 2026","Slovakia":"through Sep 2026","Slovenia":"through Sep 2026","Spain":"through Oct 2026",
       "Sweden":"through Oct 2026","Switzerland":"through Oct 2026","United Kingdom":"through Oct 2026",
@@ -1940,7 +1942,7 @@ const MONTHLY_DATA = {
       "Ecuador":2694,
       "Austria":51316,"Belgium":120581,"Bulgaria":1673,"Croatia":713,"Cyprus":1149,"Czechia":10180,"Denmark":99857,
       "Estonia":658,"Finland":21452,"France":250418,"Germany":434627,"Greece":6154,"Hungary":8025,"Iceland":4198,
-      "Ireland":23097,"Italy":67338,"Latvia":1252,"Lithuania":2171,"Luxembourg":9396,"Malta":1541,"Netherlands":108416,
+      "Ireland":23097,"Italy":67338,"Latvia":1252,"Lithuania":2171,"Luxembourg":10318,"Malta":1541,"Netherlands":108416,
       "Norway":118457,"Poland":30640,"Portugal":41325,"Romania":5424,"Slovakia":2969,"Slovenia":4424,"Spain":81166,
       "Sweden":80937,"Switzerland":39900,"United Kingdom":386244,
       "Canada":84582,"Mexico":17442,"New Zealand":4119,"United States":1026274,"India":160825,"South Korea":190942,"Taiwan":22006,
@@ -1958,12 +1960,12 @@ const MONTHLY_DATA = {
           "Bosnia-Herzegovina":46,
       "Brazil":61532,
       "Japan":31576,
-      "Malaysia": 31273
+      "Malaysia":31273
     },
     // Total (all powertrains) units for the same period a year prior — source: world_auto_sales_annual, for the "Total Car Registrations" stat's YoY
     priorYearTotal: {
       "Ecuador":88335,
-      "Austria":239594,"Belgium":357823,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":150258,"Estonia":9422,"Finland":60152,"France":1326298,"Germany":2360481,"Greece":112232,"Hungary":95953,"Iceland":11711,"Ireland":123840,"Italy":1293729,"Latvia":17566,"Lithuania":31373,"Luxembourg":36494,"Malta":4633,"Netherlands":306697,"Norway":124545,"Poland":480636,"Portugal":187701,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":951445,"Sweden":228105,"Switzerland":187381,"United Kingdom":1723120,"Canada":1455051,"Mexico":1221825,"New Zealand":51878,"United States":12209885,"India":3804936,"South Korea":1409095,"Taiwan":258424,
+      "Austria":239594,"Belgium":357823,"Bulgaria":36209,"Croatia":56691,"Cyprus":11804,"Czechia":182437,"Denmark":150258,"Estonia":9422,"Finland":60152,"France":1326298,"Germany":2360481,"Greece":112232,"Hungary":95953,"Iceland":11711,"Ireland":123840,"Italy":1293729,"Latvia":17566,"Lithuania":31373,"Luxembourg":40294,"Malta":4633,"Netherlands":306697,"Norway":124545,"Poland":480636,"Portugal":187701,"Romania":108770,"Slovakia":67454,"Slovenia":44417,"Spain":951445,"Sweden":228105,"Switzerland":187381,"United Kingdom":1723120,"Canada":1455051,"Mexico":1221825,"New Zealand":51878,"United States":12209885,"India":3804936,"South Korea":1409095,"Taiwan":258424,
       "Israel":220530,
       "Peru":117029,
       "Uruguay":34219,
@@ -1978,7 +1980,7 @@ const MONTHLY_DATA = {
           "Bosnia-Herzegovina":8594,
       "Brazil":2057270,
       "Japan":2149896,
-      "Malaysia": 695481
+      "Malaysia":695481
     }
     // note: China omitted from priorYearBev — no matching Jan-Jul 2025 monthly data sourced (world_auto_sales has no pre-2026 China rows)
     // note: Tunisia omitted from priorYearBev/priorYearTotal for the same reason — only a full-year 2025 total was sourced (see 2025-annual), no Jan-Jul 2025 monthly breakdown to compare against
@@ -2015,7 +2017,7 @@ const MONTHLY_DATA = {
       "Japan": [118630, 48351, 1622233, 519, 757223, 103012, 2649968],
       "Latvia": [2823, 3422, 0, 653, 14619, 2589, 24106],
       "Lithuania": [4434, 6812, 25382, 898, 7969, 4303, 49798],
-      "Luxembourg": [15487, 3082, 16291, 84, 11184, 3889, 50017],
+      "Luxembourg": [16255, 3083, 16193, 59, 11047, 3857, 50494],
       "Malta": [3535, 911, 2374, 2, 1361, 323, 8506],
       "Mexico": [29672, 35269, 133624, 0, 1346842, 0, 1545407],
       "Netherlands": [161449, 77293, 99158, 1743, 25937, 3313, 368893],
