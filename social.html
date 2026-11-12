@@ -12,6 +12,7 @@
 <script src="assets/country-iso2.js"></script>
 <script src="assets/city-bus-data.js?v=2"></script>
 <script src="assets/bus-2026-data.js?v=2"></script>
+<script src="assets/ev-trucks-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
 <style>
@@ -67,7 +68,7 @@
     <label><input type="checkbox" id="ctl-prov"> include provisional numbers</label>
     <label><input type="checkbox" id="ctl-tags"> add #EV #BEV</label>
     <label>Country drafts <select id="ctl-cmode"><option value="new">Newest data of each country</option><option value="month">The month above</option></select></label>
-    <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option><option value="bus">City buses</option></select></label>
+    <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option><option value="bus">Electric buses (series)</option></select></label>
   </div>
   <div class="sd-best" id="best" hidden></div>
   <div id="cards"></div>
@@ -364,61 +365,117 @@
       Object.keys(ms).forEach(function(m){ var d = brandDraft(c, m); if(d) bm.push(d); });
     });
     var bySize = function(a, b){ return b.size - a.size; };
-    return D.concat(busDrafts(), busDrafts26(), cm.sort(bySize), bm.sort(bySize));
+    return D.concat(busSeriesDraft(), cm.sort(bySize), bm.sort(bySize));
   }
 
 
-  // ---- Europe's buses in 2026 so far (assets/bus-2026-data.js, BUS_2026): a 2-part thread per edition (key 'bus26|<edition>')
-  function busDrafts26(){
-    if(typeof BUS_2026 === 'undefined') return [];
-    var D = BUS_2026, V = D.dvv, A = D.acea, ct = V.countries.slice().sort(function(a, b){ return b[1] - a[1]; }), link = SITE + 'ev-buses.html#bus-2026', tail = '\n' + link + tags();
-    var ch = function(a, b){ return (a >= b ? '+' : '') + Math.round(100 * (a / b - 1)) + '%'; };
-    var cs = V.cityBevShareH1, fl = function(c){ var f = flag(c); return (f ? f + ' ' : '') + short(c); };
-    var p1 = '\uD83D\uDE8C Europe registered ' + fmt(V.bevH1[2026]) + ' battery-electric buses in H1 2026, ' + ch(V.bevH1[2026], V.bevH1[2025]) + ' on a year earlier (DVV Media).\nCity buses: ' + cs[2026] + '% battery-electric (' + cs[2025] + '% in H1 2025).\n'
-      + fl(ct[0][0]) + ' leads with ' + fmt(ct[0][1]) + ' (' + fmt(ct[0][2]) + ' a year ago), ahead of ' + fl(ct[1][0]) + ' ' + fmt(ct[1][1]) + ' and ' + fl(ct[2][0]) + ' ' + fmt(ct[2][1]) + ' (1/2)';
-    var mk = V.makers.slice(0, 6).map(function(r){ return r[0] + ' ' + fmt(r[1]); }).join(' · ');
-    var p2 = 'Who builds them (H1 2026, battery-electric): ' + mk + '.\nAll EU buses and coaches, ACEA Q1–Q3 2026: ' + A.q3.share + '% electrically-chargeable vs ' + A.q3.shareYearAgo + '% a year ago; diesel ' + A.q3.diesel + '%.' + tail + ' (2/2)';
-    var rowsC = ct.slice(0, 8).map(function(r){ return { label:short(r[0]), v:r[1], text:fmt(r[1]) + (r[2] ? ' (' + ch(r[1], r[2]) + ')' : '') }; });
-    var rowsM = V.makers.slice(0, 8).map(function(r){ return { label:r[0], v:r[1], text:fmt(r[1]) }; });
-    return [{ sec:'bus', title:'Buses · Europe in the first half of 2026', tag:'buses · H1 2026', why:'New 2026 bus numbers: DVV Media (battery-electric buses, Europe), ACEA (all EU buses and coaches). Provisional press summaries: check against the sources before posting.',
-      key:'bus26|' + D.edition, ym:'', chart:{ ym:'' }, link:link, posts:[p1, p2], size:1e9 - 1,
-      images:[
-        { type:'bars', title:'Battery-electric buses registered, H1 2026', sub:'Europe · DVV Media · change on H1 2025 in brackets', rows:rowsC },
-        { type:'bars', title:'Battery-electric buses by maker, H1 2026', sub:'Europe · DVV Media', rows:rowsM }
-      ] }];
-  }
+  // ---- the electric bus SERIES: one draft of 12 posts, a picture each, one for every chart of ev-buses.html
+  // numbers: IEA + ICCT (assets/ev-trucks-data.js), T&E / DVV city buses (city-bus-data.js), DVV / ACEA / ICCT 2026 (bus-2026-data.js); a new edition of any of them gives a new key, so the series comes back
+  var BUS_CONT = { 'China':'Asia', 'Japan':'Asia', 'Korea':'Asia', 'Malaysia':'Asia', 'Philippines':'Asia', 'Singapore':'Asia', 'India':'Asia', 'Viet Nam':'Asia', 'Uzbekistan':'Asia', 'Israel':'Middle East', 'Jordan':'Middle East',
+    'United Arab Emirates':'Middle East', 'USA':'North America', 'United States':'North America', 'Canada':'North America', 'Mexico':'North America', 'Uruguay':'South America', 'Chile':'South America', 'Colombia':'South America',
+    'Brazil':'South America', 'New Zealand':'Oceania', 'Australia':'Oceania', 'South Africa':'Africa' };
+  var BUS_COL = { 'Asia':'#dc2626', 'Europe':'#1e3a8a', 'North America':'#16a34a', 'South America':'#b8860b', 'Oceania':'#14b8a6', 'Middle East':'#d2b48c', 'Africa':'#111827' };
+  var BUS_AGG = { 'World':1, 'Advanced Economies':1, 'Developing Economies excl. China':1, 'Asia Pacific':1, 'Europe':1, 'European Union':1, 'Latin America':1, 'Africa':1, 'Middle East and Caspian':1, 'Southeast Asia':1 };
+  function busSeriesDraft(){
+    if(typeof EVT === 'undefined' || typeof CITY_BUS === 'undefined' || typeof BUS_2026 === 'undefined') return [];
+    var R = EVT.regions, YS = EVT.years, L = YS.length - 1, yr = YS[L], CB = CITY_BUS, B6 = BUS_2026, V = B6.dvv, A = B6.acea, I = B6.icct, W = 'World', N = 12;
+    var Bs = function(r){ return R[r] && R[r].Buses; }, at = function(r, f, i){ var b = Bs(r); return b && b[f] ? b[f][i] : null; };
+    var COUNTRIES = Object.keys(R).filter(function(r){ return Bs(r) && !BUS_AGG[r]; });
+    var nm = function(n){ return ({ 'United Arab Emirates':'UAE', 'United Kingdom':'UK', 'Viet Nam':'Vietnam', 'Korea':'S. Korea', 'United States':'USA' })[n] || n; };
+    var isoOf = function(n){ return ({ 'USA':'United States', 'Korea':'South Korea', 'Viet Nam':'Vietnam' })[n] || n; };
+    var fl = function(n){ var f = flag(isoOf(n)); return (f ? f + ' ' : '') + nm(n); };
+    var colOf = function(n){ return BUS_COL[BUS_CONT[n] || 'Europe']; };
+    var chg = function(a, b){ return b ? (a >= b ? '+' : '') + Math.round(100 * (a / b - 1)) + '%' : ''; };
+    var rnd = function(v){ return v >= 10 ? Math.round(v) : Math.round(v * 10) / 10; };
+    var no = function(i){ return ' (' + i + '/' + N + ')'; };
+    var fitList = function(head, items, sep, tail){ var n = items.length, t; for(; n >= 1; n--){ t = head + items.slice(0, n).join(sep) + tail; if(weight(t) <= 280) return t; } return head + items[0] + tail; };
+    var sortBy = function(f){ return COUNTRIES.map(function(c){ return { c:c, v:at(c, f, L) }; }).filter(function(r){ return r.v != null && r.v > 0; }).sort(function(a, b){ return b.v - a.v; }); };
+    var legendOf = function(rows){ var seen = {}, out = []; rows.forEach(function(r){ var k = BUS_CONT[r.c] || 'Europe'; if(!seen[k]){ seen[k] = 1; out.push({ label:k, color:BUS_COL[k] }); } }); return out; };
+    var posts = [], imgs = [], ZE = CB.countries.filter(function(r){ return r[0] === 'EU27'; })[0], zeEU = ZE[1] + ZE[2], ze = function(r){ return r[1] + r[2]; };
+    var link = SITE + 'ev-buses.html';
 
-  // ---- city buses (assets/city-bus-data.js, CITY_BUS): one thread per edition of the data; a new edition gives a new key, so it shows up again
-  function busDrafts(){
-    if(typeof CITY_BUS === 'undefined') return [];
-    var CB = CITY_BUS, EU = CB.eu, n = EU.years.length - 1, ze = function(r){ return r[1] + r[2]; }, by = {};
-    CB.countries.forEach(function(r){ by[r[0]] = r; });
-    var link = SITE + 'ev-buses.html#city-buses', tail = '\n' + link + tags();
-    var lab = function(c){ var r = by[c], f = flag(c); return (f ? f + ' ' : '') + short(c) + ' ' + (r[6] ? '~' : '') + ze(r) + '%'; };
-    var yr = CB.dataYear, E = by.EU27;
-    // part 1: the EU trend
-    var p1 = '\uD83D\uDE8C ' + Math.round(ze(E) / 10) + ' out of 10 new EU city buses were zero-emission in ' + yr + ' (' + E[1] + '% battery-electric + ' + E[2] + '% hydrogen), up from ' + EU.values[0] + '% in ' + EU.years[0] + '.';
-    var full = EU.projection.filter(function(x){ return x[1] >= 100; })[0];
-    if(full) p1 += '\nTransport & Environment: at the 2023–25 pace, 100% by ' + full[0] + '.';
-    p1 += '\nNew city bus registrations, EU27 (1/3)';
-    // part 2: the leaders
-    var lead = CB.countries.filter(function(r){ return r[0] !== 'EU27'; }).sort(function(a, b){ return ze(b) - ze(a); }), ln = [];
-    for(var i = 0; i < lead.length && ln.length < 12; i++){ var t = ['Zero-emission share of new city buses, ' + yr + ':'].concat(ln, [lab(lead[i][0])]).join('\n') + ' (2/3)'; if(weight(t) > 280) break; ln.push(lab(lead[i][0])); }
-    var p2 = 'Zero-emission share of new city buses, ' + yr + ':\n' + ln.join('\n') + ' (2/3)';
-    // part 3: big markets and laggards
-    var big = ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(function(c){ return by[c]; }).map(lab);
-    var lag = CB.countries.filter(function(r){ return ze(r) <= 25 && r[0] !== 'EU27' && ['Norway', 'Iceland', 'Switzerland', 'United Kingdom'].indexOf(r[0]) < 0; }).sort(function(a, b){ return ze(a) - ze(b); }).slice(0, 4).map(function(r){ return lab(r[0]); });
-    var p3 = 'The big markets: ' + big.join(' · ') + '.\nFurthest behind: ' + lag.join(' · ') + '.\nSource: ' + (CB.short || CB.label) + tail + ' (3/3)';
-    var rowsEU = EU.years.map(function(y, i){ return { label:String(y), v:EU.values[i], text:EU.values[i] + '%' }; }).concat(EU.projection.map(function(x){ return { label:x[0] + ' (proj.)', v:x[1], text:x[1] + '%' }; }));
-    var rowsLead = lead.slice(0, 12).map(function(r){ return { label:short(r[0]), v:ze(r), text:(r[6] ? '≈' : '') + ze(r) + '%' }; });
-    var rowsBig = big.length ? ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(function(c){ return by[c]; }).map(function(c){ return { label:short(c), v:ze(by[c]), text:(by[c][6] ? '≈' : '') + ze(by[c]) + '%' }; }).concat(lag.length ? CB.countries.filter(function(r){ return ze(r) <= 25 && ['Norway', 'Iceland', 'Switzerland', 'United Kingdom', 'EU27'].indexOf(r[0]) < 0; }).sort(function(a, b){ return ze(a) - ze(b); }).slice(0, 4).map(function(r){ return { label:short(r[0]), v:ze(r), text:ze(r) + '%' }; }) : []) : [];
-    return [{ sec:'bus', title:'City buses · zero-emission share of new EU city buses', tag:'buses · ' + yr + ' data', why:'Buses are where electrification is furthest: 60% of new EU city buses in 2025. A new edition of the data (assets/city-bus-data.js) gives a new draft.',
-      key:'bus|' + CB.edition, ym:'', chart:{ ym:'' }, link:link, posts:[p1, p2, p3], size:1e9,
-      images:[
-        { type:'bars', max:100, title:'EU27: zero-emission share of new city buses', sub:CB.label + ' · battery-electric + hydrogen · dashed years = projection', rows:rowsEU },
-        { type:'bars', max:100, title:'Zero-emission share of new city buses, ' + yr, sub:CB.label + ' · battery-electric + hydrogen', rows:rowsLead },
-        { type:'bars', max:100, title:'Big markets and laggards, ' + yr, sub:CB.label + ' · zero-emission share of new city buses', rows:rowsBig }
-      ] }];
+    // 1. the headline number (hero)
+    var w25 = at(W, 'sales', L), w24 = at(W, 'sales', L - 1), st = at(W, 'stock', L), cn = at('China', 'sales', L), cst = at('China', 'stock', L), eu = at('Europe', 'sales', L), eu0 = at('Europe', 'sales', L - 1);
+    posts.push('🚌 ' + fmt(w25) + ' electric buses were sold worldwide in ' + yr + ' (' + fmt(w24) + ' in ' + (yr - 1) + ', IEA).\nChina sold ' + fmt(cn) + ' of them (' + Math.round(100 * cn / w25) + '%) and runs ' + Math.round(100 * cst / st) + '% of the ' + compact(st) + ' electric buses on the road.\nEurope: ' + fmt(eu) + ' (' + chg(eu, eu0) + '). The electric bus race, in ' + N + ' charts 🧵' + no(1));
+    imgs.push({ type:'hero', title:'The electric bus race', sub:'Electric buses sold worldwide · IEA Global EV Outlook ' + (yr + 1), big:fmt(w25), l1:'electric buses sold worldwide in ' + yr, l2:rnd(at(W, 'sShare', L)) + '% of all new buses sold',
+      series:YS.filter(function(y){ return y >= 2015; }).map(function(y){ return { m:String(y), v:at(W, 'sales', YS.indexOf(y)) || 0 }; }),
+      tiles:[ { v:fmt(st), l:'electric buses on the road' }, { v:Math.round(100 * cst / st) + '%', l:'of them are in China', color:'#dc2626' }, { v:fmt(eu), l:'sold in Europe (' + chg(eu, eu0) + ' on ' + (yr - 1) + ')', color:'#1e3a8a' }, { v:zeEU + '%', l:'of new EU city buses zero-emission (T&E)', color:'#0ea5e9' } ] });
+
+    // 2. who leads by share
+    var rs = sortBy('sShare');
+    posts.push(fitList('Which countries buy the most electric buses? Share of new bus sales that were electric in ' + yr + ' (IEA):\n', rs.slice(0, 9).map(function(r){ return fl(r.c) + ' ' + rnd(r.v) + '%'; }), ' · ', '\nWorld: ' + rnd(at(W, 'sShare', L)) + '%' + no(2)));
+    var rs12 = rs.slice(0, 12);
+    imgs.push({ type:'bars', max:100, title:'Share of new buses that are electric, ' + yr, sub:'Countries with the highest share · IEA', legend:legendOf(rs12), rows:rs12.map(function(r){ return { label:nm(r.c), v:r.v, text:rnd(r.v) + '%', color:colOf(r.c) }; }) });
+
+    // 3. who leads in units
+    var ru = sortBy('sales'), ind = at('India', 'sales', L), ind0 = at('India', 'sales', L - 2), ru10 = ru.slice(0, 10);
+    posts.push(fitList('In units, one market dwarfs the rest. Electric buses sold in ' + yr + ' (IEA):\n', ru10.map(function(r){ return fl(r.c) + ' ' + fmt(r.v); }), ' · ', '\nIndia ' + chg(ind, ind0) + ' in two years (' + fmt(ind0) + ' → ' + fmt(ind) + ').' + no(3)));
+    imgs.push({ type:'bars', title:'Electric buses sold, ' + yr, sub:'Units, the 10 biggest markets · IEA', legend:legendOf(ru10), rows:ru10.map(function(r){ return { label:nm(r.c), v:r.v, text:fmt(r.v), color:colOf(r.c) }; }) });
+
+    // 4. the takeoff by region
+    var years = YS.filter(function(y){ return y >= 2015; }), g = function(r, y){ return at(r, 'sales', YS.indexOf(y)) || 0; };
+    var cols = years.map(function(y){ var a = g('China', y), b = g('Europe', y), c = g('India', y), d = g('USA', y) + g('Canada', y), t = g(W, y); return { label:String(y), total:t, segs:[ { v:a, color:'#dc2626' }, { v:b, color:'#1e3a8a' }, { v:c, color:'#f59e0b' }, { v:d, color:'#16a34a' }, { v:Math.max(0, t - a - b - c - d), color:'#94a3b8' } ] }; });
+    var pk = cols.reduce(function(m, k, i){ return k.total > cols[m].total ? i : m; }, 0), lo = -1;
+    cols.forEach(function(k, i){ if(i > pk && (lo < 0 || k.total < cols[lo].total)) lo = i; });
+    if(lo < 0) lo = pk;
+    var na25 = g('USA', yr) + g('Canada', yr);
+    posts.push('The takeoff, region by region. World sales peaked at ' + fmt(cols[pk].total) + ' in ' + years[pk] + ' (China ' + fmt(g('China', years[pk])) + '), fell to ' + fmt(cols[lo].total) + ' in ' + years[lo] + ' and are back at ' + fmt(w25) + '.\nEurope: ' + fmt(g('Europe', years[0])) + ' in ' + years[0] + ' → ' + fmt(eu) + '. India ' + fmt(ind) + ', North America ' + fmt(na25) + '.' + no(4));
+    imgs.push({ type:'stackcols', title:'Electric bus sales by region', sub:'Units per year · IEA', legend:[ { label:'China', color:'#dc2626' }, { label:'Europe', color:'#1e3a8a' }, { label:'India', color:'#f59e0b' }, { label:'North America', color:'#16a34a' }, { label:'Rest of the world', color:'#94a3b8' } ], cols:cols });
+
+    // 5. China in two lines (country spotlight)
+    var cS = years.map(function(y){ return [y, at('China', 'sShare', YS.indexOf(y))]; }).filter(function(p){ return p[1] != null; }), cT = years.map(function(y){ return [y, at('China', 'tShare', YS.indexOf(y))]; }).filter(function(p){ return p[1] != null; });
+    var since = cS.filter(function(p){ return p[0] >= 2019; }).map(function(p){ return p[1]; });
+    posts.push('China in two lines. ' + rnd(at('China', 'sShare', L)) + '% of its new buses were electric in ' + yr + ', but that share swings with the year (' + Math.min.apply(null, since) + '% to ' + Math.max.apply(null, since) + '% since 2019). The fleet share only climbs: ' + rnd(at('China', 'tShare', L)) + '% of all buses on the road are electric, from ' + rnd(cT[0][1]) + '% in ' + cT[0][0] + '.' + no(5));
+    imgs.push({ type:'lines', title:'China: electric share of buses', sub:'Of new buses sold and of the whole fleet · IEA', legend:[ { label:'Share of new buses', color:'#16a34a' }, { label:'Share of the fleet', color:'#0ea5e9' } ], x:[years[0], yr], ymax:100, ticks:[0, 25, 50, 75, 100],
+      series:[ { color:'#16a34a', pts:cS.map(function(p){ return [p[0], rnd(p[1])]; }) }, { color:'#0ea5e9', pts:cT.map(function(p){ return [p[0], rnd(p[1])]; }) } ] });
+
+    // 6. Europe's city buses over time (T&E)
+    var EUS = CB.eu, nE = EUS.years.length - 1, full = EUS.projection.filter(function(x){ return x[1] >= 100; })[0];
+    posts.push('🚌 Europe\'s city buses went from ' + EUS.values[0] + '% to ' + EUS.values[nE] + '% zero-emission in ' + (EUS.years[nE] - EUS.years[0]) + ' years (EU27, battery-electric + hydrogen, Transport & Environment).' + (full ? '\nAt the 2023–25 pace, T&E sees 100% by ' + full[0] + (CB.facts && CB.facts.cvdTarget2035 ? ', ' + (2035 - full[0]) + ' years ahead of the 2035 target.' : '.') : '') + no(6));
+    imgs.push({ type:'lines', title:'EU city buses: zero-emission share', sub:CB.label + ' · battery-electric + hydrogen · dashed = T&E projection', legend:[ { label:'Actual', color:'#16a34a' }, { label:'Projection at the 2023–25 pace', color:'#16a34a' } ], x:[EUS.years[0], EUS.projection[EUS.projection.length - 1][0]], ymax:100, ticks:[0, 25, 50, 75, 100],
+      series:[ { color:'#16a34a', pts:EUS.years.map(function(y, i){ return [y, EUS.values[i]]; }) }, { color:'#16a34a', dash:true, hollow:true, skipFirst:true, pts:[[EUS.years[nE], EUS.values[nE]]].concat(EUS.projection) } ] });
+
+    // 7. who leads among city buses (T&E league)
+    var byC = {}; CB.countries.forEach(function(r){ byC[r[0]] = r; });
+    var hund = CB.countries.filter(function(r){ return r[0] !== 'EU27' && ze(r) >= 100; }).map(function(r){ return nm(r[0]); }), big = ['United Kingdom', 'Italy', 'Germany', 'France'].filter(function(c){ return byC[c]; });
+    var tail7 = CB.countries.filter(function(r){ return r[0] !== 'EU27' && ze(r) <= 20; }).sort(function(a, b){ return ze(a) - ze(b); }).slice(0, 3).map(function(r){ return nm(r[0]) + ' ' + ze(r) + '%'; });
+    posts.push(fitList('Who leads in ' + CB.dataYear + '? Zero-emission share of new city buses: ' + hund.join(', ') + ' are at 100%.\nBig markets: ', big.map(function(c){ return nm(c) + ' ' + (byC[c][6] ? '≈' : '') + ze(byC[c]) + '%'; }), ', ', '.\nFurthest behind: ' + tail7.join(', ') + '.' + no(7)));
+    var pick = ['Bulgaria', 'Denmark', 'Slovenia', 'Netherlands', 'Norway', 'Finland', 'Sweden', 'United Kingdom', 'Italy', 'EU27', 'Germany', 'France', 'Czechia', 'Hungary', 'Slovakia'].filter(function(c){ return byC[c]; });
+    var SEGC = [ '#16a34a', '#0ea5e9', '#fbbf24', '#9ca3af', '#4b5563' ];
+    imgs.push({ type:'stack100', title:'City buses by powertrain, ' + CB.dataYear, sub:CB.label + ' · share of new city buses', legend:[ { label:'Battery-electric', color:SEGC[0] }, { label:'Hydrogen', color:SEGC[1] }, { label:'Hybrid', color:SEGC[2] }, { label:'Diesel', color:SEGC[3] }, { label:'Gas', color:SEGC[4] } ],
+      rows:pick.map(function(c){ var r = byC[c]; return { label:nm(c), bold:c === 'EU27', text:(r[6] ? '≈' : '') + ze(r) + '%', segs:[1, 2, 3, 4, 5].map(function(k){ return { v:r[k], color:SEGC[k - 1] }; }) }; }) });
+
+    // 8. 2026 so far: city bus share, half-year by half-year (DVV)
+    var cs = V.cityBevShareH1, csY = Object.keys(cs).map(Number).sort();
+    posts.push('Europe in 2026 (DVV Media): ' + fmt(V.bevH1[2026]) + ' battery-electric buses registered in the first half, ' + chg(V.bevH1[2026], V.bevH1[2025]) + ' on ' + fmt(V.bevH1[2025]) + '.\nCity buses: ' + cs[2026] + '% battery-electric, up from ' + cs[csY[0]] + '% in H1 ' + csY[0] + '.\nOther drivelines, H1 2026: hybrid ' + fmt(V.alt.hybrid[0]) + ', CNG ' + fmt(V.alt.cng[0]) + ', hydrogen ' + fmt(V.alt.fuelCell[0]) + '.' + no(8));
+    imgs.push({ type:'bars', max:100, title:'City buses: battery-electric share', sub:'First half of each year · registrations in Europe · DVV Media', rows:csY.map(function(y){ return { label:'H1 ' + y, v:cs[y], text:cs[y] + '%', color:y === csY[csY.length - 1] ? '#16a34a' : '#86efac' }; }) });
+
+    // 9. 2026 so far: by country (DVV)
+    var ct = V.countries.slice().sort(function(a, b){ return b[1] - a[1]; });
+    posts.push(fitList('Who registers them? Battery-electric buses, H1 2026:\n', ct.map(function(r){ return fl(r[0]) + ' ' + fmt(r[1]) + (r[2] ? ' (' + chg(r[1], r[2]) + ')' : ''); }), ' · ', '\nChange on H1 2025 in brackets (DVV Media).' + no(9)));
+    imgs.push({ type:'bars', title:'Battery-electric buses registered, H1 2026', sub:'By country · change on H1 2025 in brackets · DVV Media', legend:[ { label:'Europe', color:BUS_COL.Europe } ], rows:ct.slice(0, 11).map(function(r){ return { label:nm(r[0]), v:r[1], text:fmt(r[1]) + (r[2] ? ' (' + chg(r[1], r[2]) + ')' : ''), color:BUS_COL.Europe }; }) });
+
+    // 10. who builds them (DVV)
+    var mk = V.makers, cnM = mk.filter(function(r){ return (BUS_CONT[r[2]] || 'Europe') === 'Asia'; }), cnU = cnM.reduce(function(s, r){ return s + r[1]; }, 0);
+    posts.push(fitList('Who builds them? Battery-electric bus registrations in Europe, H1 2026:\n', mk.map(function(r){ return r[0] + ' ' + fmt(r[1]); }), ' · ', '\n' + cnM.map(function(r){ return r[0]; }).join(' + ') + ' alone: ' + fmt(cnU) + ' of ' + fmt(V.bevH1[2026]) + ' (' + Math.round(100 * cnU / V.bevH1[2026]) + '%).' + no(10)));
+    var usedC = []; mk.forEach(function(r){ var k = BUS_CONT[r[2]] || 'Europe'; if(usedC.indexOf(k) < 0) usedC.push(k); });
+    imgs.push({ type:'bars', title:'Who builds Europe\'s electric buses', sub:'Battery-electric registrations by maker, H1 2026 · DVV Media', legend:usedC.map(function(k){ return { label:({ Asia:'Chinese maker', Europe:'European maker' })[k] || k, color:BUS_COL[k] }; }),
+      rows:mk.slice(0, 11).map(function(r){ return { label:r[0], v:r[1], text:fmt(r[1]) + (r[0] === 'Solaris' && V.solarisFuelCell ? ' (+' + V.solarisFuelCell + ' H₂)' : ''), color:BUS_COL[BUS_CONT[r[2]] || 'Europe'] }; }) });
+
+    // 11. a second global count: the ICCT
+    var ic = Object.keys(EVT.icct || {}).map(function(c){ return { c:c, v:(EVT.icct[c]['2025'] || {}).buses, p:(EVT.icct[c]['2024'] || {}).buses }; }).filter(function(r){ return r.v > 0; }).sort(function(a, b){ return b.v - a.v; }), ic12 = ic.slice(0, 12);
+    posts.push(fitList('A second count, the ICCT\'s: zero-emission buses sold in ' + yr + '\n', ic.map(function(r){ return fl(r.c) + ' ' + fmt(r.v) + (r.p ? ' (' + chg(r.v, r.p) + ')' : ''); }), ' · ', '\nIt covers markets the IEA does not list, such as the US, Brazil and Chile.' + no(11)));
+    imgs.push({ type:'bars', title:'Zero-emission buses sold, ' + yr, sub:'ICCT Global ZE Market Monitor · change on ' + (yr - 1) + ' in brackets', legend:legendOf(ic12), rows:ic12.map(function(r){ return { label:nm(r.c), v:r.v, text:fmt(r.v) + (r.p ? ' (' + chg(r.v, r.p) + ')' : ''), color:colOf(r.c) }; }) });
+
+    // 12. three ways to count (and the link)
+    var euAll = at('European Union', 'sShare', L);
+    posts.push('Same market, different numbers. EU ' + yr + ': ' + zeEU + '% of new city buses zero-emission (T&E) vs ' + rnd(euAll) + '% of all new buses electric (IEA, coaches included).\nACEA 2026: ' + A.q3.share + '% of EU buses and coaches chargeable (' + A.q3.shareYearAgo + '% a year ago).\nAll the charts: ' + link + tags() + no(12));
+    imgs.push({ type:'tiles', title:'One bus market, four counts', sub:'Europe: the same buses, counted four different ways',
+      tiles:[ { big:zeEU + '%', color:'#16a34a', label:'of new EU city buses were zero-emission in ' + yr, src:'T&E / DVV Media (city buses only)' }, { big:rnd(euAll) + '%', color:'#0ea5e9', label:'of ALL new EU buses were electric in ' + yr, src:'IEA (coaches and intercity buses included)' },
+        { big:A.q3.share + '%', color:'#f59e0b', label:'of EU buses and coaches sold in Q1–Q3 2026 were electrically-chargeable', src:'ACEA · ' + A.q3.shareYearAgo + '% a year earlier' }, { big:fmt(I.zeUnits[0]), color:'#7c3aed', label:'zero-emission buses and coaches sold in the EU in Q1–Q2 2026 (' + chg(I.zeUnits[0], I.zeUnits[1]) + ')', src:'ICCT' } ] });
+
+    return [{ sec:'bus', title:'Electric buses · the series (' + N + ' posts)', tag:'buses · series · ' + yr, why:'One post per chart of the EV Buses page: world headline, country ranking (share, units), regional takeoff, China, Europe\'s city buses (trend, league), 2026 so far (city share, countries, makers), the ICCT count, and why the numbers differ. Post the last one first: the thread then reads 1 to ' + N + ' on X.',
+      key:'busseries|' + CB.edition + '|' + B6.edition + '|' + yr, ym:'', chart:{ ym:'' }, link:link, posts:posts, images:imgs, size:1e9 }];
   }
 
   // ---- which drafts were posted on X (in the database through the stats passphrase, on this device only until the passphrase is given)
@@ -486,6 +543,14 @@
     });
     c.textBaseline = 'alphabetic'; c.textAlign = 'left';
   }
+  // a rounded rectangle path and a word-wrapped text (returns the y of the line after the last)
+  function rr(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath(); }
+  function wrapText(c, text, x, y, maxW, lh){
+    var words = String(text).split(' '), line = '';
+    words.forEach(function(w){ var t = line ? line + ' ' + w : w; if(c.measureText(t).width > maxW && line){ c.fillText(line, x, y); y += lh; line = w; } else line = t; });
+    if(line){ c.fillText(line, x, y); y += lh; }
+    return y;
+  }
   function drawCard(img){
     var W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var c = cv.getContext('2d');
     c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
@@ -494,7 +559,11 @@
     c.fillStyle = MUTED; c.font = '500 25px ' + FONT; c.fillText(img.sub, 56, 126);
     c.fillStyle = INK; c.font = '800 24px ' + FONT; c.fillText('Road to Electric', 56, H - 30);
     c.fillStyle = MUTED; c.font = '600 22px ' + FONT; c.textAlign = 'right'; c.fillText('roadtoelectric.github.io', W - 56, H - 30); c.textAlign = 'left';
-    var top = 160, bottom = H - 78;
+    var top = img.legend ? 196 : 160, bottom = H - 78;
+    if(img.legend){                                   // colour key under the subtitle: [{ label, color }]
+      var lgx = 56; c.font = '700 21px ' + FONT; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      img.legend.forEach(function(k){ c.fillStyle = k.color; c.fillRect(lgx, 150, 18, 18); c.fillStyle = INK; c.fillText(k.label, lgx + 26, 166); lgx += 26 + c.measureText(k.label).width + 30; });
+    }
     if(img.type === 'bars' || img.type === 'stack'){
       var rows = img.rows, n = rows.length, rh = (bottom - top) / n, x0 = 300, x1 = W - 300, bh = Math.min(38, rh * 0.62);
       var vals = rows.map(function(r){ return img.type === 'stack' ? r.total : r.v; }), mx = img.max || Math.max.apply(null, vals.map(Math.abs)), mn0 = img.signed ? Math.min(0, Math.min.apply(null, vals)) : 0, mx0 = img.signed ? Math.max(0, Math.max.apply(null, vals)) * 1.38 : mx;       // signed: headroom on the right for the value text
@@ -504,7 +573,7 @@
         c.fillStyle = INK; c.font = '700 ' + Math.round(Math.min(30, rh * 0.56)) + 'px ' + FONT; c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(r.label, x0 - 20, cy);
         c.fillStyle = TRACK; c.fillRect(x0, y, x1 - x0, bh);
         if(img.type === 'stack'){ var w = X(r.total) - x0; c.fillStyle = '#9fb3c8'; c.fillRect(x0, y, w, bh); c.fillStyle = GREEN; c.fillRect(x0, y, w * r.bev / r.total, bh); c.fillStyle = INK; c.textAlign = 'left'; c.font = '700 ' + Math.round(Math.min(26, rh * 0.5)) + 'px ' + FONT; c.fillText(r.text, Math.min(x0 + w + 14, x1 - 40), cy); return; }
-        var z = X(0), e = X(r.v); c.fillStyle = r.v < 0 ? RED : GREEN; c.fillRect(Math.min(z, e), y, Math.abs(e - z), bh);
+        var z = X(0), e = X(r.v); c.fillStyle = r.color || (r.v < 0 ? RED : GREEN); c.fillRect(Math.min(z, e), y, Math.abs(e - z), bh);
         if(r.marker != null){ c.fillStyle = INK; c.fillRect(X(r.marker) - 2, y - 6, 4, bh + 12); }
         c.fillStyle = INK; c.textAlign = 'left'; c.font = '800 ' + Math.round(Math.min(30, rh * 0.58)) + 'px ' + FONT; c.fillText(r.text, (r.v < 0 ? z + 14 : Math.max(z, e) + 14), cy);
         if(r.note){ c.fillStyle = MUTED; c.font = '500 ' + Math.round(Math.min(22, rh * 0.42)) + 'px ' + FONT; c.textAlign = 'left'; c.fillText(r.note, x1 + 16, cy); }
@@ -516,6 +585,66 @@
         c.fillStyle = MUTED; c.font = '600 30px ' + FONT; c.fillText(p[0].label, p[1] + 150, 380);
       });
       c.fillStyle = INK; c.font = '800 34px ' + FONT; c.fillText(img.foot, W / 2, 520); c.textAlign = 'left';
+    } else if(img.type === 'hero'){
+      // a big number, the yearly series as an area under it, and tiles with the other headline numbers
+      c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      c.fillStyle = GREEN; c.font = '800 150px ' + FONT; c.fillText(img.big, 56, 300);
+      c.fillStyle = INK; c.font = '700 32px ' + FONT; c.fillText(img.l1, 56, 350); c.fillStyle = MUTED; c.font = '600 25px ' + FONT; c.fillText(img.l2, 56, 386);
+      var sp = img.series, sx0 = 56, sx1 = 610, sy0 = 430, sy1 = 560, smx = Math.max.apply(null, sp.map(function(p){ return p.v; })) * 1.1;
+      var sxs = function(i){ return sx0 + (sx1 - sx0) * i / (sp.length - 1); }, sys = function(v){ return sy1 - (sy1 - sy0) * v / smx; };
+      c.beginPath(); c.moveTo(sxs(0), sy1); sp.forEach(function(p, i){ c.lineTo(sxs(i), sys(p.v)); }); c.lineTo(sxs(sp.length - 1), sy1); c.closePath(); c.fillStyle = 'rgba(30,143,95,.18)'; c.fill();
+      c.beginPath(); sp.forEach(function(p, i){ if(i) c.lineTo(sxs(i), sys(p.v)); else c.moveTo(sxs(i), sys(p.v)); }); c.strokeStyle = GREEN; c.lineWidth = 4; c.stroke();
+      var pk = 0; sp.forEach(function(p, i){ if(p.v > sp[pk].v) pk = i; });
+      [pk, sp.length - 1].forEach(function(i){ c.beginPath(); c.arc(sxs(i), sys(sp[i].v), 7, 0, 7); c.fillStyle = GREEN; c.fill(); c.fillStyle = INK; c.font = '800 21px ' + FONT; c.textAlign = i === sp.length - 1 ? 'right' : 'center'; c.fillText(compact(sp[i].v), sxs(i), sys(sp[i].v) - 14); });
+      c.fillStyle = MUTED; c.font = '600 20px ' + FONT; c.textAlign = 'left'; c.fillText(sp[0].m, sx0, sy1 + 28); c.textAlign = 'right'; c.fillText(sp[sp.length - 1].m, sx1, sy1 + 28); c.textAlign = 'left';
+      img.tiles.forEach(function(t, i){ var ty = 170 + i * 104; rr(c, 690, ty, 454, 92, 14); c.fillStyle = '#eef4fa'; c.fill(); c.fillStyle = t.color || GREEN; c.font = '800 40px ' + FONT; c.fillText(t.v, 712, ty + 47); c.fillStyle = MUTED; c.font = '600 20px ' + FONT; c.fillText(t.l, 712, ty + 76); });
+    } else if(img.type === 'stackcols'){
+      // stacked columns by year (e.g. electric bus sales by region), the total over each column
+      var cols = img.cols, nC = cols.length, gx0 = 112, gx1 = W - 56, gy0 = 226, gy1 = 556, tmx = Math.max.apply(null, cols.map(function(k){ return k.total; })) * 1.12, bw3 = (gx1 - gx0) / nC;
+      [0, 0.5, 1].forEach(function(f){ var yy = gy1 - (gy1 - gy0) * f; c.fillStyle = TRACK; c.fillRect(gx0, yy - 1, gx1 - gx0, 2); c.fillStyle = MUTED; c.font = '600 18px ' + FONT; c.textAlign = 'right'; c.fillText(compact(Math.round(tmx * f / 1000) * 1000), gx0 - 10, yy + 6); });
+      cols.forEach(function(k, i){
+        var x = gx0 + i * bw3 + 7, w = bw3 - 14, yb = gy1;
+        k.segs.forEach(function(sg){ var h = (gy1 - gy0) * sg.v / tmx; if(h <= 0) return; c.fillStyle = sg.color; c.fillRect(x, yb - h, w, h); yb -= h; });
+        c.fillStyle = INK; c.font = '800 19px ' + FONT; c.textAlign = 'center'; c.fillText(compact(k.total), x + w / 2, yb - 8);
+        c.fillStyle = MUTED; c.font = '600 20px ' + FONT; c.fillText(k.label, x + w / 2, gy1 + 28);
+      });
+      c.textAlign = 'left';
+    } else if(img.type === 'lines'){
+      // lines over a numeric x axis (years), percent y axis; a series can be dashed with hollow points (a projection)
+      var lx0 = 112, lx1 = W - 76, ly0 = 226, ly1 = 556, xr = img.x, ymx = img.ymax || 100;
+      var XL = function(v){ return lx0 + (lx1 - lx0) * (v - xr[0]) / (xr[1] - xr[0]); }, YL = function(v){ return ly1 - (ly1 - ly0) * v / ymx; };
+      img.ticks.forEach(function(t){ c.fillStyle = TRACK; c.fillRect(lx0, YL(t) - 1, lx1 - lx0, 2); c.fillStyle = MUTED; c.font = '600 19px ' + FONT; c.textAlign = 'right'; c.fillText(t + '%', lx0 - 12, YL(t) + 6); });
+      for(var xv = xr[0]; xv <= xr[1]; xv++){ c.fillStyle = MUTED; c.font = '600 19px ' + FONT; c.textAlign = 'center'; c.fillText(String(xv), XL(xv), ly1 + 28); }
+      img.series.forEach(function(s){
+        c.strokeStyle = s.color; c.lineWidth = 5; c.setLineDash(s.dash ? [14, 10] : []); c.beginPath(); s.pts.forEach(function(p, i){ if(i) c.lineTo(XL(p[0]), YL(p[1])); else c.moveTo(XL(p[0]), YL(p[1])); }); c.stroke(); c.setLineDash([]);
+        s.pts.forEach(function(p, i){
+          if(s.skipFirst && i === 0) return;                  // the first point only joins a dashed projection to the actual line
+          c.beginPath(); c.arc(XL(p[0]), YL(p[1]), 7, 0, 7); c.fillStyle = s.hollow ? '#ffffff' : s.color; c.fill(); if(s.hollow){ c.strokeStyle = s.color; c.lineWidth = 3; c.stroke(); }
+          if(s.labels !== false){ c.fillStyle = INK; c.font = '800 21px ' + FONT; c.textAlign = 'center'; c.fillText(p[1] + '%', XL(p[0]), YL(p[1]) + (s.below ? 34 : -16)); }
+        });
+      });
+      c.textAlign = 'left';
+    } else if(img.type === 'stack100'){
+      // 100% stacked horizontal bars (a powertrain mix per row); a bold row is outlined
+      var srows = img.rows, ns = srows.length, srh = (bottom - top) / ns, sbh = Math.min(30, srh * 0.68), sxa = 262, sxb = W - 150;
+      srows.forEach(function(r, i){
+        var cy = top + i * srh + srh / 2, yy = cy - sbh / 2, tot = r.segs.reduce(function(s, g){ return s + g.v; }, 0) || 1, x = sxa;
+        c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = INK; c.font = (r.bold ? '800 ' : '700 ') + Math.round(Math.min(21, srh * 0.72)) + 'px ' + FONT; c.fillText(r.label, sxa - 14, cy);
+        r.segs.forEach(function(g){ var w = (sxb - sxa) * g.v / tot; if(w <= 0) return; c.fillStyle = g.color; c.fillRect(x, yy, w, sbh); x += w; });
+        if(r.bold){ c.strokeStyle = INK; c.lineWidth = 3; c.strokeRect(sxa, yy - 2, sxb - sxa, sbh + 4); }
+        c.fillStyle = INK; c.textAlign = 'left'; c.font = '800 ' + Math.round(Math.min(23, srh * 0.78)) + 'px ' + FONT; c.fillText(r.text, sxb + 14, cy);
+      });
+      c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+    } else if(img.type === 'tiles'){
+      // a 2 x 2 grid: a big number, what it counts, its source
+      var tw = (W - 112 - 28) / 2, th = 196;
+      img.tiles.forEach(function(t, i){
+        var tx = 56 + (i % 2) * (tw + 28), ty = 168 + Math.floor(i / 2) * (th + 24);
+        rr(c, tx, ty, tw, th, 16); c.fillStyle = '#eef4fa'; c.fill(); c.fillStyle = t.color; c.fillRect(tx, ty + 22, 8, th - 44);
+        c.textAlign = 'left'; c.fillStyle = t.color; c.font = '800 76px ' + FONT; c.fillText(t.big, tx + 34, ty + 90);
+        c.fillStyle = INK; c.font = '700 24px ' + FONT; var yy2 = wrapText(c, t.label, tx + 34, ty + 126, tw - 60, 29);
+        c.fillStyle = MUTED; c.font = '600 20px ' + FONT; c.fillText(t.src, tx + 34, ty + th - 18);
+      });
     } else if(img.type === 'world'){
       // left: the share, the year-ago comparison; right: the biggest BEV markets (units, share)
       c.textAlign = 'left'; c.textBaseline = 'alphabetic';
@@ -595,7 +724,7 @@
 
   function render(){
     var show = $('ctl-show').value, ALL = build(), D = ALL.filter(function(d){ return !d.key || !posted[d.key]; }).filter(function(d){ return show === 'all' || d.sec === show; }), host = $('cards'); host.innerHTML = '';
-    var SECN = { rank:'Rankings, world and regions', bus:'City buses', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
+    var SECN = { rank:'Rankings, world and regions', bus:'Electric buses', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
     var io = (typeof IntersectionObserver !== 'undefined') ? new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); e.target.__d && ensureImage(e.target.__d); } }); }, { rootMargin:'900px 0px' }) : null;
     D.forEach(function(d){
       if(d.sec !== lastSec){ lastSec = d.sec; var hh = document.createElement('h2'); hh.className = 'sd-sec'; hh.textContent = SECN[d.sec] + ' (' + (cnt[d.sec] || 0) + ')'; host.appendChild(hh); }
@@ -612,7 +741,7 @@
       order.forEach(function(i, pos){
         var text = d.posts[i];
         var wrap = document.createElement('div'); wrap.className = 'sd-post';
-        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth'][pos] + ' — it is part ' + (i + 1) + '/' + parts + (imgs[i] ? ' · with its own image' : ' · no image'); wrap.appendChild(cap); }
+        if(parts > 1){ var cap = document.createElement('div'); cap.className = 'sd-order'; cap.textContent = 'Post this ' + ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth'][pos] + ' — it is part ' + (i + 1) + '/' + parts + (imgs[i] ? ' · with its own image' : ' · no image'); wrap.appendChild(cap); }
         var ir = imgs[i] ? imageRow(d, i, imgs[i], io) : null; if(ir) wrap.appendChild(ir.row);
         var ta = document.createElement('textarea'); ta.value = text; ta.spellcheck = false; ta.rows = Math.min(14, text.split('\n').length + 1);
         var row = document.createElement('div'); row.className = 'sd-row';
