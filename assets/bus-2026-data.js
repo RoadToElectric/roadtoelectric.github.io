@@ -14,7 +14,8 @@ const BUS_2026 = {
     alt: { bev: [8141, 5477], hybrid: [1449, 1348], cng: [1328, 1195], fuelCell: [397, 272] },   // [H1 2026, H1 2025]
     countries: [['Italy', 1559, 369], ['United Kingdom', 1075, 1299], ['Poland', 1060, 148], ['Norway', 660, null], ['Germany', 553, null], ['Netherlands', 510, null], ['Portugal', 473, null],
       ['Romania', 343, 161], ['France', 337, null], ['Sweden', 326, null], ['Spain', 223, null], ['Denmark', 208, 161]],                // [country, battery-electric H1 2026, H1 2025]
-    makers: [['Yutong', 1636], ['Iveco / Heuliez', 1156], ['Solaris', 1022], ['BYD', 681], ['MAN', 584], ['Mercedes', 553], ['Wrightbus', 542], ['Karsan', 321], ['VDL', 202], ['Alexander Dennis', 157], ['Volvo', 153]],
+    makers: [['Yutong', 1636, 'China'], ['Iveco / Heuliez', 1156, 'Italy'], ['Solaris', 1022, 'Poland'], ['BYD', 681, 'China'], ['MAN', 584, 'Germany'], ['Mercedes', 553, 'Germany'], ['Wrightbus', 542, 'United Kingdom'],
+      ['Karsan', 321, 'Turkey'], ['VDL', 202, 'Netherlands'], ['Alexander Dennis', 157, 'United Kingdom'], ['Volvo', 153, 'Sweden']],   // [maker, battery-electric registrations H1 2026, home country (bar colour = its continent)]
     solarisFuelCell: 256
   },
   // ACEA commercial vehicle registrations, EU27: all buses and coaches, "electrically-chargeable" = battery-electric + plug-in hybrid + fuel cell

@@ -299,6 +299,7 @@
         <h3 style="font-size:14px;margin:18px 0 2px" id="b26-h3c">Battery-electric buses registered by country, first half of 2026</h3>
         <div class="tk-bars" id="b26-ctry"></div>
         <h3 style="font-size:14px;margin:18px 0 2px">Who builds them: battery-electric bus registrations, first half of 2026</h3>
+        <div class="tk-lg" id="b26-mk-lg"></div>
         <div class="tk-bars" id="b26-mk"></div>
         <p class="tk-note" id="b26-foot"></p>
         <div class="tk-callout" id="b26-call"></div>
@@ -516,7 +517,9 @@ function so2026(){
   bars('b26-city', Object.keys(cs).map(y => ({ l:`H1 ${y}`, v:cs[y], c:y == 2026 ? '#16a34a' : '#86efac', t:cs[y] + '%' })));
   const ct = V.countries.slice().sort((a, b) => b[1] - a[1]);
   bars('b26-ctry', ct.map(r => ({ l:esc(nm(r[0])), v:r[1], c:colOf(r[0]), t:`${fmt(r[1])}${r[2] ? ` (${sg(r[1], r[2])})` : ''}` })));
-  bars('b26-mk', V.makers.map(r => ({ l:esc(r[0]), v:r[1], c:'#0ea5e9', t:fmt(r[1]) + (r[0] === 'Solaris' ? ` (+${V.solarisFuelCell} hydrogen)` : '') })));
+  bars('b26-mk', V.makers.map(r => ({ l:esc(r[0]), v:r[1], c:colOf(r[2]), t:fmt(r[1]) + (r[0] === 'Solaris' ? ` (+${V.solarisFuelCell} hydrogen)` : '') })));
+  const usedC = [...new Set(V.makers.map(r => CONT[r[2]] || 'Europe'))];
+  document.getElementById('b26-mk-lg').innerHTML = usedC.map(k => `<span><i class="sq" style="background:${CONT_COL[k]}"></i>${({ 'Asia':'Chinese', 'Europe':'European' })[k] || k} maker</span>`).join('');
   const a = V.alt;
   document.getElementById('b26-foot').innerHTML = `Country bars: first-half 2026 registrations, change on first-half 2025 in brackets where the source gives it (Lithuania covers January–March only). Other drivelines in H1 2026 (DVV): hybrid ${fmt(a.hybrid[0])} (${fmt(a.hybrid[1])}), CNG ${fmt(a.cng[0])} (${fmt(a.cng[1])}), hydrogen ${fmt(a.fuelCell[0])} (${fmt(a.fuelCell[1])}). Sources: <a href="${V.url}" target="_blank" rel="noopener">${esc(V.label)}</a> · <a href="${A.h1.url}" target="_blank" rel="noopener">ACEA, ${A.h1.date}</a> · <a href="${A.q3.url}" target="_blank" rel="noopener">ACEA, ${A.q3.date}</a> · <a href="${I.url}" target="_blank" rel="noopener">${esc(I.label)}</a>.`;
   document.getElementById('b26-call').innerHTML = `<b>Italy took the lead.</b> It registered ${fmt(V.countries[0][1])} battery-electric buses in the first half (${fmt(V.countries[0][2])} a year earlier), ahead of the United Kingdom (${fmt(V.countries[1][1])}, down from ${fmt(V.countries[1][2])}) and Poland (${fmt(V.countries[2][1])}, from ${fmt(V.countries[2][2])}). ACEA says the same: Italy is now the EU's largest bus market and its electrically-chargeable registrations more than doubled over nine months, while diesel still holds ${A.q3.diesel}% of EU bus sales. The city segment is where electrification is furthest: battery-electric buses were ${cs[2026]}% of city bus registrations in the first half and, per the ICCT, more than ${I.cityBusElectricQ2Above}% in the second quarter, the highest share recorded. <br><br><b>Why 61%, 28% and 26%?</b> DVV counts the city bus segment only; ACEA and the ICCT count all buses and coaches, and ACEA includes plug-in hybrids. The ICCT quotes 28.3% in its summary and 28.6% further in its report for the first half. These figures are provisional and come from press summaries of the DVV report; ACEA's share slipped from ${A.h1.share}% (first half) to ${A.q3.share}% (nine months) as coaches and diesel buses sold more in the summer.`;
