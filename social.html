@@ -10,6 +10,7 @@
 <script src="assets/country-monthly-data.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script src="assets/country-iso2.js"></script>
+<script src="assets/city-bus-data.js"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
 <style>
@@ -65,7 +66,7 @@
     <label><input type="checkbox" id="ctl-prov"> include provisional numbers</label>
     <label><input type="checkbox" id="ctl-tags"> add #EV #BEV</label>
     <label>Country drafts <select id="ctl-cmode"><option value="new">Newest data of each country</option><option value="month">The month above</option></select></label>
-    <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option></select></label>
+    <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option><option value="bus">City buses</option></select></label>
   </div>
   <div class="sd-best" id="best" hidden></div>
   <div id="cards"></div>
@@ -362,7 +363,40 @@
       Object.keys(ms).forEach(function(m){ var d = brandDraft(c, m); if(d) bm.push(d); });
     });
     var bySize = function(a, b){ return b.size - a.size; };
-    return D.concat(cm.sort(bySize), bm.sort(bySize));
+    return D.concat(busDrafts(), cm.sort(bySize), bm.sort(bySize));
+  }
+
+  // ---- city buses (assets/city-bus-data.js, CITY_BUS): one thread per edition of the data; a new edition gives a new key, so it shows up again
+  function busDrafts(){
+    if(typeof CITY_BUS === 'undefined') return [];
+    var CB = CITY_BUS, EU = CB.eu, n = EU.years.length - 1, ze = function(r){ return r[1] + r[2]; }, by = {};
+    CB.countries.forEach(function(r){ by[r[0]] = r; });
+    var link = SITE + 'ev-trucking.html#bus-card', tail = '\n' + link + tags();
+    var lab = function(c){ var r = by[c], f = flag(c); return (f ? f + ' ' : '') + short(c) + ' ' + (r[6] ? '~' : '') + ze(r) + '%'; };
+    var yr = CB.dataYear, E = by.EU27;
+    // part 1: the EU trend
+    var p1 = '\uD83D\uDE8C ' + Math.round(ze(E) / 10) + ' out of 10 new EU city buses were zero-emission in ' + yr + ' (' + E[1] + '% battery-electric + ' + E[2] + '% hydrogen), up from ' + EU.values[0] + '% in ' + EU.years[0] + '.';
+    var full = EU.projection.filter(function(x){ return x[1] >= 100; })[0];
+    if(full) p1 += '\nTransport & Environment: at the 2023–25 pace, 100% by ' + full[0] + '.';
+    p1 += '\nNew city bus registrations, EU27 (1/3)';
+    // part 2: the leaders
+    var lead = CB.countries.filter(function(r){ return r[0] !== 'EU27'; }).sort(function(a, b){ return ze(b) - ze(a); }), ln = [];
+    for(var i = 0; i < lead.length && ln.length < 12; i++){ var t = ['Zero-emission share of new city buses, ' + yr + ':'].concat(ln, [lab(lead[i][0])]).join('\n') + ' (2/3)'; if(weight(t) > 280) break; ln.push(lab(lead[i][0])); }
+    var p2 = 'Zero-emission share of new city buses, ' + yr + ':\n' + ln.join('\n') + ' (2/3)';
+    // part 3: big markets and laggards
+    var big = ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(function(c){ return by[c]; }).map(lab);
+    var lag = CB.countries.filter(function(r){ return ze(r) <= 25 && r[0] !== 'EU27' && ['Norway', 'Iceland', 'Switzerland', 'United Kingdom'].indexOf(r[0]) < 0; }).sort(function(a, b){ return ze(a) - ze(b); }).slice(0, 4).map(function(r){ return lab(r[0]); });
+    var p3 = 'The big markets: ' + big.join(' · ') + '.\nFurthest behind: ' + lag.join(' · ') + '.\nSource: ' + (CB.short || CB.label) + tail + ' (3/3)';
+    var rowsEU = EU.years.map(function(y, i){ return { label:String(y), v:EU.values[i], text:EU.values[i] + '%' }; }).concat(EU.projection.map(function(x){ return { label:x[0] + ' (proj.)', v:x[1], text:x[1] + '%' }; }));
+    var rowsLead = lead.slice(0, 12).map(function(r){ return { label:short(r[0]), v:ze(r), text:(r[6] ? '≈' : '') + ze(r) + '%' }; });
+    var rowsBig = big.length ? ['United Kingdom', 'Italy', 'Spain', 'Germany', 'France'].filter(function(c){ return by[c]; }).map(function(c){ return { label:short(c), v:ze(by[c]), text:(by[c][6] ? '≈' : '') + ze(by[c]) + '%' }; }).concat(lag.length ? CB.countries.filter(function(r){ return ze(r) <= 25 && ['Norway', 'Iceland', 'Switzerland', 'United Kingdom', 'EU27'].indexOf(r[0]) < 0; }).sort(function(a, b){ return ze(a) - ze(b); }).slice(0, 4).map(function(r){ return { label:short(r[0]), v:ze(r), text:ze(r) + '%' }; }) : []) : [];
+    return [{ sec:'bus', title:'City buses · zero-emission share of new EU city buses', tag:'buses · ' + yr + ' data', why:'Buses are where electrification is furthest: 60% of new EU city buses in 2025. A new edition of the data (assets/city-bus-data.js) gives a new draft.',
+      key:'bus|' + CB.edition, ym:'', chart:{ ym:'' }, link:link, posts:[p1, p2, p3], size:1e9,
+      images:[
+        { type:'bars', max:100, title:'EU27: zero-emission share of new city buses', sub:CB.label + ' · battery-electric + hydrogen · dashed years = projection', rows:rowsEU },
+        { type:'bars', max:100, title:'Zero-emission share of new city buses, ' + yr, sub:CB.label + ' · battery-electric + hydrogen', rows:rowsLead },
+        { type:'bars', max:100, title:'Big markets and laggards, ' + yr, sub:CB.label + ' · zero-emission share of new city buses', rows:rowsBig }
+      ] }];
   }
 
   // ---- which drafts were posted on X (in the database through the stats passphrase, on this device only until the passphrase is given)
@@ -539,7 +573,7 @@
 
   function render(){
     var show = $('ctl-show').value, ALL = build(), D = ALL.filter(function(d){ return !d.key || !posted[d.key]; }).filter(function(d){ return show === 'all' || d.sec === show; }), host = $('cards'); host.innerHTML = '';
-    var SECN = { rank:'Rankings, world and regions', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
+    var SECN = { rank:'Rankings, world and regions', bus:'City buses', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
     var io = (typeof IntersectionObserver !== 'undefined') ? new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); e.target.__d && ensureImage(e.target.__d); } }); }, { rootMargin:'900px 0px' }) : null;
     D.forEach(function(d){
       if(d.sec !== lastSec){ lastSec = d.sec; var hh = document.createElement('h2'); hh.className = 'sd-sec'; hh.textContent = SECN[d.sec] + ' (' + (cnt[d.sec] || 0) + ')'; host.appendChild(hh); }
@@ -561,7 +595,7 @@
         var ta = document.createElement('textarea'); ta.value = text; ta.spellcheck = false; ta.rows = Math.min(14, text.split('\n').length + 1);
         var row = document.createElement('div'); row.className = 'sd-row';
         var cp = btn('Copy text'), go = document.createElement('a'); go.className = 'sd-btn primary'; go.target = '_blank'; go.rel = 'noopener'; go.textContent = 'Post on X';
-        var ch = document.createElement('a'); ch.className = 'sd-btn'; ch.target = '_blank'; ch.rel = 'noopener'; ch.textContent = 'Open the chart'; ch.href = linkMix(d.chart.ym, d.chart.c);
+        var ch = document.createElement('a'); ch.className = 'sd-btn'; ch.target = '_blank'; ch.rel = 'noopener'; ch.textContent = 'Open the chart'; ch.href = d.link || linkMix(d.chart.ym, d.chart.c);
         // a part with a picture: copy it FIRST (while this page still has the focus: a new tab takes it away and the browser then refuses the copy), open X after
         if(ir){
           go.textContent = 'Post on X + copy image';
