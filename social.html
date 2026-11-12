@@ -120,7 +120,7 @@
     // 1. leaderboard of BEV share
     var lb = T.slice().sort(function(a, b){ return b.s - a.s; }).slice(0, 10);
     var lines = lb.map(function(x, i){ return (i + 1) + '. ' + flag(x.c) + ' ' + short(x.c) + ' ' + pct1(x.s) + '%'; });
-    var hdr = 'BEV share of new car sales, ' + mn + ' (markets above ' + fmt(minU) + ' cars):';
+    var hdr = 'BEV share of new car sales, ' + mn + (minU > 0 ? ' (markets above ' + fmt(minU) + ' cars)' : '') + ':';       // no size limit: no description of one
     D.push({ title:'BEV share leaderboard', tag:'ranking', why:'Rankings get opened and quoted: a hook, ten lines, the link.', posts: thread(hdr, lines, linkMix(ym) + tags()), chart:{ ym:ym } });
 
     // 2. the tracked markets together (same markets a year ago)
