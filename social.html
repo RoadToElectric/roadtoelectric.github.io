@@ -169,13 +169,7 @@
 
     // 2. the tracked markets together (same markets a year ago)
     var pair = T.filter(function(x){ return x.prev && x.prev.total; });
-    if(pair.length >= 8){
-      var b = pair.reduce(function(s, x){ return s + x.r.bev; }, 0), t = pair.reduce(function(s, x){ return s + x.r.total; }, 0), bp = pair.reduce(function(s, x){ return s + x.prev.bev; }, 0), tp = pair.reduce(function(s, x){ return s + x.prev.total; }, 0);
-      var now = 100 * b / t, was = 100 * bp / tp;
-      D.push({ title:'The tracked markets together', tag:'big picture', why:'One number for the whole panel, compared with the same markets a year ago (a fair comparison).',
-        posts:[ 'EV share across the ' + pair.length + ' markets with a like-for-like comparison (' + compact(t) + ' new cars), ' + mn + ': BEV ' + pct1(now) + '%.\nSame markets, ' + py + ': ' + pct1(was) + '% (' + (now >= was ? '+' : '') + pct1(now - was) + ' pp).\nBEV units ' + (b >= bp ? '+' : '') + Math.round(100 * (b / bp - 1)) + '% year on year.\n' + linkMix(ym) + tags() ], chart:{ ym:ym },
-        img:{ type:'duo', title:'EV share across ' + pair.length + ' markets', sub:'Like for like with a year ago · ' + compact(t) + ' new cars in ' + mn, a:{ label:mn, v:now }, b:{ label:py, v:was }, foot:'BEV units ' + (b >= bp ? '+' : '') + Math.round(100 * (b / bp - 1)) + '% year on year · ' + (now >= was ? '+' : '') + pct1(now - was) + ' pp' } });
-    }
+    // (the "tracked markets together" draft is built by aggDraft in build(): all markets loaded, as the chart page lists them, then like for like)
 
     // 3. biggest movers vs a year ago
     var mv = pair.filter(function(x){ return x.prev.total >= minU * 0.6; }).map(function(x){ return { c:x.c, d:x.s - x.ps, s:x.s, ps:x.ps }; }).sort(function(a, b){ return b.d - a.d; });
@@ -236,7 +230,8 @@
     var hasCmp = pair.length >= Math.max(1, Math.ceil(N * 0.6)) && likePrev !== null;
     var cn = pair.filter(function(x){ return x.c === 'China'; })[0], ex = null;
     if(cn && hasCmp && (label === 'World' || label === 'Asia') && tN - cn.r.total > 0 && tP - cn.prev.total > 0) ex = { now:100 * (bN - cn.r.bev) / (tN - cn.r.total), was:100 * (bP - cn.prev.bev) / (tP - cn.prev.total) };
-    var p1 = icon + ' ' + (label === 'World' ? 'World' : label) + ' EV snapshot, ' + mn + ': ' + N + ' markets, ' + compact(t) + ' new cars.\nBEV ' + pct1(now) + '% (' + compact(b) + ' units), plug-in hybrids ' + pct1(plug) + '%.';
+    var tracked = label === 'Tracked';       // a month that is not complete yet: "the N markets loaded so far" instead of the world
+    var p1 = icon + ' ' + (tracked ? 'EV snapshot across the ' + N + ' markets loaded so far' : label + ' EV snapshot') + ', ' + mn + ': ' + (tracked ? '' : N + ' markets, ') + compact(t) + ' new cars.\nBEV ' + pct1(now) + '% (' + compact(b) + ' units), plug-in hybrids ' + pct1(plug) + '%.';
     var same = pair.length === N;          // otherwise some markets have no year-ago month (China has no monthly rows before 2026): the comparison is then labelled like for like on the others
     if(hasCmp) p1 += '\n' + (same ? py + ', same markets: BEV ' + pct1(likePrev) + '% (' + sgn(likeNow - likePrev) + ' pp)' : 'Like for like (' + pair.length + ' markets with ' + py + ' data): BEV ' + pct1(likePrev) + '% → ' + pct1(likeNow) + '% (' + sgn(likeNow - likePrev) + ' pp)') + ', BEV units ' + sgnI(100 * (bN / bP - 1)) + '%.';
     if(ex) p1 += '\nWithout China: ' + pct1(ex.now) + '% (' + pct1(ex.was) + '% a year ago).';
@@ -249,9 +244,11 @@
       posts = lines.every(function(l){ return whole.indexOf(l) >= 0; }) ? [whole] : [p1 + '\n(1/2)', fitPost(hdr2, lines, link, '(2/2)')];
     }
     var prov = rows.some(function(x){ return x.prov; });
-    return { sec:'rank', title:label === 'World' ? 'World: EV snapshot' : label + ': EV snapshot', tag:label === 'World' ? 'world · ' + N + ' markets' : 'region · ' + N + ' markets' + (prov ? ' · provisional' : ''), warn:prov,
-      why:(label === 'World' ? 'All the markets of the month together' : 'The markets of ' + label + ' together') + ', compared with the same markets a year ago. Appears once a month has ' + WORLD_MIN + '+ markets.', posts:posts, chart:{ ym:ym }, key:'agg|' + label + '|' + ym, ym:ym,
-      img:{ type:'world', title:(label === 'World' ? 'World' : label) + ' EV snapshot', sub:mn + ' · BEV share of new car sales · ' + N + ' markets', big:pct1(now) + '%',
+    var provNames = rows.filter(function(x){ return x.prov; }).map(function(x){ return x.c; });
+    return { sec:'rank', title:tracked ? 'The tracked markets together' : label === 'World' ? 'World: EV snapshot' : label + ': EV snapshot', tag:(tracked ? 'big picture' : label === 'World' ? 'world' : 'region') + ' · ' + N + ' markets' + (prov ? ' · provisional' : ''), warn:prov,
+      why:(tracked ? 'All ' + N + ' markets loaded so far for the month (the same ones the chart page lists), then a like-for-like comparison on those that also have the month a year ago.' : (label === 'World' ? 'All the markets of the month together' : 'The markets of ' + label + ' together') + ', compared with the same markets a year ago. Appears once a month has ' + WORLD_MIN + '+ markets.') + (prov ? ' Includes provisional markets (estimated powertrain split): ' + provNames.join(', ') + '.' : ''),
+      posts:posts, chart:{ ym:ym }, key:tracked ? 'panel|' + ym : 'agg|' + label + '|' + ym, ym:ym,
+      img:{ type:'world', title:tracked ? 'EV share across ' + N + ' markets' : (label === 'World' ? 'World' : label) + ' EV snapshot', sub:mn + ' · BEV share of new car sales · ' + (tracked ? 'all markets loaded so far' : N + ' markets'), big:pct1(now) + '%',
         l2:compact(t) + ' new cars · plug-in hybrids ' + pct1(plug) + '%', l3:hasCmp ? (same ? py + ': ' + pct1(likePrev) + '% · ' + sgn(likeNow - likePrev) + ' pp' : 'Like for like, ' + pair.length + ' markets:') : '', l4:hasCmp ? (same ? '' : pct1(likePrev) + '% → ' + pct1(likeNow) + '% · ') + 'BEV units ' + sgnI(100 * (bN / bP - 1)) + '% on a year ago' : '', l5:ex ? 'Without China: ' + pct1(ex.now) + '% (' + pct1(ex.was) + '%)' : '',
         head:'Biggest BEV markets (units · share)', rows:big.slice(0, 8).map(function(x){ return { label:short(x.c), total:x.r.bev, bev:x.r.bev, text:compact(x.r.bev) + ' · ' + pct1(x.s) + '%' }; }) } };
   }
@@ -335,6 +332,7 @@
     // world and regions: only for a month with enough markets; otherwise say how far it is
     if((countOf[ym] || 0) >= WORLD_MIN) worldDrafts(ym).forEach(function(d){ D.push(d); });
     else {
+      D.push(aggDraft('Tracked', table(ym, 0, true), ym));          // the month is not complete: "the N markets loaded so far", the same ones the chart page lists
       var done = months.filter(function(k){ return (countOf[k] || 0) >= WORLD_MIN; })[0];
       D.push({ sec:'rank', title:'World and regional drafts', tag:'waiting', info:monthName(ym) + ' has ' + (countOf[ym] || 0) + ' markets so far; the world and regional drafts (World, Asia, Europe, North & Central America, South America, Oceania) appear once a month has ' + WORLD_MIN + ' or more.', switchTo:done, switchLabel:done ? 'Show ' + monthName(done) + ' (' + countOf[done] + ' markets)' : '' });
     }
