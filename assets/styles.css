@@ -1737,3 +1737,6 @@ nav.sidebar-nav a.nav-hot[aria-current="page"]{ background:#ffc933; color:#1b140
 nav.sidebar-nav a.nav-hot[aria-current="page"] .dot{ background:#1b1400; animation:none; }
 @keyframes navHotPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,201,51,.7); } 70%,100%{ box-shadow:0 0 0 7px rgba(255,201,51,0); } }
 @media (prefers-reduced-motion:reduce){ nav.sidebar-nav a.nav-hot .dot{ animation:none; } }
+
+/* a toggle button that is not available right now (e.g. the Mix by Country "Bars" view before a country is picked) */
+.chart-mode-toggle .mode-btn:disabled{ opacity:.4; cursor:not-allowed; }

@@ -292,15 +292,18 @@
           </div>
         </div>
 
-        <div class="card chart-card hidden" id="elec-bars-card">
+        <!-- one card for the Electrification Mix (bars) and the Motorisation Trends (lines): a Bars / Lines toggle in each header (setMixView) -->
+        <div class="card chart-card" id="mix-trend-card">
+         <div id="mix-pane-bars">
+          <div class="hidden" id="elec-bars-card">
           <h2 id="elec-bars-title">Electrification Mix — Recent</h2>
           <div class="chart-legend" id="elec-bars-legend"></div>
           <svg class="chart" id="elec-bars-svg" viewBox="0 0 900 320" preserveAspectRatio="none"></svg>
           <p class="note" id="elec-bars-note"></p>
           <div class="tooltip" id="elec-bars-tooltip"></div>
-        </div>
-
-        <div class="card chart-card">
+          </div>
+         </div>
+         <div id="mix-pane-lines">
           <div class="chart-header-row">
             <h2 id="trends-title">Motorisation Trends</h2>
             <a href="#" id="trends-clear" class="mode-btn hidden" style="text-decoration:none;">✕ Show all filtered countries</a>
@@ -310,6 +313,7 @@
           <svg class="chart" id="trends-svg" viewBox="0 0 900 300" preserveAspectRatio="none"></svg>
           <div class="tooltip" id="trends-tooltip"></div>
           <a href="#" id="trends-country-page-link" class="back-link hidden" style="margin:10px 0 0;">Open full country page →</a>
+         </div>
         </div>
 
         <div class="card chart-card">
@@ -3506,6 +3510,42 @@ function renderElectrificationBars(){
   renderElectrificationBarsChart(selectedElecCountries);
 }
 
+// ---- Electrification Mix (bars) and Motorisation Trends (lines) share one card, with a Bars / Lines toggle in each header ----
+// Bars need a focused country or two or more selected ones (renderElectrificationBars hides its pane otherwise): the Lines view then shows alone and Bars is greyed out.
+// The Lines view is shares only (%): no "# of Units" mode, and its tooltip shows no unit counts.
+let mixView = 'bars';                       // the reader's choice; Bars shows whenever it is available
+function mixBarsAvailable(){ return !document.getElementById('elec-bars-card').classList.contains('hidden'); }
+function ensureMixToggles(){
+  document.querySelectorAll('#mix-trend-card .chart-header-row').forEach(row => {
+    if(row.querySelector('.mix-view-toggle')) return;
+    const t = document.createElement('div');
+    t.className = 'chart-mode-toggle lg mix-view-toggle'; t.setAttribute('role', 'group'); t.setAttribute('aria-label', 'Chart type');
+    t.innerHTML = '<button type="button" class="mode-btn" data-mix-view="bars">BARS</button><button type="button" class="mode-btn" data-mix-view="lines">LINES</button>';
+    t.addEventListener('click', e => { const b = e.target.closest('[data-mix-view]'); if(b && !b.disabled) setMixView(b.dataset.mixView); });
+    const title = row.querySelector('h2');
+    if(title && title.nextSibling) row.insertBefore(t, title.nextSibling); else row.appendChild(t);
+  });
+}
+function applyMixView(){
+  ensureMixToggles();
+  const barsOK = mixBarsAvailable(), view = (mixView === 'bars' && barsOK) ? 'bars' : 'lines';
+  document.getElementById('mix-pane-bars').style.display = view === 'bars' ? '' : 'none';
+  document.getElementById('mix-pane-lines').style.display = view === 'lines' ? '' : 'none';
+  document.querySelectorAll('#mix-trend-card [data-mix-view]').forEach(b => {
+    const isBars = b.dataset.mixView === 'bars';
+    b.classList.toggle('active', b.dataset.mixView === view);
+    b.disabled = isBars && !barsOK;
+    b.title = isBars ? (barsOK ? 'Stacked bars: the electrification mix, as a % or in units.' : 'Click a country, or select two or more, to see their electrification mix as bars.') : 'Lines: the motorisation trend, shares in % only.';
+  });
+  return view;
+}
+function setMixView(v){
+  mixView = v;
+  const view = applyMixView();
+  if(view === 'bars') renderElectrificationBars(); else renderTrendsChart();       // a chart drawn while its pane was hidden (a phone sizes a chart to its box) is redrawn now
+  applyMixView();
+}
+
 // Non-BEV on-road fleet (2018-2041): only meaningful once a single country is focused, and only
 // for the 50 countries in CARS_ON_ROAD (real fleet counts where found, otherwise a survival-curve model) --
 // renderCarsOnRoadChart itself hides the card and bails out when that data doesn't exist, so the
@@ -4219,8 +4259,7 @@ function renderTrendsChart(){
         : d.isProjected ? (granularity === 'monthly' ? 'Rest of 2026 — implied monthly rate (not a measurement)' : `${d.label} (Projected — not a measurement)`)
         : d.label;
       trendsTooltip.innerHTML = `<strong>${trendsPointTitle}</strong><br>` +
-        activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong> <span style="opacity:.7">(${d.raw[k] == null ? '—' : d.raw[k].toLocaleString('en-US')})</span>`).filter(Boolean).join('<br>') +
-        `<br>Total: ${d.total.toLocaleString('en-US')}` +
+        activeKeys.map(k => d[k] == null || isNaN(d[k]) ? '' : `${FUEL_LABELS[k]}: <strong>${d[k].toFixed(1)}%</strong>`).filter(Boolean).join('<br>') +
         (focusedCountry === 'Canada' && granularity === 'monthly' ? `<br><span style="opacity:.7">quarterly StatCan data spread evenly across months; Jul-Sep 2026 is a DesRosiers estimate until StatCan publishes Q3</span>` : '');
     })
     .on('pointerleave', () => { guide.style('opacity', 0); trendsTooltip.style.opacity = 0; });
@@ -5492,6 +5531,7 @@ function recompute(){
   renderMomentum();
   renderFocusStats();
   renderElectrificationBars();
+  applyMixView();
   renderCarsOnRoad();
   renderEvRegulations();
   if(typeof renderMfrSection === 'function') renderMfrSection();
@@ -7300,7 +7340,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
 FilterMemory.auto({ exclude:['elec-tl-range', 'mfr-country-select', 'mfr-model-country-select', 'mfr-country-group-country-select'] });
 FilterMemory.restore();
 // phone view: charts that draw at the width of their card are redrawn after a rotation or a view switch
-if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderTrendsChart(); renderBubbleChart(); if(focusedCountry) renderCarsOnRoad(); });
+if(window.RTEView && RTEView.onResize) RTEView.onResize(() => { renderTrendsChart(); renderElectrificationBars(); applyMixView(); renderBubbleChart(); if(focusedCountry) renderCarsOnRoad(); });
 </script>
 <script>
 // a link such as index.html's first card (…?period=latest#elec-share-card): scroll to the section once the page has drawn (the URL is rewritten by the state code, so the hash is read from the early copy)
