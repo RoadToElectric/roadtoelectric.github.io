@@ -67,9 +67,21 @@
   .eu-range{ flex:1; min-width:180px; accent-color:var(--accent); }
   table.eu-t{ width:100%; border-collapse:collapse; font-size:13px; }
   .eu-t, .eu-t th, .eu-t td{ font-family:inherit; }
-  .eu-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px 8px; border-bottom:1px solid var(--border); }
-  .eu-t td{ padding:7px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .eu-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px 8px; border-bottom:1px solid var(--border); cursor:default; }
+  .eu-t td{ padding:7px 8px; border-bottom:1px solid var(--border); vertical-align:top; text-align:left; white-space:normal; }   /* the site-wide table rule right-aligns every cell in monospace: text columns are left-aligned here */
   .eu-t td.n, .eu-t th.n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .eu-t td:last-child{ min-width:260px; line-height:1.45; }
+  .eu-t td.badge{ white-space:nowrap; }
+  /* the share of the EU population of each country, listed to the right of the map */
+  .eu-shh{ font-size:13px; font-weight:800; margin:2px 0 2px; }
+  .eu-shn{ font-size:12px; color:var(--text-muted); margin:0 0 8px; }
+  .eu-shl{ columns:2; column-gap:12px; }
+  .eu-sh{ position:relative; display:flex; align-items:center; gap:7px; padding:3px 7px; margin:0 0 3px; border-radius:6px; font-size:12.5px; break-inside:avoid; cursor:pointer; }
+  .eu-sh::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:var(--w); background:var(--c); opacity:.2; border-radius:6px; }
+  .eu-sh:hover::before{ opacity:.35; }
+  .eu-sh i{ position:relative; width:10px; height:10px; border-radius:3px; background:var(--c); flex:none; }
+  .eu-sh .nm{ position:relative; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .eu-sh b{ position:relative; font-variant-numeric:tabular-nums; }
   .eu-t tr.clk{ cursor:pointer; }
   .eu-t tr.clk:hover td{ background:var(--surface-alt); }
   .eu-scroll{ overflow:auto; border:1px solid var(--border); border-radius:12px; max-height:520px; }
@@ -153,7 +165,7 @@
         <p class="eu-note">Click a country on the map or in the table to set its vote: Yes, No, Abstain, Undecided. Undecided and abstaining states count as not-yes, and the thresholds are measured on all 27 states. The first view shows today's real status, with a slider to watch the approvals arrive.</p>
         <div class="eu-row" data-nocapture><span class="eu-lab">Map shows</span><button class="eu-chip on" id="m-status">Real status</button><button class="eu-chip" id="m-sim">My vote</button></div>
         <div class="eu-row" data-nocapture id="sc-row"><span class="eu-lab">Try</span>
-          <button class="eu-chip sc" data-sc="now">Approved states vote yes</button><button class="eu-chip sc" data-sc="review">+ all states in review</button><button class="eu-chip sc" data-sc="big4">+ Germany, France, Italy, Spain</button><button class="eu-chip sc" data-sc="clear">Clear all</button></div>
+          <button class="eu-chip sc" data-sc="now">Approved states vote yes</button><button class="eu-chip sc" data-sc="review">+ all states in review</button><button class="eu-chip sc" data-sc="big4">+ Germany, France, Italy, Spain</button><button class="eu-chip sc" data-sc="clear" title="Back to the real status map">Clear all</button></div>
         <div class="eu-row" data-nocapture id="date-row"><label class="eu-lab" for="date">Approvals up to</label><input id="date" class="eu-range" type="range"><b id="date-l" style="min-width:104px;text-align:right"></b></div>
         <div class="eu-leg" id="leg"></div>
         <div class="eu-grid">
@@ -202,7 +214,7 @@
 
   function approvedAt(d){ return S.filter(function(s){ return s[3] === 'approved' && s[4] <= d; }); }
   function fromStatus(d){ S.forEach(function(s){ vote[s[0]] = (s[3] === 'approved' && s[4] <= d) ? 'yes' : 'und'; }); }
-  function scen(k){ S.forEach(function(s){ var v = 'und'; if(s[3] === 'approved') v = 'yes'; else if(k === 'review' && s[3] === 'review') v = 'yes'; else if(k === 'big4' && ['DE', 'FR', 'IT', 'ES'].indexOf(s[0]) >= 0) v = 'yes'; vote[s[0]] = v; }); asof = d1; }
+  function scen(k){ S.forEach(function(s){ var v = 'und'; if(s[3] === 'approved') v = 'yes'; else if(k === 'review' && s[3] === 'review') v = 'yes'; else if(k === 'big4' && ['DE', 'FR', 'IT', 'ES'].indexOf(s[0]) >= 0) v = 'yes'; vote[s[0]] = v; }); }
   fromStatus(asof);
 
   // hero numbers: the real status today
@@ -241,7 +253,8 @@
     $('m-status').classList.toggle('on', mode === 'status'); $('m-sim').classList.toggle('on', mode === 'sim');
     $('date-row').style.display = mode === 'status' ? '' : 'none';
     if(mode === 'status') fromStatus(asof);
-    if(paths) paths.filter(function(f){ return byName[f.properties.name]; }).style('fill', function(f){ var s = byName[f.properties.name]; return mode === 'status' ? (vote[s[0]] === 'yes' ? STC.approved : STC[s[3] === 'approved' ? 'none' : s[3]]) : VC[vote[s[0]]]; })
+    var colorOf = function(s){ return mode === 'status' ? (vote[s[0]] === 'yes' ? STC.approved : STC[s[3] === 'approved' ? 'none' : s[3]]) : VC[vote[s[0]]]; };
+    if(paths) paths.filter(function(f){ return byName[f.properties.name]; }).style('fill', function(f){ return colorOf(byName[f.properties.name]); })
       .each(function(f){ var s = byName[f.properties.name], t = d3.select(this).select('title'); if(t.empty()) t = d3.select(this).append('title'); t.text(s[1] + ' · ' + s[2].toFixed(1) + ' M people (' + pct(s[2]).toFixed(1) + '% of the EU) · ' + (mode === 'status' ? STL[s[3]] : VL[vote[s[0]]])); });
     var yes = S.filter(function(s){ return vote[s[0]] === 'yes'; }), no = S.filter(function(s){ return vote[s[0]] === 'no'; }), yp = pct(yes.reduce(function(t, s){ return t + s[2]; }, 0)), np = pct(no.reduce(function(t, s){ return t + s[2]; }, 0));
     var pass = yes.length >= D.needStates && yp >= D.needPop, blocked = no.length >= 4 && np > 35;
@@ -257,7 +270,10 @@
       prog('States saying yes', yes.length, yes.length + ' of 27', D.needStates, 27, '#1b9e3f', 'need ' + D.needStates) +
       prog('Population saying yes', yp, yp.toFixed(1) + '%', D.needPop, 100, '#1b9e3f', 'need ' + D.needPop + '%') +
       (no.length ? prog('States saying no', no.length, no.length + ' · ' + np.toFixed(1) + '%', 4, 27, '#d64541', '4 can block') : '') +
-      (pass ? '' : '<div class="eu-fast"><b>Gap:</b> ' + Math.max(0, D.needStates - yes.length) + ' more states and ' + Math.max(0, D.needPop - yp).toFixed(1) + ' points of population.' + (fp ? '<br><b>Fastest path:</b> ' + fp.pick.map(function(s){ return esc(s[1]) + ' (' + pct(s[2]).toFixed(1) + '%)'; }).join(' + ') + ' gets it to ' + fp.n + ' states and ' + fp.p.toFixed(1) + '%.' : '<br>It cannot get there without the states set to No.') + '</div>');
+      (pass ? '' : '<div class="eu-fast"><b>Gap:</b> ' + Math.max(0, D.needStates - yes.length) + ' more states and ' + Math.max(0, D.needPop - yp).toFixed(1) + ' points of population.' + (fp ? '<br><b>Fastest path:</b> ' + fp.pick.map(function(s){ return esc(s[1]) + ' (' + pct(s[2]).toFixed(1) + '%)'; }).join(' + ') + ' gets it to ' + fp.n + ' states and ' + fp.p.toFixed(1) + '%.' : '<br>It cannot get there without the states set to No.') + '</div>') +
+      '<div class="eu-shh">Share of the EU population</div><p class="eu-shn">Each country’s weight in the vote, coloured like the map. Click one to change its vote.</p><div class="eu-shl">' +
+      S.slice().sort(function(a, b){ return b[2] - a[2]; }).map(function(s){ return '<div class="eu-sh" data-i="' + s[0] + '" style="--c:' + colorOf(s) + ';--w:' + (100 * s[2] / S.reduce(function(m, x){ return Math.max(m, x[2]); }, 0)).toFixed(1) + '%" title="' + esc(s[1]) + ': ' + s[2].toFixed(1) + ' M people"><i></i><span class="nm">' + esc(s[1]) + '</span><b>' + pct(s[2]).toFixed(1) + '%</b></div>'; }).join('') + '</div>';
+    $('panel').querySelectorAll('.eu-sh').forEach(function(r){ r.addEventListener('click', function(){ toggle(r.dataset.i); }); });
     // table
     $('tbl').innerHTML = '<thead><tr><th>State</th><th class="n">Pop. (M)</th><th class="n">Share</th><th>Status</th><th>Since</th><th>Vote here</th><th>Who announced it / note</th></tr></thead><tbody>' + S.slice().sort(function(a, b){ return b[2] - a[2]; }).map(function(s){
       return '<tr class="clk" data-i="' + s[0] + '"><td><b>' + esc(s[1]) + '</b></td><td class="n">' + s[2].toFixed(1) + '</td><td class="n">' + pct(s[2]).toFixed(1) + '%</td><td><span class="eu-badge" style="background:' + STC[s[3]] + '">' + STL[s[3]] + '</span></td><td class="n">' + (s[4] ? fmtDate(s[4]) : '') + '</td><td><span class="eu-badge" style="background:' + VC[vote[s[0]]] + '">' + VL[vote[s[0]]] + '</span></td><td>' + esc(s[5]) + '</td></tr>'; }).join('') + '</tbody>';
@@ -268,7 +284,8 @@
   inp.addEventListener('input', function(){ asof = new Date(t0 + inp.value * day).toISOString().slice(0, 10); mode = 'status'; render(); });
   $('m-status').addEventListener('click', function(){ mode = 'status'; render(); });
   $('m-sim').addEventListener('click', function(){ mode = 'sim'; render(); });
-  document.querySelectorAll('[data-sc]').forEach(function(b){ b.addEventListener('click', function(){ if(b.dataset.sc === 'clear'){ S.forEach(function(s){ vote[s[0]] = 'und'; }); } else scen(b.dataset.sc); mode = 'sim'; render(); }); });
+  document.querySelectorAll('[data-sc]').forEach(function(b){ b.addEventListener('click', function(){ if(b.dataset.sc === 'clear'){ mode = 'status'; asof = d1; inp.value = inp.max; render(); return; }       // Clear = back to the real status map, slider at today
+      scen(b.dataset.sc); mode = 'sim'; render(); }); });
   if(readUrl()) mode = 'sim';
 
   function noMap(e){ $('map').innerHTML = '<p class="eu-note" style="padding:14px">The map could not be loaded (' + esc(e && e.message || e) + '). The table and the simulator below still work.</p>'; render(); }
