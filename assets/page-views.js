@@ -3,6 +3,8 @@
    One count per page per browser session; a visit from localhost or a file is shown but not counted. The numbers are shown at the bottom of the page.
    A counted visit also sends the reading mode (the site's own view, mobile or desktop): hit_page adds 1 to a counter per day / page / mode / country (the country is read from the request
    by the database; the IP address is never stored, and there is no visit-level log). The owner's own browser is not counted (localStorage 'rte-notrack', set when stats.html is unlocked).
+   New or returning reader (2026-11-13): the browser keeps two dates in its own localStorage ('rte-seen': first and last visit, dropped after 400 days) and tells the database only 'new' or 'back'
+   (a first visit on an earlier day = back) plus whether this is its first counted view of the day. No number or identifier is sent or stored: hit_page adds 1 to a daily counter per kind.
    The private page stats.html reads the counters through the passphrase-protected function site_stats. */
 (function(){
   'use strict';
@@ -15,6 +17,10 @@
   var bot = !!navigator.webdriver || /bot|crawl|spider|headless|preview/i.test(navigator.userAgent || '');
   var mine = false; try{ mine = localStorage.getItem('rte-notrack') === '1'; }catch(e){}
   var count = !local && !seen && !bot && !mine;
+  // new or returning reader: only 'new' / 'back' and 'first view of the day' leave the browser, never an identifier
+  var RK = 'rte-seen', today = (function(){ try{ return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date()); }catch(e){ return new Date().toISOString().slice(0, 10); } })(), mark = null;
+  try{ var rawMark = JSON.parse(localStorage.getItem(RK) || 'null'); if(rawMark && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.f) && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.l) && (Date.parse(today) - Date.parse(rawMark.l)) / 864e5 < 400) mark = rawMark; }catch(e){}
+  var ret = (mark && mark.f < today) ? 'back' : 'new', day1 = !mark || mark.l !== today;
   // the view this page is shown in (assets/view-mode.js)
   function mode(){ return document.documentElement.getAttribute('data-view') === 'mobile' ? 'mobile' : 'desktop'; }
   function fmt(n){ try{ return Number(n).toLocaleString('en-US'); }catch(e){ return String(n); } }
@@ -33,8 +39,8 @@
   document.head.appendChild(st);
   function go(){
     var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function(){ if(ctl) ctl.abort(); }, 8000);
-    fetch(URL_, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(count ? { p: page, count_it: true, x_mode: mode() } : { p: page, count_it: false }), signal: ctl ? ctl.signal : undefined })
-      .then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ clearTimeout(t); if(count){ try{ sessionStorage.setItem(ssKey, '1'); }catch(e){} } show(j); }).catch(function(){ clearTimeout(t); });
+    fetch(URL_, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(count ? { p: page, count_it: true, x_mode: mode(), x_ret: ret, x_day1: day1 } : { p: page, count_it: false }), signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ clearTimeout(t); if(count){ try{ sessionStorage.setItem(ssKey, '1'); }catch(e){} try{ localStorage.setItem(RK, JSON.stringify({ f: mark ? mark.f : today, l: today })); }catch(e){} } show(j); }).catch(function(){ clearTimeout(t); });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();

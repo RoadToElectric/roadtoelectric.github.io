@@ -45,10 +45,10 @@
   .st-leg{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:12.5px; }
   .st-leg b{ font-variant-numeric:tabular-nums; }
   .st-leg i{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; }
-  #days-chart svg{ width:100%; height:auto; display:block; }
-  #days-chart text{ fill:var(--text-muted); font-size:10px; }
-  #days-chart text.vl{ fill:var(--text); font-weight:700; }
-  #days-chart text.vv{ font-size:9px; }
+  #days-chart svg, #ret-chart svg{ width:100%; height:auto; display:block; }
+  #days-chart text, #ret-chart text{ fill:var(--text-muted); font-size:10px; }
+  #days-chart text.vl, #ret-chart text.vl{ fill:var(--text); font-weight:700; }
+  #days-chart text.vv, #ret-chart text.vv{ font-size:9px; }
   #days-chart text.si{ fill:#fff; font-weight:800; }
   .st-muted{ color:var(--text-muted); }
   .xc h3{ font-size:13px; font-weight:800; margin:0 0 2px; }
@@ -97,6 +97,14 @@
       <p class="st-note" id="days-note"></p>
       <div id="days-chart"></div>
       <div class="st-leg" style="margin-top:6px"><span><i style="background:#2fae4e"></i>Mobile view</span><span><i style="background:#0a80d0"></i>Desktop view</span><span><i style="background:var(--border)"></i>Mode not recorded (before the breakdown started)</span></div>
+    </section>
+
+    <section class="st-card" id="ret-card">
+      <h2>Returning readers</h2>
+      <p class="st-note" id="ret-note"></p>
+      <div class="st-kpis" id="ret-kpis" style="margin-bottom:10px"></div>
+      <div id="ret-chart"></div>
+      <div class="st-leg" style="margin-top:6px"><span><i style="background:#8b5cf6"></i>Views from returning readers (number above each bar)</span><span><i style="background:var(--border)"></i>All counted views that day</span></div>
     </section>
 
     <div class="st-cols">
@@ -177,6 +185,35 @@
     key = ''; $('dash').hidden = true; $('st-bar').hidden = true; $('lock').hidden = false; $('err').textContent = msg || ''; clearInterval(timer);
   }
 
+  // returning readers: a browser that visited on an earlier day (it keeps two dates in its own storage, nothing identifies it). Views from them, readers per day, and the share.
+  function retCard(d, monthly){
+    var R = d.returning || {}, T = R.totals || {}, since = R.since, bv = T.back_views || 0, nv = T.new_views || 0, bu = T.back_visitors || 0, nu = T.new_visitors || 0;
+    $('ret-note').textContent = 'A returning reader is a browser that visited on an earlier day. The browser keeps two dates in its own storage (first and last visit) and tells the site only "new" or "back": no number identifies anyone. ' +
+      (since ? 'Counted since ' + since + '. ' : 'Counting starts with the first visit after this was switched on. ') + 'A new browser, a second device or cleared browser data counts as a new reader, so the real number of returning readers is at least this.';
+    $('ret-kpis').innerHTML = [['Views from returning readers', fmt(bv), (bv + nv ? pct(bv, bv + nv) + '% of the views counted' : 'no data yet')], ['Returning readers', fmt(bu), 'browsers back on a later day, counted once per day'], ['New readers', fmt(nu), 'first visit, counted once per day'],
+      ['Returning share of readers', bu + nu ? pct(bu, bu + nu) + '%' : '—', 'of the readers of the period']]
+      .map(function(k){ return '<div class="st-kpi"><div class="l">' + esc(k[0]) + '</div><div class="v">' + esc(k[1]) + '</div><div class="s">' + esc(k[2]) + '</div></div>'; }).join('');
+    var host = $('ret-chart'), list = [];
+    if(!since){ host.innerHTML = '<p class="st-note">No data yet. The first returning readers will show up from the day after the first visits are counted.</p>'; return; }
+    if(monthly){ list = (R.by_month || []).map(function(x){ return { label:x.month.slice(0, 7), b:x.back_views, t:x.back_views + x.new_views }; }); }
+    else {
+      var map = {}; (R.by_day || []).forEach(function(x){ map[x.day] = x; });
+      for(var c = new Date((since > d.from ? since : d.from) + 'T12:00:00'), end = new Date(d.today + 'T12:00:00'); c <= end; c.setDate(c.getDate() + 1)){ var k = c.toISOString().slice(0, 10), x = map[k]; list.push({ label:k, b:x ? x.back_views : 0, t:x ? x.back_views + x.new_views : 0 }); }
+    }
+    var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.t; }).concat([0]))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), vert = bw < 26, plot = H - 18 - (vert ? 6 * fmt(max).length + 10 : 18), step = Math.ceil(list.length / 12), svg = '';
+    list.forEach(function(x, i){
+      var xx = pad + i * bw, w = Math.max(1, bw - 2), ht = Math.round(plot * x.t / max), hb = Math.round(plot * x.b / max), tip = '<title>' + x.label + ': ' + fmt(x.b) + ' views from returning readers, ' + fmt(x.t) + ' views in all</title>', cx = xx + w / 2;
+      if(x.t > 0) svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - 18 - ht) + '" width="' + w.toFixed(1) + '" height="' + ht + '" fill="var(--border)">' + tip + '</rect>';
+      if(x.b > 0){
+        svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - 18 - Math.max(1, hb)) + '" width="' + w.toFixed(1) + '" height="' + Math.max(1, hb) + '" fill="#8b5cf6">' + tip + '</rect>';
+        var ly = H - 18 - Math.max(1, hb) - 3;
+        svg += vert ? '<text class="vl vv" x="' + (cx + 3.2).toFixed(1) + '" y="' + ly + '" transform="rotate(-90 ' + (cx + 3.2).toFixed(1) + ' ' + ly + ')">' + fmt(x.b) + '</text>' : '<text class="vl" x="' + cx.toFixed(1) + '" y="' + (ly - 1) + '" text-anchor="middle">' + fmt(x.b) + '</text>';
+      }
+      if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + (monthly ? x.label : x.label.slice(5)) + '</text>';
+    });
+    svg += '<text x="0" y="12">' + fmt(max) + '</text><text x="0" y="' + (H - 18) + '">0</text>';
+    host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Views from returning readers">' + svg + '</svg>';
+  }
   function show(d){
     $('lock').hidden = true; $('dash').hidden = false; $('st-bar').hidden = false;
     document.querySelectorAll('#st-bar [data-days]').forEach(function(b){ b.classList.toggle('on', +b.dataset.days === days); });
@@ -203,6 +240,7 @@
     svg += '<text x="0" y="12">' + fmt(max) + '</text><text x="0" y="' + (H - 18) + '">0</text>';
     $('days-chart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + (monthly ? 'Views per month' : 'Views per day') + '">' + svg + '</svg>';
     $('days-title').textContent = monthly ? 'Views per month' : 'Views per day';
+    retCard(d, monthly);
     $('days-note').textContent = fmt(inPeriod) + ' views in the period. One view = one page opened in a browser session. ' + (monthly ? 'Daily numbers are kept for 90 days; a month older than that is kept as one monthly number.' : 'Days are Toronto days.');
 
     // per year
