@@ -3,4 +3,6 @@
    One clip can serve both drafts of a country: use the same URL on both keys.
    Example:  'country|Colombia|2026-10': 'https://youtu.be/XXXXXXXXXXX',  'brands|Colombia|2026-10': 'https://youtu.be/XXXXXXXXXXX' */
 const VIDEO_LINKS = {
+  'country|Colombia|2026-10': 'https://youtube.com/shorts/ZAqZ-pGg2mQ',
+  'brands|Colombia|2026-10': 'https://youtube.com/shorts/ZAqZ-pGg2mQ'
 };
