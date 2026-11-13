@@ -147,3 +147,6 @@ html[data-view="mobile"] .tl-chips{ flex-wrap:nowrap; overflow-x:auto; -webkit-o
 html[data-view="mobile"] .tl-chips > *, html[data-view="mobile"] .tl-chip-group{ flex:none; flex-wrap:nowrap; }
 html[data-view="mobile"] .tl-chip-group{ display:inline-flex; gap:6px; }
 html[data-view="mobile"] .tl-chip{ flex:none; min-height:34px; padding:0 12px; }
+
+/* Manufacturers: the sticky selection summary scrolls with the page on a phone (stuck, it sat under the top bars and over the card) */
+html[data-view="mobile"] .fx-chipbar{ position:static; }

@@ -6,8 +6,8 @@
 <title>Manufacturers — Who Sells What, Country by Country</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
-<link rel="stylesheet" href="assets/mobile.css?v=9">
-<script src="assets/view-mode.js?v=6"></script>
+<link rel="stylesheet" href="assets/mobile.css?v=10">
+<script src="assets/view-mode.js?v=7"></script>
 <script src="assets/page-views.js?v=3" defer></script>
 <script src="assets/section-link.js?v=4" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
@@ -287,6 +287,11 @@
   .bar-hover .mdl-title{ margin-top:9px; padding-top:8px; border-top:1px solid var(--border); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin-bottom:5px; }
   .bar-hover .mfr-row{ grid-template-columns:18px 150px 1fr 64px; }
   .rank-row[data-scope] .country-label, .rank-row[data-scope] .bar-track{ cursor:help; }
+  /* active Motorization / Car class filters, shown inside each card they apply to */
+  .fx-badge{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin:2px 0 10px; }
+  .fx-badge-l{ font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-muted); }
+  .fx-badge .fx-chip{ box-shadow:none; }
+  .fx-badge .fx-clear{ margin-left:2px; }
 </style>
 </head>
 <body>
@@ -330,7 +335,7 @@
 
   <main class="main">
     <div class="content-with-filters">
-      <aside class="filters-panel mfr-side" data-rte-drawer="Filters" data-rte-summary="#f-period,#f-continent,#f-country,#f-mfr-search,#f-model-search">
+      <aside class="filters-panel mfr-side" data-rte-drawer="Filters" data-rte-summary="fn:rteSegSummary,#f-period,#f-continent,#f-country,#f-mfr-search,#f-model-search">
       <section class="fx-panel mfr-filters" id="fx-panel">
         <div class="fx-head">
           <div class="fx-brand"><span class="fx-pulse"></span><div><div class="fx-kicker">Explore</div><div class="fx-title">Pick a brand or a model, or set two head to head</div></div></div>
@@ -1253,6 +1258,7 @@ function renderMap(){
   renderSpotlight();
   renderExtras();
   renderChipBar();
+  renderFilterBadges();
   updateSegStatus(n);
   syncStrips();
 }
@@ -1277,6 +1283,29 @@ function renderChipBar(){
   else h += `<button type="button" class="fx-clear" data-clear="all">Clear selection</button>`;
   bar.innerHTML = h;
 }
+// the Motorization / Car class filters, repeated at the top of every card they apply to (and in the phone Filters bar), each with a way to remove it
+const BADGE_CARDS = ['continent-bars-card', 'wm-card', 'wc-card', 'bars-card', 'gb-card', 'gm-card', 'ctry-card'];
+const segText = () => [clsSel.size ? 'Class: ' + CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => d[1]).join(', ') : '', motSel.size ? 'Motorization: ' + MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => d[1]).join(', ') : ''].filter(Boolean).join(' · ');
+window.rteSegSummary = segText;
+function renderFilterBadges(){
+  const chips = (clsSel.size ? `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>` : '') +
+    (motSel.size ? `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>` : '');
+  BADGE_CARDS.forEach(id => {
+    const c = document.getElementById(id); if(!c) return;
+    let b = c.querySelector(':scope > .fx-badge');
+    if(!chips){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement('div'); b.className = 'fx-badge'; const h = c.querySelector('h2'); if(!h) return; (h.closest('.chart-header-row') || h).insertAdjacentElement('afterend', b); }
+    b.innerHTML = `<span class="fx-badge-l">Filtered to</span>${chips}<button type="button" class="fx-clear" data-clear="seg">Clear filters</button>`;
+  });
+  if(window.RTEView && RTEView.summaryChanged) RTEView.summaryChanged();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.fx-badge [data-clear]'); if(!b) return;
+  const w = b.dataset.clear;
+  if(w === 'cls' || w === 'seg') clsSel.clear();
+  if(w === 'mot' || w === 'seg') motSel.clear();
+  renderSegUI(); refresh(false);
+});
 document.getElementById('fx-chipbar').addEventListener('click', e => {
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;

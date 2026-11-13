@@ -26,7 +26,7 @@
     if(changed){ root.classList.remove('rte-nav-open'); ui(); if(fire) window.dispatchEvent(new CustomEvent('rte-viewchange', { detail: { view: v } })); }
   }
   function set(v){ writePref(v === 'mobile' || v === 'desktop' ? v : null); apply(true); }
-  window.RTEView = { get: function(){ return current; }, pref: readPref, set: set, toggle: function(){ set(current === 'mobile' ? 'desktop' : 'mobile'); } };
+  window.RTEView = { summaryChanged: function(){ if(window.__rteSummary) window.__rteSummary(); }, get: function(){ return current; }, pref: readPref, set: set, toggle: function(){ set(current === 'mobile' ? 'desktop' : 'mobile'); } };
 
   // ---------- buttons (built once the markup exists) ----------
   var link = null, pill = null, burger = null;
@@ -55,7 +55,9 @@
   var dBar = null, dBtn = null, dSum = null, dDone = null, sumT = null;
   function summary(panel){
     var sels = (panel.getAttribute('data-rte-summary') || '').split(','), out = [], i, e, v;
-    for(i = 0; i < sels.length; i++){ e = sels[i] && document.querySelector(sels[i].trim()); if(!e) continue; v = e.tagName === 'SELECT' ? (e.selectedOptions[0] ? e.selectedOptions[0].textContent : '') : e.value; v = (v || '').trim(); if(v) out.push(v); }
+    for(i = 0; i < sels.length; i++){
+      if(sels[i].trim().indexOf('fn:') === 0){ v = window[sels[i].trim().slice(3)]; v = typeof v === 'function' ? String(v() || '').trim() : ''; if(v) out.push(v); continue; }      // fn:name = a page function that returns text (e.g. the active Motorization filter)
+      e = sels[i] && document.querySelector(sels[i].trim()); if(!e) continue; v = e.tagName === 'SELECT' ? (e.selectedOptions[0] ? e.selectedOptions[0].textContent : '') : e.value; v = (v || '').trim(); if(v) out.push(v); }
     return out.join(' · ');
   }
   function setDrawer(on){
@@ -70,6 +72,7 @@
       var wrap = panel.parentNode; dBar = mk('div', 'rte-filter-bar'); dBtn = mk('button', 'rte-filter-btn', '☰ ' + (panel.getAttribute('data-rte-drawer') || 'Filters')); dBtn.type = 'button'; dBtn.setAttribute('aria-expanded', 'false');
       dSum = mk('span', 'rte-filter-sum'); dBar.appendChild(dBtn); dBar.appendChild(dSum); wrap.parentNode.insertBefore(dBar, wrap);
       dDone = mk('button', 'rte-drawer-done', 'Show results'); dDone.type = 'button'; panel.appendChild(dDone);
+      window.__rteSummary = function(){ if(dSum) dSum.textContent = summary(panel) || 'All data'; };
       dBtn.addEventListener('click', function(){ setDrawer(!root.classList.contains('rte-drawer-open')); }); dDone.addEventListener('click', function(){ setDrawer(false); });
       var upd = function(){ clearTimeout(sumT); sumT = setTimeout(function(){ dSum.textContent = summary(panel) || 'All data'; }, 150); };
       panel.addEventListener('change', upd); panel.addEventListener('click', upd); panel.addEventListener('input', upd);
