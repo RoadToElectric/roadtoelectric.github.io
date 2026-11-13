@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/mobile.css?v=10">
 <script src="assets/view-mode.js?v=7"></script>
-<script src="assets/page-views.js?v=4" defer></script>
+<script src="assets/page-views.js?v=5" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
-<link rel="stylesheet" href="assets/contact.css?v=1">
+<link rel="stylesheet" href="assets/contact.css?v=2">
 </head>
 <body>
 
@@ -85,7 +85,7 @@
           <p><b>Tip:</b> every graph has a 🔗 button that copies a link to that exact graph with its filters. Paste it in your message and we see what you see.</p>
         </div>
 
-        <div class="ct-h">Privacy</div>
+        <div class="ct-h" id="privacy">Privacy</div>
         <div class="ct-priv">
           <div class="ct-box">
             <h3>What is counted</h3>
@@ -106,7 +106,11 @@
             </ul>
           </div>
         </div>
-        <p class="ct-fine">This site counts visits to learn which pages are useful and whether readers come back. Only totals are kept; clearing your browser data removes the two dates.</p>
+        <div class="ct-optout">
+          <label class="ct-switch"><input type="checkbox" id="optout" aria-describedby="optout-state"><span></span></label>
+          <div><b>Don’t count my visits</b><small id="optout-state"></small></div>
+        </div>
+        <p class="ct-fine">This site counts visits to learn which pages are useful and whether readers come back. Only totals are kept. You can stop the counting with the switch above (it also deletes the two dates), or clear your browser data at any time.</p>
       </div>
       <footer class="page-footer">
         Road to Electric — analyzing the current shift to EVs.
@@ -126,6 +130,15 @@
   }
   function flash(el, t){ var o = el.textContent; el.textContent = t; setTimeout(function(){ el.textContent = o; }, 1600); }
   function copy(t){ if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t); return new Promise(function(ok, no){ try{ var a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(a); a.select(); document.execCommand('copy') ? ok() : no(); document.body.removeChild(a); }catch(e){ no(e); } }); }
+  // the visitor's opt-out: one flag in the reader's own browser (assets/page-views.js reads it), and the two dates are deleted when it is switched on
+  (function(){
+    var cb = $('optout'), st = $('optout-state'), KEY = 'rte-optout';
+    if(!cb) return;
+    function get(){ try{ return localStorage.getItem(KEY) === '1'; }catch(e){ return null; } }
+    function say(){ var v = get(); st.textContent = v === null ? 'Your browser does not let this page keep the switch, and nothing is stored on your device by this site in that case.' : (cb.checked ? 'Your visits are not counted from this browser, and the two dates were deleted.' : 'Your visits are counted as described above. Switch on to stop it.'); }
+    cb.checked = get() === true; if(get() === null) cb.disabled = true; say();
+    cb.addEventListener('change', function(){ try{ if(cb.checked){ localStorage.setItem(KEY, '1'); localStorage.removeItem('rte-seen'); } else localStorage.removeItem(KEY); }catch(e){} say(); });
+  })();
   if($('ct-copy')) $('ct-copy').addEventListener('click', function(){ var b = this; copy(MAIL).then(function(){ flash(b, '✓ Copied'); }, function(){ flash(b, MAIL); }); });
   if($('cf-send')){
     $('cf-send').addEventListener('click', function(){

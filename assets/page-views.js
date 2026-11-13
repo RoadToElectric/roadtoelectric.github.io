@@ -3,7 +3,7 @@
    One count per page per browser session; a visit from localhost or a file is shown but not counted. The numbers are shown at the bottom of the page.
    A counted visit also sends the reading mode (the site's own view, mobile or desktop): hit_page adds 1 to a counter per day / page / mode / country (the country is read from the request
    by the database; the IP address is never stored, and there is no visit-level log). The owner's own browser is not counted (localStorage 'rte-notrack', set when stats.html is unlocked).
-   New or returning reader (2026-11-13): the browser keeps two dates in its own localStorage ('rte-seen': first and last visit, dropped after 400 days) and tells the database only 'new' or 'back'
+   New or returning reader (2026-11-13): the browser keeps two dates in its own localStorage ('rte-seen': first and last visit, dropped after 390 days (13 months)) and tells the database only 'new' or 'back'
    (a first visit on an earlier day = back) plus whether this is its first counted view of the day. No number or identifier is sent or stored: hit_page adds 1 to a daily counter per kind.
    The private page stats.html reads the counters through the passphrase-protected function site_stats. */
 (function(){
@@ -15,11 +15,11 @@
   var seen = false, ssKey = 'rte-pv:' + page;
   try{ seen = sessionStorage.getItem(ssKey) === '1'; }catch(e){}
   var bot = !!navigator.webdriver || /bot|crawl|spider|headless|preview/i.test(navigator.userAgent || '');
-  var mine = false; try{ mine = localStorage.getItem('rte-notrack') === '1'; }catch(e){}
+  var mine = false; try{ mine = localStorage.getItem('rte-notrack') === '1' || localStorage.getItem('rte-optout') === '1'; }catch(e){}       // rte-notrack: the owner's browser; rte-optout: a reader's "Don't count my visits" switch (contact.html#privacy)
   var count = !local && !seen && !bot && !mine;
   // new or returning reader: only 'new' / 'back' and 'first view of the day' leave the browser, never an identifier
   var RK = 'rte-seen', today = (function(){ try{ return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date()); }catch(e){ return new Date().toISOString().slice(0, 10); } })(), mark = null;
-  try{ var rawMark = JSON.parse(localStorage.getItem(RK) || 'null'); if(rawMark && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.f) && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.l) && (Date.parse(today) - Date.parse(rawMark.l)) / 864e5 < 400) mark = rawMark; }catch(e){}
+  try{ var rawMark = JSON.parse(localStorage.getItem(RK) || 'null'); if(rawMark && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.f) && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.l) && (Date.parse(today) - Date.parse(rawMark.l)) / 864e5 < 390) mark = rawMark; }catch(e){}
   var ret = (mark && mark.f < today) ? 'back' : 'new', day1 = !mark || mark.l !== today;
   // the view this page is shown in (assets/view-mode.js)
   function mode(){ return document.documentElement.getAttribute('data-view') === 'mobile' ? 'mobile' : 'desktop'; }
@@ -31,7 +31,7 @@
       el = document.createElement('div'); el.id = 'rte-views'; el.className = 'rte-views';
       if(host) host.appendChild(el); else { var pg = document.querySelector('.main .page') || document.querySelector('.page') || document.body; pg.appendChild(el); }
     }
-    el.innerHTML = '👁 <b>' + fmt(r.page) + '</b> views of this page · <b>' + fmt(r.site) + '</b> across the whole site';
+    el.innerHTML = '👁 <b>' + fmt(r.page) + '</b> views of this page · <b>' + fmt(r.site) + '</b> across the whole site · <a href="contact.html#privacy" style="color:inherit">Privacy and opt-out</a>';
   }
   var st = document.createElement('style');
   st.textContent = '.rte-views{margin-top:8px;font-size:12px;font-weight:600;color:var(--text-muted);letter-spacing:.01em}.rte-views b{color:var(--text);font-variant-numeric:tabular-nums}' +
