@@ -1279,6 +1279,7 @@ function renderChipBar(){
   if(mfr && mfr2) h += `<span class="fx-chipvs">VS</span>` + chip(mfr2, 2);
   if(clsSel.size) h += `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>`;
   if(motSel.size) h += `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>`;
+  if(cmpMode !== 'all') h += `<span class="fx-chip neutral">Compare: ${cmpMode === 'bev' ? 'BEV only' : 'Non-BEV only'}<button type="button" data-clear="cmp" title="Back to all sales">×</button></span>`;
   if(cont) h += `<span class="fx-chip neutral">${esc(CONTINENT_LABELS[cont])}<button type="button" data-clear="continent" title="Back to every continent">×</button></span>`;
   if(ctry) h += `<span class="fx-chip neutral">${esc(ctry)}<button type="button" data-clear="country" title="Back to every country">×</button></span>`;
   if(!mfr) h += `<span class="fx-chipvs" style="margin-left:6px">All manufacturers — pick a brand or a model above, or click a quick pick</span>`;
@@ -1288,9 +1289,10 @@ function renderChipBar(){
 // the Motorization / Car class filters, repeated at the top of every card they apply to (and in the phone Filters bar), each with a way to remove it
 const BADGE_CARDS = ['continent-bars-card', 'wm-card', 'wc-card', 'bars-card', 'gb-card', 'gm-card', 'ctry-card'];
 const segText = () => [clsSel.size ? 'Class: ' + CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => d[1]).join(', ') : '', motSel.size ? 'Motorization: ' + MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => d[1]).join(', ') : ''].filter(Boolean).join(' · ');
-window.rteSegSummary = segText;
+const cmpText = () => cmpMode === 'bev' ? 'Compare: BEV only' : cmpMode === 'nonbev' ? 'Compare: Non-BEV only' : '';
+window.rteSegSummary = () => [segText(), cmpText()].filter(Boolean).join(' · ');
 function renderFilterBadges(){
-  const chips = (clsSel.size ? `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>` : '') +
+  const chips = (cmpMode !== 'all' ? `<span class="fx-chip neutral">${cmpText()}<button type="button" data-clear="cmp" title="Back to all sales">×</button></span>` : '') + (clsSel.size ? `<span class="fx-chip neutral">Class: ${CLASS_DEFS.filter(d => clsSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="cls" title="Remove">×</button></span>` : '') +
     (motSel.size ? `<span class="fx-chip neutral">Motorization: ${MOTOR_DEFS.filter(d => motSel.has(d[0])).map(d => esc(d[1])).join(', ')}<button type="button" data-clear="mot" title="Remove">×</button></span>` : '');
   BADGE_CARDS.forEach(id => {
     const c = document.getElementById(id); if(!c) return;
@@ -1306,11 +1308,13 @@ document.addEventListener('click', e => {
   const w = b.dataset.clear;
   if(w === 'cls' || w === 'seg') clsSel.clear();
   if(w === 'mot' || w === 'seg') motSel.clear();
-  renderSegUI(); refresh(false);
+  if(w === 'cmp' || w === 'seg') cmpMode = 'all';
+  renderSegUI(); refresh(false); refreshBarCards();
 });
 document.getElementById('fx-chipbar').addEventListener('click', e => {
   const b = e.target.closest('[data-clear]'); if(!b) return;
   const w = b.dataset.clear, M1 = kind === 'model' ? selModel : selMfr, M2 = kind === 'model' ? selModel2 : selMfr2;
+  if(w === 'cmp'){ cmpMode = 'all'; refreshBarCards(); return; }
   if(w === 'continent'){ setContinent(''); return; }
   if(w === 'country'){ setCountry(''); return; }
   if(w === 'cls' || w === 'mot'){ (w === 'cls' ? clsSel : motSel).clear(); renderSegUI(); refresh(false); return; }
@@ -1821,15 +1825,14 @@ const CMP_TIPS = { all:'Every vehicle sold', bev:'Battery-electric vehicles only
 function renderCmpBars(){
   const md = mode();
   document.querySelectorAll('[data-cmpbar]').forEach(el => {
-    if(md === 'market' && !ctry){ el.classList.add('hidden'); el.innerHTML = ''; return; }
-    el.classList.remove('hidden');
+    el.classList.remove('hidden');      // always shown: Compare is remembered between visits and applies to the brand lists, so it must stay visible
     const b = (k, t) => `<button type="button" data-cmp="${k}" class="${cmpMode === k ? 'active' : ''}" title="${CMP_TIPS[k]}">${t}</button>`;
     const on = splitOn && cmpMode === 'all';
     el.innerHTML = `<div class="cmp-group"><span class="cmp-label">Compare</span><div class="cmp-seg" role="group" aria-label="Compare">${b('all', 'All sales')}${b('bev', 'BEV only')}${b('nonbev', 'Non-BEV only')}</div></div>` +
       `<div class="cmp-group"><span class="cmp-label">Split</span><button type="button" class="cmp-switch${on ? ' on' : ''}" data-split aria-pressed="${on}" ${cmpMode !== 'all' ? 'disabled' : ''} title="${cmpMode !== 'all' ? 'Pick All sales to split each bar into BEV and non-BEV' : 'Cut each bar into BEV and non-BEV (plug-in hybrids count as non-BEV)'}"><span class="track"><span class="knob"></span></span>BEV / Non-BEV split</button></div>`;
   });
 }
-function refreshBarCards(){ renderContinentBars(); renderCountryBars(); renderCmpBars(); saveFilters(); }
+function refreshBarCards(){ renderContinentBars(); renderCountryBars(); renderCmpBars(); renderChipBar(); renderFilterBadges(); saveFilters(); }
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-cmp]');
   if(c){ cmpMode = c.dataset.cmp; refreshBarCards(); return; }
