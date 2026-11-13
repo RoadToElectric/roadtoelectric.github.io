@@ -82,6 +82,14 @@ const STATS_CATALOG = [
     description: "Which markets grow their battery-electric sales fastest: year-over-year %, month-over-month %, and the raw number of extra electric cars sold.",
     tag: "Monthly",
     url: "biggest-movers.html"
+  },
+  {
+    title: "EU Vote on Tesla FSD",
+    subject: "Europe · Self-driving rules",
+    keywords: ["tesla", "fsd", "full self-driving", "supervised", "tesla assisted driving", "eu", "vote", "tcmv", "rdw", "approval", "netherlands", "germany", "autonomous", "self-driving", "simulator"],
+    description: "Which of the 27 EU states have approved Tesla FSD (Supervised), what an EU-wide approval needs (15 states and 65% of the EU population), the timeline, and a simulator to play the vote yourself.",
+    tag: "Updated Nov 2026",
+    url: "eu-fsd-vote.html#simulator"
   }
 ];
 

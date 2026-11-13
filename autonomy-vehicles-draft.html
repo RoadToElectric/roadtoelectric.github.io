@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Autonomy vehicles (draft) — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+  /* private page: not linked from the site menu, noindex. Robotaxis, Tesla FSD, the EU vote. */
+  body{ margin:0; background:var(--bg); color:var(--text); overflow-x:hidden; }
+  .av{ max-width:1180px; margin:0 auto; padding:18px 16px 56px; }
+  .av-top{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; margin-bottom:12px; }
+  .av-top a{ color:var(--accent); font-weight:700; text-decoration:none; font-size:13px; }
+  .av h1{ font-size:clamp(26px,4.2vw,38px); margin:0; font-weight:900; letter-spacing:-.02em; }
+  .av h1 small{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); border:1px solid var(--border); border-radius:999px; padding:2px 9px; margin-left:10px; vertical-align:middle; }
+  .av-sub{ color:var(--text-muted); font-size:15px; line-height:1.5; max-width:78ch; margin:6px 0 18px; }
+  .av-draft{ background:rgba(232,163,23,.14); border:1px solid rgba(232,163,23,.5); border-radius:12px; padding:10px 14px; font-size:13px; line-height:1.5; margin-bottom:16px; }
+  .av-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 20px; margin-bottom:18px; box-shadow:var(--shadow); }
+  .av-card h2{ font-size:19px; margin:0 0 4px; font-weight:900; letter-spacing:-.01em; }
+  .av-card h3{ font-size:14px; margin:16px 0 6px; font-weight:800; }
+  .av-note{ font-size:13px; color:var(--text-muted); line-height:1.5; margin:0 0 12px; }
+  .av-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+  @media (max-width:900px){ .av-kpis{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:520px){ .av-kpis{ grid-template-columns:1fr; } }
+  .av-kpi{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:3px; }
+  .av-kpi .l{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+  .av-kpi .v{ font-size:27px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .av-kpi .s{ font-size:12px; color:var(--text-muted); line-height:1.4; }
+  .av-kpi .t{ margin-top:auto; padding-top:6px; font-size:11px; color:var(--text-muted); }
+  .av-kpi a{ color:inherit; }
+  .av-tier{ display:inline-block; min-width:18px; text-align:center; padding:0 6px; border-radius:6px; font-size:10.5px; font-weight:900; letter-spacing:.03em; margin-right:5px; color:#fff; }
+  .av-tier.t-P{ background:#1b9e3f; } .av-tier.t-PC{ background:#4f9d2d; } .av-tier.t-C{ background:#d98a0b; } .av-tier.t-T{ background:#7b8794; }
+  .av-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin:8px 0; }
+  .av-chip{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:5px 12px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .av-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .av-chip.ghost{ color:var(--text-muted); }
+  .av-leg{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12.5px; margin:8px 0 2px; }
+  .av-leg span{ display:inline-flex; align-items:center; gap:6px; }
+  .av-leg i{ width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .av-leg i.sq{ border-radius:3px; }
+  .av-leg b{ font-variant-numeric:tabular-nums; }
+  .av-map{ border:1px solid var(--border); border-radius:12px; background:var(--surface-alt); overflow:hidden; position:relative; }
+  .av-map svg{ display:block; width:100%; height:auto; touch-action:pan-y; }
+  .av-map .land{ fill:var(--surface); stroke:var(--border); stroke-width:.5; vector-effect:non-scaling-stroke; }
+  .av-map .eu-c{ stroke:var(--surface); stroke-width:.6; vector-effect:non-scaling-stroke; cursor:pointer; }
+  .av-map .eu-c:hover{ filter:brightness(1.12); }
+  .av-map .dot{ stroke:#fff; cursor:pointer; vector-effect:non-scaling-stroke; }
+  .av-map .dot.sel{ stroke:#000; stroke-width:2.5px; }
+  .av-map text{ fill:var(--text); font-size:9px; paint-order:stroke; stroke:var(--surface); stroke-width:2.6px; pointer-events:none; font-weight:700; }
+  .av-map text.pl{ fill:#fff; stroke:rgba(0,0,0,.45); stroke-width:1.6px; font-size:8px; }
+  .av-detail{ margin-top:10px; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--surface); font-size:13px; line-height:1.5; }
+  .av-detail h4{ margin:0 0 6px; font-size:15px; font-weight:900; }
+  .av-detail .r{ display:grid; grid-template-columns:84px 1fr; gap:2px 10px; padding:6px 0; border-top:1px solid var(--border); }
+  .av-detail .r b{ font-weight:800; }
+  .av-badge{ display:inline-block; border-radius:999px; padding:1px 9px; font-size:11.5px; font-weight:800; color:#fff; }
+  table.av-t{ width:100%; border-collapse:collapse; font-size:13px; }
+  .av-t, .av-t th, .av-t td{ font-family:inherit; }
+  .av-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:5px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); }
+  .av-t td{ padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .av-t td.n, .av-t th.n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .av-t tr.clk{ cursor:pointer; }
+  .av-t tr.clk:hover td{ background:var(--surface-alt); }
+  .av-scroll{ max-height:420px; overflow:auto; border:1px solid var(--border); border-radius:10px; }
+  .av-bar{ display:block; height:9px; border-radius:5px; background:var(--accent); min-width:2px; }
+  .av-two{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; align-items:start; }
+  @media (max-width:900px){ .av-two{ grid-template-columns:1fr; } }
+  .av-prog{ margin:8px 0 12px; }
+  .av-prog .h{ display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:3px; }
+  .av-prog .h b{ font-variant-numeric:tabular-nums; }
+  .av-prog .tr{ position:relative; height:16px; background:var(--surface-alt); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .av-prog .fl{ position:absolute; left:0; top:0; bottom:0; border-radius:8px; }
+  .av-prog .mk{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--text); }
+  .av-verdict{ font-size:15px; font-weight:900; border-radius:12px; padding:10px 14px; margin:8px 0 12px; }
+  .av-verdict.ok{ background:rgba(27,158,63,.16); border:1px solid rgba(27,158,63,.55); }
+  .av-verdict.no{ background:rgba(214,69,65,.12); border:1px solid rgba(214,69,65,.5); }
+  .av-tl{ list-style:none; margin:6px 0 0; padding:0; }
+  .av-tl li{ display:grid; grid-template-columns:92px 1fr; gap:10px; padding:7px 0; border-top:1px solid var(--border); font-size:13px; line-height:1.5; }
+  .av-tl li b{ font-variant-numeric:tabular-nums; }
+  input[type=range].av-range{ width:100%; accent-color:var(--accent); }
+  .av-co{ display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:14px; }
+  .av-co > div{ border:1px solid var(--border); border-radius:14px; padding:14px 16px; background:var(--surface); }
+  .av-co h3{ margin:0 0 8px; font-size:16px; font-weight:900; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .av-co dl{ margin:0; display:grid; grid-template-columns:64px 1fr; gap:5px 10px; font-size:13px; line-height:1.45; }
+  .av-co dt{ font-weight:800; color:var(--text-muted); font-size:11px; letter-spacing:.05em; text-transform:uppercase; padding-top:2px; }
+  .av-co dd{ margin:0; }
+  .av-co .src{ margin-top:10px; font-size:12px; color:var(--text-muted); }
+  .av-co .src a{ color:var(--accent); }
+  .av-src{ list-style:none; padding:0; margin:0; font-size:13px; }
+  .av-src li{ padding:4px 0; }
+  .av-src a{ color:var(--accent); }
+  .av-gaps{ margin:0; padding-left:18px; font-size:13.5px; line-height:1.6; }
+  .av-bars{ display:grid; gap:5px; font-size:12.5px; }
+  .av-bars .b{ display:grid; grid-template-columns:150px 1fr 74px; gap:8px; align-items:center; }
+  .av-bars .b span.v{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  @media (max-width:560px){ .av-bars .b{ grid-template-columns:96px 1fr 62px; } .av-tl li{ grid-template-columns:1fr; gap:2px; } }
+  .av-miles svg{ width:100%; height:auto; display:block; }
+  .av-miles text{ fill:var(--text-muted); font-size:10px; }
+  .av-miles text.vl{ fill:var(--text); font-weight:800; }
+  .av-miles .gl{ stroke:var(--border); }
+</style>
+</head>
+<body>
+<div class="av">
+  <div class="av-top"><a href="index.html">← Road to Electric</a><span class="av-note" style="margin:0">Private page, not linked from the site, kept out of search engines.</span></div>
+  <h1>Autonomy vehicles <small>Private · draft</small></h1>
+  <p class="av-sub">Robotaxis and Tesla FSD: where they drive, how far, who allows them, and the EU vote. Compiled on <b id="asof"></b>. Every figure has a source and a reliability tag: <span class="av-tier t-P">P</span> the company or regulator itself, <span class="av-tier t-C">C</span> a company figure read second-hand (earnings call, press), <span class="av-tier t-T">T</span> a third-party tracker or news article.</p>
+  <div class="av-draft"><b>First draft.</b> Tesla's own pages block automatic reading, so Tesla numbers come from the press. See "What is still missing" at the bottom before anything goes public.</div>
+
+  <div class="av-kpis" id="kpis"></div>
+
+  <!-- ===== robotaxi map ===== -->
+  <section class="av-card" id="robotaxi">
+    <h2>Where the robotaxis are</h2>
+    <p class="av-note">One dot per city, coloured by the most advanced service there. Click a dot or a row for the detail, source by source.</p>
+    <div class="av-row" id="rt-ops"></div>
+    <div class="av-row" id="rt-presets"></div>
+    <div class="av-leg" id="rt-leg"></div>
+    <div class="av-map" id="rt-map"></div>
+    <div class="av-detail" id="rt-detail">Click a city.</div>
+    <h3>All cities</h3>
+    <div class="av-scroll"><table class="av-t" id="rt-table"></table></div>
+  </section>
+
+  <!-- ===== FSD map ===== -->
+  <section class="av-card" id="fsd">
+    <h2>Where Tesla FSD (Supervised) is allowed</h2>
+    <p class="av-note">Level 2: the driver stays responsible. In Europe Tesla now calls it "Tesla Assisted Driving". Green = on sale; amber = a national review is open; grey = no approval (or none asked for). Move the slider to see the European approvals arrive; only the EU countries and China have dates here, the other markets are shown as open at every date.</p>
+    <div class="av-row"><label for="fsd-date" style="font-weight:800;font-size:13px">Date</label><input id="fsd-date" class="av-range" type="range" style="flex:1;min-width:200px"><b id="fsd-dl" style="min-width:96px;text-align:right"></b></div>
+    <div class="av-leg" id="fsd-leg"></div>
+    <div class="av-map" id="fsd-map"></div>
+    <div class="av-two" style="margin-top:12px">
+      <div><h3 style="margin-top:0">Approved at this date</h3><div class="av-scroll"><table class="av-t" id="fsd-table"></table></div></div>
+      <div id="fsd-side"></div>
+    </div>
+    <p class="av-note" style="margin-top:10px" id="fsd-src"></p>
+  </section>
+
+  <!-- the EU vote now lives on the public site -->
+  <section class="av-card" id="euvote"><h2>The EU vote on FSD (Supervised)</h2><p class="av-note" style="margin:0">Moved to the public site, with the simulator: <a href="eu-fsd-vote.html" style="color:var(--accent);font-weight:800">eu-fsd-vote.html</a> (menu: Trends).</p></section>
+
+  <!-- ===== miles ===== -->
+  <section class="av-card av-miles" id="miles">
+    <h2>How far they have driven</h2>
+    <p class="av-note">Tesla's FSD miles have a human at the wheel; the Robotaxi and Waymo miles have nobody driving. Different things: do not add them up.</p>
+    <div class="av-two">
+      <div><h3 style="margin-top:0">Tesla FSD (Supervised), cumulative billion miles</h3><div id="ch-fsd"></div><p class="av-note" id="ch-fsd-src"></p></div>
+      <div>
+        <h3 style="margin-top:0">Tesla Robotaxi, miles with nobody driving, by city (to 18 Oct 2026)</h3><div class="av-bars" id="ch-tesla"></div>
+        <h3>Waymo rider-only miles by city (through June 2026)</h3><div class="av-bars" id="ch-waymo"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== companies ===== -->
+  <section class="av-card" id="companies">
+    <h2>The companies</h2>
+    <p class="av-note">Figures as the companies state them, nothing estimated by us. "Not disclosed" means we looked and found nothing from the company.</p>
+    <div class="av-co" id="co"></div>
+  </section>
+
+  <section class="av-card" id="gaps"><h2>What is still missing</h2><ul class="av-gaps" id="gap-list"></ul></section>
+  <section class="av-card" id="sources"><h2>Sources</h2><ul class="av-src" id="src-list"></ul></section>
+</div>
+<script src="assets/eu-fsd-vote-data.js"></script>
+<script src="assets/autonomy-data.js"></script>
+<script>AUTONOMY.eu = EU_FSD;</script>
+<script>
+(function(){
+  'use strict';
+  var A = AUTONOMY, $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var TIER = { 'P':'The company or the regulator itself', 'P/C':'Company pages plus press for some figures', 'C':'Company figure read second-hand (earnings call, press)', 'T':'Third-party tracker or news article' };
+  var chip = function(t){ return '<span class="av-tier t-' + t.replace('/', '') + '" title="' + esc(TIER[t] || t) + '">' + t + '</span>'; };
+  var ST = A.statuses, ORDER = ['paid', 'limited', 'driver', 'next'];
+  var fmtN = function(n){ return Number(n).toLocaleString('en-US'); };
+  $('asof').textContent = new Date(A.asOf + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+
+  // ---------- header cards ----------
+  $('kpis').innerHTML = A.kpis.map(function(k){
+    return '<div class="av-kpi"><div class="l">' + esc(k.label) + '</div><div class="v">' + esc(k.value) + '</div><div class="s">' + esc(k.sub) + '</div><div class="t">' + chip(k.tier) + '<a href="' + esc(k.url) + '" target="_blank" rel="noopener">' + esc(k.src) + '</a></div></div>';
+  }).join('');
+  $('gap-list').innerHTML = A.gaps.map(function(g){ return '<li>' + esc(g) + '</li>'; }).join('');
+  $('src-list').innerHTML = A.sources.map(function(s){ return '<li>' + chip(s.t) + '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + '</a></li>'; }).join('');
+  $('co').innerHTML = A.companies.map(function(c){
+    return '<div><h3>' + esc(c.n) + ' ' + chip(c.tier) + '</h3><dl><dt>Where</dt><dd>' + esc(c.where) + '</dd><dt>Fleet</dt><dd>' + esc(c.fleet) + '</dd><dt>Rides</dt><dd>' + esc(c.rides) + '</dd><dt>Miles</dt><dd>' + esc(c.miles) + '</dd><dt>Other</dt><dd>' + esc(c.other) + '</dd></dl>' +
+      '<div class="src">Source: <a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.src) + '</a></div></div>';
+  }).join('');
+
+  // ---------- miles charts ----------
+  (function(){
+    var M = A.fsdMilestones, W = 560, H = 250, L = 34, R = 26, T = 22, B = 30, pw = W - L - R, ph = H - T - B;
+    var t0 = new Date('2025-12-01').getTime(), t1 = new Date('2026-11-20').getTime(), X = function(d){ return L + pw * (new Date(d).getTime() - t0) / (t1 - t0); }, Y = function(b){ return T + ph * (1 - b / 18); };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="FSD cumulative miles">';
+    [0, 6, 12, 18].forEach(function(v){ s += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/><text x="' + (L - 5) + '" y="' + (Y(v) + 3) + '" text-anchor="end">' + v + '</text>'; });
+    ['2026-01-01', '2026-03-01', '2026-05-01', '2026-07-01', '2026-09-01', '2026-11-01'].forEach(function(d){ s += '<text x="' + X(d) + '" y="' + (H - 10) + '" text-anchor="middle">' + new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { month:'short' }) + '</text>'; });
+    s += '<polyline fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" points="' + M.map(function(m){ return X(m.d).toFixed(1) + ',' + Y(m.b).toFixed(1); }).join(' ') + '"/>';
+    M.forEach(function(m){ var x = X(m.d), y = Y(m.b); s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4.5" fill="' + (m.ap ? 'var(--surface)' : 'var(--accent)') + '" stroke="var(--accent)" stroke-width="2"><title>' + m.d + (m.ap ? ' (approximate date)' : '') + '</title></circle><text class="vl" x="' + x.toFixed(1) + '" y="' + (y - 9).toFixed(1) + '" text-anchor="middle">' + m.b + ' B' + (m.ap ? '*' : '') + '</text>'; });
+    $('ch-fsd').innerHTML = s + '</svg>';
+    $('ch-fsd-src').innerHTML = chip(A.fsdMilesSource.tier) + 'Hollow dot and * = approximate date. ' + esc(A.fsdMilesSource.label) + '. At the Nov pace Tesla adds about 1,000 miles every 1.8 seconds.';
+  })();
+  function bars(host, rows, color){
+    var mx = Math.max.apply(null, rows.map(function(r){ return r[1]; }));
+    $(host).innerHTML = rows.map(function(r){ return '<div class="b"><span>' + esc(r[0]) + '</span><span class="av-bar" style="width:' + Math.max(1, 100 * r[1] / mx) + '%;background:' + color + '"></span><span class="v">' + esc(r[2]) + '</span></div>'; }).join('');
+  }
+  bars('ch-tesla', [['Austin', 2118015, '2.12 M'], ['Dallas', 608130, '0.61 M'], ['Houston', 225964, '226 k'], ['Orlando', 61053, '61 k'], ['Tampa', 53117, '53 k'], ['Miami', 46262, '46 k']], '#0a80d0');
+  bars('ch-waymo', [['Phoenix', 92.121, '92.1 M'], ['SF Bay Area', 82.421, '82.4 M'], ['Los Angeles', 67.098, '67.1 M'], ['Austin', 21.064, '21.1 M'], ['Atlanta', 8.624, '8.6 M']], '#1b9e3f');
+
+  // ---------- maps ----------
+  d3.json('assets/countries-50m.json').then(function(topo){
+    var feats = topojson.feature(topo, topo.objects.countries).features.filter(function(f){ return f.properties.name !== 'Antarctica'; });
+    robotaxi(feats); fsd(feats);
+  }).catch(function(e){ ['rt-map', 'fsd-map'].forEach(function(id){ $(id).innerHTML = '<p class="av-note" style="padding:14px">The map shapes could not be loaded (' + esc(e.message || e) + ').</p>'; }); });
+
+  // === robotaxi ===
+  function robotaxi(feats){
+    var W = 960, H = 500, proj = d3.geoNaturalEarth1(), path = d3.geoPath(proj);
+    proj.fitExtent([[4, 4], [W - 4, H - 4]], { type:'FeatureCollection', features:feats });
+    var svg = d3.select('#rt-map').append('svg').attr('viewBox', '0 0 ' + W + ' ' + H), g = svg.append('g');
+    g.append('g').selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', path);
+    var layer = g.append('g'), K = 1, sel = null, ops = {}, showNext = true;
+    A.operators.forEach(function(o){ ops[o] = true; });
+    var zoom = d3.zoom().scaleExtent([1, 40]).translateExtent([[0, 0], [W, H]]).on('zoom', function(ev){ K = ev.transform.k; g.attr('transform', ev.transform); restyle(); });
+    svg.call(zoom);
+    function best(c){ var rows = c.rows.filter(function(r){ return ops[r[0]] && (showNext || r[1] !== 'next'); }); if(!rows.length) return null; return rows.reduce(function(m, r){ return ORDER.indexOf(r[1]) < ORDER.indexOf(m) ? r[1] : m; }, 'next'); }
+    function restyle(){
+      layer.selectAll('circle').attr('r', function(d){ return (d.st === 'next' ? 3.6 : 5.2) / Math.pow(K, .62); }).attr('stroke-width', 1 / Math.pow(K, .3));
+      layer.selectAll('text').attr('font-size', 9 / Math.pow(K, .72)).attr('display', K >= 2.4 ? null : 'none').attr('stroke-width', 2.6 / Math.pow(K, .5));
+    }
+    function draw(){
+      var data = A.cities.map(function(c){ return { c:c, st:best(c) }; }).filter(function(d){ return d.st; }).sort(function(a, b){ return ORDER.indexOf(b.st) - ORDER.indexOf(a.st); });
+      var xy = function(d){ return proj([d.c.lon, d.c.lat]); };
+      layer.selectAll('circle').data(data, function(d){ return d.c.n; }).join('circle').attr('class', function(d){ return 'dot' + (sel === d.c.n ? ' sel' : ''); })
+        .attr('cx', function(d){ return xy(d)[0]; }).attr('cy', function(d){ return xy(d)[1]; }).attr('fill', function(d){ return ST[d.st].color; })
+        .on('click', function(ev, d){ select(d.c.n); }).append('title').text(function(d){ return d.c.n + ' · ' + ST[d.st].label; });
+      layer.selectAll('text').data(data, function(d){ return d.c.n; }).join('text').attr('x', function(d){ return xy(d)[0] + 7 / Math.pow(K, .5); }).attr('y', function(d){ return xy(d)[1] + 3; }).text(function(d){ return d.c.n; });
+      restyle();
+      var cnt = {}; ORDER.forEach(function(s){ cnt[s] = 0; }); data.forEach(function(d){ cnt[d.st]++; });
+      $('rt-leg').innerHTML = ORDER.filter(function(s){ return showNext || s !== 'next'; }).map(function(s){ return '<span><i style="background:' + ST[s].color + '"></i>' + esc(ST[s].label) + ' <b>' + cnt[s] + '</b></span>'; }).join('');
+      var rows = data.slice().sort(function(a, b){ return ORDER.indexOf(a.st) - ORDER.indexOf(b.st) || a.c.n.localeCompare(b.c.n); });
+      $('rt-table').innerHTML = '<thead><tr><th>City</th><th>Country</th><th>Best status</th><th>Operators</th></tr></thead><tbody>' + rows.map(function(d){
+        return '<tr class="clk" data-c="' + esc(d.c.n) + '"><td><b>' + esc(d.c.n) + '</b></td><td>' + esc(d.c.c) + '</td><td><span class="av-badge" style="background:' + ST[d.st].color + '">' + esc(ST[d.st].label.split(',')[0]) + '</span></td><td>' +
+          d.c.rows.filter(function(r){ return ops[r[0]] && (showNext || r[1] !== 'next'); }).map(function(r){ return '<span class="av-badge" style="background:' + ST[r[1]].color + '">' + esc(r[0]) + '</span>'; }).join(' ') + '</td></tr>'; }).join('') + '</tbody>';
+      $('rt-table').querySelectorAll('tr.clk').forEach(function(tr){ tr.addEventListener('click', function(){ select(tr.dataset.c, true); }); });
+    }
+    function select(name, fly){
+      sel = name; var c = A.cities.filter(function(x){ return x.n === name; })[0]; if(!c) return;
+      layer.selectAll('circle').attr('class', function(d){ return 'dot' + (d.c.n === name ? ' sel' : ''); });
+      $('rt-detail').innerHTML = '<h4>' + esc(c.n) + ', ' + esc(c.c) + '</h4>' + c.rows.map(function(r){
+        return '<div class="r"><b>' + esc(r[0]) + '</b><div><span class="av-badge" style="background:' + ST[r[1]].color + '">' + esc(ST[r[1]].label) + '</span>' + (r[2] ? ' <b>' + esc(r[2]) + '</b>' : '') + '<br><span style="color:var(--text-muted)">' + esc(r[3]) + '</span></div></div>'; }).join('');
+      if(fly) view([[c.lon - 6, c.lat - 3.5], [c.lon + 6, c.lat + 3.5]], true);
+    }
+    function view(box, smooth){
+      var a = proj(box[0]), b = proj(box[1]), x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]);
+      var k = Math.max(1, Math.min(40, 0.92 * Math.min(W / (x1 - x0), H / (y1 - y0)))), t = d3.zoomIdentity.translate(W / 2 - k * (x0 + x1) / 2, H / 2 - k * (y0 + y1) / 2).scale(k);
+      (smooth ? svg.transition().duration(600) : svg).call(zoom.transform, t);
+    }
+    var PRE = [['World', null], ['United States', [[-125, 24], [-66, 50]]], ['Texas', [[-101, 25.5], [-93.5, 34]]], ['Europe', [[-10, 36], [30, 60]]], ['China', [[97, 20], [125, 42]]], ['Middle East', [[43, 21], [60, 30]]], ['Singapore', [[100, -1], [107, 4]]]];
+    $('rt-presets').innerHTML = '<span style="font-size:12.5px;font-weight:800">Zoom to</span>' + PRE.map(function(p, i){ return '<button class="av-chip ghost" data-p="' + i + '">' + p[0] + '</button>'; }).join('');
+    $('rt-presets').querySelectorAll('button').forEach(function(b){ b.addEventListener('click', function(){ var p = PRE[+b.dataset.p]; if(p[1]) view(p[1], true); else svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity); }); });
+    $('rt-ops').innerHTML = '<span style="font-size:12.5px;font-weight:800">Operators</span>' + A.operators.map(function(o){ return '<button class="av-chip on" data-o="' + esc(o) + '">' + esc(o) + '</button>'; }).join('') + '<button class="av-chip on" data-next="1">Announced</button>';
+    $('rt-ops').querySelectorAll('button').forEach(function(b){ b.addEventListener('click', function(){ if(b.dataset.next){ showNext = !showNext; } else ops[b.dataset.o] = !ops[b.dataset.o]; b.classList.toggle('on'); draw(); }); });
+    draw(); select('Austin');
+  }
+
+  // === FSD availability ===
+  function fsd(feats){
+    var W = 960, H = 500, proj = d3.geoNaturalEarth1(), path = d3.geoPath(proj);
+    proj.fitExtent([[4, 4], [W - 4, H - 4]], { type:'FeatureCollection', features:feats });
+    var NAME = { US:'United States of America', CA:'Canada', MX:'Mexico', PR:'Puerto Rico', CN:'China', KR:'South Korea', AU:'Australia', NZ:'New Zealand', NO:'Norway', CH:'Switzerland' };
+    var CHINA_DATE = '2026-05-21', min = '2026-04-01', max = A.asOf, FS = { avail:{ label:'On sale / usable', color:'#1b9e3f' }, review:{ label:'National review open (EU)', color:'#e8a317' }, none:{ label:'No approval', color:'var(--surface)' } };
+    var byName = {}, rec = {};
+    A.fsdOther.forEach(function(o){ byName[NAME[o.iso]] = o; });
+    A.eu.states.forEach(function(s){ byName[s[1]] = { n:s[1], eu:s, s:s[3] === 'approved' ? 'avail' : s[3] === 'review' ? 'review' : 'none', note:s[5] }; });
+    function stAt(name, d){ var o = byName[name]; if(!o) return 'none'; if(o.eu){ return o.eu[3] === 'approved' ? (o.eu[4] <= d ? 'avail' : 'none') : o.eu[3] === 'review' ? 'review' : 'none'; } if(o.iso === 'CN') return d >= CHINA_DATE ? 'avail' : 'none'; return o.s; }
+    var svg = d3.select('#fsd-map').append('svg').attr('viewBox', '0 0 ' + W + ' ' + H);
+    var paths = svg.append('g').selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', path);
+    paths.append('title').text(function(d){ var o = byName[d.properties.name]; return d.properties.name + (o && o.note ? ' · ' + o.note : ''); });
+    $('fsd-leg').innerHTML = Object.keys(FS).map(function(k){ return '<span><i class="sq" style="background:' + FS[k].color + ';border:1px solid var(--border)"></i>' + esc(FS[k].label) + ' <b id="fl-' + k + '"></b></span>'; }).join('');
+    var inp = $('fsd-date'), day = 86400000, t0 = new Date(min + 'T12:00:00').getTime(), t1 = new Date(max + 'T12:00:00').getTime();
+    inp.min = 0; inp.max = Math.round((t1 - t0) / day); inp.value = inp.max;
+    function upd(){
+      var d = new Date(t0 + inp.value * day).toISOString().slice(0, 10); $('fsd-dl').textContent = new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+      var cnt = { avail:0, review:0, none:0 }; var seen = {};
+      paths.style('fill', function(f){ var s = stAt(f.properties.name, d); if(byName[f.properties.name] && !seen[f.properties.name]){ seen[f.properties.name] = 1; cnt[s]++; } return s === 'none' ? 'var(--surface)' : FS[s].color; });
+      $('fl-avail').textContent = cnt.avail; $('fl-review').textContent = cnt.review; $('fl-none').textContent = '';
+      var rows = Object.keys(byName).map(function(n){ return { n:n, o:byName[n], s:stAt(n, d) }; }).filter(function(r){ return r.s === 'avail'; });
+      rows.sort(function(a, b){ var da = a.o.eu ? a.o.eu[4] : (a.o.iso === 'CN' ? CHINA_DATE : '0000'), db = b.o.eu ? b.o.eu[4] : (b.o.iso === 'CN' ? CHINA_DATE : '0000'); return da < db ? -1 : da > db ? 1 : a.n.localeCompare(b.n); });
+      $('fsd-table').innerHTML = '<thead><tr><th>Country</th><th>Since</th><th>Note</th></tr></thead><tbody>' + rows.map(function(r){ var dt = r.o.eu ? r.o.eu[4] : (r.o.iso === 'CN' ? CHINA_DATE : ''); return '<tr><td><b>' + esc(r.n) + '</b></td><td class="n">' + (dt || 'before 2026') + '</td><td>' + esc(r.o.eu ? r.o.eu[5] : r.o.note) + '</td></tr>'; }).join('') + '</tbody>';
+      var eu = A.eu.states.filter(function(s){ return s[3] === 'approved' && s[4] <= d; }).length;
+      $('fsd-side').innerHTML = '<div class="av-kpi"><div class="l">Countries on the map at this date</div><div class="v">' + cnt.avail + '</div><div class="s">of which ' + eu + ' in the EU. ' + cnt.review + ' more EU countries are reviewing it.</div></div>' +
+        '<p class="av-note" style="margin-top:10px">Not approved, as far as we found: the United Kingdom, Japan, the UAE (floated as next by Tesla), Switzerland (Tesla has not applied) and Norway (waiting for the EU decision).</p>';
+    }
+    inp.addEventListener('input', upd); upd();
+    $('fsd-src').innerHTML = chip(A.fsdOtherSource.tier) + 'Outside the EU: <a href="' + esc(A.fsdOtherSource.url) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + esc(A.fsdOtherSource.label) + '</a>. ' + chip(A.eu.source.tier) + 'EU: <a href="' + esc(A.eu.source.url) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + esc(A.eu.source.label) + '</a>.';
+  }
+
+})();
+</script>
+</body>
+</html>

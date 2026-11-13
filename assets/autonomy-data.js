@@ -126,51 +126,7 @@ const AUTONOMY = {
   ],
   fsdMilesSource: { label:'Drive Tesla Canada, 2 Nov 2026 (Tesla FSD Supervised Vehicle Safety Report); milestone dates from Drive Tesla Canada / Basenor / Sawyer Merritt posts', url:'https://driveteslacanada.ca/news/tesla-fsd-surpasses-17-billion-miles-driven/', tier:'C' },
 
-  // ---------- EU vote ----------
-  eu: {
-    asOf: '2026-11-11',
-    source: { label:'FSD-EU-Tracker.de (CC BY 4.0), checked 13 Nov 2026; each approval cites a national authority or news item', url:'https://fsd-eu-tracker.de/en/', tier:'T' },
-    needStates: 15, needPop: 65,
-    // pop = millions (as used by the tracker); status: approved | review | none; src = who announced it
-    states: [
-      ['NL','Netherlands',17.9,'approved','2026-04-10','RDW (the type approval everyone else recognises)'],
-      ['LT','Lithuania',2.9,'approved','2026-05-20','ETSC'],
-      ['EE','Estonia',1.4,'approved','2026-05-29','Estonian World'],
-      ['DK','Denmark',6.0,'approved','2026-06-09','Electrek'],
-      ['BE','Belgium',11.7,'approved','2026-06-10','evxl.co'],
-      ['SI','Slovenia',2.1,'approved','2026-09-07','GOV.SI (AVP)'],
-      ['CZ','Czechia',10.9,'approved','2026-09-21','Ministry of Transport (md.gov.cz)'],
-      ['HR','Croatia',3.9,'approved','2026-09-29','N1 (HINA)'],
-      ['SK','Slovakia',5.4,'approved','2026-10-16','Ministry of Transport (MD SR)'],
-      ['LV','Latvia',1.9,'approved','2026-10-26','CSDD (via LETA)'],
-      ['FI','Finland',5.6,'approved','2026-11-10','Traficom (says it does not bind Finland in the EU vote)'],
-      ['DE','Germany',83.4,'review','','Transport ministry 6 Oct 2026: open to approval, wants name change and speed offset capped at +10%'],
-      ['FR','France',68.3,'review','','Reuters'],
-      ['IT','Italy',59.0,'review','','Review since July; Salvini backs swift EU approval (29 Oct 2026), no national decision'],
-      ['ES','Spain',48.6,'review','','Minister Hereu'],
-      ['GR','Greece',10.4,'review','','ETSC'],
-      ['SE','Sweden',10.6,'review','','Trafikverket recommended the EU reject it while the system can exceed speed limits (June 2026)'],
-      ['IE','Ireland',5.4,'review','','Electrek'],
-      ['PL','Poland',36.6,'none','',''],
-      ['RO','Romania',19.1,'none','',''],
-      ['PT','Portugal',10.6,'none','',''],
-      ['HU','Hungary',9.6,'none','',''],
-      ['AT','Austria',9.2,'none','',''],
-      ['BG','Bulgaria',6.5,'none','',''],
-      ['LU','Luxembourg',0.7,'none','',''],
-      ['CY','Cyprus',0.9,'none','',''],
-      ['MT','Malta',0.5,'none','','']
-    ],
-    timeline: [
-      ['2026-04-10','The Dutch road authority RDW gives Tesla FSD (Supervised) a provisional type approval, valid in the Netherlands, at least 36 months (electrive, Reuters).'],
-      ['2026-06-30','118th meeting of the EU technical committee (TCMV): the Netherlands presents the case, no vote. The minutes cite 40 million km driven on FSD (Supervised) (EU Commission register, via the tracker).'],
-      ['2026-09-25','The EU puts the Tesla item off the 6 October agenda: discussion only, no vote (Electrek, electrive).'],
-      ['2026-10-06','119th TCMV meeting: discussion, no vote. A majority of approval authorities signalled they were not ready to vote (Norway’s Statens vegvesen). Germany sets its conditions: rename and a +10% speed margin cap.'],
-      ['2026-10-29','Italy’s transport minister Salvini backs a swift EU approval, without recognising the Dutch approval nationally.'],
-      ['2026-11-10','Finland recognises the Dutch approval: eleventh EU country. Tesla’s system is now branded "Tesla Assisted Driving" in Europe.'],
-      ['December','Next scheduled TCMV meeting. A vote is "envisaged" by Germany’s ministry but not confirmed; RDW says discussions are confidential and a vote is expected "at the earliest" then. We could not find the exact day.']
-    ]
-  },
+  // EU vote: moved to assets/eu-fsd-vote-data.js (public page eu-fsd-vote.html); the draft page sets AUTONOMY.eu = EU_FSD
 
   // ---------- company table ----------
   companies: [

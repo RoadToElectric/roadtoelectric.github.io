@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EU Vote on Tesla FSD — Road to Electric</title>
+<meta name="description" content="Will Tesla's FSD (Supervised) get an EU-wide approval? Which of the 27 member states have approved it, what the vote needs (15 states and 65% of the EU population), and a simulator to play the vote yourself.">
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/mobile.css?v=10">
+<script src="assets/view-mode.js?v=7"></script>
+<script src="assets/page-views.js?v=3" defer></script>
+<script src="assets/section-link.js?v=4" defer></script>
+<script src="assets/tooltip-fit.js" defer></script>
+<script src="assets/deeplink.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+  .eu-hero{ position:relative; overflow:hidden; border-radius:22px; padding:26px 30px 24px; color:#fff;
+    background:radial-gradient(900px 360px at 92% -20%, rgba(47,174,78,.45), transparent 60%), radial-gradient(700px 420px at -6% 115%, rgba(10,128,208,.55), transparent 60%), linear-gradient(135deg,#031a36,#06264d 55%,#073a63);
+    box-shadow:0 14px 36px rgba(2,16,40,.28); display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:22px; align-items:center; }
+  .eu-hero .k{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#7be0ff; }
+  .eu-hero .big{ display:flex; flex-wrap:wrap; gap:6px 28px; margin:8px 0 6px; }
+  .eu-hero .big b{ display:block; font-size:clamp(40px,7vw,76px); font-weight:900; letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; background:linear-gradient(90deg,#7be0ff,#22d3ee 45%,#6fe14a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .eu-hero .big span{ display:block; font-size:13px; color:#cfe3f5; margin-top:4px; }
+  .eu-hero p{ margin:0; color:#cfe3f5; font-size:14.5px; line-height:1.55; }
+  .eu-need{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:14px 16px; display:grid; gap:10px; }
+  .eu-need div{ display:flex; justify-content:space-between; gap:12px; font-size:13.5px; color:#cfe3f5; }
+  .eu-need div b{ color:#fff; font-size:15px; font-variant-numeric:tabular-nums; text-align:right; }
+  @media (max-width:900px){ .eu-hero{ grid-template-columns:1fr; padding:22px 18px; } }
+
+  .eu-page{ display:flex; flex-direction:column; gap:22px; }
+  .eu-card h2{ font-size:20px; font-weight:900; letter-spacing:-.01em; margin:0 0 4px; }
+  .eu-card h3{ font-size:14px; font-weight:800; margin:16px 0 6px; }
+  .eu-note{ font-size:13px; color:var(--text-muted); line-height:1.55; margin:0 0 12px; }
+  .eu-row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:8px 0; }
+  .eu-lab{ font-size:12.5px; font-weight:800; }
+  .eu-chip{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:6px 13px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .eu-chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .eu-chip.sc{ color:var(--text-muted); }
+  .eu-chip.sc:hover{ border-color:var(--accent); color:var(--text); }
+  .eu-leg{ display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; margin:8px 0 8px; }
+  .eu-leg span{ display:inline-flex; align-items:center; gap:6px; }
+  .eu-leg i{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .eu-leg b{ font-variant-numeric:tabular-nums; }
+  .eu-grid{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:18px; align-items:start; }
+  @media (max-width:900px){ .eu-grid{ grid-template-columns:1fr; } }
+  .eu-map{ border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); overflow:hidden; }
+  .eu-map svg{ display:block; width:100%; height:auto; }
+  .eu-map .land{ fill:var(--surface); stroke:var(--border); stroke-width:.5; vector-effect:non-scaling-stroke; }
+  .eu-map .eu-c{ stroke:var(--surface); stroke-width:.7; vector-effect:non-scaling-stroke; cursor:pointer; transition:filter .12s; }
+  .eu-map .eu-c:hover{ filter:brightness(1.14); }
+  .eu-map text{ pointer-events:none; fill:#fff; stroke:rgba(0,0,0,.5); stroke-width:1.8px; paint-order:stroke; font-weight:800; font-size:9px; text-anchor:middle; }
+  .eu-map text.pc{ font-size:7.5px; font-weight:700; }
+  .eu-verdict{ font-size:17px; font-weight:900; border-radius:14px; padding:12px 16px; margin:0 0 14px; line-height:1.35; }
+  .eu-verdict.ok{ background:rgba(27,158,63,.16); border:1px solid rgba(27,158,63,.55); }
+  .eu-verdict.no{ background:rgba(214,69,65,.11); border:1px solid rgba(214,69,65,.45); }
+  .eu-verdict small{ display:block; font-size:12.5px; font-weight:600; color:var(--text-muted); margin-top:2px; }
+  .eu-prog{ margin:0 0 14px; }
+  .eu-prog .h{ display:flex; justify-content:space-between; gap:10px; font-size:13px; font-weight:700; margin-bottom:4px; }
+  .eu-prog .h b{ font-variant-numeric:tabular-nums; font-size:15px; }
+  .eu-prog .tr{ position:relative; height:20px; background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .eu-prog .fl{ position:absolute; left:0; top:0; bottom:0; }
+  .eu-prog .mk{ position:absolute; top:0; bottom:0; width:3px; background:var(--text); }
+  .eu-prog .need{ position:absolute; top:-1px; font-size:10.5px; font-weight:800; transform:translateX(-100%); padding-right:6px; line-height:20px; color:var(--text); }
+  .eu-fast{ font-size:13px; line-height:1.55; background:var(--surface-alt); border:1px solid var(--border); border-radius:12px; padding:10px 14px; margin:0 0 12px; }
+  .eu-range{ flex:1; min-width:180px; accent-color:var(--accent); }
+  table.eu-t{ width:100%; border-collapse:collapse; font-size:13px; }
+  .eu-t, .eu-t th, .eu-t td{ font-family:inherit; }
+  .eu-t th{ text-align:left; font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:6px 8px; border-bottom:1px solid var(--border); }
+  .eu-t td{ padding:7px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .eu-t td.n, .eu-t th.n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .eu-t tr.clk{ cursor:pointer; }
+  .eu-t tr.clk:hover td{ background:var(--surface-alt); }
+  .eu-scroll{ overflow:auto; border:1px solid var(--border); border-radius:12px; max-height:520px; }
+  .eu-badge{ display:inline-block; border-radius:999px; padding:1px 10px; font-size:11.5px; font-weight:800; color:#fff; white-space:nowrap; }
+  .eu-tl{ list-style:none; margin:6px 0 0; padding:0; }
+  .eu-tl li{ display:grid; grid-template-columns:96px 1fr; gap:12px; padding:9px 0; border-top:1px solid var(--border); font-size:13.5px; line-height:1.55; }
+  .eu-tl li b{ font-variant-numeric:tabular-nums; }
+  @media (max-width:560px){ .eu-tl li{ grid-template-columns:1fr; gap:2px; } }
+  .eu-src{ list-style:none; margin:0; padding:0; font-size:13px; }
+  .eu-src li{ padding:4px 0; }
+  .eu-src a{ color:var(--accent); }
+  .eu-tier{ display:inline-block; min-width:18px; text-align:center; padding:0 6px; border-radius:6px; font-size:10.5px; font-weight:900; margin-right:6px; color:#fff; background:#7b8794; }
+  .eu-tier.C{ background:#d98a0b; } .eu-tier.P{ background:#1b9e3f; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="ev-buses.html"><span class="dot"></span>EV Buses</a>
+      <a href="autonomy-vehicles.html"><span class="dot"></span>Autonomy Vehicles</a>
+      <a href="world-oil.html"><span class="dot"></span>World Oil</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
+      <a href="energy-mix.html"><span class="dot"></span>Energy Mix</a>
+
+      <div class="nav-heading">Trends</div>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+      <a href="eu-fsd-vote.html" aria-current="page"><span class="dot"></span>EU Vote on Tesla FSD</a>
+
+      <div class="nav-heading">About</div>
+      <a href="contact.html"><span class="dot"></span>Contact</a>
+      <a href="comments.html"><span class="dot"></span>Comments</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page eu-page">
+      <header class="page-header">
+        <div class="eyebrow">Trends · EU Vote</div>
+        <h1>EU vote on Tesla FSD</h1>
+        <p class="subtitle">Will Tesla's FSD (Supervised) get an EU-wide approval? It takes 15 of the 27 member states, holding 65% of the EU population. Eleven states have already approved it on their own. Play the vote yourself.</p>
+      </header>
+
+      <section class="eu-hero" id="where-it-stands">
+        <div>
+          <div class="k">Where it stands</div>
+          <div class="big"><div><b id="h-st">–</b><span>of 27 states have approved it nationally</span></div><div><b id="h-pop">–</b><span>of the EU population</span></div></div>
+          <p>A national approval is not a vote: each state recognised the Dutch approval on its own. The EU-wide decision is taken by the technical committee on motor vehicles (TCMV), where the big states weigh most.</p>
+        </div>
+        <div class="eu-need">
+          <div><span>The vote needs</span><b>15 states + 65% of the population</b></div>
+          <div><span>It can be blocked by</span><b>4 states with over 35%</b></div>
+          <div><span>Next committee meeting</span><b>December 2026</b></div>
+          <div><span>Exact day / vote confirmed?</span><b>Not published / not confirmed</b></div>
+        </div>
+      </section>
+
+      <section class="card chart-card eu-card" id="simulator">
+        <h2>The vote simulator</h2>
+        <p class="eu-note">Click a country on the map or in the table to set its vote: Yes, No, Abstain, Undecided. Undecided and abstaining states count as not-yes, and the thresholds are measured on all 27 states. The first view shows today's real status, with a slider to watch the approvals arrive.</p>
+        <div class="eu-row" data-nocapture><span class="eu-lab">Map shows</span><button class="eu-chip on" id="m-status">Real status</button><button class="eu-chip" id="m-sim">My vote</button></div>
+        <div class="eu-row" data-nocapture id="sc-row"><span class="eu-lab">Try</span>
+          <button class="eu-chip sc" data-sc="now">Approved states vote yes</button><button class="eu-chip sc" data-sc="review">+ all states in review</button><button class="eu-chip sc" data-sc="big4">+ Germany, France, Italy, Spain</button><button class="eu-chip sc" data-sc="clear">Clear all</button></div>
+        <div class="eu-row" data-nocapture id="date-row"><label class="eu-lab" for="date">Approvals up to</label><input id="date" class="eu-range" type="range"><b id="date-l" style="min-width:104px;text-align:right"></b></div>
+        <div class="eu-leg" id="leg"></div>
+        <div class="eu-grid">
+          <div class="eu-map" id="map"></div>
+          <div id="panel"></div>
+        </div>
+      </section>
+
+      <section class="card chart-card eu-card" id="states">
+        <h2>The 27 states</h2>
+        <p class="eu-note">Largest first. Click a row to change its vote in the simulator. Populations are in millions, as used by the tracker below.</p>
+        <div class="eu-scroll"><table class="eu-t" id="tbl"></table></div>
+      </section>
+
+      <section class="card chart-card eu-card" id="timeline">
+        <h2>How we got here</h2>
+        <ul class="eu-tl" id="tl"></ul>
+      </section>
+
+      <section class="card chart-card eu-card" id="sources">
+        <h2>Sources and limits</h2>
+        <p class="eu-note">Data as of <b id="asof"></b>, checked <span id="checked"></span>. <span class="eu-tier">T</span> a tracker or news article citing its own sources, <span class="eu-tier C">C</span> a company statement read second-hand. Each state's approval was announced by the national authority or outlet named in the table. A state's own approval does not bind it in the EU vote (Finland says so itself), and how any state would vote is not known: that is what the simulator is for.</p>
+        <ul class="eu-src" id="src"></ul>
+      </section>
+
+      <footer class="page-footer">
+        Road to Electric — analyzing the current shift to EVs.
+      </footer>
+    </div>
+  </main>
+</div>
+<script src="assets/eu-fsd-vote-data.js"></script>
+<script>
+(function(){
+  'use strict';
+  var D = EU_FSD, S = D.states, $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var tot = S.reduce(function(t, s){ return t + s[2]; }, 0), byName = {}, byIso = {};
+  S.forEach(function(s){ byName[s[1]] = s; byIso[s[0]] = s; });
+  var STC = { approved:'#1b9e3f', review:'#e8a317', none:'#aab4c2' }, STL = { approved:'Approved', review:'In review', none:'No approval' };
+  var VC = { yes:'#1b9e3f', no:'#d64541', abs:'#e8a317', und:'#aab4c2' }, VL = { yes:'Yes', no:'No', abs:'Abstain', und:'Undecided' }, VK = { y:'yes', n:'no', a:'abs' }, VR = { yes:'y', no:'n', abs:'a' };
+  var CYC = ['yes', 'no', 'abs', 'und'], vote = {}, mode = 'status';
+  var d0 = '2026-04-01', d1 = D.asOf, day = 86400000, t0 = new Date(d0 + 'T12:00:00').getTime(), t1 = new Date(d1 + 'T12:00:00').getTime(), asof = d1;
+  var pct = function(x){ return (100 * x / tot); };
+  var fmtDate = function(d){ return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }); };
+
+  function approvedAt(d){ return S.filter(function(s){ return s[3] === 'approved' && s[4] <= d; }); }
+  function fromStatus(d){ S.forEach(function(s){ vote[s[0]] = (s[3] === 'approved' && s[4] <= d) ? 'yes' : 'und'; }); }
+  function scen(k){ S.forEach(function(s){ var v = 'und'; if(s[3] === 'approved') v = 'yes'; else if(k === 'review' && s[3] === 'review') v = 'yes'; else if(k === 'big4' && ['DE', 'FR', 'IT', 'ES'].indexOf(s[0]) >= 0) v = 'yes'; vote[s[0]] = v; }); asof = d1; }
+  fromStatus(asof);
+
+  // hero numbers: the real status today
+  var ap = approvedAt(d1); $('h-st').textContent = ap.length; $('h-pop').textContent = pct(ap.reduce(function(t, s){ return t + s[2]; }, 0)).toFixed(1) + '%';
+  $('asof').textContent = fmtDate(D.asOf); $('checked').textContent = fmtDate(D.checked);
+  $('tl').innerHTML = D.timeline.map(function(t){ return '<li><b>' + esc(/^\d{4}-/.test(t[0]) ? fmtDate(t[0]) : t[0]) + '</b><span>' + esc(t[1]) + '</span></li>'; }).join('');
+  $('src').innerHTML = D.sources.map(function(s){ return '<li><span class="eu-tier ' + (s.t === 'C' ? 'C' : '') + '">' + s.t + '</span><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.label) + '</a></li>'; }).join('');
+
+  // the scenario lives in the address (?vote=DE.y,FR.n), so the link button and a copied URL carry it
+  function readUrl(){ try{ var v = new URLSearchParams(location.search).get('vote'); if(v == null) return false; S.forEach(function(s){ vote[s[0]] = 'und'; }); v.split(',').forEach(function(p){ var a = p.split('.'); if(byIso[a[0]] && VK[a[1]]) vote[a[0]] = VK[a[1]]; }); return true; }catch(e){ return false; } }
+  function writeUrl(){ try{ var q = new URLSearchParams(location.search); q.delete('vote'); if(mode === 'sim'){ var v = S.filter(function(s){ return vote[s[0]] !== 'und'; }).map(function(s){ return s[0] + '.' + VR[vote[s[0]]]; }).join(','); if(v) q.set('vote', v); } var qs = q.toString(); history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash); }catch(e){} }
+
+  var svg, paths, lab;
+  function build(feats){
+    var W = 560, H = 620, proj = d3.geoConicConformal().rotate([-10, 0]).parallels([35, 65]), path = d3.geoPath(proj);
+    proj.fitExtent([[6, 6], [W - 6, H - 6]], { type:'MultiPoint', coordinates:[[-10, 34.2], [34.5, 34.2], [34.5, 71], [-10, 71]] });
+    svg = d3.select('#map').append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('role', 'img').attr('aria-label', 'Map of the 27 EU states coloured by status or by vote');
+    paths = svg.append('g').selectAll('path').data(feats).join('path').attr('class', function(f){ return byName[f.properties.name] ? 'eu-c' : 'land'; }).attr('d', path);
+    paths.filter(function(f){ return byName[f.properties.name]; }).on('click', function(ev, f){ toggle(byName[f.properties.name][0]); });
+    var HOME = { FR:[2.3, 46.6], NL:[5.3, 52.2], DK:[9.4, 56.1], SE:[15.5, 62.5], FI:[26, 63.5], GR:[22, 39.3], PT:[-8, 39.6], ES:[-3.7, 40.2], IT:[12.6, 42.6], CY:[33.1, 35], DE:[10.3, 51.1], PL:[19.4, 52], RO:[25, 45.8] };
+    lab = svg.append('g');
+    S.forEach(function(s){ var f = feats.filter(function(x){ return x.properties.name === s[1]; })[0]; if(!f) return; var c = HOME[s[0]] ? proj(HOME[s[0]]) : path.centroid(f); if(isNaN(c[0])) return;
+      var big = pct(s[2]) >= 2.4;
+      lab.append('text').attr('x', c[0]).attr('y', c[1] + (big ? 0 : 3)).text(s[0]);
+      if(big) lab.append('text').attr('class', 'pc').attr('x', c[0]).attr('y', c[1] + 8.5).text(pct(s[2]).toFixed(1) + '%'); });
+    render();
+  }
+  function toggle(iso){ if(mode === 'status') mode = 'sim'; vote[iso] = CYC[(CYC.indexOf(vote[iso]) + 1) % CYC.length]; render(); }
+
+  function fastest(yes, yp){
+    var cand = S.filter(function(s){ return vote[s[0]] !== 'yes' && vote[s[0]] !== 'no'; }).sort(function(a, b){ return b[2] - a[2]; }), pick = [], n = yes.length, p = yp;
+    for(var i = 0; i < cand.length && !(n >= D.needStates && p >= D.needPop); i++){ pick.push(cand[i]); n++; p += pct(cand[i][2]); }
+    return (n >= D.needStates && p >= D.needPop) ? { pick:pick, n:n, p:p } : null;
+  }
+  function render(){
+    $('m-status').classList.toggle('on', mode === 'status'); $('m-sim').classList.toggle('on', mode === 'sim');
+    $('date-row').style.display = mode === 'status' ? '' : 'none';
+    if(mode === 'status') fromStatus(asof);
+    if(paths) paths.filter(function(f){ return byName[f.properties.name]; }).style('fill', function(f){ var s = byName[f.properties.name]; return mode === 'status' ? (vote[s[0]] === 'yes' ? STC.approved : STC[s[3] === 'approved' ? 'none' : s[3]]) : VC[vote[s[0]]]; })
+      .each(function(f){ var s = byName[f.properties.name], t = d3.select(this).select('title'); if(t.empty()) t = d3.select(this).append('title'); t.text(s[1] + ' · ' + s[2].toFixed(1) + ' M people (' + pct(s[2]).toFixed(1) + '% of the EU) · ' + (mode === 'status' ? STL[s[3]] : VL[vote[s[0]]])); });
+    var yes = S.filter(function(s){ return vote[s[0]] === 'yes'; }), no = S.filter(function(s){ return vote[s[0]] === 'no'; }), yp = pct(yes.reduce(function(t, s){ return t + s[2]; }, 0)), np = pct(no.reduce(function(t, s){ return t + s[2]; }, 0));
+    var pass = yes.length >= D.needStates && yp >= D.needPop, blocked = no.length >= 4 && np > 35;
+    // legend
+    $('leg').innerHTML = mode === 'status'
+      ? [['approved', 'Approved nationally', function(s){ return s[3] === 'approved' && s[4] <= asof; }], ['review', 'National review open', function(s){ return s[3] === 'review'; }], ['none', 'No approval yet', function(s){ return s[3] === 'none' || (s[3] === 'approved' && s[4] > asof); }]].map(function(k){ var n = S.filter(k[2]); return '<span><i style="background:' + STC[k[0]] + '"></i>' + k[1] + ' <b>' + n.length + '</b> · ' + pct(n.reduce(function(t, s){ return t + s[2]; }, 0)).toFixed(1) + '% of population</span>'; }).join('')
+      : CYC.map(function(k){ var n = S.filter(function(s){ return vote[s[0]] === k; }); return '<span><i style="background:' + VC[k] + '"></i>' + VL[k] + ' <b>' + n.length + '</b> · ' + pct(n.reduce(function(t, s){ return t + s[2]; }, 0)).toFixed(1) + '%</span>'; }).join('');
+    $('date-l').textContent = fmtDate(asof);
+    // right-hand panel
+    var prog = function(label, val, txt, need, max, col, needTxt){ return '<div class="eu-prog"><div class="h"><span>' + label + '</span><b>' + txt + '</b></div><div class="tr"><div class="fl" style="width:' + Math.min(100, 100 * val / max) + '%;background:' + col + '"></div><div class="mk" style="left:calc(' + (100 * need / max) + '% - 1.5px)"></div><span class="need" style="left:' + (100 * need / max) + '%">' + needTxt + '</span></div></div>'; };
+    var fp = pass ? null : fastest(yes, yp);
+    $('panel').innerHTML = '<div class="eu-verdict ' + (pass ? 'ok' : 'no') + '">' + (pass ? 'It would pass' : 'It would not pass') + (blocked ? '<small>The No votes form a blocking minority: 4+ states with over 35% of the population.</small>' : '<small>' + (mode === 'status' ? 'Counting only the states that have approved it nationally (a national approval does not bind them in the vote).' : 'In your scenario.') + '</small>') + '</div>' +
+      prog('States saying yes', yes.length, yes.length + ' of 27', D.needStates, 27, '#1b9e3f', 'need ' + D.needStates) +
+      prog('Population saying yes', yp, yp.toFixed(1) + '%', D.needPop, 100, '#1b9e3f', 'need ' + D.needPop + '%') +
+      (no.length ? prog('States saying no', no.length, no.length + ' · ' + np.toFixed(1) + '%', 4, 27, '#d64541', '4 can block') : '') +
+      (pass ? '' : '<div class="eu-fast"><b>Gap:</b> ' + Math.max(0, D.needStates - yes.length) + ' more states and ' + Math.max(0, D.needPop - yp).toFixed(1) + ' points of population.' + (fp ? '<br><b>Fastest path:</b> ' + fp.pick.map(function(s){ return esc(s[1]) + ' (' + pct(s[2]).toFixed(1) + '%)'; }).join(' + ') + ' gets it to ' + fp.n + ' states and ' + fp.p.toFixed(1) + '%.' : '<br>It cannot get there without the states set to No.') + '</div>');
+    // table
+    $('tbl').innerHTML = '<thead><tr><th>State</th><th class="n">Pop. (M)</th><th class="n">Share</th><th>Status</th><th>Since</th><th>Vote here</th><th>Who announced it / note</th></tr></thead><tbody>' + S.slice().sort(function(a, b){ return b[2] - a[2]; }).map(function(s){
+      return '<tr class="clk" data-i="' + s[0] + '"><td><b>' + esc(s[1]) + '</b></td><td class="n">' + s[2].toFixed(1) + '</td><td class="n">' + pct(s[2]).toFixed(1) + '%</td><td><span class="eu-badge" style="background:' + STC[s[3]] + '">' + STL[s[3]] + '</span></td><td class="n">' + (s[4] ? fmtDate(s[4]) : '') + '</td><td><span class="eu-badge" style="background:' + VC[vote[s[0]]] + '">' + VL[vote[s[0]]] + '</span></td><td>' + esc(s[5]) + '</td></tr>'; }).join('') + '</tbody>';
+    $('tbl').querySelectorAll('tr.clk').forEach(function(tr){ tr.addEventListener('click', function(){ toggle(tr.dataset.i); }); });
+    writeUrl();
+  }
+  var inp = $('date'); inp.min = 0; inp.max = Math.round((t1 - t0) / day); inp.value = inp.max;
+  inp.addEventListener('input', function(){ asof = new Date(t0 + inp.value * day).toISOString().slice(0, 10); mode = 'status'; render(); });
+  $('m-status').addEventListener('click', function(){ mode = 'status'; render(); });
+  $('m-sim').addEventListener('click', function(){ mode = 'sim'; render(); });
+  document.querySelectorAll('[data-sc]').forEach(function(b){ b.addEventListener('click', function(){ if(b.dataset.sc === 'clear'){ S.forEach(function(s){ vote[s[0]] = 'und'; }); } else scen(b.dataset.sc); mode = 'sim'; render(); }); });
+  if(readUrl()) mode = 'sim';
+
+  function noMap(e){ $('map').innerHTML = '<p class="eu-note" style="padding:14px">The map could not be loaded (' + esc(e && e.message || e) + '). The table and the simulator below still work.</p>'; render(); }
+  if(typeof d3 === 'undefined' || typeof topojson === 'undefined') noMap('map library offline');
+  else d3.json('assets/countries-50m.json').then(function(topo){
+    build(topojson.feature(topo, topo.objects.countries).features.filter(function(f){ return f.properties.name !== 'Antarctica'; }));
+  }).catch(noMap);
+})();
+</script>
+</body>
+</html>
