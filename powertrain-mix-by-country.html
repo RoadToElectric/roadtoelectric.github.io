@@ -636,7 +636,9 @@ const MONTHLY_DATA = {
       // source: MTA vstat (vstat.mta.org.nz/new, data snapshot Oct 2026; NZTA Waka Kotahi data), new passenger cars/vans only (commercial excluded), October 2026 total 11,824: BEV 1481 / PHEV 1477 / Hybrid 4978 / Petrol 3265 / Diesel 623 (vstat 'Other' = 0). Same dashboard and convention as August 2026. Prior-year month in the site is the NZTA register reconstruction (Oct 2025 10,676; vstat now shows 10,715).
       "New Zealand": [1481,1477,4978,0,3265,623,11824],
       // PROVISIONAL powertrain split. naamsa Industry Total (local sales only, all segments), October 2026 = 61,890 (+10.4% on Oct 2025's 56,051; passenger cars 45,084, LCV 13,689, medium CV 770, heavy CV/buses 2,347; release dated 2 Nov 2026) is REAL. naamsa publishes the NEV split one month late, so BEV/PHEV/HEV are ESTIMATED by scaling September's real split (595/1,163/1,686 of 61,645) onto October's total -- TO CORRECT when the November release (~1 Dec 2026) gives YTD October: October = YTD Oct minus YTD Sep (BEV 3,217 / PHEV 8,082 / HEV 11,090). Petrol = residual.
-      "South Africa": [597,1168,1693,0,58432,0,61890]
+      "South Africa": [597,1168,1693,0,58432,0,61890],
+      // MIXED-SOURCE MONTH (BEV on a different basis than the earlier months). Total 136,806 = AEB press release of 5 Nov 2026 (PPK: new passenger cars + LCV, -19.9% on Oct 2025; AEB's own count 133,824; Jan-Oct 1,104,797). The AEB release gives NO EV figure for October, so BEV 4,030 is Autostat's count of new passenger battery-electric cars (record month, share just over 3%; Changan Qiyuan Q05 1,085), which counts about 40% more than the AEB-derived series (Sept 2,208 here vs roughly 3,200 on Autostat's 2.6% share): October therefore looks like a jump of ~80% on September when on Autostat's own basis it is ~26%. Replace with the AEB-basis figure when AEB's cumulative EV number for Jan-Oct appears. Diesel 1.7% of the total (same share as Aug/Sep, no source split), petrol = remainder; PHEV/HEV not reported.
+      "Russian Federation": [4030,0,0,0,130450,2326,136806]
     },
     priorYearBev: {
           "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":369,      "United Kingdom":36830,      "Netherlands":13968,      "Portugal":4618,      "Ireland":707,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908,      "Malaysia":4345,      "India":20981,      "Luxembourg":922,      "Uruguay":1748,      "Colombia":2090,      "New Zealand":502},
@@ -1903,7 +1905,7 @@ const MONTHLY_DATA = {
       "Serbia": [1166,0,13141,535,11929,2746,29517],
           // source: naamsa (all-segment total, real) -- Jan-May 2026 summed from monthly
       "South Africa": [3467,8137,10109,0,370960,0,392673],      // source: AEB (Association of European Businesses -- Jan-Aug 2026 summed from monthly
-      "Russian Federation": [10570,0,0,0,942796,14654,968020],
+      "Russian Federation": [14600,0,0,0,1073246,16980,1104826],
       // source: Transport Department Hong Kong (Monthly Traffic and Transport Digest, Table 4.1(e)) — first registrations of private cars, new cars only (vehicle status A+B; used/owner imports excluded). BEV is exact; hybrids and plug-in hybrids are registered as petrol and cannot be separated, so PHEV and HEV show 0 and are inside Petrol (Jan-Jul 2026)
       "Hong Kong": [35766,0,0,0,4406,0,40172],
       // source: ProAuto (proauto.ba) "Trziste novih automobila u BiH" -- Jan-Jan 2026 summed from monthly
@@ -1951,7 +1953,7 @@ const MONTHLY_DATA = {
       "Albania":"through Aug 2026",
       "Paraguay":"through Sep 2026",
       "Mauritius":"through Sep 2026",
-          "South Africa":"through Oct 2026",      "Russian Federation":"through Sep 2026",
+          "South Africa":"through Oct 2026",      "Russian Federation":"through Oct 2026",
       "Hong Kong":"through Sep 2026",
           "Bosnia-Herzegovina":"through Sep 2026"},
     // BEV units for the matching prior-year period (same months)
@@ -2091,7 +2093,7 @@ const MONTHLY_DATA = {
       "Tunisia": [5030, 4436, 1469, 0, 61499, 0, 72434],
       // source: uvoznicivozila.rs (Serbian Association of Vehicle and Parts Importers) / Cube Team — flat annualization (Jan-Sep 2026 x12/9), not the standard trend method: H1 2026 has no internal monthly granularity to trend from (it's itself an even split of the H1 total), so a plain doubling is the least-fabricated option available
       "Serbia": [1555, 0, 17521, 713, 15905, 3661, 39355],
-          "South Africa": [6219, 14075, 18101, 0, 656667, 0, 695062],      "Russian Federation": [16534, 0, 0, 0, 1297768, 20896, 1335198],
+          "South Africa": [6219, 14075, 18101, 0, 656667, 0, 695062],      "Russian Federation": [20236, 0, 0, 0, 1316353, 21282, 1357871],
       // source: derived, not published -- each fuel = Jan-Jul 2026 actuals + the average of the last 3 actual months (May-Jul) x the remaining 5 months. Deliberately NO "YTD floor" (the site standard): Hong Kong ended its electric-car first-registration tax concession on 31 March 2026, so Jan-Apr is inflated by a rush (Mar 9,619 and Apr 8,535 new cars vs ~2,000-4,800 other months) and a YTD floor would project 2026 about 40% above 2025
       "Hong Kong": [41047, 0, 0, 0, 6092, 0, 47139],
       "Bosnia-Herzegovina": [167, 363, 4198, 7408, 0, 0, 12136]},
