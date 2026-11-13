@@ -16,7 +16,7 @@ window.RTE_FRESH = Date.now();
 <script src="assets/city-bus-data.js?v=2"></script>
 <script src="assets/bus-2026-data.js?v=2"></script>
 <script src="assets/ev-trucks-data.js"></script>
-<script>['manufacturer-monthly-data', 'manufacturer-model-monthly-data'].forEach(function(f){ document.write('<script src="assets/' + f + '.js?v=' + window.RTE_FRESH + '"><\/script>'); });</script>
+<script>['manufacturer-monthly-data', 'manufacturer-model-monthly-data', 'video-links'].forEach(function(f){ document.write('<script src="assets/' + f + '.js?v=' + window.RTE_FRESH + '"><\/script>'); });</script>
 <style>
   /* private drafting desk for X posts: not linked from the site; the drafts are written from the same public data as the charts */
   body{ margin:0; background:var(--bg); color:var(--text); }
@@ -137,6 +137,8 @@ window.RTE_FRESH = Date.now();
     }
     return [one];
   }
+  // a YouTube clip for a draft (assets/video-links.js: draft key -> URL): its link goes on the last post, after the chart link, and the post is re-fitted to 280
+  var vidLine = function(key){ var u = (typeof VIDEO_LINKS !== 'undefined' && VIDEO_LINKS[key]) || ''; return u ? '\n▶ ' + u : ''; };
   var linkMix = function(ym, c){ return SITE + 'powertrain-mix-by-country.html?period=' + ym + (c ? '&country=' + encodeURIComponent(c) + '&countries=' + encodeURIComponent(c) : ''); };
 
   function table(ym, minUnits, prov){
@@ -308,7 +310,7 @@ window.RTE_FRESH = Date.now();
       p2 = c + ', year to date (Jan–' + nowM + ' ' + yr + ')\nBEV: ' + fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' = ' + pct1(100 * ytd.bev / ytd.total) + '%' + (yRank ? '\nBEV share rank, Jan–' + nowM + ': #' + yRank.rank + ' of ' + yRank.of + ' markets with data' : '');
       if(full && full.total) p2 += '\nFull year ' + pyr + ': ' + fmt(full.bev) + ' of ' + fmt(full.total) + ' = ' + pct1(100 * full.bev / full.total) + '% (' + sgn(100 * ytd.bev / ytd.total - 100 * full.bev / full.total) + ' pp)' + (full.bev ? '\nBEV units so far: ' + Math.round(100 * ytd.bev / full.bev) + '% of all ' + pyr : '');
     }
-    var link = linkMix(m, c) + tags(), posts;
+    var link = linkMix(m, c) + vidLine('country|' + c + '|' + m) + tags(), posts;
     if(p2) posts = [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];          // always two parts when there is a year to date: each part has its own picture (a country without a year-ago month, like Australia, used to fit in one post and lost the mix picture)
     else posts = [p1 + '\n' + link];
     var prov = isProv(c, m);
@@ -371,7 +373,7 @@ window.RTE_FRESH = Date.now();
     var rowB = function(o, label){ return { label:label, total:o.total, bev:o.bev, text:unitsText(o.total) + ' · ' + pct1(100 * o.bev / o.total) + '%' }; };
     var rowM = function(o, label){ return { label:label, total:o.total, bev:o.bev, text:unitsText(o.total) + ' · ' + pct1(100 * o.total / T) + '%' }; };
     var rowE = function(o, label){ return { label:label, total:o.bev, bev:o.bev, text:unitsText(o.bev) }; };
-    var link = linkMix(m, c) + tags(), parts = [];
+    var link = linkMix(m, c) + vidLine('brands|' + c + '|' + m) + tags(), parts = [];
     if(B.length >= 3) parts.push({ hdr:head + 'best-selling brands (cars · BEV share)', L:B, f:lineB, rx:RX_BRAND, row:rowB, col:'Brands · units · BEV share', labelW:230, sub:'best-selling brands · BEV part in green' });
     if(M.length >= 3) parts.push({ hdr:head + 'best-selling models (cars · share of sales)', L:M, f:lineM, rx:RX_MODEL, row:rowM, col:'Models · units · share of all new cars', labelW:330, sub:'best-selling models · BEV part in green' });
     if(EVM.length >= 3) parts.push({ hdr:head + 'best-selling BEV models (units)', L:EVM, f:lineE, rx:RX_MODEL, row:rowE, col:'BEV models · units', labelW:330, sub:'best-selling battery-electric models' });
