@@ -64,11 +64,12 @@
 
   <div class="sd-ctl">
     <label>Month <select id="ctl-month"></select></label>
-    <label>Markets of at least <input type="number" id="ctl-min" value="5000" min="0" step="500"> cars</label>
+    <label>Markets of at least <input type="number" id="ctl-min" value="0" min="0" step="500"> cars</label>
     <label><input type="checkbox" id="ctl-prov"> include provisional numbers</label>
     <label><input type="checkbox" id="ctl-tags"> add #EV #BEV</label>
     <label>Country drafts <select id="ctl-cmode"><option value="new">Newest data of each country</option><option value="month">The month above</option></select></label>
     <label>Show <select id="ctl-show"><option value="all">Everything</option><option value="rank">Rankings, world and regions</option><option value="cm">Motorisation by country</option><option value="bm">Brands and models by country</option><option value="bus">Electric buses (series)</option></select></label>
+    <label>Country <select id="ctl-country"><option value="">All countries</option></select></label>
   </div>
   <div class="sd-best" id="best" hidden></div>
   <div id="cards"></div>
@@ -303,7 +304,7 @@
     if(p2) posts = [p1 + '\n(1/2)', p2 + '\n' + link + '\n(2/2)'];          // always two parts when there is a year to date: each part has its own picture (a country without a year-ago month, like Australia, used to fit in one post and lost the mix picture)
     else posts = [p1 + '\n' + link];
     var prov = isProv(c, m);
-    var dr = { sec:'cm', title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). Part 1 has every month against the same month a year earlier; part 2 has the powertrain mix bars with the change.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
+    var dr = { sec:'cm', country:c, title:c, tag:'country' + (prov ? ' · provisional' : ''), warn:prov, why:'Country snapshot: the month and its year-ago comparison, then the year to date against the full year before (raw units and shares). Part 1 has every month against the same month a year earlier; part 2 has the powertrain mix bars with the change.', posts:posts, chart:{ ym:m, c:c }, key:'country|' + c + '|' + m, ym:m, size:r.total,
       img:{ type:'country', title:c, sub:mn + ' · BEV share of new car sales' + (mk ? ' · #' + mk.rank + ' car market' : ''), yr:yr, pyr:pyr, mi:mi, big:pct1(s) + '%', l2:fmt(r.bev) + ' of ' + fmt(r.total) + ' new cars', l3:ps !== null ? lastM + ': ' + pct1(ps) + '% · ' + sgn(s - ps) + ' pp' : '',
         ytd:(ytd && mi > 1) ? { head:'Year to date, Jan–' + nowM + ' ' + yr, rank:yRank ? '#' + yRank.rank + ' of ' + yRank.of : '', pct:pct1(100 * ytd.bev / ytd.total) + '%', raw:fmt(ytd.bev) + ' of ' + fmt(ytd.total) + ' cars', fyHead:full && full.total ? 'Full year ' + pyr + ': ' + pct1(100 * full.bev / full.total) + '%' : '', fyRaw:full && full.total ? fmt(full.bev) + ' of ' + fmt(full.total) + ' cars' : '' } : null,
         bars:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(function(k){ var kk = (k < 10 ? '0' : '') + k, a = BY[c][yr + '-' + kk], b = BY[c][pyr + '-' + kk]; return { m:k, cur:(k <= mi && a && a.total) ? share(a) : null, prev:(b && b.total) ? share(b) : null }; }) } };
@@ -351,7 +352,7 @@
     var prov = isProv(c, m), cols = [];
     if(B.length >= 3) cols.push({ head:'Brands', labelW:190, rows:B.slice(0, 8).map(function(o){ return { label:o.name, total:o.total, bev:o.bev, text:unitsText(o.total) }; }) });
     if(M.length >= 3) cols.push({ head:'Models', labelW:240, rows:M.slice(0, 8).map(function(o){ return { label:o.name, total:o.total, bev:o.bev, text:unitsText(o.total) }; }) });
-    return { sec:'bm', title:c + ' · brands and models', tag:'brands & models' + (prov ? ' · provisional' : ''), warn:prov, why:'Best-selling brands and models of the month, with the BEV part of each (green in the picture).' + (parts.length > 1 ? ' Models of the same name are added up across powertrains.' : ''), posts:posts, chart:{ ym:m, c:c }, key:'brands|' + c + '|' + m, ym:m, size:B.reduce(function(s, o){ return s + o.total; }, 0),
+    return { sec:'bm', country:c, title:c + ' · brands and models', tag:'brands & models' + (prov ? ' · provisional' : ''), warn:prov, why:'Best-selling brands and models of the month, with the BEV part of each (green in the picture).' + (parts.length > 1 ? ' Models of the same name are added up across powertrains.' : ''), posts:posts, chart:{ ym:m, c:c }, key:'brands|' + c + '|' + m, ym:m, size:B.reduce(function(s, o){ return s + o.total; }, 0),
       img:{ type:'bm', title:c, sub:mn + ' · best-selling brands and models · BEV part in green', cols:cols } };
   }
 
@@ -736,7 +737,14 @@
   function downloadImage(d){ ensureImage(d).then(function(b){ var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'road-to-electric-' + d.key.replace(/[^a-z0-9]+/gi, '-') + '.png'; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500); }); }
 
   function render(){
-    var show = $('ctl-show').value, ALL = build(), D = ALL.filter(function(d){ return !d.key || !posted[d.key]; }).filter(function(d){ return show === 'all' || d.sec === show; }), host = $('cards'); host.innerHTML = '';
+    var show = $('ctl-show').value, ALL = build();
+    // the country drop-down lists every country that still has a draft (with how many); a chosen country shows only its own drafts
+    var cs = $('ctl-country'), curC = cs.value, cn = {};
+    ALL.forEach(function(d){ if(d.country && (!d.key || !posted[d.key])) cn[d.country] = (cn[d.country] || 0) + 1; });
+    var cNames = Object.keys(cn).sort();
+    cs.innerHTML = '<option value="">All countries</option>' + cNames.map(function(c){ return '<option value="' + c.replace(/"/g, '&quot;') + '">' + c + ' (' + cn[c] + ')</option>'; }).join('');
+    cs.value = cNames.indexOf(curC) >= 0 ? curC : '';
+    var D = ALL.filter(function(d){ return !d.key || !posted[d.key]; }).filter(function(d){ return show === 'all' || d.sec === show; }).filter(function(d){ return !cs.value || d.country === cs.value; }), host = $('cards'); host.innerHTML = '';
     var SECN = { rank:'Rankings, world and regions', bus:'Electric buses', cm:'Motorisation by country', bm:'Brands and models by country' }, lastSec = '', cnt = {}; D.forEach(function(d){ cnt[d.sec] = (cnt[d.sec] || 0) + (d.info ? 0 : 1); });
     var io = (typeof IntersectionObserver !== 'undefined') ? new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ io.unobserve(e.target); e.target.__d && ensureImage(e.target.__d); } }); }, { rootMargin:'900px 0px' }) : null;
     D.forEach(function(d){
@@ -815,7 +823,7 @@
 
   months.forEach(function(m){ var o = document.createElement('option'); o.value = m; o.textContent = monthName(m) + ' (' + countOf[m] + ' markets)'; $('ctl-month').appendChild(o); });
   var def = months.filter(function(m){ return countOf[m] >= 20; })[0] || months[0]; if(def) $('ctl-month').value = def;
-  ['ctl-month', 'ctl-min', 'ctl-prov', 'ctl-tags', 'ctl-cmode', 'ctl-show'].forEach(function(id){ $(id).addEventListener('change', render); });
+  ['ctl-month', 'ctl-min', 'ctl-prov', 'ctl-tags', 'ctl-cmode', 'ctl-show', 'ctl-country'].forEach(function(id){ $(id).addEventListener('change', render); });
   $('sync-go').addEventListener('click', function(){
     var v = $('sync-key').value.trim(); if(!v) return;
     $('sync-err').textContent = '';
