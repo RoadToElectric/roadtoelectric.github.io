@@ -48,6 +48,18 @@
   #days-chart svg{ width:100%; height:auto; display:block; }
   #days-chart text{ fill:var(--text-muted); font-size:10px; }
   .st-muted{ color:var(--text-muted); }
+  .xc h3{ font-size:13px; font-weight:800; margin:0 0 2px; }
+  .xc svg{ width:100%; height:auto; display:block; }
+  .xc svg text{ fill:var(--text-muted); font-size:10px; }
+  .xc svg .gl{ stroke:var(--border); stroke-width:1; }
+  .xc svg .col{ fill:var(--accent); }
+  .xc svg .col:hover{ opacity:.7; }
+  .xc svg .ln{ fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
+  .xc svg .pt{ fill:var(--surface); stroke:var(--accent); stroke-width:2.5; }
+  .xc svg text.vl{ fill:var(--text); font-weight:800; }
+  .xc a{ color:inherit; text-decoration:none; }
+  .xc a:hover{ text-decoration:underline; }
+  .xc details > summary{ cursor:pointer; font-size:12.5px; font-weight:700; color:var(--text-muted); margin:6px 0; }
 </style>
 </head>
 <body>
@@ -119,7 +131,8 @@
       <h2>X posts <span class="st-muted" style="font-weight:600">@RoadToElectrik</span></h2>
       <p class="st-note" id="x-note"></p>
       <div id="x-kpis" class="st-kpis" style="margin-bottom:10px"></div>
-      <div id="x-posts"></div>
+      <div class="xc" id="x-charts"></div>
+      <div id="x-posts" class="xc"></div>
     </section>
 
     <p class="st-note" id="foot"></p>
@@ -236,9 +249,49 @@
     $('x-kpis').innerHTML = [['Followers', a.followers, a0 ? delta(a.followers, a0.followers) : ''], ['Posts read', P.length, ''], ['Views', views, delta(views, P.some(function(p){ return p.views_prev != null; }) ? P.reduce(function(s, p){ return s + (p.views_prev || 0); }, 0) : null)],
       ['Likes', sum('likes'), ''], ['Reposts', sum('reposts'), ''], ['Replies', sum('replies'), ''], ['Engagement', views ? pct(eng, views) + '%' : '—', '']]
       .map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v" style="font-size:22px">' + (typeof k[1] === 'number' ? fmt(k[1]) : (k[1] == null ? '—' : k[1])) + k[2] + '</div></div>'; }).join('');
-    $('x-posts').innerHTML = P.length ? '<table class="st-t"><thead><tr><th>Posted</th><th>Post</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Reposts</th><th class="n">Replies</th></tr></thead><tbody>' +
+    xCharts(P, acc);
+    $('x-posts').innerHTML = P.length ? '<details><summary>All ' + P.length + ' posts, newest first (table)</summary><table class="st-t"><thead><tr><th>Posted</th><th>Post</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Reposts</th><th class="n">Replies</th></tr></thead><tbody>' +
       P.map(function(p){ return '<tr><td class="st-muted" style="white-space:nowrap">' + esc(new Date(p.posted_at).toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' + new Date(p.posted_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })) + '</td>' +
-        '<td><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(p.excerpt) + '…</a></td><td class="n">' + fmt(p.views) + delta(p.views, p.views_prev) + '</td><td class="n">' + fmt(p.likes) + delta(p.likes, p.likes_prev) + '</td><td class="n">' + fmt(p.reposts) + delta(p.reposts, p.reposts_prev) + '</td><td class="n">' + fmt(p.replies) + delta(p.replies, p.replies_prev) + '</td></tr>'; }).join('') + '</tbody></table>' : '';
+        '<td><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(p.excerpt) + '…</a></td><td class="n">' + fmt(p.views) + delta(p.views, p.views_prev) + '</td><td class="n">' + fmt(p.likes) + delta(p.likes, p.likes_prev) + '</td><td class="n">' + fmt(p.reposts) + delta(p.reposts, p.reposts_prev) + '</td><td class="n">' + fmt(p.replies) + delta(p.replies, p.replies_prev) + '</td></tr>'; }).join('') + '</tbody></table></details>' : '';
+  }
+  // charts of the X card: views of every post in order, followers at each reading, the best posts (inline SVG, no library)
+  function xCharts(P, acc){
+    var host = $('x-charts'); if(!P.length){ host.innerHTML = ''; return; }
+    var day = function(t){ return new Date(t).toLocaleDateString(undefined, { month:'short', day:'numeric' }); }, nice = function(m){ var e = Math.pow(10, Math.floor(Math.log10(Math.max(m, 1)))), f = m / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e; };
+    // 1. views per post, oldest to newest, with the day under the first post of each day
+    var A = P.slice().sort(function(a, b){ return new Date(a.posted_at) - new Date(b.posted_at); }), W = 960, Hh = 220, L = 38, R = 8, T = 16, B = 26, pw = W - L - R, ph = Hh - T - B;
+    var maxV = Math.max.apply(null, A.map(function(p){ return p.views || 0; })), top = nice(maxV), step = pw / A.length, bw = Math.max(2, step * .74), svg = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="Views per post">';
+    [0, .5, 1].forEach(function(f){ var y = T + ph * (1 - f); svg += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (L - 5) + '" y="' + (y + 3) + '" text-anchor="end">' + fmt(Math.round(top * f)) + '</text>'; });
+    var lastDay = '';
+    A.forEach(function(p, i){
+      var v = p.views || 0, h = ph * v / top, x = L + i * step + (step - bw) / 2, d = day(p.posted_at);
+      svg += '<a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener"><rect class="col" x="' + x.toFixed(1) + '" y="' + (T + ph - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(h, v ? 1 : 0).toFixed(1) + '" rx="1.5"><title>' + esc(d + ' · ' + fmt(v) + ' views · ' + p.excerpt) + '</title></rect></a>';
+      if(v === maxV && v > 0) svg += '<text class="vl" x="' + (x + bw / 2).toFixed(1) + '" y="' + (T + ph - h - 4).toFixed(1) + '" text-anchor="middle">' + fmt(v) + '</text>';
+      if(d !== lastDay){ lastDay = d; svg += '<line class="gl" x1="' + (L + i * step).toFixed(1) + '" x2="' + (L + i * step).toFixed(1) + '" y1="' + (T + ph) + '" y2="' + (T + ph + 5) + '"/><text x="' + (L + i * step + 2).toFixed(1) + '" y="' + (Hh - 8) + '">' + esc(d) + '</text>'; }
+    });
+    var c1 = '<div class="st-card" style="box-shadow:none;margin-bottom:10px"><h3>Views of every post</h3><p class="st-note" style="margin-bottom:6px">One column per post, oldest on the left. Hover for the text, click to open the post.</p>' + svg + '</svg></div>';
+    // 2. followers at each reading
+    var F = acc.filter(function(a){ return a.followers != null; }), c2 = '';
+    if(F.length){
+      var w2 = 460, h2 = 210, l2 = 34, r2 = 16, t2 = 18, b2 = 28, t0 = new Date(F[0].at).getTime(), t1 = new Date(F[F.length - 1].at).getTime(), span = Math.max(t1 - t0, 1);
+      var fv = F.map(function(a){ return a.followers; }), lo = Math.max(0, Math.min.apply(null, fv) - 1), hi = Math.max.apply(null, fv) + 1, stepY = Math.max(1, Math.ceil((hi - lo) / 4));
+      var px = function(t){ return F.length === 1 ? l2 + (w2 - l2 - r2) / 2 : l2 + (w2 - l2 - r2) * (t - t0) / span; }, py = function(v){ return t2 + (h2 - t2 - b2) * (1 - (v - lo) / (hi - lo)); };
+      var s2 = '<svg viewBox="0 0 ' + w2 + ' ' + h2 + '" role="img" aria-label="Followers at each reading">';
+      for(var g = lo; g <= hi; g += stepY) s2 += '<line class="gl" x1="' + l2 + '" x2="' + (w2 - r2) + '" y1="' + py(g).toFixed(1) + '" y2="' + py(g).toFixed(1) + '"/><text x="' + (l2 - 5) + '" y="' + (py(g) + 3).toFixed(1) + '" text-anchor="end">' + g + '</text>';
+      s2 += '<polyline class="ln" points="' + F.map(function(a){ return px(new Date(a.at).getTime()).toFixed(1) + ',' + py(a.followers).toFixed(1); }).join(' ') + '"/>';
+      F.forEach(function(a, i){
+        var x = px(new Date(a.at).getTime()), y = py(a.followers);
+        s2 += '<circle class="pt" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4.5"><title>' + esc(new Date(a.at).toLocaleString() + ' · ' + a.followers + ' followers, following ' + a.following) + '</title></circle><text class="vl" x="' + x.toFixed(1) + '" y="' + (y - 10).toFixed(1) + '" text-anchor="middle">' + a.followers + '</text>';
+        if(i === 0 || i === F.length - 1) s2 += '<text x="' + x.toFixed(1) + '" y="' + (h2 - 8) + '" text-anchor="' + (F.length > 1 ? (i ? 'end' : 'start') : 'middle') + '">' + esc(day(a.at)) + '</text>';
+      });
+      c2 = '<div class="st-card" style="box-shadow:none;margin-bottom:0"><h3>Followers</h3><p class="st-note" style="margin-bottom:6px">At each reading of the account page (' + F.length + ' so far).</p>' + s2 + '</svg></div>';
+    }
+    // 3. the best posts
+    var best = P.slice().sort(function(a, b){ return (b.views || 0) - (a.views || 0); }).slice(0, 10), bmax = best[0] ? (best[0].views || 1) : 1;
+    var c3 = '<div class="st-card" style="box-shadow:none;margin-bottom:0"><h3>Best posts by views</h3><p class="st-note" style="margin-bottom:6px">Likes, reposts and replies together in the last column.</p><table class="st-t" style="table-layout:fixed"><colgroup><col><col style="width:44px"><col style="width:26%"><col style="width:34px"></colgroup><tbody>' + best.map(function(p){
+      var e = (p.likes || 0) + (p.reposts || 0) + (p.replies || 0);
+      return '<tr><td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" title="' + esc(p.excerpt) + '">' + esc(p.excerpt) + '</a><div class="st-muted" style="font-size:11px">' + esc(day(p.posted_at)) + '</div></td><td class="n">' + fmt(p.views || 0) + '</td><td class="barw" style="width:auto"><i class="bar" style="width:' + Math.max(2, 100 * (p.views || 0) / bmax) + '%"></i></td><td class="n st-muted">' + fmt(e) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    host.innerHTML = c1 + '<div class="st-cols" style="margin-bottom:10px">' + c2 + c3 + '</div>';
   }
 
   $('go').addEventListener('click', function(){ key = $('key').value.trim(); if(key) load(); });
