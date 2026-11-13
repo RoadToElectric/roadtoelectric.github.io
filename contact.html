@@ -10,22 +10,7 @@
 <script src="assets/view-mode.js?v=6"></script>
 <script src="assets/page-views.js?v=3" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
-<style>
-  .ct-card{ max-width:760px; }
-  .ct-mail{ display:inline-flex; align-items:center; gap:10px; font-size:clamp(18px,3.4vw,26px); font-weight:900; letter-spacing:-.01em; color:var(--accent); text-decoration:none; word-break:break-all; }
-  .ct-mail:hover{ text-decoration:underline; }
-  .ct-row{ display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 4px; }
-  .ct-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-weight:800; font-size:14px; padding:10px 16px; border-radius:12px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .ct-btn.primary{ background:linear-gradient(135deg,#0a80d0,#2fae4e); border-color:transparent; color:#fff; }
-  .ct-list{ margin:10px 0 0 18px; padding:0; line-height:1.7; color:var(--text); }
-  .ct-form{ display:grid; gap:12px; margin-top:8px; }
-  .ct-form label{ display:grid; gap:5px; font-size:12px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
-  .ct-form input, .ct-form select, .ct-form textarea{ font:inherit; font-size:16px; text-transform:none; letter-spacing:0; font-weight:500; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; width:100%; box-sizing:border-box; }
-  .ct-form textarea{ min-height:150px; resize:vertical; }
-  .ct-two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  @media (max-width:640px){ .ct-two{ grid-template-columns:1fr; } }
-  .ct-note{ font-size:13px; color:var(--text-muted); line-height:1.5; margin:10px 0 0; }
-</style>
+<link rel="stylesheet" href="assets/contact.css?v=1">
 </head>
 <body>
 
@@ -71,25 +56,54 @@
       <header class="page-header">
         <div class="eyebrow">About · Contact</div>
         <h1>Contact</h1>
-        <p class="subtitle">Road to Electric analyses the global shift to electric mobility: monthly car registrations and powertrain mix, manufacturers, oil, population and charging. Write to us — questions, corrections, data sources, collaborations.</p>
+        <p class="subtitle">Road to Electric analyses the global shift to electric mobility: monthly car registrations and powertrain mix, manufacturers, oil, population and charging.</p>
       </header>
-      <div class="card ct-card">
-        <a class="ct-mail" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">✉ roadtoelectric@gmail.com</a>
-        <div class="ct-row">
-          <a class="ct-btn primary" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">Write an email</a>
-          <button type="button" class="ct-btn" id="ct-copy">Copy the address</button>
-          <a class="ct-btn" href="comments.html">Leave a comment instead →</a>
+      <div class="ct-wrap">
+        <section class="ct-hero">
+          <div class="ct-hero-k">Write to us</div>
+          <a class="ct-mail" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">roadtoelectric@gmail.com</a>
+          <p class="ct-hero-sub">Questions, corrections, data sources, collaborations: every message is read.</p>
+          <div class="ct-row">
+            <a class="ct-btn primary" href="mailto:roadtoelectric@gmail.com?subject=Road%20to%20Electric">✉ Write an email</a>
+            <button type="button" class="ct-btn" id="ct-copy">Copy the address</button>
+            <a class="ct-btn" href="comments.html">Leave a comment instead →</a>
+          </div>
+        </section>
+
+        <div class="ct-h">What is useful to send</div>
+        <div class="ct-tiles">
+          <div class="ct-tile" style="--c:#e2564a"><div class="ct-ic">🔍</div><h3>A number that looks wrong</h3><p>The country, the month and the source you compared it with.</p></div>
+          <div class="ct-tile" style="--c:#2fae4e"><div class="ct-ic">🗂️</div><h3>A data source</h3><p>One we do not use yet: an association, a registry, a monthly release.</p></div>
+          <div class="ct-tile" style="--c:#0a80d0"><div class="ct-ic">📈</div><h3>A request</h3><p>A chart, a filter or a country you would like to see.</p></div>
+          <div class="ct-tile" style="--c:#f59e0b"><div class="ct-ic">📰</div><h3>Press, partnership or reuse</h3><p>Of a chart: tell us where it will appear.</p></div>
         </div>
-        <h2 style="margin-top:22px">What is useful to send</h2>
-        <ul class="ct-list">
-          <li><b>A number that looks wrong</b> — the country, the month and the source you compared it with.</li>
-          <li><b>A data source</b> we do not use yet (an association, a registry, a monthly release).</li>
-          <li><b>A request</b> for a chart, a filter or a country.</li>
-          <li><b>Press, partnership or reuse</b> of a chart: tell us where it will appear.</li>
-        </ul>
-        <p class="ct-note">Tip: every graph has a 🔗 button that copies a link to that exact graph with its filters — paste it in your message and we see what you see.</p>
-        <h2 style="margin-top:22px">Privacy</h2>
-        <p class="ct-note">This site counts visits to learn which pages are useful: the page, the country the visit comes from (worked out when the page is requested — your IP address is not kept) and whether the desktop or the mobile view is used. Only totals are kept: no cookies, no advertising, no profile of you and no record of individual visits.</p>
+
+        <div class="ct-tip">
+          <div class="ct-ic">🔗</div>
+          <p><b>Tip:</b> every graph has a 🔗 button that copies a link to that exact graph with its filters. Paste it in your message and we see what you see.</p>
+        </div>
+
+        <div class="ct-h">Privacy</div>
+        <div class="ct-priv">
+          <div class="ct-box">
+            <h3>What is counted</h3>
+            <ul>
+              <li><span>The page that was opened</span></li>
+              <li><span>The country the visit comes from<small>worked out when the page is requested</small></span></li>
+              <li><span>Whether the desktop or the mobile view is used</span></li>
+            </ul>
+          </div>
+          <div class="ct-box no">
+            <h3>What is never kept</h3>
+            <ul>
+              <li><span>Your IP address</span></li>
+              <li><span>Cookies or advertising</span></li>
+              <li><span>A profile of you</span></li>
+              <li><span>A record of individual visits</span></li>
+            </ul>
+          </div>
+        </div>
+        <p class="ct-fine">This site counts visits to learn which pages are useful. Only totals are kept.</p>
       </div>
       <footer class="page-footer">
         Road to Electric — analyzing the current shift to EVs.

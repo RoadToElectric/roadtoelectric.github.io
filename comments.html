@@ -10,22 +10,7 @@
 <script src="assets/view-mode.js?v=6"></script>
 <script src="assets/page-views.js?v=3" defer></script>
 <script src="assets/tooltip-fit.js" defer></script>
-<style>
-  .ct-card{ max-width:760px; }
-  .ct-mail{ display:inline-flex; align-items:center; gap:10px; font-size:clamp(18px,3.4vw,26px); font-weight:900; letter-spacing:-.01em; color:var(--accent); text-decoration:none; word-break:break-all; }
-  .ct-mail:hover{ text-decoration:underline; }
-  .ct-row{ display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 4px; }
-  .ct-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-weight:800; font-size:14px; padding:10px 16px; border-radius:12px; cursor:pointer; text-decoration:none; display:inline-block; }
-  .ct-btn.primary{ background:linear-gradient(135deg,#0a80d0,#2fae4e); border-color:transparent; color:#fff; }
-  .ct-list{ margin:10px 0 0 18px; padding:0; line-height:1.7; color:var(--text); }
-  .ct-form{ display:grid; gap:12px; margin-top:8px; }
-  .ct-form label{ display:grid; gap:5px; font-size:12px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
-  .ct-form input, .ct-form select, .ct-form textarea{ font:inherit; font-size:16px; text-transform:none; letter-spacing:0; font-weight:500; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; width:100%; box-sizing:border-box; }
-  .ct-form textarea{ min-height:150px; resize:vertical; }
-  .ct-two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  @media (max-width:640px){ .ct-two{ grid-template-columns:1fr; } }
-  .ct-note{ font-size:13px; color:var(--text-muted); line-height:1.5; margin:10px 0 0; }
-</style>
+<link rel="stylesheet" href="assets/contact.css?v=1">
 </head>
 <body>
 
@@ -71,28 +56,57 @@
       <header class="page-header">
         <div class="eyebrow">About · Comments</div>
         <h1>Comments &amp; suggestions</h1>
-        <p class="subtitle">Tell us what you think of a page, report a number that looks wrong, or suggest something to add. Your message opens in your email program, ready to send to roadtoelectric@gmail.com.</p>
+        <p class="subtitle">Tell us what you think of a page, report a number that looks wrong, or suggest something to add. It opens in your email program, ready to send.</p>
       </header>
-      <div class="card ct-card">
-        <form class="ct-form" id="ct-form" onsubmit="return false">
-          <div class="ct-two">
-            <label>Your name (optional)<input id="cf-name" type="text" autocomplete="name"></label>
-            <label>Your email (optional, so we can answer)<input id="cf-mail" type="email" autocomplete="email"></label>
-          </div>
-          <div class="ct-two">
-            <label>About which page
-              <select id="cf-page">
-                <option value="">The site in general</option>
-                <option>Home</option><option>World Car Sales</option><option>Mix by Country</option><option>Manufacturers</option><option>EV Trucking</option><option>World Oil</option>
-                <option>Population &amp; Energy</option><option>EV Charging</option><option>World Population</option><option>Biggest Movers</option>
-              </select></label>
-            <label>Type of message
-              <select id="cf-type"><option>Comment</option><option>Suggestion</option><option>A number looks wrong</option><option>Data source to add</option><option>Question</option></select></label>
-          </div>
-          <label>Your message<textarea id="cf-msg" placeholder="Write here. If it is about a graph, use its 🔗 button and paste the link."></textarea></label>
-          <div class="ct-row" style="margin:0"><button type="button" class="ct-btn primary" id="cf-send">Open in my email program</button><button type="button" class="ct-btn" id="cf-copy">Copy the message</button></div>
-          <p class="ct-note" id="cf-status">Nothing is stored on this site: the message is sent from your own email program to roadtoelectric@gmail.com.</p>
-        </form>
+      <div class="ct-wrap">
+        <div class="ct-grid">
+          <section class="ct-panel">
+            <h2>Your message</h2>
+            <form class="ct-form" id="ct-form" onsubmit="return false">
+              <fieldset class="ct-field">
+                <legend>Type of message</legend>
+                <div class="ct-chips" role="radiogroup">
+                  <label class="ct-chip"><input type="radio" name="cf-type" value="Comment" checked><span>💬 Comment</span></label>
+                  <label class="ct-chip"><input type="radio" name="cf-type" value="Suggestion"><span>💡 Suggestion</span></label>
+                  <label class="ct-chip"><input type="radio" name="cf-type" value="A number looks wrong"><span>🔍 A number looks wrong</span></label>
+                  <label class="ct-chip"><input type="radio" name="cf-type" value="Data source to add"><span>🗂️ Data source to add</span></label>
+                  <label class="ct-chip"><input type="radio" name="cf-type" value="Question"><span>❓ Question</span></label>
+                </div>
+              </fieldset>
+              <label class="ct-field"><span>About which page</span>
+                <select id="cf-page">
+                  <option value="">The site in general</option>
+                  <option>Home</option><option>World Car Sales</option><option>Mix by Country</option><option>Manufacturers</option><option>EV Trucking</option><option>EV Buses</option><option>World Oil</option>
+                  <option>Population &amp; Energy</option><option>EV Charging</option><option>World Population</option><option>Energy Mix</option><option>Biggest Movers</option>
+                </select></label>
+              <label class="ct-field"><span>Your message</span>
+                <textarea id="cf-msg" placeholder="Write here. If it is about a graph, use its 🔗 button and paste the link."></textarea></label>
+              <div class="ct-two">
+                <label class="ct-field"><span>Your name<em>optional</em></span><input id="cf-name" type="text" autocomplete="name"></label>
+                <label class="ct-field"><span>Your email<em>optional, so we can answer</em></span><input id="cf-mail" type="email" autocomplete="email"></label>
+              </div>
+              <div class="ct-actions"><button type="button" class="ct-btn primary" id="cf-send">✉ Open in my email program</button><button type="button" class="ct-btn" id="cf-copy">Copy the message</button></div>
+              <p class="ct-status" id="cf-status">Nothing is stored on this site: the message is sent from your own email program to roadtoelectric@gmail.com.</p>
+            </form>
+          </section>
+
+          <aside class="ct-side">
+            <section class="ct-panel">
+              <h2>How it works</h2>
+              <ol class="ct-steps">
+                <li><span><b>Write your message</b> and pick what it is about.</span></li>
+                <li><span><b>Open in my email program:</b> an email to roadtoelectric@gmail.com is filled in for you.</span></li>
+                <li><span><b>Press send</b> in your email program. That is all.</span></li>
+              </ol>
+              <p class="ct-lock"><span>🔒</span><span>Nothing is stored on this site. Your message goes from your own email program straight to us.</span></p>
+            </section>
+            <div class="ct-tip">
+              <div class="ct-ic">🔗</div>
+              <p><b>About a graph?</b> Use its 🔗 button and paste the link: we see what you see, with the same filters.</p>
+            </div>
+            <p class="ct-fine">Prefer to write directly? <a class="ct-link" href="contact.html">Contact page →</a></p>
+          </aside>
+        </div>
       </div>
       <footer class="page-footer">
         Road to Electric — analyzing the current shift to EVs.
@@ -105,19 +119,21 @@
   var MAIL = 'roadtoelectric@gmail.com';
   var $ = function(id){ return document.getElementById(id); };
   function build(){
-    var type = $('cf-type').value, page = $('cf-page').value, name = $('cf-name').value.trim(), mail = $('cf-mail').value.trim(), msg = $('cf-msg').value.trim();
+    var tr = document.querySelector('input[name="cf-type"]:checked'), type = tr ? tr.value : 'Comment', page = $('cf-page').value, name = $('cf-name').value.trim(), mail = $('cf-mail').value.trim(), msg = $('cf-msg').value.trim();
     var subject = 'Road to Electric — ' + type + (page ? ' — ' + page : '');
     var body = msg + '\n\n' + '—\n' + (name ? 'From: ' + name + '\n' : '') + (mail ? 'Reply to: ' + mail + '\n' : '') + (page ? 'Page: ' + page + '\n' : '');
     return { subject: subject, body: body, msg: msg };
   }
+  function say(t, warn){ var el = $('cf-status'); el.textContent = t; el.classList.toggle('warn', !!warn); }
   function flash(el, t){ var o = el.textContent; el.textContent = t; setTimeout(function(){ el.textContent = o; }, 1600); }
   function copy(t){ if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t); return new Promise(function(ok, no){ try{ var a = document.createElement('textarea'); a.value = t; a.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(a); a.select(); document.execCommand('copy') ? ok() : no(); document.body.removeChild(a); }catch(e){ no(e); } }); }
   if($('ct-copy')) $('ct-copy').addEventListener('click', function(){ var b = this; copy(MAIL).then(function(){ flash(b, '✓ Copied'); }, function(){ flash(b, MAIL); }); });
   if($('cf-send')){
+    $('cf-msg').addEventListener('input', function(){ var m = build(); if(m.body.length > 1800) say('Long message: some email programs cut a long link, so if yours does, use “Copy the message” and paste it into an email.', true); else if($('cf-status').classList.contains('warn')) say('Nothing is stored on this site: the message is sent from your own email program to ' + MAIL + '.'); });
     $('cf-send').addEventListener('click', function(){
-      var m = build(); if(!m.msg){ $('cf-status').textContent = 'Please write a message first.'; $('cf-msg').focus(); return; }
+      var m = build(); if(!m.msg){ say('Please write a message first.', true); $('cf-msg').focus(); return; }
       window.location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
-      $('cf-status').textContent = 'If nothing opened, use “Copy the message” and paste it in an email to ' + MAIL + '.';
+      say('If nothing opened, use “Copy the message” and paste it in an email to ' + MAIL + '.');
     });
     $('cf-copy').addEventListener('click', function(){ var m = build(), b = this; copy('To: ' + MAIL + '\nSubject: ' + m.subject + '\n\n' + m.body).then(function(){ flash(b, '✓ Copied'); }, function(){ flash(b, 'Copy failed'); }); });
   }
