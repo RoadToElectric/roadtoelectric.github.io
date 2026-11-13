@@ -351,7 +351,8 @@
     // Tesla (brands) and Model Y / Model 3 (models) are always shown: when they are not among the top lines they are added at the end, with their rank on the left
     var RX_BRAND = [/^tesla$/i], RX_MODEL = [/^tesla model y$/i, /^tesla model 3$/i];
     var lineB = function(o, i){ return (i + 1) + '. ' + o.name + ' ' + fmt(o.total) + ' · ' + pct1(100 * o.bev / o.total) + '%'; };
-    var lineM = function(o, i){ var sb = 100 * o.bev / o.total; return (i + 1) + '. ' + o.name + ' ' + fmt(o.total) + (sb >= 95 ? ' (BEV)' : sb >= 10 ? ' (' + Math.round(sb) + '% BEV)' : ''); };
+    var T = ((index().b[c] || {})[m] || []).reduce(function(s, r){ return s + r.total; }, 0) || 1;          // all new cars of the brand table (the same basis as the model lines): the base of the market share
+    var lineM = function(o, i){ var sb = 100 * o.bev / o.total; return (i + 1) + '. ' + o.name + ' ' + fmt(o.total) + ' · ' + pct1(100 * o.total / T) + '%' + (sb >= 95 ? ' (BEV)' : sb >= 10 ? ' (' + Math.round(sb) + '% BEV)' : ''); };
     var lineE = function(o, i){ return (i + 1) + '. ' + o.name + ' ' + fmt(o.bev); };
     var rankOf = function(L, rx){ var k = -1; L.forEach(function(o, i){ if(k < 0 && rx.test(o.name)) k = i; }); return k; };
     var listPost = function(hdr, L, f, rxs, tail, suffix){
@@ -364,16 +365,18 @@
       rxs.map(function(rx){ return rankOf(L, rx); }).filter(function(k){ return k >= 8; }).sort(function(a, b){ return a - b; }).forEach(function(k){ rows.push(row(L[k], L[k].name + ' (#' + (k + 1) + ')')); });
       return rows;
     };
+    // one picture per part: the brands, the models (units and share of the market) and the BEV models, each as one list (the BEV part of a bar in green)
+    var rowB = function(o, label){ return { label:label, total:o.total, bev:o.bev, text:unitsText(o.total) + ' · ' + pct1(100 * o.bev / o.total) + '%' }; };
+    var rowM = function(o, label){ return { label:label, total:o.total, bev:o.bev, text:unitsText(o.total) + ' · ' + pct1(100 * o.total / T) + '%' }; };
+    var rowE = function(o, label){ return { label:label, total:o.bev, bev:o.bev, text:unitsText(o.bev) }; };
     var link = linkMix(m, c) + tags(), parts = [];
-    if(B.length >= 3) parts.push({ hdr:head + 'best-selling brands (cars · BEV share)', L:B, f:lineB, rx:RX_BRAND });
-    if(M.length >= 3) parts.push({ hdr:head + 'best-selling models (cars)', L:M, f:lineM, rx:RX_MODEL });
-    if(EVM.length >= 3) parts.push({ hdr:head + 'best-selling BEV models (units)', L:EVM, f:lineE, rx:RX_MODEL });
+    if(B.length >= 3) parts.push({ hdr:head + 'best-selling brands (cars · BEV share)', L:B, f:lineB, rx:RX_BRAND, row:rowB, col:'Brands · units · BEV share', labelW:230, sub:'best-selling brands · BEV part in green' });
+    if(M.length >= 3) parts.push({ hdr:head + 'best-selling models (cars · share of sales)', L:M, f:lineM, rx:RX_MODEL, row:rowM, col:'Models · units · share of all new cars', labelW:330, sub:'best-selling models · BEV part in green' });
+    if(EVM.length >= 3) parts.push({ hdr:head + 'best-selling BEV models (units)', L:EVM, f:lineE, rx:RX_MODEL, row:rowE, col:'BEV models · units', labelW:330, sub:'best-selling battery-electric models' });
     var posts = parts.map(function(p, i){ return listPost(p.hdr, p.L, p.f, p.rx, i === parts.length - 1 ? link : '', parts.length > 1 ? '(' + (i + 1) + '/' + parts.length + ')' : ''); });
-    var prov = isProv(c, m), cols = [], rowOf = function(o, label){ return { label:label, total:o.total, bev:o.bev, text:unitsText(o.total) }; };
-    if(B.length >= 3) cols.push({ head:'Brands', labelW:190, rows:imgRows(B, RX_BRAND, rowOf) });
-    if(M.length >= 3) cols.push({ head:'Models', labelW:240, rows:imgRows(M, RX_MODEL, rowOf) });
+    var prov = isProv(c, m), images = parts.map(function(p){ return { type:'bm', title:c, sub:mn + ' · ' + p.sub, cols:[ { head:p.col, labelW:p.labelW - 120, rows:imgRows(p.L, p.rx, p.row) } ] }; });
     return { sec:'bm', country:c, title:c + ' · brands and models', tag:'brands & models' + (prov ? ' · provisional' : ''), warn:prov, why:'Best-selling brands and models of the month, with the BEV part of each (green in the picture).' + (parts.length > 1 ? ' Models of the same name are added up across powertrains.' : ''), posts:posts, chart:{ ym:m, c:c }, key:'brands|' + c + '|' + m, ym:m, size:B.reduce(function(s, o){ return s + o.total; }, 0),
-      img:{ type:'bm', title:c, sub:mn + ' · best-selling brands and models · BEV part in green', cols:cols } };
+      img:images[0], images:images };
   }
 
   function build(){
