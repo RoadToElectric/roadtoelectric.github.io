@@ -7,14 +7,16 @@
 <title>Post drafts — Road to Electric</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
-<script src="assets/country-monthly-data.js"></script>
-<script src="assets/country-yearly-data.js"></script>
+<script>
+/* the data files change several times a day: this page never uses a cached copy of them (a stale file hides new drafts or cuts a thread short) */
+window.RTE_FRESH = Date.now();
+['country-monthly-data', 'country-yearly-data'].forEach(function(f){ document.write('<script src="assets/' + f + '.js?v=' + window.RTE_FRESH + '"><\/script>'); });
+</script>
 <script src="assets/country-iso2.js"></script>
 <script src="assets/city-bus-data.js?v=2"></script>
 <script src="assets/bus-2026-data.js?v=2"></script>
 <script src="assets/ev-trucks-data.js"></script>
-<script src="assets/manufacturer-monthly-data.js"></script>
-<script src="assets/manufacturer-model-monthly-data.js"></script>
+<script>['manufacturer-monthly-data', 'manufacturer-model-monthly-data'].forEach(function(f){ document.write('<script src="assets/' + f + '.js?v=' + window.RTE_FRESH + '"><\/script>'); });</script>
 <style>
   /* private drafting desk for X posts: not linked from the site; the drafts are written from the same public data as the charts */
   body{ margin:0; background:var(--bg); color:var(--text); }
