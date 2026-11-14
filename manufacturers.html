@@ -560,6 +560,7 @@
 <script src="assets/filter-memory.js?v=5"></script>
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-yearly-data.js"></script>
+<script src="assets/rte-private.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-fin-report-sales.js"></script>
@@ -2192,7 +2193,7 @@ let hoverKey = null, modelDataPromise = null;
 function loadModelData(){
   if(modelDataPromise) return modelDataPromise;
   const load = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); });
-  modelDataPromise = Promise.all([load('assets/manufacturer-model-monthly-data.js'), load('assets/manufacturer-model-yearly-data.js')]);
+  modelDataPromise = Promise.all([load('assets/manufacturer-model-monthly-data.js'), load('assets/manufacturer-model-yearly-data.js')]).then(r => { if(window.RTEPrivate) RTEPrivate.merge(); return r; });   // local-only data (assets/rte-private.js)
   return modelDataPromise;
 }
 function modelRowsFor(country){

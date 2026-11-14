@@ -562,6 +562,7 @@
 <script src="assets/manufacturer-monthly-data.js"></script>
 <script src="assets/manufacturer-model-monthly-data.js"></script>
 <script src="assets/manufacturer-model-yearly-data.js"></script>
+<script src="assets/rte-private.js"></script>
 <script src="assets/model-class-data.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/electrification-bars.js?v=8"></script>
@@ -2983,6 +2984,7 @@ const ALL_COUNTRIES_SORTED = [...ALL_COUNTRIES].sort((a,b) => {
 // "purple" markets (sales totals known, no powertrain split anywhere) are part of the country / continent filters too:
 // they have no mix to rank, but unchecking one (or its continent / rank tier) removes its purple shading from the map
 const PURPLE_CONTINENT = {"Qatar":"MIDEAST","Bolivia":"SA","Cambodia":"ASIA","Egypt":"AFRICA","Guatemala":"NAC","Guyana":"SA","Iran":"MIDEAST","Kuwait":"MIDEAST","Laos":"ASIA","Moldova":"EU","Myanmar":"ASIA","Nigeria":"AFRICA","Oman":"MIDEAST","Pakistan":"ASIA","Panama":"NAC","Puerto Rico":"NAC","Rwanda":"AFRICA","Saudi Arabia":"MIDEAST","Suriname":"SA","UAE":"MIDEAST","Venezuela":"SA","Yemen":"MIDEAST","Zambia":"AFRICA","Bosnia-Herzegovina":"EU"};
+if(window.RTEPrivate) RTEPrivate.mixTop(COUNTRY_DATA_QUALITY, PURPLE_CONTINENT);   // local-only data (assets/rte-private.js); a no-op on the public site
 const PURPLE_COUNTRIES = Object.keys(COUNTRY_DATA_QUALITY).filter(c => !COUNTRIES_WITH_TREND.has(c));
 PURPLE_COUNTRIES.forEach(c => { if(!COUNTRY_CONTINENT[c]) COUNTRY_CONTINENT[c] = PURPLE_CONTINENT[c] || 'OTHER'; });
 const PURPLE_SET = new Set(PURPLE_COUNTRIES);
@@ -6030,6 +6032,7 @@ const MFR_MONTHLY_SOURCE_NOTE = {
   Egypt: '(added 2026-11-02) Same BSCB article, all 164 models of H1 2026 (the list adds up to all 92,440 units, so there is no (other models) row). Monthly rows follow the brand rows (AMIC-shaped split). BEV flag as described in the brand note, everything else Others.',
   'Bosnia-Herzegovina': '(added 2026-11-04) Same ProAuto articles: the best-selling models of each month (about 30, +"Ostali" = the rest), of January-September 2026 (about 40) and of each full year; (other models) = brand total minus the listed models. BEV and PHEV are placed on models from the pooled EVStats model shares and the brand\'s estimated totals, most of them land in (other models) because ProAuto does not say which models are electrified; model-level hybrids are counted in Others, as everywhere on the site. Model names are ProAuto\'s (Clio (5) and Clio (6) are generations, Dacia Duster and Duster III are listed apart).',
 };
+if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOURCE_NOTE, MFR_MONTHLY_SOURCE_NOTE});   // local-only data (assets/rte-private.js); a no-op on the public site
 (function(){
   const mfrRows = document.getElementById('mfr-rank-rows');
   const mfrTooltip = document.getElementById('mfr-tooltip');
