@@ -51,6 +51,8 @@
   #days-chart text.vv, #ret-chart text.vv{ font-size:9px; }
   #days-chart text.si{ fill:#fff; font-weight:800; }
   .st-muted{ color:var(--text-muted); }
+  .st-leg i.mm, .st-leg i.dd, .st-split i.mm, .st-split i.dd{ box-shadow:inset 0 0 0 1px rgba(150,165,185,.6); }
+  .st-split i.mm{ color:#fff; } .st-split i.dd{ color:#1b2430; }
   .xc h3{ font-size:13px; font-weight:800; margin:0 0 2px; }
   .xc svg{ width:100%; height:auto; display:block; }
   .xc svg text{ fill:var(--text-muted); font-size:10px; }
@@ -96,7 +98,7 @@
       <h2 id="days-title">Views per day</h2>
       <p class="st-note" id="days-note"></p>
       <div id="days-chart"></div>
-      <div class="st-leg" style="margin-top:6px"><span><i style="background:#2fae4e"></i>Mobile view</span><span><i style="background:#0a80d0"></i>Desktop view</span><span><i style="background:var(--border)"></i>Mode not recorded (before the breakdown started)</span></div>
+      <div class="st-leg" style="margin-top:6px"><span><i class="mm" style="background:#0b0d10"></i>Mobile view</span><span><i class="dd" style="background:#b3b9c2"></i>Desktop view</span><span><i style="background:var(--border)"></i>Mode not recorded (before the breakdown started)</span></div>
     </section>
 
     <section class="st-card" id="ret-card">
@@ -158,7 +160,7 @@
   var PAGES = { 'index.html':'Home', 'powertrain-mix-by-country.html':'Mix by Country', 'manufacturers.html':'Manufacturers', 'world-car-sales.html':'World Car Sales', 'biggest-movers.html':'Biggest Movers',
     'charging-stations.html':'Charging Stations', 'ev-trucking.html':'EV Trucking', 'world-oil.html':'World Oil', 'world-population.html':'World Population', 'population-energy.html':'Population & Energy',
     'energy-mix.html':'Energy Mix', 'country.html':'Country', 'contact.html':'Contact', 'comments.html':'Comments', 'powertrain-mix-by-country-copy.html':'Mix by Country (copy)', 'ev-buses.html':'EV Buses', 'eu-fsd-vote.html':'EU Vote on Tesla FSD', 'autonomy-vehicles.html':'Autonomy Vehicles (coming soon)' };
-  var MODE = { mobile:'#2fae4e', desktop:'#0a80d0' };
+  var MODE = { mobile:'#0b0d10', desktop:'#b3b9c2' };
   var $ = function(id){ return document.getElementById(id); };
   var key = '', days = 30, timer = null;
   try{ key = localStorage.getItem('rte-stats-key') || ''; days = +localStorage.getItem('rte-stats-days'); if([0, 7, 30, 90].indexOf(days) < 0) days = 30; }catch(e){}
@@ -232,7 +234,7 @@
     var W = 960, H = 170, pad = 26, max = Math.max(5, Math.max.apply(null, list.map(function(x){ return x.v; }).concat([0]))), bw = Math.min(40, (W - pad) / Math.max(1, list.length)), svg = '', step = Math.ceil(list.length / 12), vert = bw < 26, plot = H - 18 - (vert ? 6 * fmt(max).length + 10 : 18);
     list.forEach(function(x, i){
       var xx = pad + i * bw, w = Math.max(1, bw - 2).toFixed(1), unk = Math.max(0, x.v - x.k), desk = Math.max(0, x.k - x.m), y = H - 18, tip = '<title>' + x.label + ': ' + fmt(x.v) + ' views' + (x.k ? ' (' + fmt(x.m) + ' mobile, ' + fmt(desk) + ' desktop)' : '') + '</title>';
-      [[x.m, MODE.mobile], [desk, MODE.desktop], [unk, 'var(--border)']].forEach(function(p){ if(p[0] > 0){ var h = Math.max(1, Math.round(plot * p[0] / max)); y -= h; svg += '<rect x="' + xx.toFixed(1) + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + p[1] + '">' + tip + '</rect>';
+      [[x.m, MODE.mobile], [desk, MODE.desktop], [unk, 'var(--border)']].forEach(function(p){ if(p[0] > 0){ var h = Math.max(1, Math.round(plot * p[0] / max)); y -= h; svg += '<rect x="' + xx.toFixed(1) + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + p[1] + '"' + (p[1].charAt(0) === '#' ? ' stroke="rgba(150,165,185,.55)" stroke-width=".8"' : '') + '>' + tip + '</rect>';
         if(!vert && h >= 14 && p[1] !== 'var(--border)') svg += '<text class="si" x="' + (xx + w / 2).toFixed(1) + '" y="' + (y + h / 2 + 3.5).toFixed(1) + '" text-anchor="middle">' + fmt(p[0]) + '</text>'; } });
       if(x.v > 0){ var cx = xx + w / 2; svg += vert ? '<text class="vl vv" x="' + (cx + 3.2).toFixed(1) + '" y="' + (y - 3).toFixed(1) + '" transform="rotate(-90 ' + (cx + 3.2).toFixed(1) + ' ' + (y - 3).toFixed(1) + ')">' + fmt(x.v) + '</text>' : '<text class="vl" x="' + cx.toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" text-anchor="middle">' + fmt(x.v) + '</text>'; }
       if(i % step === 0) svg += '<text x="' + (xx + 1).toFixed(1) + '" y="' + (H - 4) + '">' + (monthly ? x.label : x.label.slice(5)) + '</text>';
@@ -251,8 +253,8 @@
     var by = {}; det.by_mode.forEach(function(x){ by[x.k] = x; });
     var tot = ['mobile', 'desktop'].reduce(function(s, k){ return s + (by[k] ? by[k].views : 0); }, 0), labels = { mobile:'Mobile view', desktop:'Desktop view' };
     $('mode').innerHTML = !tot ? '<p class="st-note">No recorded views in this period yet.</p>' :
-      '<div class="st-split">' + ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<i style="width:' + pct(by[k].views, tot) + '%;background:' + MODE[k] + '" title="' + labels[k] + '">' + (pct(by[k].views, tot) >= 9 ? pct(by[k].views, tot) + '%' : '') + '</i>'; }).join('') + '</div><div class="st-leg">' +
-      ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<span><i style="background:' + MODE[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views</span></span>'; }).join('') + '</div>';
+      '<div class="st-split">' + ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<i class="' + (k === 'mobile' ? 'mm' : 'dd') + '" style="width:' + pct(by[k].views, tot) + '%;background:' + MODE[k] + '" title="' + labels[k] + '">' + (pct(by[k].views, tot) >= 9 ? pct(by[k].views, tot) + '%' : '') + '</i>'; }).join('') + '</div><div class="st-leg">' +
+      ['mobile', 'desktop'].filter(function(k){ return by[k]; }).map(function(k){ return '<span><i class="' + (k === 'mobile' ? 'mm' : 'dd') + '" style="background:' + MODE[k] + '"></i>' + labels[k] + ' <b>' + pct(by[k].views, tot) + '%</b> <span class="st-muted">' + fmt(by[k].views) + ' views</span></span>'; }).join('') + '</div>';
 
     // pages
     var pm = {}; det.by_page.forEach(function(x){ pm[x.page] = x; });
