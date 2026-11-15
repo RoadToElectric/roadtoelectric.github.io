@@ -158,6 +158,8 @@
             <label class="ge-fl" for="c-evk">Consumption</label>
             <div class="ge-inline"><input class="ge-num" id="c-evk" type="number" min="5" step="0.1"><span class="ge-unit" id="c-evk-u">kWh/100 km</span></div>
             <span class="ge-hint" id="c-ev-h"></span>
+            <label class="ge-fl" for="c-prev">Purchase price <span class="ge-hint">(optional)</span></label>
+            <div class="ge-inline"><input class="ge-num" id="c-prev" type="number" min="0" step="500" placeholder="e.g. 45000"><span class="ge-unit c-cur1">$</span></div>
           </div>
           <div class="cmp-col">
             <div class="cmp-h">⛽ Gas car</div>
@@ -166,17 +168,12 @@
             <label class="ge-fl" for="c-icel">Fuel use</label>
             <div class="ge-inline"><input class="ge-num" id="c-icel" type="number" min="1" step="0.1"><span class="ge-unit" id="c-icel-u">L/100 km</span></div>
             <span class="ge-hint" id="c-ice-h"></span>
+            <label class="ge-fl" for="c-price">Purchase price <span class="ge-hint">(optional)</span></label>
+            <div class="ge-inline"><input class="ge-num" id="c-price" type="number" min="0" step="500" placeholder="e.g. 36000"><span class="ge-unit c-cur1">$</span></div>
           </div>
         </div>
 
         <div class="cmp-opts" data-nocapture>
-          <div class="cmp-opt">
-            <label class="cmp-ck"><input type="checkbox" id="c-pr"> Purchase price</label>
-            <div class="cmp-of">
-              <label>Electric car <span class="ge-inline"><input class="ge-num" id="c-prev" type="number" min="0" step="500"><span class="ge-unit c-cur1">$</span></span></label>
-              <label>Gas car <span class="ge-inline"><input class="ge-num" id="c-price" type="number" min="0" step="500"><span class="ge-unit c-cur1">$</span></span></label>
-            </div>
-          </div>
           <div class="cmp-opt">
             <label class="cmp-ck"><input type="checkbox" id="c-ins"> Insurance</label>
             <div class="cmp-of">
@@ -272,7 +269,7 @@ const ICE_NA = TYP_ICE.concat(ICE_MODELS.map(([mk, md, y, L, eng, drv, hyb, prem
 const ICE_EU = TYP_ICE.concat(EU.ice.map(([mk, md, L, regs, hyb], i) => ({ id:'j' + i + ':' + mk + '|' + md + '|' + hyb, g:mk, n:mk + ' ' + md, md, L, regs, hyb, src:'EEA WLTP' })));
 
 const DEF = { reg:'CA-QC', units:'metric', cur:'CAD', ev:'avg', evK:null, ice:'tg3', iceL:null, km:20000, el:null, gas:null,
-  prOn:false, prEV:45000, prICE:36000, insOn:false, insEV:2000, insICE:1800, tirOn:false, tirP:900, tirL:70000, tirX:20,
+  prEV:0, prICE:0, insOn:false, insEV:2000, insICE:1800, tirOn:false, tirP:900, tirL:70000, tirX:20,
   oilOn:false, oilP:90, oilK:8000, othOn:false, othEV:0, othICE:0 };       // money in USD, distances in km
 const cmp = Object.assign({}, DEF);
 const isUS = () => cmp.units === 'us';
@@ -370,15 +367,16 @@ numIn('c-el', x => cmp.el = toUsd(x / 100));
 numIn('c-gas', x => cmp.gas = toUsd(isUS() ? x / L_GAL : x));
 numIn('c-evk', x => { if(x > 0) cmp.evK = isUS() ? x / KM_MI : x; });
 numIn('c-icel', x => { if(x > 0) cmp.iceL = isUS() ? MPG_K / x : x; });
-numIn('c-prev', x => cmp.prEV = toUsd(x)); numIn('c-price', x => cmp.prICE = toUsd(x));
+[['c-prev', 'prEV'], ['c-price', 'prICE']].forEach(([id, k]) => $(id).addEventListener('input', e => {      // empty box = price not counted
+  const x = parseFloat(e.target.value); cmp[k] = !isNaN(x) && x > 0 ? toUsd(x) : 0; render(); }));
 numIn('c-insev', x => cmp.insEV = toUsd(x)); numIn('c-insice', x => cmp.insICE = toUsd(x));
 numIn('c-tirp', x => cmp.tirP = toUsd(x)); numIn('c-tirl', x => { if(x > 0) cmp.tirL = isUS() ? x * KM_MI : x; }); numIn('c-tirx', x => cmp.tirX = x);
 numIn('c-oilp', x => cmp.oilP = toUsd(x)); numIn('c-oilk', x => { if(x > 0) cmp.oilK = isUS() ? x * KM_MI : x; });
 numIn('c-othev', x => cmp.othEV = toUsd(x)); numIn('c-othice', x => cmp.othICE = toUsd(x));
-const CKS = [['c-pr', 'prOn'], ['c-ins', 'insOn'], ['c-tir', 'tirOn'], ['c-oil', 'oilOn'], ['c-oth', 'othOn']];
+const CKS = [['c-ins', 'insOn'], ['c-tir', 'tirOn'], ['c-oil', 'oilOn'], ['c-oth', 'othOn']];
 CKS.forEach(([id, k]) => $(id).addEventListener('change', e => { cmp[k] = e.target.checked; render(); }));
 // typing in a box of a ticked-off option ticks it
-[['c-prev', 'prOn'], ['c-price', 'prOn'], ['c-insev', 'insOn'], ['c-insice', 'insOn'], ['c-tirp', 'tirOn'], ['c-tirl', 'tirOn'], ['c-tirx', 'tirOn'],
+[['c-insev', 'insOn'], ['c-insice', 'insOn'], ['c-tirp', 'tirOn'], ['c-tirl', 'tirOn'], ['c-tirx', 'tirOn'],
  ['c-oilp', 'oilOn'], ['c-oilk', 'oilOn'], ['c-othev', 'othOn'], ['c-othice', 'othOn']].forEach(([id, k]) => $(id).addEventListener('input', () => { if(!cmp[k]){ cmp[k] = true; render(); } }));
 document.querySelectorAll('.cmp-card input[type=number], #cmp-card input[type=number]').forEach(i => i.addEventListener('change', () => render(true)));
 $('c-reset').addEventListener('click', () => { const reg = cmp.reg; Object.assign(cmp, DEF); evPick.reset(); icePick.reset(); setRegion(reg); });
@@ -398,7 +396,8 @@ function render(force){
   setIn('c-gas', v.gas == null ? '' : +(usdTo(v.gas) * (us ? L_GAL : 1)).toFixed(3), force);
   setIn('c-evk', us ? +(v.evK * KM_MI).toFixed(1) : +v.evK.toFixed(1), force);
   setIn('c-icel', us ? +(MPG_K / v.iceL).toFixed(1) : +v.iceL.toFixed(1), force);
-  [['c-prev', 'prEV'], ['c-price', 'prICE'], ['c-insev', 'insEV'], ['c-insice', 'insICE'], ['c-tirp', 'tirP'], ['c-oilp', 'oilP'], ['c-othev', 'othEV'], ['c-othice', 'othICE']]
+  [['c-prev', 'prEV'], ['c-price', 'prICE']].forEach(([id, k]) => setIn(id, cmp[k] > 0 ? Math.round(usdTo(cmp[k])) : '', force));     // empty = not counted
+  [['c-insev', 'insEV'], ['c-insice', 'insICE'], ['c-tirp', 'tirP'], ['c-oilp', 'oilP'], ['c-othev', 'othEV'], ['c-othice', 'othICE']]
     .forEach(([id, k]) => setIn(id, Math.round(usdTo(cmp[k])), force));
   setIn('c-tirl', Math.round(us ? cmp.tirL / KM_MI : cmp.tirL), force); setIn('c-tirx', cmp.tirX, force);
   setIn('c-oilk', Math.round(us ? cmp.oilK / KM_MI : cmp.oilK), force);
@@ -429,6 +428,7 @@ function render(force){
     ['cmp-kpis', 'cmp-t', 'cmp-chart', 'cmp-leg'].forEach(id => $(id).innerHTML = ''); return;
   }
   const yEV = cs.reduce((s, c) => s + c.ev, 0), yICE = cs.reduce((s, c) => s + c.ice, 0), ySave = yICE - yEV;
+  cmp.prOn = cmp.prEV > 0 || cmp.prICE > 0;                                     // purchase prices count as soon as one is entered
   const pEV = cmp.prOn ? cmp.prEV : 0, pICE = cmp.prOn ? cmp.prICE : 0, pDiff = pICE - pEV;
   const save = n => pDiff + ySave * n, totEV = n => pEV + yEV * n, totICE = n => pICE + yICE * n;
   const evName = ei.typ ? ei.n : ei.n, iceName = ii.typ ? ii.n + ' (gas)' : ii.n;
@@ -483,7 +483,7 @@ $('m-wob').textContent = EU.periods.gas.replace('EU Weekly Oil Bulletin, ', '');
 $('m-cad').textContent = PER_USD.CAD.toFixed(4); $('m-eur').textContent = PER_USD.EUR.toFixed(4);
 render(true);
 
-FilterMemory.auto({ exclude:['c-reg', 'c-ev', 'c-ice', 'c-units', 'c-cur', 'c-pr', 'c-ins', 'c-tir', 'c-oil', 'c-oth'], extra:[
+FilterMemory.auto({ exclude:['c-reg', 'c-ev', 'c-ice', 'c-units', 'c-cur', 'c-ins', 'c-tir', 'c-oil', 'c-oth'], extra:[
   { key:'cmp', type:'fn', get:() => { const o = {}; Object.keys(DEF).forEach(k => { if(cmp[k] !== DEF[k]) o[k] = cmp[k]; }); return JSON.stringify(o); },
                           set:v => { try{ const o = JSON.parse(v); Object.keys(o).forEach(k => { if(k in DEF) cmp[k] = o[k]; });
                             if(!RB.has(cmp.reg)) cmp.reg = DEF.reg; if(!evList().some(e => e.id === cmp.ev)) cmp.ev = DEF.ev; if(!iceList().some(e => e.id === cmp.ice)) cmp.ice = DEF.ice;
