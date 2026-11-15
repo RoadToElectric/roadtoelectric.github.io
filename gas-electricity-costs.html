@@ -13,9 +13,9 @@
 <script src="assets/section-link.js?v=4" defer></script>
 <script src="assets/deeplink.js?v=2"></script>
 <style>
-  .ge-page{ --ge-g0:#dcfce7; --ge-g1:#14532d; --ge-r0:#fee2e2; --ge-r1:#7f1d1d; --ge-na:#d5dee8; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ge-page{ --ge-na:#24364d; } }
-  :root[data-theme="dark"] .ge-page{ --ge-na:#24364d; }
+  .ge-page{ --ge-g0:#dcfce7; --ge-g1:#14532d; --ge-r0:#fee2e2; --ge-r1:#7f1d1d; --ge-na:#d5dee8; --ge-pos:#15803d; --ge-neg:#b91c1c; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ge-page{ --ge-na:#24364d; --ge-pos:#4ade80; --ge-neg:#f87171; } }
+  :root[data-theme="dark"] .ge-page{ --ge-na:#24364d; --ge-pos:#4ade80; --ge-neg:#f87171; }
   .ge-note{ font-size:12.5px; color:var(--text-muted); line-height:1.5; margin:4px 0 10px; }
   .ge-filters{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px 14px; margin:6px 0 12px; padding:12px 14px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); }
   .ge-f{ display:flex; flex-direction:column; gap:5px; min-width:0; }
@@ -37,6 +37,19 @@
   .ge-map{ position:relative; width:100%; } .ge-map svg{ width:100%; height:auto; display:block; }
   .ge-map path.st{ stroke:var(--surface); stroke-width:.7; cursor:pointer; } .ge-map path.st:hover, .ge-map path.st.hl{ stroke:var(--text); stroke-width:1.6; }
   .ge-map path.na{ fill:var(--ge-na); }
+  .ge-mapgrid{ display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr); gap:14px; align-items:stretch; }
+  .ge-rank{ position:relative; min-height:340px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .ge-rank-in{ position:absolute; inset:0; overflow-y:auto; padding:0 10px 8px; }
+  .ge-rank h3{ position:sticky; top:0; z-index:1; margin:0 -10px 4px; padding:9px 10px 7px; background:var(--surface); border-bottom:1px solid var(--border); font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+  .ge-rank h3 b{ color:var(--text); }
+  .ge-br{ display:grid; grid-template-columns:18px minmax(0,1.35fr) minmax(40px,1fr) 62px; align-items:center; gap:7px; height:21px; font-size:12px; border-radius:6px; padding:0 3px; cursor:default; }
+  .ge-br:hover, .ge-br.hl{ background:var(--surface-alt); }
+  .ge-br .rk{ text-align:right; font-weight:800; color:var(--text-muted); font-variant-numeric:tabular-nums; font-size:11px; }
+  .ge-br .n{ font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .ge-br .n small{ font-size:9.5px; font-weight:900; color:var(--text-muted); margin-right:4px; }
+  .ge-br .t{ position:relative; height:13px; } .ge-br .t i{ position:absolute; top:0; bottom:0; border-radius:3px; } .ge-br .t u{ position:absolute; top:-3px; bottom:-3px; width:1px; background:var(--text-muted); opacity:.6; }
+  .ge-br .v{ text-align:right; font-weight:900; font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--text); }
+  .ge-br .v.neg{ color:var(--ge-neg); }
+  @media (max-width:1000px){ .ge-mapgrid{ grid-template-columns:1fr; } .ge-rank{ min-height:0; height:460px; } }
   .ge-map text.lb{ font-size:9.5px; font-weight:800; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
   .ge-map rect.inset{ fill:none; stroke:var(--border); stroke-dasharray:3 3; }
   .ge-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.5; min-width:230px; transition:opacity .1s; }
@@ -55,7 +68,8 @@
   table.ge-t tr:hover td{ background:var(--surface-alt); } table.ge-t tr.hl td{ background:var(--surface-alt); }
   table.ge-t .cc{ display:inline-block; font-size:10px; font-weight:900; padding:1px 5px; border-radius:5px; margin-right:7px; background:var(--surface-alt); color:var(--text-muted); border:1px solid var(--border); }
   table.ge-t .est{ color:var(--text-muted); font-weight:800; cursor:help; }
-  table.ge-t td.sv{ font-weight:900; } table.ge-t .pill{ display:inline-block; min-width:62px; padding:2px 8px; border-radius:7px; font-weight:900; }
+  table.ge-t td.sv{ font-weight:900; font-size:13.5px; color:var(--ge-pos); } table.ge-t td.sv.neg{ color:var(--ge-neg); }
+  table.ge-t td.sv i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; vertical-align:0; box-shadow:0 0 0 1px rgba(0,0,0,.12); }
   .ge-tfoot{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; }
   .ge-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .ge-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .ge-method li{ margin:5px 0; }
   .ge-wip{ display:flex; align-items:center; gap:14px; margin:14px 0 0; padding:12px 16px; border-radius:14px; border:2px solid #1f1f1f;
@@ -163,8 +177,13 @@
         <div class="ge-maptop">
           <div class="ge-seg" id="ge-color" data-nocapture><button type="button" data-v="saved" class="active">Colour by $ saved per year</button><button type="button" data-v="ratio">Colour by ratio</button></div>
         </div>
-        <div class="ge-map" id="ge-map"><div class="ge-tip" id="ge-tip"></div></div>
-        <div class="ge-leg" id="ge-leg"></div>
+        <div class="ge-mapgrid">
+          <div>
+            <div class="ge-map" id="ge-map"><div class="ge-tip" id="ge-tip"></div></div>
+            <div class="ge-leg" id="ge-leg"></div>
+          </div>
+          <div class="ge-rank"><div class="ge-rank-in" id="ge-rank"></div></div>
+        </div>
 
         <div class="ge-tfoot" data-nocapture>
           <div class="ge-seg" id="ge-cty"><button type="button" data-v="all" class="active">All</button><button type="button" data-v="CA">Canada</button><button type="button" data-v="US">United States</button></div>
@@ -380,7 +399,7 @@ function drawTable(rows, col){
       <td>${money(per100(r.ev100), 2)}</td>
       <td>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</td>
       <td>${fmtRatio(r.ratio)}</td>
-      <td class="sv">${r.sv == null ? '–' : `<span class="pill" style="background:${c};color:${textOn(c)}">${money(r.sv)}</span>`}</td></tr>`;
+      <td class="sv${r.sv < 0 ? ' neg' : ''}">${r.sv == null ? '–' : `<i style="background:${c}"></i>${money(r.sv)}`}</td></tr>`;
   }).join('');
   $('ge-t').innerHTML = head + '<tbody>' + body + '</tbody>';
 }
@@ -403,15 +422,47 @@ function drawLegend(col){
   $('ge-leg').innerHTML = s + `<span>${isS ? 'Green: the EV saves money · red: it costs more than gas' : 'Ratio = gas cost ÷ EV cost; above 1× the EV is cheaper'}</span><span><i></i>no data</span>`;
 }
 
+// ---------- ranking bars beside the map (same measure and colours as the map) ----------
+const SHORT = { 'Newfoundland and Labrador':'Newfoundland', 'Prince Edward Island':'P.E.I.', 'Northwest Territories':'N.W.T.', 'British Columbia':'B.C.',
+                'New Brunswick':'N. Brunswick', 'New Hampshire':'N. Hampshire', 'North Carolina':'N. Carolina', 'South Carolina':'S. Carolina',
+                'North Dakota':'N. Dakota', 'South Dakota':'S. Dakota', 'West Virginia':'W. Virginia', 'Massachusetts':'Massachusetts' };
+function drawRank(rows, col){
+  const isS = st.color === 'saved';
+  const val = r => isS ? r.sv : r.ratio;
+  const list = rows.filter(r => val(r) != null).sort((a, b) => val(b) - val(a));
+  const base = isS ? 0 : 1;                                       // bars start at $0, or at 1× for the ratio
+  const lo = Math.min(base, ...list.map(val)), hi = Math.max(base, ...list.map(val)), span = hi - lo || 1;
+  const x = v => (v - lo) / span * 100, z = x(base);
+  const html = list.map((r, i) => {
+    const v = val(r), a = x(v), c = col.of(r);
+    return `<div class="ge-br" data-id="${r.id}" title="${r.n}: ${isS ? money(v) + ' a year' : fmtRatio(v)}">
+      <span class="rk">${i + 1}</span><span class="n"><small>${r.c}</small>${SHORT[r.n] || r.n}</span>
+      <span class="t">${lo < base ? `<u style="left:${z}%"></u>` : ''}<i style="left:${Math.min(a, z)}%;width:${Math.max(Math.abs(a - z), 0.6)}%;background:${c}"></i></span>
+      <span class="v${v < base ? ' neg' : ''}">${isS ? money(v) : fmtRatio(v)}</span></div>`;
+  }).join('');
+  const none = rows.filter(r => val(r) == null).map(r => r.n);
+  $('ge-rank').innerHTML = `<h3>${isS ? `<b>$ saved per year</b> (${st.cur})` : '<b>Ratio</b> gas cost ÷ EV cost'} · highest first</h3>` + html +
+    (none.length ? `<div class="ge-hint" style="padding:6px 3px 0">No gasoline data: ${none.join(', ')}</div>` : '');
+}
+function markRank(id){
+  document.querySelectorAll('#ge-rank .ge-br.hl').forEach(e => e.classList.remove('hl'));
+  if(!id) return;
+  const el = document.querySelector(`#ge-rank .ge-br[data-id="${id}"]`);
+  if(el){ el.classList.add('hl'); const box = $('ge-rank'), top = el.offsetTop - box.clientHeight / 2; if(el.offsetTop < box.scrollTop + 30 || el.offsetTop > box.scrollTop + box.clientHeight - 30) box.scrollTo({ top, behavior:'smooth' }); }
+}
+$('ge-rank').addEventListener('mouseover', e => { const b = e.target.closest('.ge-br'); shapes.classed('hl', f => b && f.id === b.dataset.id); });
+$('ge-rank').addEventListener('mouseleave', () => shapes.classed('hl', false));
+
 // ---------- render ----------
 function render(){
   syncInputs();
   const rows = calc(), col = colorFn(rows), rb = new Map(rows.map(r => [r.id, r]));
   shapes.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c || null; })
     .classed('na', f => { const r = rb.get(f.id); return !r || r.sv == null; })
-    .on('mousemove', (ev, f) => showTip(ev, rb.get(f.id))).on('mouseleave', hideTip);
+    .on('mousemove', (ev, f) => { showTip(ev, rb.get(f.id)); markRank(f.id); }).on('mouseleave', () => { hideTip(); markRank(null); });
   labels.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c ? textOn(c) : 'var(--text-muted)'; });
   drawLegend(col);
+  drawRank(rows, col);
   drawTable(rows, col);
 
   const valid = rows.filter(r => r.sv != null).sort((a, b) => b.sv - a.sv);
