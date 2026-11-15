@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electricity &amp; Gas Costs — Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/mobile.css?v=10">
+<script src="assets/view-mode.js?v=7"></script>
+<script src="assets/page-views.js?v=5" defer></script>
+<script src="assets/tooltip-fit.js" defer></script>
+<script src="assets/section-link.js?v=4" defer></script>
+<script src="assets/deeplink.js?v=2"></script>
+<style>
+  .ge-page{ --ge-g0:#dcfce7; --ge-g1:#14532d; --ge-r0:#fee2e2; --ge-r1:#7f1d1d; --ge-na:#d5dee8; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .ge-page{ --ge-na:#24364d; } }
+  :root[data-theme="dark"] .ge-page{ --ge-na:#24364d; }
+  .ge-note{ font-size:12.5px; color:var(--text-muted); line-height:1.5; margin:4px 0 10px; }
+  .ge-filters{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px 14px; margin:6px 0 12px; padding:12px 14px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); }
+  .ge-f{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .ge-fl{ font-size:11.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  .ge-sel, .ge-num{ border:1px solid var(--border); border-radius:10px; padding:7px 10px; font:inherit; font-size:13px; font-weight:700; background:var(--surface); color:var(--text); width:100%; box-sizing:border-box; }
+  .ge-num{ font-variant-numeric:tabular-nums; }
+  .ge-inline{ display:flex; align-items:center; gap:8px; } .ge-inline .ge-num{ flex:1; min-width:0; } .ge-unit{ font-size:12px; font-weight:800; color:var(--text-muted); white-space:nowrap; }
+  .ge-seg{ display:inline-flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; align-self:flex-start; }
+  .ge-seg button{ appearance:none; border:0; background:var(--surface); color:var(--text-muted); font:inherit; font-size:12.5px; font-weight:800; padding:7px 12px; cursor:pointer; }
+  .ge-seg button + button{ border-left:1px solid var(--border); } .ge-seg button.active{ background:var(--accent); color:#fff; }
+  .ge-hint{ font-size:11.5px; color:var(--text-muted); }
+  .ge-sum{ font-size:13px; font-weight:700; margin:0 0 8px; color:var(--text); } .ge-sum b{ color:var(--accent); }
+  .ge-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:4px 0 12px; }
+  .ge-kpi{ border:1px solid var(--border); border-left:4px solid var(--c,var(--accent)); background:var(--surface); border-radius:14px; padding:9px 13px; }
+  .ge-kpi .t{ font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); }
+  .ge-kpi .v{ font-size:22px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .ge-kpi .s{ font-size:12px; color:var(--text-muted); }
+  .ge-maptop{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 14px; margin-bottom:4px; }
+  .ge-map{ position:relative; width:100%; } .ge-map svg{ width:100%; height:auto; display:block; }
+  .ge-map path.st{ stroke:var(--surface); stroke-width:.7; cursor:pointer; } .ge-map path.st:hover, .ge-map path.st.hl{ stroke:var(--text); stroke-width:1.6; }
+  .ge-map path.na{ fill:var(--ge-na); }
+  .ge-map text.lb{ font-size:9.5px; font-weight:800; pointer-events:none; text-anchor:middle; dominant-baseline:central; }
+  .ge-map rect.inset{ fill:none; stroke:var(--border); stroke-dasharray:3 3; }
+  .ge-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,16,40,.22); padding:9px 12px; font-size:12px; line-height:1.5; min-width:230px; transition:opacity .1s; }
+  .ge-tip h4{ margin:0 0 4px; font-size:13.5px; } .ge-tip .r{ display:flex; justify-content:space-between; gap:14px; } .ge-tip .r b{ font-variant-numeric:tabular-nums; }
+  .ge-tip .big{ margin-top:5px; padding-top:5px; border-top:1px solid var(--border); font-weight:900; font-size:13px; }
+  .ge-tip .est{ color:var(--text-muted); font-size:11px; margin-top:4px; }
+  .ge-leg{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--text-muted); }
+  .ge-leg svg{ width:min(420px,100%); height:auto; overflow:visible; } .ge-leg text{ fill:var(--text-muted); font-size:10.5px; }
+  .ge-leg i{ display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-2px; margin-right:5px; background:var(--ge-na); }
+  .ge-tablewrap{ overflow-x:auto; margin-top:6px; border:1px solid var(--border); border-radius:12px; }
+  table.ge-t{ width:100%; border-collapse:collapse; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  table.ge-t th{ position:sticky; top:0; background:var(--surface-alt); text-align:right; font-size:11px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--text-muted); padding:8px 9px; cursor:pointer; white-space:nowrap; user-select:none; border-bottom:1px solid var(--border); }
+  table.ge-t th:nth-child(2){ text-align:left; } table.ge-t th.on{ color:var(--accent); } table.ge-t th .ar{ font-size:9px; margin-left:3px; }
+  table.ge-t td{ padding:6px 9px; text-align:right; border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.ge-t td:nth-child(2){ text-align:left; font-weight:700; } table.ge-t td.rk{ color:var(--text-muted); font-weight:800; }
+  table.ge-t tr:hover td{ background:var(--surface-alt); } table.ge-t tr.hl td{ background:var(--surface-alt); }
+  table.ge-t .cc{ display:inline-block; font-size:10px; font-weight:900; padding:1px 5px; border-radius:5px; margin-right:7px; background:var(--surface-alt); color:var(--text-muted); border:1px solid var(--border); }
+  table.ge-t .est{ color:var(--text-muted); font-weight:800; cursor:help; }
+  table.ge-t td.sv{ font-weight:900; } table.ge-t .pill{ display:inline-block; min-width:62px; padding:2px 8px; border-radius:7px; font-weight:900; }
+  .ge-tfoot{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; }
+  .ge-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .ge-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .ge-method li{ margin:5px 0; }
+  @media (max-width:700px){ .ge-filters{ grid-template-columns:1fr 1fr; } table.ge-t{ font-size:12px; } }
+  @media (max-width:430px){ .ge-filters{ grid-template-columns:1fr; } .ge-kpis{ grid-template-columns:1fr 1fr; gap:8px; } .ge-kpi{ padding:8px 10px; } .ge-kpi .v{ font-size:18px; } .ge-kpi .s{ font-size:11px; } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="assets/road-to-electric-logo.webp" alt="Road to Electric — analyzing the current shift to EVs" width="204" height="91">
+      <span class="wordmark sr-only"><span class="brand">Road to Electric</span> <span class="sub">Analyzing the current shift to EVs</span></span>
+    </a>
+
+    <nav class="sidebar-nav">
+      <a href="index.html"><span class="dot"></span>Home</a>
+
+      <div class="nav-heading">Overview</div>
+      <a href="world-car-sales.html"><span class="dot"></span>World Car Sales</a>
+      <a href="powertrain-mix-by-country.html"><span class="dot"></span>Mix by Country</a>
+      <a href="manufacturers.html"><span class="dot"></span>Manufacturers</a>
+      <a href="ev-trucking.html"><span class="dot"></span>EV Trucking</a>
+      <a href="ev-buses.html"><span class="dot"></span>EV Buses</a>
+      <a href="autonomy-vehicles.html"><span class="dot"></span>Autonomy Vehicles</a>
+
+      <div class="nav-heading">Markets</div>
+      <a href="world-oil.html"><span class="dot"></span>World Oil</a>
+      <a href="population-energy.html"><span class="dot"></span>Population &amp; Energy</a>
+      <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
+      <a href="world-population.html"><span class="dot"></span>World Population</a>
+      <a href="energy-mix.html"><span class="dot"></span>Energy Mix</a>
+
+      <div class="nav-heading">Trends</div>
+      <a class="nav-hot" href="eu-fsd-vote.html"><span class="dot"></span>EU Vote on Tesla FSD</a>
+      <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
+      <a href="gas-electricity-costs.html" aria-current="page"><span class="dot"></span>Electricity &amp; Gas Costs</a>
+
+      <div class="nav-heading nav-about">About</div>
+      <a class="nav-about" href="contact.html"><span class="dot"></span>Contact</a>
+      <a class="nav-about" href="comments.html"><span class="dot"></span>Comments</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Monthly worldwide car sales &amp; powertrain stats — built for video &amp; social.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page ge-page">
+      <header class="page-header">
+        <div class="eyebrow">Trends · Electricity &amp; Gas Costs</div>
+        <h1>Electricity &amp; gas costs by region: where does an EV save the most?</h1>
+        <p class="subtitle">Home electricity price (sales tax included) against the 2026 average price of regular gasoline in every Canadian province and territory and every US state. Pick your EV and enter your gas car's fuel use and your yearly distance: the map and the table show how much charging at home saves (green) or costs (red) compared with filling up.</p>
+      </header>
+
+      <div class="card chart-card" id="ge-card">
+        <h2>1 · EV vs gas car: running cost by province and state, 2026</h2>
+        <p class="ge-note" id="ge-note"></p>
+
+        <div class="ge-filters" data-nocapture>
+          <div class="ge-f">
+            <label class="ge-fl" for="ge-ev">1 · Electric car</label>
+            <select class="ge-sel" id="ge-ev"></select>
+            <div class="ge-inline" id="ge-evc-w" style="display:none"><input class="ge-num" id="ge-evc" type="number" min="5" max="60" step="0.1" data-nofm><span class="ge-unit" id="ge-evc-u">kWh/100 km</span></div>
+            <span class="ge-hint" id="ge-ev-h"></span>
+          </div>
+          <div class="ge-f">
+            <span class="ge-fl">2 · Units</span>
+            <div class="ge-seg" id="ge-units"><button type="button" data-v="metric" class="active">L/100 km · km</button><button type="button" data-v="us">MPG · miles</button></div>
+            <span class="ge-hint">Changes the gas-car and distance units</span>
+          </div>
+          <div class="ge-f">
+            <label class="ge-fl" for="ge-ice">3 · Gas car fuel use</label>
+            <div class="ge-inline"><input class="ge-num" id="ge-ice" type="number" min="1" step="0.1" data-nofm><span class="ge-unit" id="ge-ice-u">L/100 km</span></div>
+            <span class="ge-hint" id="ge-ice-h"></span>
+          </div>
+          <div class="ge-f">
+            <label class="ge-fl" for="ge-dist">4 · Distance per year</label>
+            <div class="ge-inline"><input class="ge-num" id="ge-dist" type="number" min="0" step="500" data-nofm><span class="ge-unit" id="ge-dist-u">km</span></div>
+            <span class="ge-hint" id="ge-dist-h"></span>
+          </div>
+          <div class="ge-f">
+            <span class="ge-fl">Currency</span>
+            <div class="ge-seg" id="ge-cur"><button type="button" data-v="USD" class="active">USD</button><button type="button" data-v="CAD">CAD</button></div>
+            <span class="ge-hint" id="ge-fx-h"></span>
+          </div>
+        </div>
+
+        <p class="ge-sum" id="ge-sum"></p>
+        <div class="ge-kpis" id="ge-kpis"></div>
+
+        <div class="ge-maptop">
+          <div class="ge-seg" id="ge-color" data-nocapture><button type="button" data-v="saved" class="active">Colour by $ saved per year</button><button type="button" data-v="ratio">Colour by ratio</button></div>
+        </div>
+        <div class="ge-map" id="ge-map"><div class="ge-tip" id="ge-tip"></div></div>
+        <div class="ge-leg" id="ge-leg"></div>
+
+        <div class="ge-tfoot" data-nocapture>
+          <div class="ge-seg" id="ge-cty"><button type="button" data-v="all" class="active">All</button><button type="button" data-v="CA">Canada</button><button type="button" data-v="US">United States</button></div>
+          <span class="ge-hint">Click a column to sort · <span class="est">≈</span> = estimated state gasoline price</span>
+        </div>
+        <div class="ge-tablewrap"><table class="ge-t" id="ge-t"></table></div>
+        <p class="ge-note note" id="ge-tnote"></p>
+      </div>
+
+      <details class="ge-method" id="method" open>
+        <summary>How these numbers are built — read before quoting them</summary>
+        <ol>
+          <li><b>The calculation.</b> EV cost per 100 km = the car's consumption (kWh/100 km) × the home electricity price. Gas car cost per 100 km = its fuel use (L/100 km) × the gasoline price. <b>Ratio</b> = gas car cost ÷ EV cost: 3.0× means the EV costs a third as much per kilometre. <b>$ saved in gas</b> = (gas car cost − EV cost) × your yearly distance. A negative number (red) means charging at home costs more than filling up.</li>
+          <li><b>Gasoline, Canada:</b> Statistics Canada table 18-10-0001-01, regular unleaded at self-service stations, monthly, <span data-p="caGas"></span>. StatCan publishes cities, not provinces, so each province is the plain average of its cities: Ontario = Toronto, Ottawa and Thunder Bay; Quebec = Montréal and Québec City; Alberta = Calgary and Edmonton; Saskatchewan = Regina and Saskatoon; British Columbia = Vancouver and Victoria; the others one city each; Yukon = Whitehorse, Northwest Territories = Yellowknife. <b>Nunavut has no StatCan city and is left blank.</b></li>
+          <li><b>Gasoline, United States:</b> EIA monthly retail price of regular gasoline, taxes included, <span data-p="usGas"></span>. The EIA publishes its own series for only 9 states (California, Colorado, Florida, Massachusetts, Minnesota, New York, Ohio, Texas, Washington); those are used as is. <b>The other 41 states are estimates (marked ≈):</b> the 2026 average of the state's EIA region (New England, Central Atlantic, Lower Atlantic, Midwest, Gulf Coast, Rocky Mountain, West Coast) × how that state's AAA price compares with the AAA prices of the region's other states (AAA state averages, one-day reading of 14 November 2026). Tested on the 8 states EIA does publish, the estimate lands within ±6% of the real figure.</li>
+          <li><b>Electricity, United States:</b> EIA Electric Power Monthly, table 5.6.B, average residential price, January to August 2026. This is revenue ÷ kWh sold, so fixed monthly charges are spread over the kWh; it is a price before sales tax, which the page then adds (see below).</li>
+          <li><b>Electricity, Canada:</b> Canada Energy Regulator, market snapshot “How much do your neighbours across Canada pay for electricity?” (4 March 2026): modelled price for a home using 1,000 kWh a month, fixed and delivery charges and direct rebates included, <b>taxes excluded</b>, rates in force in November 2025 (Manitoba 1 January 2026, Nunavut 1 October 2022). Canada has no observed 2026 provincial average price, so this is the closest comparable measure.</li>
+          <li><b>Sales tax on electricity is included.</b> Both electricity sources give prices before tax, so the page adds the consumption tax a household pays on its electricity bill (the “Elec. tax” column; hover it for the detail), to compare with gasoline prices that already include their taxes.
+            <b>Canada</b> (rules as of November 2026): GST 5% everywhere; Quebec + QST 9.975% = 14.975%; Ontario HST 13% (the Ontario Electricity Rebate is already in the CER price); Saskatchewan + PST 6% = 11%; Manitoba + RST 7% = 12% (the RST exemption covers space heating only, not EV charging); Newfoundland and Labrador HST 15%; Nova Scotia, New Brunswick and Prince Edward Island refund the provincial part of the HST on home electricity, so 5%; British Columbia, Alberta and the territories 5%.
+            <b>United States (approximate):</b> state sales tax on residential electricity, or the state percentage tax charged on the bill in its place (Alabama utility tax 4%, Florida gross receipts 2.5%, Rhode Island 4%), plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%). Not included: per-kWh excise taxes (Illinois, Virginia), flat monthly utility taxes, city utility taxes, and gross-receipts taxes the utility builds into its rates. Local rates vary by city, so a given address can differ by a few points.</li>
+          <li><b>Home charging only:</b> public fast charging often costs 2–4× the home price. Time-of-use or EV-specific rates can be much cheaper than the averages shown.</li>
+          <li><b>EV consumption presets</b> are approximate EPA combined ratings (kWh per 100 miles converted to kWh/100 km). The EPA measures energy from the wall, so charging losses are already included. Winter driving in Canada and the northern states can add 20–35%; use the Custom value to test it.</li>
+          <li><b>Currency:</b> Canadian rows are in CAD and US rows in USD at the source; the page converts them with the Bank of Canada's 2026 average exchange rate (<span id="ge-fx-m"></span>).</li>
+          <li><b>Rebuild:</b> <code>scripts/gas_elec/build_gas_elec.py</code> reads the source files kept in <code>scripts/gas_elec/src/</code> and writes <code>assets/gas-elec-data.js</code> and the map shapes <code>assets/na-admin1-geo.js</code> (Natural Earth, public domain).</li>
+        </ol>
+      </details>
+
+      <footer class="page-footer">
+        Data: Statistics Canada (table 18-10-0001-01), U.S. Energy Information Administration, AAA, Canada Energy Regulator, Bank of Canada; map: Natural Earth. Road to Electric — analyzing the current shift to EVs.
+      </footer>
+    </div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="assets/gas-elec-data.js?v=2"></script>
+<script src="assets/na-admin1-geo.js?v=1"></script>
+<script src="assets/filter-memory.js?v=5"></script>
+<script>
+const D = GAS_ELEC, FX = D.cadPerUsd, KM_MI = 1.609344, L_GAL = 3.785411784, MPG_K = 235.214583;
+const $ = id => document.getElementById(id);
+// approximate EPA combined ratings, kWh/100 mi -> kWh/100 km (wall to wheels, charging losses included)
+const EVS = [
+  { id:'m3',   n:'Tesla Model 3 (RWD)',                    k:15.5 },
+  { id:'small',n:'Small EV (Chevrolet Bolt, Nissan Leaf)', k:17.4 },
+  { id:'my',   n:'Tesla Model Y (Long Range AWD)',         k:17.4 },
+  { id:'avg',  n:'Average EV (all models)',                k:18.6 },
+  { id:'eqx',  n:'Chevrolet Equinox EV',                   k:19.3 },
+  { id:'i5',   n:'Hyundai Ioniq 5 / Kia EV6 (AWD)',        k:19.9 },
+  { id:'mme',  n:'Ford Mustang Mach-E (AWD)',              k:20.5 },
+  { id:'r1s',  n:'Large SUV (Rivian R1S)',                 k:28.0 },
+  { id:'f150', n:'Pickup (Ford F-150 Lightning)',          k:29.8 },
+  { id:'custom', n:'Custom value…',                        k:null },
+];
+const st = { ev:'avg', evCustom:18, units:'metric', iceL:8.5, km:20000, cur:'USD', color:'saved', cty:'all', sort:'sv', dir:-1 };
+
+// ---------- calculation ----------
+const toCur = (v, c) => c === st.cur ? v : (st.cur === 'USD' ? v / FX : v * FX);      // v in the row's own currency
+const evK = () => st.ev === 'custom' ? st.evCustom : EVS.find(e => e.id === st.ev).k;
+function calc(){
+  const k = evK();
+  return D.rows.map(r => {
+    const cc = r.c === 'CA' ? 'CAD' : 'USD';
+    const e0 = toCur(r.e, cc), e = e0 * (1 + r.t), g = r.g == null ? null : toCur(r.g, cc);     // e = home electricity price with sales tax
+    const ev100 = k * e, ice100 = g == null ? null : st.iceL * g;     // per 100 km
+    const ok = ice100 != null && ev100 > 0;
+    return Object.assign({}, r, { e0, e, g, ev100, ice100, ratio: ok ? ice100 / ev100 : null, sv: ok ? (ice100 - ev100) / 100 * st.km : null });
+  });
+}
+
+// ---------- formatting ----------
+const isUS = () => st.units === 'us';
+const dUnit = () => isUS() ? 'mi' : 'km';
+const per100 = v => isUS() ? v * KM_MI : v;                        // cost per 100 km -> per 100 mi
+const gasShown = g => isUS() ? g * L_GAL : g;                      // per litre -> per gallon
+const sym = () => st.cur === 'CAD' ? 'C$' : '$';
+const money = (v, d = 0) => v == null ? '–' : (v < 0 ? '−' : '') + sym() + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
+const fmtRatio = v => v == null ? '–' : v.toFixed(v >= 10 ? 1 : 2) + '×';
+const cents = v => (v * 100).toFixed(1) + '¢';
+const pct = t => parseFloat((t * 100).toFixed(3)) + '%';         // 5%, 2.75%, 14.975%
+const nf = (v, d = 0) => v.toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
+
+// ---------- colours ----------
+function colorFn(rows){
+  const cs = getComputedStyle(document.querySelector('.ge-page'));
+  const g0 = cs.getPropertyValue('--ge-g0').trim(), g1 = cs.getPropertyValue('--ge-g1').trim(), r0 = cs.getPropertyValue('--ge-r0').trim(), r1 = cs.getPropertyValue('--ge-r1').trim();
+  const val = r => st.color === 'saved' ? r.sv : (r.ratio == null ? null : Math.log(r.ratio));
+  const vs = rows.map(val).filter(v => v != null);
+  const maxP = Math.max(0, ...vs), maxN = Math.max(0, ...vs.map(v => -v));
+  const gi = d3.interpolateLab(g0, g1), ri = d3.interpolateLab(r0, r1);
+  const f = v => v == null ? null : v >= 0 ? gi(maxP ? 0.08 + 0.92 * v / maxP : 0.08) : ri(maxN ? 0.08 + 0.92 * -v / maxN : 0.08);
+  return { of: r => f(val(r)), f, maxP, maxN, gi, ri };
+}
+const textOn = c => { const l = d3.lab(c).l; return l > 60 ? '#06182e' : '#ffffff'; };
+
+// ---------- map ----------
+const W = 960, H = 640;
+const byId = new Map(D.rows.map(r => [r.id, r]));
+const svg = d3.select('#ge-map').insert('svg', '#ge-tip').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Map of Canada and the United States coloured by EV savings');
+const mainFeats = { type:'FeatureCollection', features: NA_ADMIN1.features.filter(f => f.id !== 'US-HI') };
+const hiFeat = NA_ADMIN1.features.find(f => f.id === 'US-HI');
+const proj = d3.geoAlbers().rotate([97, 0]).center([0, 50]).parallels([38, 66]).fitExtent([[10, 6], [W - 10, H - 6]], mainFeats);
+const path = d3.geoPath(proj);
+const hiBox = [[30, H - 120], [210, H - 20]];
+const hiProj = d3.geoConicConformal().rotate([157, 0]).parallels([19, 22]).fitExtent([[hiBox[0][0] + 8, hiBox[0][1] + 8], [hiBox[1][0] - 8, hiBox[1][1] - 8]], hiFeat);
+const hiPath = d3.geoPath(hiProj);
+svg.append('rect').attr('class', 'inset').attr('x', hiBox[0][0]).attr('y', hiBox[0][1]).attr('width', hiBox[1][0] - hiBox[0][0]).attr('height', hiBox[1][1] - hiBox[0][1]).attr('rx', 6);
+const gShapes = svg.append('g'), gLabels = svg.append('g');
+const shapes = gShapes.selectAll('path').data(NA_ADMIN1.features.filter(f => f.id !== 'US-DC')).join('path')
+  .attr('class', 'st').attr('d', f => f.id === 'US-HI' ? hiPath(f) : path(f));
+const LBL_SKIP = new Set(['US-RI', 'US-DE', 'US-CT', 'US-NJ', 'US-MD', 'US-VT', 'US-NH', 'US-MA', 'CA-PE']);
+const labels = gLabels.selectAll('text').data(NA_ADMIN1.features.filter(f => {
+    if(f.id === 'US-DC' || LBL_SKIP.has(f.id)) return false;
+    return f.id === 'US-HI' || path.area(f) > 500;
+  })).join('text').attr('class', 'lb')
+  .attr('transform', f => {
+    let c = f.id === 'US-HI' ? hiPath.centroid(f) : path.centroid(f);
+    const nudge = { 'CA-NU':[-40, 40], 'CA-NT':[0, 30], 'US-FL':[12, 8], 'US-LA':[-10, -4], 'US-MI':[12, 20], 'CA-NL':[16, 10], 'US-AK':[10, 10], 'US-HI':[-30, -22],'CA-QC':[0, 30], 'CA-BC':[6, 10] }[f.id];
+    if(nudge) c = [c[0] + nudge[0], c[1] + nudge[1]];
+    return `translate(${c[0]},${c[1]})`;
+  }).text(f => f.id.slice(3));
+
+const tip = $('ge-tip');
+function showTip(ev, r){
+  if(!r) return;
+  const box = $('ge-map').getBoundingClientRect();
+  const u = dUnit();
+  const gas = r.g == null ? '<div class="r"><span>Gasoline</span><b>no data</b></div>' :
+    `<div class="r"><span>Gasoline</span><b>${money(gasShown(r.g), 2)}/${isUS() ? 'gal' : 'L'}${r.gs === 'est' ? ' ≈' : ''}</b></div>`;
+  tip.innerHTML = `<h4>${r.n}</h4>${gas}
+    <div class="r"><span>Home electricity, with tax</span><b>${cents(r.e)}/kWh</b></div>
+    <div class="r"><span>&nbsp; before tax · sales tax</span><b>${cents(r.e0)} · ${pct(r.t)}</b></div>
+    <div class="r"><span>EV cost per 100 ${u}</span><b>${money(per100(r.ev100), 2)}</b></div>
+    <div class="r"><span>Gas car cost per 100 ${u}</span><b>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</b></div>
+    <div class="r"><span>Ratio (gas ÷ EV)</span><b>${fmtRatio(r.ratio)}</b></div>
+    <div class="r big"><span>${r.sv == null ? 'Saved per year' : r.sv >= 0 ? 'EV saves per year' : 'EV costs more per year'}</span><b>${r.sv == null ? '–' : money(Math.abs(r.sv))}</b></div>
+    ${r.gs === 'est' ? `<div class="est">≈ State gasoline price estimated from the EIA ${r.gr} average and AAA state prices.</div>` : ''}
+    <div class="est">Electricity tax: ${r.tn}${r.c === 'US' ? ' (approximate)' : ''}.</div>
+    ${r.c === 'CA' && r.gc ? `<div class="est">Gasoline: ${r.gc} (StatCan cities).</div>` : ''}`;
+  tip.style.opacity = 1;
+  const x = ev.clientX - box.left, y = ev.clientY - box.top, tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.max(0, Math.min(box.width - tw, x + 14 - (x > box.width / 2 ? tw + 28 : 0))) + 'px';
+  tip.style.top = Math.max(0, Math.min(box.height - th, y - th / 2)) + 'px';
+}
+function hideTip(){ tip.style.opacity = 0; }
+
+// ---------- controls ----------
+const evSel = $('ge-ev');
+EVS.forEach(e => { const o = document.createElement('option'); o.value = e.id; evSel.appendChild(o); });
+function syncInputs(){
+  const us = isUS();
+  EVS.forEach((e, i) => { evSel.options[i].textContent = e.k == null ? e.n : `${e.n} — ${us ? nf(e.k * KM_MI, 0) + ' kWh/100 mi' : nf(e.k, 1) + ' kWh/100 km'}`; });
+  evSel.value = st.ev;
+  $('ge-evc-w').style.display = st.ev === 'custom' ? '' : 'none';
+  $('ge-evc-u').textContent = us ? 'kWh/100 mi' : 'kWh/100 km';
+  if(document.activeElement !== $('ge-evc')) $('ge-evc').value = us ? +(st.evCustom * KM_MI).toFixed(1) : +st.evCustom.toFixed(1);
+  $('ge-ev-h').textContent = 'EPA combined, charging losses included';
+  $('ge-ice-u').textContent = us ? 'MPG (US)' : 'L/100 km';
+  if(document.activeElement !== $('ge-ice')) $('ge-ice').value = us ? +(MPG_K / st.iceL).toFixed(1) : +st.iceL.toFixed(1);
+  $('ge-ice-h').textContent = us ? `= ${nf(st.iceL, 1)} L/100 km` : `= ${nf(MPG_K / st.iceL, 1)} MPG (US)`;
+  $('ge-dist-u').textContent = us ? 'miles' : 'km';
+  if(document.activeElement !== $('ge-dist')) $('ge-dist').value = us ? Math.round(st.km / KM_MI) : Math.round(st.km);
+  $('ge-dist-h').textContent = us ? `= ${nf(st.km)} km` : `= ${nf(st.km / KM_MI)} miles`;
+  $('ge-fx-h').textContent = `2026 avg: 1 USD = ${FX.toFixed(4)} CAD`;
+}
+evSel.addEventListener('change', () => { st.ev = evSel.value; render(); });
+$('ge-evc').addEventListener('input', e => { const v = parseFloat(e.target.value); if(v > 0){ st.evCustom = isUS() ? v / KM_MI : v; render(); } });
+$('ge-ice').addEventListener('input', e => { const v = parseFloat(e.target.value); if(v > 0){ st.iceL = isUS() ? MPG_K / v : v; render(); } });
+$('ge-dist').addEventListener('input', e => { const v = parseFloat(e.target.value); if(v >= 0){ st.km = isUS() ? v * KM_MI : v; render(); } });
+['ge-evc', 'ge-ice', 'ge-dist'].forEach(id => $(id).addEventListener('change', () => syncInputs()));
+function seg(id, key){
+  $(id).addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    [...$(id).children].forEach(x => x.classList.toggle('active', x === b));
+    st[key] = b.dataset.v; render();
+  });
+}
+seg('ge-units', 'units'); seg('ge-cur', 'cur'); seg('ge-color', 'color'); seg('ge-cty', 'cty');
+
+// ---------- table ----------
+const COLS = [
+  { k:'rk',  h:'#' },
+  { k:'n',   h:'Province / state' },
+  { k:'g',   h:() => `Gasoline /${isUS() ? 'gal' : 'L'}` },
+  { k:'e',   h:'Electricity /kWh, tax incl.' },
+  { k:'t',   h:'Elec. tax' },
+  { k:'ev100',  h:() => `EV /100 ${dUnit()}` },
+  { k:'ice100', h:() => `Gas car /100 ${dUnit()}` },
+  { k:'ratio',  h:'Ratio' },
+  { k:'sv',     h:() => `$ saved in gas /yr (${st.cur})` },
+];
+$('ge-t').addEventListener('click', e => {
+  const th = e.target.closest('th'); if(!th || th.dataset.k === 'rk') return;
+  const k = th.dataset.k;
+  if(st.sort === k) st.dir = -st.dir; else { st.sort = k; st.dir = k === 'n' ? 1 : -1; }
+  render();
+});
+function drawTable(rows, col){
+  let list = rows.filter(r => st.cty === 'all' || r.c === st.cty);
+  const k = st.sort;
+  list.sort((a, b) => {
+    const va = a[k], vb = b[k];
+    if(va == null && vb == null) return 0; if(va == null) return 1; if(vb == null) return -1;
+    return (typeof va === 'string' ? va.localeCompare(vb) : va - vb) * st.dir;
+  });
+  const head = '<thead><tr>' + COLS.map(c => `<th data-k="${c.k}" class="${st.sort === c.k ? 'on' : ''}">${typeof c.h === 'function' ? c.h() : c.h}${st.sort === c.k ? `<span class="ar">${st.dir > 0 ? '▲' : '▼'}</span>` : ''}</th>`).join('') + '</tr></thead>';
+  const body = list.map((r, i) => {
+    const c = col.of(r);
+    return `<tr data-id="${r.id}"><td class="rk">${i + 1}</td>
+      <td><span class="cc">${r.c}</span>${r.n}</td>
+      <td>${r.g == null ? '–' : money(gasShown(r.g), 2)}${r.gs === 'est' ? ' <span class="est" title="Estimated: EIA ' + r.gr + ' average × AAA state price relative">≈</span>' : ''}</td>
+      <td>${cents(r.e)}</td>
+      <td title="${r.tn}${r.c === 'US' ? ' (approximate)' : ''}">${pct(r.t)}</td>
+      <td>${money(per100(r.ev100), 2)}</td>
+      <td>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</td>
+      <td>${fmtRatio(r.ratio)}</td>
+      <td class="sv">${r.sv == null ? '–' : `<span class="pill" style="background:${c};color:${textOn(c)}">${money(r.sv)}</span>`}</td></tr>`;
+  }).join('');
+  $('ge-t').innerHTML = head + '<tbody>' + body + '</tbody>';
+}
+$('ge-t').addEventListener('mouseover', e => { const tr = e.target.closest('tr[data-id]'); shapes.classed('hl', f => tr && f.id === tr.dataset.id); });
+$('ge-t').addEventListener('mouseleave', () => shapes.classed('hl', false));
+
+// ---------- legend ----------
+function drawLegend(col){
+  const w = 420, h = 40, mid = col.maxN > 0 ? (col.maxN / (col.maxN + col.maxP)) * w : 0;
+  const isS = st.color === 'saved';
+  const lab = v => isS ? money(v) : fmtRatio(Math.exp(v));
+  let s = `<svg viewBox="0 0 ${w} ${h}"><defs>
+    <linearGradient id="lgG"><stop offset="0" stop-color="${col.gi(0.08)}"/><stop offset="1" stop-color="${col.gi(1)}"/></linearGradient>
+    <linearGradient id="lgR"><stop offset="0" stop-color="${col.ri(1)}"/><stop offset="1" stop-color="${col.ri(0.08)}"/></linearGradient></defs>`;
+  if(mid > 0) s += `<rect x="0" y="4" width="${mid}" height="12" rx="3" fill="url(#lgR)"/>`;
+  s += `<rect x="${mid}" y="4" width="${w - mid}" height="12" rx="3" fill="url(#lgG)"/>`;
+  s += `<text x="0" y="31">${col.maxN > 0 ? lab(-col.maxN) : lab(0)}</text>`;
+  if(mid > 30 && mid < w - 60) s += `<text x="${mid}" y="31" text-anchor="middle">${isS ? sym() + '0' : '1.00×'}</text>`;
+  s += `<text x="${w}" y="31" text-anchor="end">${lab(col.maxP)}</text></svg>`;
+  $('ge-leg').innerHTML = s + `<span>${isS ? 'Green: the EV saves money · red: it costs more than gas' : 'Ratio = gas cost ÷ EV cost; above 1× the EV is cheaper'}</span><span><i></i>no data</span>`;
+}
+
+// ---------- render ----------
+function render(){
+  syncInputs();
+  const rows = calc(), col = colorFn(rows), rb = new Map(rows.map(r => [r.id, r]));
+  shapes.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c || null; })
+    .classed('na', f => { const r = rb.get(f.id); return !r || r.sv == null; })
+    .on('mousemove', (ev, f) => showTip(ev, rb.get(f.id))).on('mouseleave', hideTip);
+  labels.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c ? textOn(c) : 'var(--text-muted)'; });
+  drawLegend(col);
+  drawTable(rows, col);
+
+  const valid = rows.filter(r => r.sv != null).sort((a, b) => b.sv - a.sv);
+  const best = valid[0], worst = valid[valid.length - 1], med = valid[Math.floor(valid.length / 2)];
+  const losers = valid.filter(r => r.sv < 0).length;
+  const ca = valid.filter(r => r.c === 'CA'), us = valid.filter(r => r.c === 'US');
+  const avg = a => a.reduce((s, r) => s + r.sv, 0) / a.length;
+  $('ge-kpis').innerHTML = [
+    { t:'Saves the most', v:money(best.sv), s:`${best.n} · ratio ${fmtRatio(best.ratio)}`, c:'#16a34a' },
+    { t:'Saves the least', v:money(worst.sv), s:`${worst.n} · ratio ${fmtRatio(worst.ratio)}`, c:worst.sv < 0 ? '#dc2626' : '#84cc16' },
+    { t:'Middle of the pack', v:money(med.sv), s:`${med.n} · ratio ${fmtRatio(med.ratio)}`, c:'#0a80d0' },
+    { t:'Average saving', v:money(avg(valid)), s:`Canada ${money(avg(ca))} · US ${money(avg(us))}`, c:'#7c3aed' },
+    { t:'Where the EV costs more', v:String(losers), s:losers ? `of ${valid.length} provinces and states` : `none of ${valid.length} provinces and states`, c:losers ? '#dc2626' : '#16a34a' },
+  ].map(k => `<div class="ge-kpi" style="--c:${k.c}"><div class="t">${k.t}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
+
+  const evName = st.ev === 'custom' ? 'Custom EV' : EVS.find(e => e.id === st.ev).n;
+  const evCons = isUS() ? `${nf(evK() * KM_MI, 0)} kWh/100 mi` : `${nf(evK(), 1)} kWh/100 km`;
+  const ice = isUS() ? `${nf(MPG_K / st.iceL, 1)} MPG` : `${nf(st.iceL, 1)} L/100 km`;
+  const dist = isUS() ? `${nf(st.km / KM_MI)} miles` : `${nf(st.km)} km`;
+  $('ge-sum').innerHTML = `<b>${evName}</b> (${evCons}) vs a gas car at <b>${ice}</b>, <b>${dist}</b> a year, home charging, amounts in <b>${st.cur}</b>.`;
+  $('ge-note').textContent = `Gasoline: 2026 average (Canada ${D.periods.caGas}, US ${D.periods.usGas}). Electricity: US residential average ${D.periods.usEl}; Canada ${D.periods.caEl} (CER, 1,000 kWh/month). Electricity prices include sales tax (GST/HST/QST/PST in Canada; state + typical local sales tax in the US, approximate). Nunavut has no gasoline series.`;
+  $('ge-tnote').textContent = `${valid.length} provinces, territories and states. Hover a row to find it on the map. ≈ = estimated state gasoline price (41 states). Canadian and US prices converted at the Bank of Canada 2026 average, 1 USD = ${FX.toFixed(4)} CAD.`;
+}
+document.querySelectorAll('[data-p]').forEach(e => e.textContent = D.periods[e.dataset.p]);
+$('ge-fx-m').textContent = `1 USD = ${FX.toFixed(4)} CAD, daily average from ${D.fxPeriod.replace(' to ', ' to ')}`;
+render();
+
+FilterMemory.auto({ exclude:['ge-ev'], extra:[
+  { key:'ev',  type:'fn', get:() => st.ev,                set:v => { if(EVS.some(e => e.id === v)){ st.ev = v; render(); } return true; } },
+  { key:'evc', type:'fn', get:() => +st.evCustom.toFixed(2), set:v => { if(+v > 0){ st.evCustom = +v; render(); } return true; } },
+  { key:'ice', type:'fn', get:() => +st.iceL.toFixed(3),  set:v => { if(+v > 0){ st.iceL = +v; render(); } return true; } },
+  { key:'km',  type:'fn', get:() => Math.round(st.km),    set:v => { if(+v >= 0){ st.km = +v; render(); } return true; } },
+  { key:'srt', type:'fn', get:() => st.sort + ':' + st.dir, set:v => { const [k, d] = String(v).split(':'); if(COLS.some(c => c.k === k)){ st.sort = k; st.dir = +d || -1; render(); } return true; } },
+] });
+FilterMemory.restore();
+</script>
+</body>
+</html>
