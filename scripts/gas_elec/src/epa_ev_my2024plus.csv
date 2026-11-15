@@ -1,0 +1,1161 @@
+year,make,model,baseModel,VClass,drive,evMotor,combE,range
+2024,Audi,e-tron GT,e-tron GT,Midsize Cars,All-Wheel Drive,175 kW PMSM 3-Phase,39.7102,249
+2024,Audi,RS e-tron GT,RS e-tron GT,Midsize Cars,All-Wheel Drive,175 kW PMSM 3-Phase,39.7102,249
+2024,Audi,Q4 40 e-tron,Q4 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,150 kW PMSM 3-Phase,32.6939,265
+2024,Audi,Q4 50 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 kW Asynchron 3-Phase,36.4003,236
+2024,Audi,Q4 Sportback 50 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 kW Asynchron 3-Phase,35.5517,242
+2024,Audi,Q8 e-tron quattro,Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 kW Asynchron 3-Phase,41.3796,285
+2024,Audi,Q8 Sportback e-tron ultra quattro,Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,172 kW Asynchron 3-Phase,39.1925,300
+2024,BMW,i4 M50 Gran Coupe (19 inch wheels),i4,Subcompact Cars,4-Wheel Drive,230 kW EESM,35.3627,269
+2024,BMW,i4 M50 Gran Coupe (20 inch wheels),i4,Subcompact Cars,4-Wheel Drive,230 kW EESM,42.3096,227
+2024,BMW,i4 xDrive40 Gran Coupe (18 inch Wheels),i4,Subcompact Cars,4-Wheel Drive,230 kW EESM,30.9718,307
+2024,BMW,i4 xDrive40 Gran Coupe (19 inch Wheels),i4,Subcompact Cars,4-Wheel Drive,190 kW EESM,34.1406,279
+2024,BMW,i4 eDrive35 Gran Coupe (18 inch Wheels),i4,Subcompact Cars,Rear-Wheel Drive,250 kW EESM,27.982,276
+2024,BMW,i4 eDrive35 Gran Coupe (19 inch Wheels),i4,Subcompact Cars,Rear-Wheel Drive,250 kW EESM,30.7674,252
+2024,BMW,i4 eDrive40 Gran Coupe (18 inch Wheels),i4,Subcompact Cars,Rear-Wheel Drive,250 kW EESM,30.9281,301
+2024,BMW,i4 eDrive40 Gran Coupe (19 inch Wheels),i4,Subcompact Cars,Rear-Wheel Drive,250 kW EESM,33.8558,283
+2024,BMW,i5 eDrive40 Sedan (19 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,32.2089,295
+2024,BMW,i5 eDrive40 Sedan (20 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,34.2082,278
+2024,BMW,i5 eDrive40 Sedan (21 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,35.2736,270
+2024,BMW,i5 M60 xDrive Sedan (19 inch Wheels),i5,Compact Cars,4-Wheel Drive,190 kW EESM,37.0351,256
+2024,BMW,i5 M60 xDrive Sedan (20 inch Wheels),i5,Compact Cars,4-Wheel Drive,190 kW EESM,37.7438,248
+2024,BMW,i5 M60 xDrive Sedan (21 inch Wheels),i5,Compact Cars,4-Wheel Drive,190 kW EESM,39.5995,240
+2024,BMW,i7 eDrive50 Sedan (19 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,37.3574,321
+2024,BMW,i7 eDrive50 Sedan (20 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.9985,301
+2024,BMW,i7 eDrive50 Sedan (21 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.0941,311
+2024,BMW,i7 M70 xDrive Sedan (20 inch Wheels),i7,Large Cars,All-Wheel Drive,360 kW EESM,44.0186,274
+2024,BMW,i7 M70 xDrive Sedan (21 inch Wheels),i7,Large Cars,All-Wheel Drive,190 kW EESM,41.5264,291
+2024,BMW,i7 xDrive60 Sedan (19 inch wheels),i7,Large Cars,4-Wheel Drive,190 kW EESM,37.6463,317
+2024,BMW,i7 xDrive60 Sedan (20 inch wheels),i7,Large Cars,4-Wheel Drive,190 kW EESM,40.2123,298
+2024,BMW,i7 xDrive60 Sedan (21 inch wheels),i7,Large Cars,4-Wheel Drive,190 kW EESM,38.2532,307
+2024,BMW,iX M60 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,360 kW EESM,42.2946,296
+2024,BMW,iX M60 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 kW EESM,42.2946,296
+2024,BMW,iX xDrive40 (20 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 kW EESM,39.3181,217
+2024,BMW,iX xDrive40 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 kW EESM,39.3181,217
+2024,BMW,iX xDrive40 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,230 kW EESM,39.3181,217
+2024,BMW,iX xDrive50 (20 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 kW EESM,40.8272,307
+2024,BMW,iX xDrive50 (21 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 kW EESM,40.8272,307
+2024,BMW,iX xDrive50 (22 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,230 kW EESM,40.8272,307
+2024,Cadillac,LYRIQ,LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,38.0898,314
+2024,Chevrolet,Silverado EV,Silverado,Standard Pickup Trucks 4WD,All-Wheel Drive,191 kW ACPM,53.3826,450
+2024,Genesis,Electrified GV70,GV70,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,37.1566,236
+2024,Genesis,GV60 Advanced (19 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 kW PMSM,34.0,264
+2024,Genesis,GV60 Advanced (20 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,35.4988,248
+2024,Genesis,GV60 PERFORMANCE,GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,37.0,235
+2024,GMC,Hummer EV Pickup,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,214 kW PMSM,63.4112,314
+2024,GMC,Hummer EV Pickup MT Tires,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,214 kW PMSM,63.0286,298
+2024,GMC,Hummer EV SUV,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,214 kW PMSM,63.4112,314
+2024,GMC,Hummer EV SUV MT Tires,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,214 kW PMSM,63.0286,298
+2024,Hyundai,Ioniq 6 Long range AWD (18 inch Wheels),Ioniq 6,Midsize Cars,All-Wheel Drive,165 kW PMSM,27.2272,316
+2024,Hyundai,Ioniq 6 Long range AWD (20 inch Wheels),Ioniq 6,Midsize Cars,All-Wheel Drive,165 kW PMSM,33.0,270
+2024,Hyundai,Ioniq 6 Long range RWD (18 inch Wheels),Ioniq 6,Midsize Cars,Rear-Wheel Drive,168 kW PMSM,24.0,361
+2024,Hyundai,Ioniq 6 Long range RWD (20 inch Wheels),Ioniq 6,Midsize Cars,Rear-Wheel Drive,168 kW PMSM,29.0,305
+2024,Hyundai,Ioniq 6 Standard Range RWD,Ioniq 6,Midsize Cars,Rear-Wheel Drive,111 kW PMSM,25.0,240
+2024,Hyundai,Ioniq 5 Long range RWD,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.0,303
+2024,Hyundai,Ioniq 5 Standard range RWD,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,31.0,220
+2024,Hyundai,Ioniq 5 Long range AWD,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,165 kW PMSM,34.0206,260
+2024,Jaguar,I-Pace EV400 (20 inch tires),I-Pace,Small Sport Utility Vehicle 4WD,4-Wheel Drive,147 kW PMSM,39.4505,246
+2024,Jaguar,I-Pace EV400 (22 inch tires),I-Pace,Small Sport Utility Vehicle 4WD,4-Wheel Drive,147 kW PMSM,44.6407,217
+2024,Kia,EV6 Long Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,186 kW PMSM,29.0,310
+2024,Kia,EV6 Standard Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,29.0,232
+2024,Kia,Niro Electric,Niro,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM,29.0,253
+2024,Kia,EV6 AWD GT,EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,41.0,218
+2024,Kia,EV6 Long Range AWD (19 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,165 kW PMSM,31.0595,282
+2024,Kia,EV6 Long Range AWD (20 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,165 kW PMSM,35.0,252
+2024,Mercedes-Benz,AMG EQE 4matic Plus (SUV),EQE,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,165 kW PMSM 3-Phase,46.0,235
+2024,MINI,Cooper SE Hardtop 2 door,Cooper,Subcompact Cars,Front-Wheel Drive,135 kW DCPM,30.714,114
+2024,Nissan,LEAF,LEAF,Midsize Cars,Front-Wheel Drive,110 kW DCPM,30.4264,149
+2024,Nissan,LEAF SV,LEAF,Midsize Cars,Front-Wheel Drive,160 kW DCPM,30.7824,212
+2024,Polestar,2 Dual Motor (19 Inch Wheels),2,Midsize Cars,All-Wheel Drive,200 kW ACPM,31.7153,276
+2024,Polestar,2 Dual Motor (20 Inch Wheels),2,Midsize Cars,All-Wheel Drive,135 kW AC Induction,33.0,266
+2024,Polestar,2 Dual Motor Performance Pack,2,Midsize Cars,All-Wheel Drive,110 kW AC Induction,35.0,247
+2024,Polestar,2 Single Motor (19 Inch Wheels),2,Midsize Cars,Rear-Wheel Drive,220 kW ACPM,29.2238,320
+2024,Polestar,2 Single Motor (20 Inch Wheels),2,Midsize Cars,Rear-Wheel Drive,135 kW AC Induction,30.0,307
+2024,Volvo,C40 Recharge,C40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,110 kW AC Induction,31.4965,297
+2024,Volvo,XC40 Recharge,XC40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,220 kW ACPM,31.6937,293
+2024,Volvo,C40 Recharge twin,C40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,135 kW AC Induction,34.169,257
+2024,Volvo,XC40 Recharge twin,XC40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,110 kW AC Induction,34.4839,254
+2024,Audi,Q8 Sportback e-tron quattro,Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 172 kW Asynchron 3-Phase,38.9209,296
+2024,Audi,SQ8 e-tron (20 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,172 kW Asynchron 3-Phase,46.1062,253
+2024,Audi,SQ8 e-tron (21/22 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,172 kW Asynchron 3-Phase,53.8641,218
+2024,Audi,SQ8 Sportback e-tron (20 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,172 kW Asynchron 3-Phase,46.1062,253
+2024,Audi,SQ8 Sportback e-tron (21/22 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,172 kW Asynchron 3-Phase,53.8641,218
+2024,Chevrolet,Blazer EV AWD,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 67 kW AC Induction,35.2192,279
+2024,Chevrolet,Silverado EV,Silverado,Standard Pickup Trucks 4WD,All-Wheel Drive,189 and 189 kW ACPM,50.5346,393
+2024,Genesis,Electrified G80,G80,Midsize Cars,All-Wheel Drive,136 and 136 kW PMSM,35.0,282
+2024,Genesis,GV60 Standard,GV60,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.0,294
+2024,Hyundai,Kona Electric Long Range,Kona,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM,29.0825,261
+2024,Kia,EV9 Long Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM,38.0,304
+2024,Kia,EV9 Standard Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM,38.0,230
+2024,Kia,EV9 Long Range AWD,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 141 kW PMSM,41.0,280
+2024,Kia,EV9 Long Range AWD GT-Line,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 141 kW PMSM,42.0,270
+2024,Lucid,Air Pure RWD with 19 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,24.5788,419
+2024,Lucid,Air Pure RWD with 20 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,25.9281,394
+2024,Lucid,Air Sapphire AWD,Air,Large Cars,All-Wheel Drive,"310, 310 and 330 kW ACPM",32.1321,427
+2024,Mercedes-Benz,AMG EQE 4matic Plus,EQE,Midsize Cars,All-Wheel Drive,165 and 165 kW ACPM 3-Phase,46.0,230
+2024,Mercedes-Benz,EQE 350 4matic,EQE,Midsize Cars,All-Wheel Drive,72 and 144 kW ACPM 6-Phase,37.0,280
+2024,Mercedes-Benz,EQE 350 Plus,EQE,Midsize Cars,Rear-Wheel Drive,215 kW ACPM 6-Phase,34.6491,298
+2024,Mercedes-Benz,EQE 500 4matic,EQE,Midsize Cars,All-Wheel Drive,100 and 200 kW ACPM 6-Phase,34.6491,298
+2024,Mercedes-Benz,AMG EQS 4matic Plus,EQS,Large Cars,All-Wheel Drive,310 and 310 kW ACPM 6-Phase,41.0,305
+2024,Mercedes-Benz,EQS 450 4matic,EQS,Large Cars,All-Wheel Drive,135 and 135 kW ACPM 3-Phase,35.1346,345
+2024,Mercedes-Benz,EQS 450 Plus,EQS,Large Cars,Rear-Wheel Drive,265 kW ACPM 6-Phase,35.0,352
+2024,Mercedes-Benz,EQS 580 4matic,EQS,Large Cars,All-Wheel Drive,265 and 265 kW ACPM 6-Phase,34.8968,345
+2024,Mercedes-Benz,EQS 680 4matic Maybach (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,310 and 310 kW ACPM 6-Phase,44.0,280
+2024,Porsche,Taycan 4S Performance Battery Plus,Taycan,Compact Cars,All-Wheel Drive,150 and 234 kW ACPM,42.2815,235
+2024,Porsche,Taycan 4S Performance Battery,Taycan,Compact Cars,All-Wheel Drive,150 and 254 kW ACPM,41.0,206
+2024,Porsche,Taycan GTS,Taycan,Compact Cars,All-Wheel Drive,234 kW ACPM,40.6946,246
+2024,Porsche,Taycan GTS Sport Turismo,Taycan,Compact Cars,All-Wheel Drive,254 kW ACPM,42.0951,233
+2024,Porsche,Taycan Performance Battery Plus,Taycan,Compact Cars,Rear-Wheel Drive,280 kW ACPM,41.1859,242
+2024,Porsche,Taycan Performance Battery,Taycan,Compact Cars,Rear-Wheel Drive,280 kW ACPM,40.6731,208
+2024,Porsche,Taycan Turbo,Taycan,Compact Cars,All-Wheel Drive,235 kW ACPM,41.8137,238
+2024,Porsche,Taycan Turbo S,Taycan,Compact Cars,All-Wheel Drive,254 kW ACPM,44.5214,222
+2024,Porsche,Taycan 4 Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,234 and 235 kW ACPM,42.0106,235
+2024,Porsche,Taycan Turbo Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,234 kW ACPM,43.0,233
+2024,Porsche,Taycan Turbo S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,235 kW ACPM,44.5214,222
+2024,Rivian,R1S All-Terrain Quad Large (20 inch),R1S,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"162, 162, 163 and 135 kW ACPM 3-Phase",53.6978,274
+2024,Rolls-Royce,Spectre Black Badge (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,43.1676,280
+2024,Rolls-Royce,Spectre Black Badge (23 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,45.8785,264
+2024,Rolls-Royce,Spectre (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,41.475,291
+2024,Rolls-Royce,Spectre (23 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,45.4581,266
+2024,Subaru,Solterra AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,32.0,227
+2024,Subaru,Solterra Limited/Touring AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,33.0,222
+2024,Volkswagen,ID.4 Pro,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,209 kW AC 3-Phase,29.783,291
+2024,Volkswagen,ID.4 AWD Pro,ID.4,Small Sport Utility Vehicle 4WD,All-Wheel Drive,105 and 209  kW AC 3-Phase,32.9685,263
+2024,Volkswagen,ID.4 AWD Pro S,ID.4,Small Sport Utility Vehicle 4WD,All-Wheel Drive,105 and 209  kW AC 3-Phase,32.9685,263
+2024,Vinfast,VF 9 Eco,VF 9,Special Purpose Vehicle 4WD,All-Wheel Drive,300 kW ACPM 3-Phase,44.8914,330
+2024,Vinfast,VF 9 Plus,VF 9,Special Purpose Vehicle 4WD,All-Wheel Drive,260 kW ACPM 3-Phase,49.0809,291
+2024,Acura,ZDX AWD,ZDX,Standard Sport Utility Vehicle 2WD,All-Wheel Drive,155 and 200 kW ACPM,38.6225,304
+2024,Acura,ZDX RWD,ZDX,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,37.4374,313
+2024,Audi,Q4 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW Asynchron 3-Phase,33.7302,258
+2024,Audi,Q4 Sportback 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW Asynchron 3-Phase,33.7302,258
+2024,Cadillac,LYRIQ AWD,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 kW ACPM,37.981,307
+2024,Chevrolet,Blazer EV RWD,Blazer,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,36.631,324
+2024,Chevrolet,Equinox EV FWD,Equinox,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,31.0964,319
+2024,Chevrolet,Equinox EV AWD,Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,35.1247,285
+2024,Fiat,500e,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,29.1808,149
+2024,Fiat,500e All Season,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,30.5327,141
+2024,Ford,F-150 Lightning 4WD Extended Range,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,47.9143,320
+2024,Ford,F-150 Lightning Platinum 4WD,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,50.7071,300
+2024,Ford,F-150 Lightning PRO 4WD Extended Range,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,47.9143,320
+2024,Ford,F-150 Lightning 4WD,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,358 and 358 kW AC PMSM,49.3643,240
+2024,Ford,Mustang Mach-E RWD,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,197 kW AC PMSM,32.9357,250
+2024,Ford,Mustang Mach-E RWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,216 kW AC PMSM,31.8286,320
+2024,Ford,Mustang Mach-E AWD,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,198 and 198 kW AC PMSM,36.9214,230
+2024,Ford,Mustang Mach-E AWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,78 and 210 kW AC PMSM,34.1929,300
+2024,Ford,Mustang Mach-E GT,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,37.3571,280
+2024,Ford,Mustang Mach-E Rally,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,39.3571,265
+2024,Honda,Prologue FWD,Prologue,Standard Sport Utility Vehicle 2WD,Front-Wheel Drive,212 kW ACPM,33.9679,296
+2024,Honda,Prologue AWD Elite,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,36.7604,273
+2024,Honda,Prologue AWD Touring,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,35.5276,281
+2024,Hyundai,Kona Electric Standard Range,Kona,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,99 kW PMSM,28.5326,200
+2024,Lexus,RZ 300e (18 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,27.0,266
+2024,Lexus,RZ 300e (20 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,31.4874,224
+2024,Lexus,RZ 450e AWD (18 inch wheels),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW AC Synchronous,31.1421,220
+2024,Lexus,RZ 450e AWD (20 inch wheels),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW AC Synchronous,36.0,196
+2024,Lucid,Air G Touring XR AWD with19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,26.1381,516
+2024,Lucid,Air G Touring XR AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,27.8516,485
+2024,Lucid,Air G Touring XR AWD with 21 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,29.7946,450
+2024,Lucid,Air Touring AWD with 19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,25.3039,411
+2024,Lucid,Air Touring AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,27.4478,382
+2024,Lucid,Air Touring AWD with 21inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,28.6247,365
+2024,Maserati,Grancabrio Folgore,Grancabrio,Subcompact Cars,All-Wheel Drive,"275, 275 and 275 kW DCPM",41.2032,233
+2024,Maserati,Granturismo Folgore,Granturismo,Subcompact Cars,All-Wheel Drive,"275, 275 and 275 kW DCPM",38.5322,242
+2024,Mercedes-Benz,EQB 250 Plus,EQB,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,140 kW ACPM 3-Phase,31.4691,251
+2024,Mercedes-Benz,EQB 350 4matic,EQB,Small Sport Utility Vehicle 4WD,All-Wheel Drive,72 and 96 kW ACPM 3-Phase,38.7794,207
+2024,Mercedes-Benz,EQE 350 Plus (SUV),EQE,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,215 kW ACPM 6-Phase,35.7183,307
+2024,Mercedes-Benz,EQS 450 Plus (SUV),EQS,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,265 kW ACPM 6-Phase,38.5572,339
+2024,Mercedes-Benz,EQE 350 4matic (SUV),EQE,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,71 and 114 kW ACPM 3-Phase,40.0,265
+2024,Mercedes-Benz,EQE 500 4matic (SUV),EQE,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,31 and 104 kW ACPM 6-Phase,38.5738,282
+2024,Mercedes-Benz,EQS 450 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 3-Phase,41.0,330
+2024,Mercedes-Benz,EQS 580 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 3-Phase,41.0,330
+2024,Mercedes-Benz,EQS 680 4matic Maybach (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,174 and 310 kW ACPM 3-Phase,42.0,321
+2024,Nissan,ARIYA ENGAGE e-4ORCE 63kWh,ARIYA,Small Station Wagons,All-Wheel Drive,160 and 160 kW AC 3-phase,35.2939,205
+2024,Nissan,ARIYA ENGAGE FWD 63kWh,ARIYA,Small Station Wagons,Front-Wheel Drive,160 kW AC 3-phase,33.2574,216
+2024,Nissan,ARIYA ENGAGE+/EVOLVE+ e-4ORCE 87kWh,ARIYA,Small Station Wagons,All-Wheel Drive,160 and 160 kW AC 3-phase,36.6389,272
+2024,Nissan,ARIYA EVOLVE+/EMPOWER+ FWD 87kWh,ARIYA,Small Station Wagons,Front-Wheel Drive,178 kW AC 3-phase,34.3726,289
+2024,Nissan,ARIYA PLATINUM+ e-4ORCE 87kWh 19in. Wheels,ARIYA,Small Station Wagons,All-Wheel Drive,160 and 160 kW AC 3-phase,37.3979,267
+2024,Nissan,ARIYA PLATINUM+ e-4ORCE 87kWh 20in. Wheels,ARIYA,Small Station Wagons,All-Wheel Drive,160 and 160 kW AC 3-phase,38.8396,257
+2024,Nissan,ARIYA VENTURE Plus FWD 87kWh,ARIYA,Small Station Wagons,Front-Wheel Drive,178 kW AC 3-phase,32.7108,304
+2024,Porsche,Taycan 4S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,190 and 235 kW ACPM,42.7868,230
+2024,Rivian,R1T All-Terrain Dual Large (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,49.2406,307
+2024,Rivian,R1T All-Terrain Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.124,355
+2024,Rivian,R1T All-Terrain Dual Standard Plus (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,51.6452,277
+2024,Rivian,R1T All-Terrain Performance Dual Large (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,49.2406,307
+2024,Rivian,R1T All-Terrain Performance Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.124,355
+2024,Rivian,R1T All-Terrain Quad Large (20in),R1T,Standard Pickup Trucks 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",53.6978,274
+2024,Rivian,R1T AT Performance Dual Standard Plus (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,51.6452,277
+2024,Rivian,R1T Dual Large (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.2259,352
+2024,Rivian,R1T Dual Large (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,44.478,341
+2024,Rivian,R1T Dual Max (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,39.9444,410
+2024,Rivian,R1T Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.3111,380
+2024,Rivian,R1T Dual Standard (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,45.2041,270
+2024,Rivian,R1T Dual Standard (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,48.031,255
+2024,Rivian,R1T Dual Standard Plus (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.8057,315
+2024,Rivian,R1T Dual Standard Plus (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.7443,300
+2024,Rivian,R1T Performance Dual Large (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.2259,352
+2024,Rivian,R1T Performance Dual Large (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,44.478,341
+2024,Rivian,R1T Performance Dual Max (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,39.9444,410
+2024,Rivian,R1T Performance Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.3111,380
+2024,Rivian,R1T Performance Dual Standard Plus (21in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.8057,315
+2024,Rivian,R1T Performance Dual Standard Plus (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.7443,300
+2024,Rivian,R1T Quad Large (20in),R1T,Standard Pickup Trucks 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",52.3772,289
+2024,Rivian,R1T Quad Large (21in),R1T,Standard Pickup Trucks 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",46.1441,328
+2024,Rivian,R1T Quad Large (22in),R1T,Standard Pickup Trucks 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",49.3574,303
+2024,Rivian,R1S All-Terrain Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,49.2406,307
+2024,Rivian,R1S All-Terrain Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.124,355
+2024,Rivian,R1S All-Terrain Dual Standard Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,51.6452,277
+2024,Rivian,R1S All-Terrain Performance Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,49.2406,307
+2024,Rivian,R1S All-Terrain Performance Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.124,355
+2024,Rivian,R1S AT Performance Dual Standard Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,51.6452,277
+2024,Rivian,R1S Dual Large (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.2259,352
+2024,Rivian,R1S Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,44.7406,341
+2024,Rivian,R1S Dual Max (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,40.8697,400
+2024,Rivian,R1S Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.3111,380
+2024,Rivian,R1S Dual Standard (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,45.2041,270
+2024,Rivian,R1S Dual Standard (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,48.031,255
+2024,Rivian,R1S Dual Standard Plus (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.8057,315
+2024,Rivian,R1S Dual Standard Plus (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.7443,300
+2024,Rivian,R1S Performance Dual Large (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.2259,352
+2024,Rivian,R1S Performance Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,44.7406,341
+2024,Rivian,R1S Performance Dual Max (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,40.8697,400
+2024,Rivian,R1S Performance Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.3111,380
+2024,Rivian,R1S Performance Dual Standard (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,46.7443,300
+2024,Rivian,R1S Performance Dual Standard Plus (21in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,43.8057,315
+2024,Rivian,R1S Quad Large (20in),R1S,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",52.3772,289
+2024,Rivian,R1S Quad Large (21in),R1S,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",47.3963,321
+2024,Rivian,R1S Quad Large (22in),R1S,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"162, 162, 162 and 162 kW AC 3-Phase",49.3574,303
+2024,Tesla,Model 3 Long Range AWD,Model 3,Midsize Cars,All-Wheel Drive,84 and 191 kW ACPM 3-Phase,25.8361,342
+2024,Tesla,Model 3 RWD,Model 3,Midsize Cars,Rear-Wheel Drive,192 kW ACPM 3-Phase,25.4472,272
+2024,Tesla,Model S,Model S,Large Cars,All-Wheel Drive,247 and 247 kW ACPM 3-Phase,27.7036,402
+2024,Tesla,Model S Plaid (19in wheels),Model S,Large Cars,All-Wheel Drive,"250, 250 and 250 kW ACPM 3-Phase",31.4651,359
+2024,Tesla,Model S Plaid (21in wheels),Model S,Large Cars,All-Wheel Drive,"250, 250 and 250 kW ACPM 3-Phase",35.2387,320
+2024,Tesla,Model Y Long Range AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW AC Induction,28.6981,310
+2024,Tesla,Model Y Performance AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 243 kW AC Induction,32.2142,279
+2024,Tesla,Model X,Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,243 and 243 kW ACPM 3-Phase,33.6127,335
+2024,Tesla,Model X Plaid (20in wheels),Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"230, 230 and 230 kW ACPM 3-Phase",34.5286,326
+2024,Tesla,Model X Plaid (22in wheels),Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"230, 230 and 230 kW ACPM 3-Phase",37.2621,300
+2024,Toyota,bZ4X,bZ4X,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,28.317,252
+2024,Toyota,bZ4X Limited,bZ4X,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,30.1384,236
+2024,Toyota,bZ4X AWD,bZ4X,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,32.0,228
+2024,Toyota,bZ4X Limited AWD,bZ4X,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,33.0,222
+2024,Volkswagen,ID.4,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW AC 3-Phase,31.5624,206
+2024,Volkswagen,ID.4 Pro S,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW AC 3-Phase,29.783,291
+2024,Volkswagen,ID.4 S,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW AC 3-Phase,31.5624,206
+2025,Audi,Q4 45 e-tron,Q4 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW PMSM 3-Phase,29.4031,288
+2025,Audi,Q6 e-tron quattro (19 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 280 kW PMSM ECCA 3-Phase,34.0414,307
+2025,Audi,Q6 e-tron quattro (20 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 280 kW Asynchron ECFA 3-Phase,35.3024,295
+2025,Audi,Q8 e-tron quattro (20 inch wheels),Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 172 kW Asynchron 3-Phase,43.1758,272
+2025,Audi,Q8 e-tron quattro (21 inch wheels),Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 172 kW Asynchron 3-Phase,45.5353,254
+2025,Audi,Q8 Sportback e-tron quattro (20 inch wheels),Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 172 kW Asynchron 3-Phase,43.1758,272
+2025,Audi,Q8 Sportback e-tron quattro (21 inch wheels),Q8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 172 kW Asynchron 3-Phase,45.5353,254
+2025,Audi,SQ6 e-tron,SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW Asynchron ECFA 3-Phase,37.8055,275
+2025,Audi,SQ8 e-tron (20 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,138 and 157 kW Asynchron 3-Phase,48.1489,242
+2025,Audi,SQ8 e-tron (21/22 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,138 and 157 kW Asynchron 3-Phase,56.2587,208
+2025,Audi,SQ8 Sportback e-tron (20 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,138 and 157 kW Asynchron 3-Phase,48.1489,242
+2025,Audi,SQ8 Sportback e-tron (21/22 inch wheels),SQ8 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,138 and 157 kW Asynchron 3-Phase,56.2587,208
+2025,BMW,i4 eDrive35 Gran Coupe (18 inch Wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,29.1671,266
+2025,BMW,i4 eDrive35 Gran Coupe (19 inch Wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,31.7304,244
+2025,BMW,i4 eDrive40 Gran Coupe (18 inch wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,30.1552,318
+2025,BMW,i4 eDrive40 Gran Coupe (19 inch Wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,32.3112,295
+2025,BMW,i4 M50 Gran Coupe (19 inch wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,35.8724,267
+2025,BMW,i4 M50 Gran Coupe (20 inch wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,42.1631,227
+2025,BMW,i4 xDrive40 Gran Coupe (18 inch Wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,33.4089,287
+2025,BMW,i4 xDrive40 Gran Coupe (19 inch Wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,35.9861,268
+2025,BMW,i5 eDrive40 Sedan (19 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,32.2089,295
+2025,BMW,i5 eDrive40 Sedan (20 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,34.2082,278
+2025,BMW,i5 eDrive40 Sedan (21 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,35.2736,271
+2025,BMW,i5 M60 xDrive Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,37.5255,253
+2025,BMW,i5 M60 xDrive Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,38.2436,250
+2025,BMW,i5 M60 xDrive Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,40.1239,239
+2025,BMW,i5 xDrive40 Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,36.1443,266
+2025,BMW,i5 xDrive40 Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,192 and 250 kW EESM,36.2955,262
+2025,BMW,i5 xDrive40 Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,192 and 250 kW EESM,38.8179,248
+2025,BMW,i7 eDrive50 Sedan (19 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.1958,314
+2025,BMW,i7 eDrive50 Sedan (20 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,39.8738,301
+2025,BMW,i7 eDrive50 Sedan (21 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.949,307
+2025,BMW,i7 M70 xDrive Sedan (20 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 360 kW EESM,44.9556,268
+2025,BMW,i7 M70 xDrive Sedan (21 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 360 kW EESM,42.4501,285
+2025,BMW,i7 xDrive60 Sedan (19 inch wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.4128,311
+2025,BMW,i7 xDrive60 Sedan (20 inch wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,40.754,296
+2025,BMW,i7 xDrive60 Sedan (21inch wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.7685,308
+2025,BMW,iX M60 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 360 kW EESM,44.3995,284
+2025,BMW,iX M60 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 360 kW EESM,43.742,285
+2025,BMW,iX xDrive40 (20 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,39.2541,217
+2025,BMW,iX xDrive40 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,40.6422,211
+2025,BMW,iX xDrive40 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,38.578,219
+2025,BMW,iX xDrive50 (20 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,40.5945,309
+2025,BMW,iX xDrive50 (21 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,41.4396,303
+2025,BMW,iX xDrive50 (22 inch wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,41.4915,302
+2025,Bugatti Rimac,Nevera,Nevera,Two Seaters,4-Wheel Drive,"226, 226, 450 and 450 kW AC Induction",63.2681,204
+2025,Chevrolet,Blazer EV AWD,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,35.639,283
+2025,GMC,Hummer EV Pickup 2X,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,195 and 215 kW ACPM,63.8996,318
+2025,GMC,Hummer EV Pickup 3X,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,"195, 195 and 195 kW ACPM",65.1464,312
+2025,GMC,Hummer EV Pickup MT Tires 2X,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,195 and 215 kW ACPM,71.709,282
+2025,GMC,Hummer EV Pickup MT Tires 3X,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,"195, 195 and 215 kW ACPM",70.2768,289
+2025,GMC,Hummer EV SUV 2X,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,195 and 215 kW ACPM,63.935,315
+2025,GMC,Hummer EV SUV 3X,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"195, 195 and 215 kW ACPM",65.1464,312
+2025,GMC,Hummer EV SUV MT Tires 2X,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,195 and 215 kW ACPM,71.709,282
+2025,GMC,Hummer EV SUV MT Tires 3X,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"195, 195 and 215 kW ACPM",70.2768,289
+2025,Genesis,Electrified G80,G80,Midsize Cars,All-Wheel Drive,136 and 136 kW PMSM,35.0,282
+2025,Genesis,GV60 RWD,GV60,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM (IPM),30.0,294
+2025,Genesis,Electrified GV70,GV70,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,37.1566,236
+2025,Genesis,GV60 AWD Advanced (20 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,35.4988,248
+2025,Genesis,GV60 AWD Performance,GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,36.8341,235
+2025,Genesis,GV60 AWD (19 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,34.0,264
+2025,Hyundai,Kona Electric (17 inch Wheels),Kona,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM (IPM),29.0825,261
+2025,Hyundai,Kona Electric (19 inch Wheels),Kona,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM (IPM),31.0,230
+2025,Hyundai,Kona Electric Standard Range,Kona,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,99 kW PMSM (IPM),28.5326,200
+2025,Hyundai,Ioniq 5 N,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,166 and 282 kW PMSM,43.0,221
+2025,Hyundai,Ioniq 6 AWD (18 inch Wheels),Ioniq 6,Midsize Cars,All-Wheel Drive,74 and 165 kW PMSM,28.0,316
+2025,Hyundai,Ioniq 6 RWD (18 inch Wheels),Ioniq 6,Midsize Cars,Rear-Wheel Drive,168 kW PMSM,26.0,342
+2025,Hyundai,Ioniq 6 RWD (20 inch Wheels),Ioniq 6,Midsize Cars,Rear-Wheel Drive,168 kW PMSM,29.7709,291
+2025,Hyundai,Ioniq 6 Standard Range,Ioniq 6,Midsize Cars,Rear-Wheel Drive,111 kW PMSM,25.0,240
+2025,Hyundai,Ioniq 6 AWD (20 inch Wheels),Ioniq 6,Midsize Cars,All-Wheel Drive,74 and 165 kW PMSM,32.5202,270
+2025,Kia,EV9 Long Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM (IPM),38.0,304
+2025,Kia,EV9 Standard Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM (IPM),38.0,230
+2025,Kia,EV9 Long Range AWD,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 141 kW PMSM (IPM),41.0,280
+2025,Kia,EV9 Long Range AWD GT-Line,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 and 141 kW PMSM (IPM),42.0,270
+2025,Kia,Niro Electric,Niro,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM (IPM),30.0,253
+2025,Lucid,Air G Touring XR AWD with 19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,26.4283,512
+2025,Lucid,Air G Touring XR AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,28.1608,480
+2025,Lucid,Air G Touring XR AWD with 21 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,30.1254,446
+2025,Lucid,Air Pure RWD with 19 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,23.141,420
+2025,Lucid,Air Pure RWD with 20 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,26.1017,372
+2025,Lucid,Air Sapphire AWD,Air,Large Cars,All-Wheel Drive,"310, 310 and 310 kW ACPM",32.1321,427
+2025,Lucid,Air Touring AWD with 19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,25.5849,406
+2025,Lucid,Air Touring AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,27.7525,377
+2025,Lucid,Air Touring AWD with 21 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,28.9425,361
+2025,Maserati,Grecale Folgore (20 inch Wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 and 205 kW DCPM,44.906,245
+2025,Maserati,Grecale Folgore (21 inch Wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 and 205 kW DCPM,54.0273,206
+2025,Mercedes-Benz,AMG EQE 4matic Plus,EQE,Midsize Cars,All-Wheel Drive,165 and 165 kW ACPM 3-Phase,48.0,220
+2025,Mercedes-Benz,EQE 350 4matic,EQE,Midsize Cars,All-Wheel Drive,71 and 144 kW ACPM 3-Phase,39.0,267
+2025,Mercedes-Benz,EQE 350 Plus,EQE,Midsize Cars,Rear-Wheel Drive,215 kW ACPM 6-Phase,36.0,308
+2025,Mercedes-Benz,EQE 500 4matic,EQE,Midsize Cars,All-Wheel Drive,71 and 144 kW ACPM 6-Phase,40.0,266
+2025,Mercedes-Benz,AMG EQS 4matic Plus,EQS,Large Cars,All-Wheel Drive,174 and 310 kW ACPM 3-Phase,42.8479,315
+2025,Mercedes-Benz,EQS 450 4matic,EQS,Large Cars,All-Wheel Drive,174 and 310 kW ACPM 3-Phase,37.0,367
+2025,Mercedes-Benz,EQS 450 Plus,EQS,Large Cars,Rear-Wheel Drive,265 kW ACPM 6-Phase,34.0,390
+2025,Mercedes-Benz,EQS 580 4matic,EQS,Large Cars,All-Wheel Drive,310 kW ACPM 6-Phase,36.0,371
+2025,Mercedes-Benz,EQE 350 Plus (SUV),EQE,Midsize Station Wagons,Rear-Wheel Drive,215 kW ACPM 6-Phase,36.0755,302
+2025,Mercedes-Benz,EQE 500 4matic (SUV),EQE,Midsize Station Wagons,All-Wheel Drive,71 and 144 kW ACPM 3-Phase,42.0,264
+2025,Mercedes-Benz,EQS 450 Plus (SUV),EQS,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,265 kW ACPM 6-Phase,41.0,323
+2025,Mercedes-Benz,AMG EQE 4matic Plus (SUV),EQE,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,165 and 295 kW ACPM 3-Phase,45.5282,230
+2025,Mercedes-Benz,EQE 350 4matic (SUV),EQE,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,71 and 144 kW ACPM 6-Phase,42.0,253
+2025,Mercedes-Benz,EQS 450 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,174 and 310 kW ACPM 6-Phase,43.0,312
+2025,Mercedes-Benz,EQS 580 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,174 and 310 kW ACPM 6-Phase,42.0,317
+2025,Mercedes-Benz,EQS 680 4matic Maybach (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,174 and 310 kW ACPM 6-Phase,43.559,302
+2025,MINI,Countryman SE ALL4 (18 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,34.9904,212
+2025,MINI,Countryman SE ALL4 (19 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,36.8577,204
+2025,Nissan,LEAF,LEAF,Midsize Cars,Front-Wheel Drive,110 kW DCPM,30.4264,149
+2025,Nissan,LEAF SV,LEAF,Midsize Cars,Front-Wheel Drive,160 kW DCPM,30.7824,212
+2025,Polestar,2 Dual Motor (19 Inch Wheels),2,Midsize Cars,All-Wheel Drive,200 and 215 kW PMSM,33.5166,278
+2025,Polestar,2 Dual Motor (20 Inch Wheels),2,Midsize Cars,All-Wheel Drive,190 and 215 kW PMSM,35.0,268
+2025,Polestar,2 Dual Motor Performance Pack,2,Midsize Cars,All-Wheel Drive,190 and 215 kW PMSM,36.8773,254
+2025,Polestar,2 Single Motor (19 Inch Wheels),2,Midsize Cars,Rear-Wheel Drive,185 and 220 kW PMSM,29.6426,314
+2025,Polestar,2 Single Motor (20 Inch Wheels),2,Midsize Cars,Rear-Wheel Drive,185 and 220 kW PMSM,30.827,300
+2025,Polestar,4 Long Range Single Motor,4,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,200 kW PMSM,37.0,300
+2025,Polestar,3 Long Range Dual Motor (20 Inch Wheels),3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,173 and 180 kW PMSM,39.0,310
+2025,Polestar,3 Long Range Dual Motor (21 Inch Wheels),3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,127 and 180 kW PMSM,38.3624,315
+2025,Polestar,3 Long Range Dual Motor (22 Inch Wheels),3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,173 and 200 kW PMSM,42.0,287
+2025,Polestar,3 Long Range Dual Motor Performance Pack,3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,127 and 200 kW PMSM,43.7426,279
+2025,Polestar,4 Long Range Dual Motor,4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,200 kW PMSM,41.0,272
+2025,Porsche,Taycan 4S Perf Battery Plus 19 inch Wheels,Taycan,Compact Cars,All-Wheel Drive,201 and 235 kW ACPM,36.2403,315
+2025,Porsche,Taycan Perf Battery Plus,Taycan,Compact Cars,Rear-Wheel Drive,300 and 320 kW ACPM,36.6041,318
+2025,Porsche,Taycan Performance Battery,Taycan,Compact Cars,Rear-Wheel Drive,300 and 320 kW ACPM,37.0713,274
+2025,Rivian,R1T All-Terrain Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,46.8874,292
+2025,Rivian,R1T All-Terrain Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,43.2248,370
+2025,Rivian,R1T All-Terrain Performance Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,46.8874,292
+2025,Rivian,R1T All-Terrain Performance Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,43.2248,370
+2025,Rivian,R1T Dual Large Plus (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,40.9029,330
+2025,Rivian,R1T Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,41.9729,380
+2025,Rivian,R1T Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,38.8406,420
+2025,Rivian,R1T Dual Standard (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,42.8683,258
+2025,Rivian,R1T Dual Standard (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,39.8854,270
+2025,Rivian,R1T Performance Dual Large Plus (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,40.9029,330
+2025,Rivian,R1T Performance Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,41.9729,380
+2025,Rivian,R1T Performance Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,38.8406,420
+2025,Rivian,R1S All-Terrain Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,46.8874,292
+2025,Rivian,R1S All-Terrain Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,43.2248,370
+2025,Rivian,R1S All-Terrain Performance  Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,43.2248,370
+2025,Rivian,R1S All-Terrain Performance Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,46.8874,292
+2025,Rivian,R1S Dual Large Plus (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,40.9029,330
+2025,Rivian,R1S Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,41.9729,380
+2025,Rivian,R1S Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 and 264 kW ACPM,39.9385,410
+2025,Rivian,R1S Dual Standard (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,42.8683,258
+2025,Rivian,R1S Dual Standard (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,39.8854,270
+2025,Rivian,R1S Performance Dual Large Plus (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,208 and 208 kW ACPM,40.9029,330
+2025,Rivian,R1S Performance Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,41.9729,380
+2025,Rivian,R1S Performance Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 and 208 kW ACPM,39.9385,410
+2025,Rolls-Royce,Spectre Black Badge (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,45.4265,266
+2025,Rolls-Royce,Spectre Black Badge (23 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,48.2792,251
+2025,Rolls-Royce,Spectre (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,43.6454,277
+2025,Rolls-Royce,Spectre (23 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,47.8369,253
+2025,Volkswagen,ID. Buzz,ID. Buzz,Minivan - 2WD,Rear-Wheel Drive,210 kW AC 3-Phase,40.7703,234
+2025,Volkswagen,ID. Buzz 4motion,ID. Buzz,Minivan - 4WD,All-Wheel Drive,80 and 210 kW AC 3-Phase,41.9661,231
+2025,Volvo,EC40 Twin,EC40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 215 kW PMSM,34.8397,268
+2025,Volvo,EX40 Twin,EX40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 210 kW PMSM,35.9765,260
+2025,Volvo,EC40,EC40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 and 220 kW PMSM,31.6837,298
+2025,Volvo,EX30 Single Motor extended range (18 Inch Wheels),EX30,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 kW PMSM,29.678,257
+2025,Volvo,EX30 Single Motor extended range (19/20 Inch Wheels),EX30,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 kW PMSM,29.1651,261
+2025,Volvo,EX40,EX40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 and 220 kW PMSM,31.7016,296
+2024,Bugatti Rimac,Nevera,Nevera,Two Seaters,4-Wheel Drive,226 kW AC Induction,63.2681,204
+2024,Fisker,Ocean Sport 20in,Ocean,Standard Sport Utility Vehicle 2WD,Front-Wheel Drive,207 kW AC PMSM,36.6051,231
+2024,Fisker,Ocean Sport 22in,Ocean,Standard Sport Utility Vehicle 2WD,Front-Wheel Drive,207 kW AC PMSM,42.7309,194
+2024,Mercedes-Benz,EQB 300 4matic,EQB,Small Sport Utility Vehicle 4WD,All-Wheel Drive,72 kW ACPM,38.6807,205
+2024,Tesla,Model 3 Long Range AWD-E,Model 3,Midsize Cars,All-Wheel Drive,191 kW ACPM 3-Phase,26.3757,341
+2024,Tesla,Model Y Long Range AWD-I,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,200 kW ACPM 3-Phase,28.6357,308
+2024,Tesla,Model Y Long Range RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,221 kW ACPM 3-Phase,28.0611,320
+2024,Tesla,Model Y RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,203 kW ACPM 3-Phase,28.0056,260
+2025,Audi,Q4 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 170 kW Asynchron 3-Phase,33.7331,258
+2025,Audi,Q4 Sportback 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 170 kW Asynchron 3-Phase,33.7331,258
+2025,Audi,Q6 e-tron (19 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,225 kW PMSM ECCA 3-Phase,33.7501,310
+2025,Audi,Q6 e-tron (20 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,225 kW PMSM ECCA 3-Phase,35.2131,298
+2025,Audi,Q6 e-tron ultra,Q6 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,225 kW PMSM ECCA 3-Phase,32.4863,321
+2025,Audi,Q6 Sportback e-tron quattro (19 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 280 kW Asynchron ECFA 3-Phase,32.6976,319
+2025,Audi,Q6 Sportback e-tron quattro (20 inch wheels),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 280 kW Asynchron ECFA 3-Phase,34.2764,305
+2025,Audi,S e-tron GT (20 inch wheels),S e-tron,Subcompact Cars,All-Wheel Drive,"176, 176 and 415 kW PSM 3-Phase",37.6493,300
+2025,Audi,S e-tron GT (21 inch wheels),S e-tron,Subcompact Cars,All-Wheel Drive,"252, 252 and 415 kW PSM 3-Phase",38.5,294
+2025,Audi,SQ6 Sportback e-tron,SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,280 and 280 kW PMSM ECCA 3-Phase,36.8708,283
+2025,Cadillac,LYRIQ,LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,36.008,326
+2025,Cadillac,LYRIQ AWD (11 kW Charger),LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW ACPM,37.6053,319
+2025,Cadillac,LYRIQ AWD (19 kW Charger),LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW ACPM,39.7563,303
+2025,Chevrolet,Blazer EV RWD,Blazer,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,35.3391,334
+2025,Chevrolet,Equinox EV AWD (11 kW Charger),Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,180 kW ACPM,32.6179,307
+2025,Chevrolet,Equinox EV AWD (19 kW Charger),Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,35.1701,307
+2025,Chevrolet,Equinox EV FWD,Equinox,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,67 and 180 kW ACPM,31.2399,319
+2025,Chevrolet,Silverado EV 8WT,Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,49.881,492
+2025,Chevrolet,Silverado EV 5WT (11 kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,48.3284,422
+2025,Chevrolet,Silverado EV (11 kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,49.9059,408
+2025,Chevrolet,Silverado EV (19 kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,52.3625,390
+2025,Chevrolet,Silverado EV 5WT (19 kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,48.3284,422
+2025,Fiat,500e,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,29.1808,149
+2025,Fiat,500e All Season,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,30.5327,141
+2025,Ford,F-150 Lightning 4WD ER1,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,47.9143,320
+2025,Ford,F-150 Lightning 4WD PRO ER1,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,47.9143,320
+2025,Ford,F-150 Lightning 4WD SR,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,358 and 358 kW AC PMSM,49.3643,240
+2025,Ford,F-150 Lightning Platinum 4WD,F-150 Lightning,Standard Pickup Trucks 4WD,All-Wheel Drive,210 and 210 kW AC PMSM,50.7071,300
+2025,GMC,Sierra EV,Sierra,Standard Pickup Trucks 4WD,4-Wheel Drive,189 and 189 kW ACPM,52.3625,390
+2025,Hyundai,Ioniq 5 AWD (19 inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,31.6676,290
+2025,Hyundai,Ioniq 5 AWD (20 inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,34.497,269
+2025,Hyundai,Ioniq 5 AWD XRT,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,35.7633,259
+2025,Hyundai,Ioniq 5 RWD,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.0,318
+2025,Hyundai,Ioniq 5 Standard range,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,29.0,245
+2025,Maserati,Grancabrio Folgore,Grancabrio,Subcompact Cars,All-Wheel Drive,"275, 275 and 275 kW DCPM",41.0835,229
+2025,Maserati,Granturismo Folgore,Granturismo,Subcompact Cars,All-Wheel Drive,"275, 275 and 275 kW DCPM",40.5097,233
+2025,Mercedes-Benz,G 580 with EQ Technology,G-Class,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,"108, 108 and 108 kW ACPM 3-Phase",54.0,239
+2025,Nissan,ARIYA e-4ORCE 63kWh,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 and 160 kW AC 3-phase,35.2939,205
+2025,Nissan,ARIYA ENGAGE+/EVOLVE+ e-4ORCE 87kWh,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 and 160 kW AC 3-phase,36.6389,272
+2025,Nissan,ARIYA EVOLVE+ FWD 87kWh,ARIYA,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,178 and 160 kW AC 3-phase,34.3726,289
+2025,Nissan,ARIYA FWD 63kWh,ARIYA,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,160 kW AC 3-phase,33.2574,216
+2025,Nissan,ARIYA PLATINUM+ e-4ORCE 87kWh 19in. Wheels,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 and 160 kW AC 3-phase,37.3979,267
+2025,Nissan,ARIYA PLATINUM+ e-4ORCE 87kWh 20in. Wheels,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 and 160 kW AC 3-phase,38.8396,257
+2025,Polestar,3 Long Range Single Motor (20 Inch Wheels),3,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,220 kW PMSM,36.0134,342
+2025,Polestar,3 Long Range Single Motor (21 Inch Wheels),3,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,220 kW PMSM,35.3013,350
+2025,Polestar,3 Long Range Single Motor (22 Inch Wheels),3,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,220 kW PMSM,36.9495,333
+2025,Porsche,Macan 4 Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 175 and 495 kW ACPM",34.4628,308
+2025,Porsche,Macan 4S Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"280, 280 and 495 kW ACPM",37.1664,288
+2025,Porsche,Macan Turbo Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"280, 280 and 495 kW ACPM",36.9137,288
+2025,Porsche,Taycan 4 Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,150 and 354 kW ACPM,41.5097,277
+2025,Porsche,Taycan 4S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,150 and 175 kW ACPM,42.2417,272
+2025,Porsche,Taycan 4S Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,201 and 234 kW ACPM,38.5437,295
+2025,Porsche,Taycan 4S Performance Battery,Taycan,Compact Cars,All-Wheel Drive,150 and 234 kW ACPM,38.4498,252
+2025,Porsche,Taycan Turbo,Taycan,Compact Cars,All-Wheel Drive,175 and 234 kW ACPM,39.3432,292
+2025,Porsche,Taycan Turbo 21in Aero-Design wheel (285/35),Taycan,Compact Cars,All-Wheel Drive,175 and 234 kW ACPM,36.188,317
+2025,Porsche,Taycan Turbo Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,190 and 201 kW ACPM,42.9487,265
+2025,Porsche,Taycan Turbo GT,Taycan,Compact Cars,All-Wheel Drive,150 and 253 kW ACPM,40.8761,276
+2025,Porsche,Taycan Turbo GT with Weissach Package,Taycan,Compact Cars,All-Wheel Drive,175 and 234 kW ACPM,41.7469,269
+2025,Porsche,Taycan Turbo S,Taycan,Compact Cars,All-Wheel Drive,190 and 235 kW ACPM,42.7654,266
+2025,Porsche,Taycan Turbo S 21in Aero-Design wheel (285/35),Taycan,Compact Cars,All-Wheel Drive,234 and 254 kW ACPM,37.5527,298
+2025,Porsche,Taycan Turbo S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,150 and 253 kW ACPM,43.6145,261
+2025,Rivian,R1S All-Terrain Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,44.3622,289
+2025,Rivian,R1S All-Terrain Performance Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,44.3622,289
+2025,Rivian,R1S All-Terrain Tri Max (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,49.8346,329
+2025,Rivian,R1S Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,42.8711,300
+2025,Rivian,R1S Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,39.4726,329
+2025,Rivian,R1S Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,43.1237,317
+2025,Rivian,R1S Performance Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,42.8711,300
+2025,Rivian,R1S Performance Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,39.4726,329
+2025,Rivian,R1S Performance Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 and 264 kW ACPM,43.1237,317
+2025,Rivian,R1S Tri Max (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,"201, 201 and 233 kW ACPM",44.5717,371
+2025,Rivian,R1T All-Terrain Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,44.3622,289
+2025,Rivian,R1T All-Terrain Performance Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,44.3622,289
+2025,Rivian,R1T All-Terrain Tri Max (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,"201, 201 and 233 kW ACPM",49.8346,329
+2025,Rivian,R1T Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,42.8711,300
+2025,Rivian,R1T Dual Large (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,39.4726,329
+2025,Rivian,R1T Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,43.1237,317
+2025,Rivian,R1T Performance Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,42.8711,300
+2025,Rivian,R1T Performance Dual Large (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,39.4726,329
+2025,Rivian,R1T Performance Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 and 264 kW ACPM,43.1237,317
+2025,Rivian,R1T Tri Max (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,"201, 201 and 233 kW ACPM",44.5717,371
+2025,Subaru,Solterra AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,32.0,227
+2025,Subaru,Solterra Limited/Touring AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 80 kW AC Synchronous,33.0,222
+2025,Tesla,Model 3 Long Range AWD,Model 3,Midsize Cars,All-Wheel Drive,85 and 88 kW ACPM 3-Phase,26.3757,346
+2025,Tesla,Model 3 Long Range RWD,Model 3,Midsize Cars,Rear-Wheel Drive,192 kW ACPM 3-Phase,24.6398,363
+2025,Tesla,Model S Plaid (19in wheels),Model S,Large Cars,All-Wheel Drive,"250, 250 and 250 kW ACPM 3-Phase",32.4868,348
+2025,Tesla,Model S Plaid (21in wheels),Model S,Large Cars,All-Wheel Drive,"250, 250 and 250 kW ACPM 3-Phase",36.1407,312
+2025,Tesla,Model X Plaid (20in wheels),Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"230, 230 and 230 kW ACPM 3-Phase",35.8667,314
+2025,Tesla,Model X Plaid (22in wheels),Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"230, 230 and 230 kW ACPM 3-Phase",38.1191,294
+2025,Tesla,Model Y Long Range AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 183 kW ACPM 3-Phase,28.7946,311
+2025,Tesla,Model Y Long Range RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,221 kW ACPM 3-Phase,26.8631,337
+2025,Tesla,Model Y Performance AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 200 kW ACPM 3-Phase,32.4121,277
+2025,Volkswagen,ID.4 AWD Pro,ID.4,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 and 210 kW ACPM 3-Phase,32.9685,263
+2025,Volkswagen,ID.4 AWD Pro S,ID.4,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 210 kW ACPM 3-Phase,32.9685,263
+2025,Volvo,EX30 Twin Performance (19 Inch Wheels),EX30,Small Sport Utility Vehicle 4WD,All-Wheel Drive,115 and 185 kW PMSM,31.0632,253
+2025,Volvo,EX30 Twin Performance (20 Inch Wheels),EX30,Small Sport Utility Vehicle 4WD,All-Wheel Drive,115 and 185 kW PMSM,31.0437,250
+2025,Volvo,EX90 Twin Motor (20 and 22 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,127 and 200 kW PMSM,42.0,300
+2025,Volvo,EX90 Twin Motor (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,127 and 173 kW PMSM,40.0261,310
+2025,Volvo,EX90 Twin Motor Performance (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,173 and 180 kW PMSM,40.0261,310
+2025,Volvo,EX90 Twin Motor Performance (20 and 22 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,127 and 180 kW PMSM,42.0,300
+2024,Acura,ZDX AWD Type S,ZDX,Standard Sport Utility Vehicle 2WD,All-Wheel Drive,155 and 220 kW ACPM,43.0203,278
+2024,Dodge,Charger 2-Dr Daytona R/T AWD 18in,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,39.0,274
+2024,Dodge,Charger 2-Dr Daytona R/T AWD 20in Goodyear,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,40.0,268
+2024,Dodge,Charger 2-Dr Daytona R/T AWD 20in Nexen,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,34.5239,308
+2024,Dodge,Charger 2-Dr Daytona Scat Pack Track Pack AWD,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,48.0,216
+2024,Dodge,Charger 2-Dr Daytona Scat Pack Track Pack AWD A/S,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,43.3733,241
+2024,GMC,Hummer EV Pickup 2M20,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,214 and 214 kW ACPM,65.0,311
+2024,GMC,Hummer EV Pickup MT Tires 2M20,Hummer EV,Standard Pickup Trucks 4WD,All-Wheel Drive,214 and 214 kW ACPM,71.7483,279
+2024,GMC,Hummer EV SUV 2M20,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,214 and 214 kW ACPM,65.9777,303
+2024,GMC,Hummer EV SUV MT Tires 2M20,Hummer EV,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,214 and 214 kW ACPM,71.7483,279
+2024,Jeep,Wagoneer S AWD (Falken tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,34.6289,303
+2024,Jeep,Wagoneer S AWD (Pirelli tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,39.0,270
+2024,Porsche,Macan 4 Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,175 and 280 kW ACPM,34.4628,308
+2024,Porsche,Macan Turbo Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,175 and 490 kW ACPM,36.9137,288
+2024,Tesla,Model 3 Long Range RWD,Model 3,Midsize Cars,Rear-Wheel Drive,192 kW ACPM 3-Phase,24.6398,363
+2024,Tesla,Model 3 Performance AWD,Model 3,Midsize Cars,All-Wheel Drive,85 and 192 kW ACPM 3-Phase,30.1017,303
+2025,Audi,RS e-tron GT Performance,RS e-tron,Subcompact Cars,All-Wheel Drive,252 and 415 kW PSM 3-Phase,40.1762,278
+2025,Dodge,Charger Daytona R/T AWD 255/45R20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,34.5239,308
+2025,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear A/S,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,43.3733,241
+2025,Tesla,Model 3 Performance AWD,Model 3,Midsize Cars,All-Wheel Drive,85 and 191 kW ACPM 3-Phase,30.9191,298
+2025,Toyota,bZ4X LIMITED,bZ4X,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,80 kW AC Synchronous,30.1384,236
+2025,Cadillac,CELESTIQ,CELESTIQ,Small Station Wagons,All-Wheel Drive,155 and 220 kW ACPM,41.6988,303
+2025,Chevrolet,Blazer EV AWD SS,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW ACPM,39.6711,303
+2025,Chevrolet,Blazer EV FWD,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,32.2898,312
+2025,Chevrolet,Blazer EV FWD 22 inch tire,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,35.6443,283
+2025,Chevrolet,Silverado EV 2WT,Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,189 kW ACPM,50.7794,282
+2025,Dodge,Charger Daytona R/T AWD 245/55ZR18,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,35.0,274
+2025,Dodge,Charger Daytona R/T AWD 275/40R20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,35.0,268
+2025,Dodge,Charger Daytona R/T AWD 305/35ZR20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,35.0,279
+2025,Dodge,Charger Daytona Scat Pack AWD 305/35ZR20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,38.0,279
+2025,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,43.0,216
+2025,Ford,F-150 Lightning 4WD ER2,F-150 Lightning,Standard Pickup Trucks 4WD,4-Wheel Drive,210 and 210 kW ACPM,46.9714,300
+2025,Ford,Mustang Mach-E AWD,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,1 and 242 kW ACPM,33.6352,240
+2025,Ford,Mustang Mach-E AWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,258 kW ACPM,32.2577,300
+2025,Ford,Mustang Mach-E GT,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 kW ACPM,37.3929,280
+2025,Ford,Mustang Mach-E Rally,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 kW ACPM,39.3847,265
+2025,Ford,Mustang Mach-E RWD,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,197 kW ACPM,31.4375,260
+2025,Ford,Mustang Mach-E RWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,207 kW ACPM,30.6701,320
+2025,Vinfast,VF 6 Plus,VF 6,Special Purpose Vehicle 2WD,Front-Wheel Drive,150 kW ACPM 3-Phase,39.5833,176
+2025,Vinfast,VF 7 Plus,VF 7,Special Purpose Vehicle 4WD,All-Wheel Drive,260 kW ACPM 3-Phase,44.3737,209
+2025,Vinfast,VF 8 Eco,VF 8,Special Purpose Vehicle 4WD,All-Wheel Drive,260 and 300 kW ACPM 3-Phase,46.2475,256
+2025,Vinfast,VF 8 Plus,VF 8,Special Purpose Vehicle 4WD,All-Wheel Drive,260 and 300 kW ACPM 3-Phase,44.294,235
+2025,Vinfast,VF 9 Plus,VF 9,Special Purpose Vehicle 4WD,All-Wheel Drive,260 and 300 kW ACPM 3-Phase,49.7751,287
+2025,Honda,Prologue AWD Touring,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,33.7777,294
+2025,Honda,Prologue AWD Elite,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,35.2951,283
+2025,Honda,Prologue FWD,Prologue,Standard Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,32.5465,308
+2025,Hyundai,Ioniq 5 Robo taxi,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,47.5266,168
+2025,Jeep,Wagoneer S AWD (Falken tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,36.2004,294
+2025,Kia,EV6 AWD GT,EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,175 and 303 kW PMSM,40.0,231
+2025,Kia,EV6 Long Range AWD (19 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,32.0,295
+2025,Kia,EV6 Long Range AWD (20 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,34.5856,270
+2025,Kia,EV6 Long Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,29.5817,319
+2025,Kia,EV6 Standard Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,29.2248,237
+2025,Lexus,RZ 300e (18 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,26.7583,266
+2025,Lexus,RZ 300e (20 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,31.0,224
+2025,Lexus,RZ 450e AWD (18 inch wheels),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW AC Synchronous,31.0,220
+2025,Lexus,RZ 450e AWD (20 inch wheels),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 150 kW AC Synchronous,35.0,196
+2025,Lucid,Gravity GT w/20F21R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,31.0845,450
+2025,Lucid,Gravity GT w/20F21R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,32.4302,437
+2025,Lucid,Gravity GT w/21F22R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,34.3333,407
+2025,Lucid,Gravity GT w/21F22R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,36.4512,386
+2025,Lucid,Gravity GT w/22F23R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,34.3333,407
+2025,Lucid,Gravity GT w/22F23R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,36.4512,386
+2025,Mercedes-Benz,EQB 250 Plus,EQB,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,140 kW ACPM 3-Phase,31.4691,251
+2025,Mercedes-Benz,EQB 300 4matic,EQB,Small Sport Utility Vehicle 4WD,All-Wheel Drive,72 and 96 kW ACPM 3-Phase,38.6807,205
+2025,Mercedes-Benz,EQB 350 4matic,EQB,Small Sport Utility Vehicle 4WD,All-Wheel Drive,72 and 96 kW ACPM 3-Phase,38.7794,207
+2025,Porsche,Macan Electric,Macan,Small Sport Utility Vehicle 4WD,Rear-Wheel Drive,280 kW ACPM,34.0545,315
+2025,Porsche,Taycan 4 Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,150 and 254 kW ACPM,38.7298,294
+2025,Porsche,Taycan GTS,Taycan,Compact Cars,All-Wheel Drive,234 kW ACPM,38.977,293
+2025,Porsche,Taycan GTS Sport Turismo,Taycan,Compact Cars,All-Wheel Drive,254 kW ACPM,41.0496,279
+2025,Tesla,Cybertruck AWD,Cybertruck,Standard Pickup Trucks 4WD,All-Wheel Drive,224 and 239 kW AC Induction,42.9059,325
+2025,Tesla,Model S,Model S,Large Cars,All-Wheel Drive,243 and 248 kW ACPM 3-Phase,27.1309,410
+2025,Tesla,Model X,Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,243 and 248 kW ACPM,34.2466,329
+2025,Toyota,bZ4X,bZ4X,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW AC Synchronous,28.317,252
+2025,Toyota,bZ4X AWD (18inch Wheels),bZ4X,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 kW AC Synchronous,31.0,228
+2025,Toyota,bZ4X AWD (20inch Wheels),bZ4X,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 kW AC Synchronous,32.0,222
+2025,Toyota,bZ4X LIMITED AWD,bZ4X,Small Sport Utility Vehicle 4WD,All-Wheel Drive,80 kW AC Synchronous,32.0,222
+2025,Bugatti Rimac,Nevera R,Nevera,Two Seaters,4-Wheel Drive,226 and 500 kW AC Induction,66.4549,174
+2025,Jeep,Wagoneer S AWD (Pirelli tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,41.0,262
+2025,Tesla,Cybertruck Long Range,Cybertruck,Standard Pickup Trucks 2WD,Rear-Wheel Drive,240 kW ACPM 3-Phase,40.8735,335
+2025,Tesla,Cybertruck Long Range (20in Cyber wheels),Cybertruck,Standard Pickup Trucks 2WD,Rear-Wheel Drive,240 kW ACPM 3-Phase,43.3555,335
+2025,Tesla,Model 3 Long Range RWD-I (19in wheels),Model 3,Midsize Cars,Rear-Wheel Drive,"192, 213 and 225 kW ACPM 3-Phase",25.6484,346
+2025,Volkswagen,ID.4,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW ACPM 3-Phase,31.5973,206
+2025,Volkswagen,ID.4 Pro,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW ACPM 3-Phase,29.783,291
+2025,Volkswagen,ID.4 Pro S,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW ACPM 3-Phase,29.783,291
+2025,Volkswagen,ID.4 S,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW ACPM 3-Phase,31.5973,206
+2026,Audi,Q4 45 e-tron,Q4 e-tron,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,170 kW Asynchron 3-Phase,29.4031,288
+2026,BMW,i5 eDrive40 Sedan (19 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,30.6096,310
+2026,BMW,i5 eDrive40 Sedan (20 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,31.7381,300
+2026,BMW,i5 eDrive40 Sedan (21 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,34.4815,278
+2026,BMW,i5 xDrive40 Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,34.3752,278
+2026,BMW,i5 xDrive40 Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,35.2224,272
+2026,BMW,i5 xDrive40 Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,37.2045,259
+2026,BMW,iX xDrive45 (20 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 200 kW EESM,35.9932,312
+2026,BMW,iX xDrive45 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 200 kW EESM,37.7189,297
+2026,BMW,iX xDrive45 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 200 kW EESM,40.266,279
+2026,BMW,iX xDrive45 (23 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 200 kW EESM,38.6474,290
+2026,BMW,iX xDrive60 (20 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,34.7115,364
+2026,BMW,iX xDrive60 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,37.2214,341
+2026,BMW,iX xDrive60 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,38.5172,327
+2026,BMW,iX xDrive60 (23 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 230 kW EESM,39.5629,318
+2026,BMW,iX M70 (21 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 360 kW EESM,41.9857,303
+2026,BMW,iX M70 (22 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 360 kW EESM,44.4809,284
+2026,BMW,iX M70 (23 inch Wheels),iX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,190 and 360 kW EESM,44.8149,283
+2026,Bugatti Rimac,Nevera R,Nevera,Two Seaters,4-Wheel Drive,226 and 550 kW AC Induction,66.4549,174
+2026,Cadillac,LYRIQ (11 kW Charger),LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW DCPM,36.8206,326
+2026,Cadillac,LYRIQ (19 kW Charger),LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW DCPM,36.8364,326
+2026,Cadillac,LYRIQ PAWD V SERIES (11 kW Charger),LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,42.359,285
+2026,Cadillac,LYRIQ PAWD V SERIES (19 kW Charger),LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,42.359,285
+2026,Cadillac,LYRIQ PAWD,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,37.9814,319
+2026,Cadillac,VISTIQ (11 kW Charger),VISTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,39.3469,305
+2026,Cadillac,VISTIQ (19 kW Charger),VISTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,39.3469,300
+2026,Chevrolet,Silverado EV Ext Range WT,Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,47.8421,424
+2026,Chevrolet,Silverado EV Max Range WT (19kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,49.4829,493
+2026,Chevrolet,Silverado EV Ext Range (11kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,49.5493,410
+2026,Chevrolet,Silverado EV Ext Range (19kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,52.4183,385
+2026,Chevrolet,Silverado EV Std Range WT (11kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,49.5517,286
+2026,Chevrolet,Silverado EV Std Range (11kW Charger),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,50.2832,283
+2026,Chevrolet,Blazer EV FWD,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,32.2898,312
+2026,Chevrolet,Blazer EV FWD 22 inch tire,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,35.6443,283
+2026,Chevrolet,Blazer EV AWD,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,35.7361,283
+2026,Dodge,Charger Daytona R/T AWD 305/35ZR20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,39.1428,267
+2026,Dodge,Charger Daytona Scat Pack AWD 305/35ZR20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,39.1428,267
+2026,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,46.5919,223
+2026,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear A/S,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,43.3733,241
+2026,Genesis,Electrified G80,G80,Midsize Cars,All-Wheel Drive,136 kW PMSM,35.0,300
+2026,Genesis,GV60 RWD,GV60,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.5687,306
+2026,Genesis,GV60 AWD (19 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,33.5879,282
+2026,Genesis,GV60 AWD Advanced (20 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,35.1749,267
+2026,Genesis,GV60 AWD Performance,GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,37.0265,252
+2026,Genesis,Electrified GV70 AWD (19 inch Wheels),GV70,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,35.0,263
+2026,Genesis,Electrified GV70 AWD (20 inch Wheels),GV70,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,38.0,243
+2026,GMC,SIERRA EV Ext Range (11kW Charger),Sierra,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,49.5493,410
+2026,GMC,SIERRA EV Ext Range (19kW Charger),Sierra,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,52.4183,385
+2026,GMC,SIERRA EV Std Range (11kW Charger),Sierra,Standard Pickup Trucks 4WD,4-Wheel Drive,255 and 256 kW ACPM,50.2832,283
+2026,Hyundai,Ioniq 9 RWD,Ioniq 9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM,37.0,335
+2026,Hyundai,Ioniq 9 AWD,Ioniq 9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,66 and 160 kW PMSM,38.0,320
+2026,Hyundai,Ioniq 9 AWD Performance,Ioniq 9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,157 kW PMSM (IPM),40.0,311
+2026,Kia,Niro Electric,Niro,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW PMSM (IPM),30.0,253
+2026,Kia,EV9 Standard Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM (IPM),38.0,230
+2026,Kia,EV9 Long Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM (IPM),38.0,305
+2026,Kia,EV9 Long Range AWD,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 kW PMSM (IPM),40.0,283
+2026,Kia,EV9 Long Range AWD GT-Line,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141 kW PMSM (IPM),41.0,280
+2026,Kia,EV9 GT,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,139 and 235 kW PMSM (IPM),43.0,260
+2026,Lucid,Gravity GT w/20F21R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,31.0948,450
+2026,Lucid,Gravity GT w/21F22R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,34.3333,407
+2026,Lucid,Gravity GT w/22F23R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,34.3333,407
+2026,Lucid,Gravity GT w/21F22R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,36.4512,386
+2026,Lucid,Gravity GT w/22F23R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,36.4512,386
+2026,Lucid,Gravity Dream w/20F21R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,33.8831,420
+2026,Lucid,Gravity Dream w/21F22R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,37.641,378
+2026,Lucid,Gravity Dream w/22F23R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,37.641,378
+2026,Mercedes-Benz,AMG EQE 4matic Plus,EQE,Midsize Cars,All-Wheel Drive,165 and 295 kW ACPM 6-Phase,48.0,220
+2026,Mercedes-Benz,EQE 320 Plus,EQE,Midsize Cars,Rear-Wheel Drive,235 kW ACPM 6-Phase,35.6258,308
+2026,Mercedes-Benz,EQE 320 4matic,EQE,Midsize Cars,All-Wheel Drive,78 and157 kW ACPM 6-Phase,39.0,267
+2026,Mercedes-Benz,EQS 450 Plus,EQS,Large Cars,Rear-Wheel Drive,265 kW ACPM 6-Phase,34.0127,390
+2026,Mercedes-Benz,EQS 580 4matic,EQS,Large Cars,All-Wheel Drive,135 and 265 kW ACPM 6-Phase,35.622,371
+2026,Mercedes-Benz,EQS 450 4matic,EQS,Large Cars,All-Wheel Drive,135 and 265 kW ACPM 6-Phase,37.0,367
+2026,Mercedes-Benz,EQE 320 Plus (SUV),EQE,Midsize Station Wagons,Rear-Wheel Drive,235 kW ACPM 6-Phase,36.0755,302
+2026,Mercedes-Benz,EQE 320 4matic (SUV),EQE,Midsize Station Wagons,All-Wheel Drive,78 and 257 kW ACPM 6-Phase,42.0,253
+2026,Mercedes-Benz,AMG EQE 4matic Plus (SUV),EQE,Midsize Station Wagons,All-Wheel Drive,165 and 295 kW ACPM 6-Phase,45.5282,230
+2026,Mercedes-Benz,G 580 with EQ Technology,G-Class,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,180 kW ACPM 6-Phase,54.0,239
+2026,Mercedes-Benz,EQS 400 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 6-Phase,43.0,312
+2026,Mercedes-Benz,EQS 550 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 6-Phase,42.0,317
+2026,Mercedes-Benz,EQS 680 4matic Maybach (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,174 and 310 kW ACPM 6-Phase,39.823,300
+2026,Rivian,R1T Dual Standard (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 kW ACPM,39.8854,270
+2026,Rivian,R1T Dual Standard (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,208 kW ACPM,42.8683,258
+2026,Rivian,R1T Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2026,Rivian,R1T Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,38.8406,420
+2026,Rivian,R1T All-Terrain Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2026,Rivian,R1T Performance Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2026,Rivian,R1T Performance Dual Max (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,38.8406,420
+2026,Rivian,R1T All-Terrain Performance Dual Max (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2026,Rivian,R1T Dual Large Plus (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,40.9029,330
+2026,Rivian,R1T All-Terrain Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,46.8874,292
+2026,Rivian,R1T Performance Dual Large Plus (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,40.9029,330
+2026,Rivian,R1T All-Terrain Performance Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,46.8874,292
+2026,Rivian,R1T Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,43.1237,317
+2026,Rivian,R1T Performance Dual Large Plus (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,208 kW ACPM,43.1237,317
+2026,Rivian,R1T Tri Max (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 and 233 kW ACPM,44.5717,371
+2026,Rivian,R1T All-Terrain Tri Max (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 and 233 kW ACPM,49.8346,329
+2026,Rivian,R1T Dual Large (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2026,Rivian,R1T Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2026,Rivian,R1T All-Terrain Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2026,Rivian,R1T Performance Dual Large (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2026,Rivian,R1T Performance Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2026,Rivian,R1T All-Terrain Performance Dual Large (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2026,Rivian,R1T Quad Max (22in UHP),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,47.3466,338
+2026,Rivian,R1T Quad Max (20in AT),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,50.1027,325
+2026,Rivian,R1T Quad Max (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,44.3718,374
+2026,Rivian,R1S Dual Standard (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 kW ACPM,39.8854,270
+2026,Rivian,R1S Dual Standard (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,208 kW ACPM,42.8683,258
+2026,Rivian,R1S Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2026,Rivian,R1S Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,39.9385,410
+2026,Rivian,R1S All-Terrain Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2026,Rivian,R1S Performance Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2026,Rivian,R1S Performance Dual Max (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,39.9385,410
+2026,Rivian,R1S All-Terrain Performance  Dual Max (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2026,Rivian,R1S Dual Large Plus (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,40.9029,330
+2026,Rivian,R1S All-Terrain Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,46.8874,292
+2026,Rivian,R1S Performance Dual Large Plus (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,40.9029,330
+2026,Rivian,R1S All-Terrain Performance Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,46.8874,292
+2026,Rivian,R1S Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,43.1237,317
+2026,Rivian,R1S Performance Dual Large Plus (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,43.1237,317
+2026,Rivian,R1S Tri Max (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,44.5717,371
+2026,Rivian,R1S All-Terrain Tri Max (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,49.8346,329
+2026,Rivian,R1S Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2026,Rivian,R1S Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2026,Rivian,R1S All-Terrain Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2026,Rivian,R1S Performance Dual Large (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2026,Rivian,R1S Performance Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2026,Rivian,R1S All-Terrain Performance Dual Large (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2026,Rivian,R1S Quad Max (22in UHP),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,47.3466,338
+2026,Rivian,R1S Quad Max (20in AT),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,50.1027,325
+2026,Rivian,R1S Quad Max (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,44.3718,374
+2026,Tesla,Model S,Model S,Large Cars,All-Wheel Drive,243 and 248 kW ACPM 3-Phase,27.1309,410
+2026,Tesla,Model S Plaid,Model S,Large Cars,All-Wheel Drive,250 kW ACPM 3-Phase,30.587,368
+2026,Tesla,Model Y Long Range RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,228 and 243 kW ACPM,25.2252,357
+2026,Tesla,Model Y Long Range AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,90 and 200 kW ACPM,27.4959,327
+2026,Tesla,Model X,Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,246 and 251 kW ACPM,32.2022,352
+2026,Tesla,Model X Plaid,Model X,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,230 kW ACPM 3-Phase,33.6949,335
+2026,Volvo,EX40,EX40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 kW PMSM,31.7016,296
+2026,Volvo,EC40,EC40,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,185 kW PMSM,31.6837,298
+2026,Volvo,EX40 Twin,EX40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"110, 135 and 190 kW PMSM",35.9765,260
+2026,Volvo,EC40 Twin,EC40,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"110, 135 and 190 kW PMSM",34.8397,268
+2026,BMW,i7 eDrive50 Sedan (19 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.1958,314
+2026,BMW,i7 eDrive50 Sedan (20 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,39.8738,301
+2026,BMW,i7 eDrive50 Sedan (21 inch Wheels),i7,Large Cars,Rear-Wheel Drive,335 kW EESM,38.949,307
+2026,BMW,i7 M70 xDrive Sedan (20 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 360 kW EESM,45.0571,267
+2026,BMW,i7 M70 xDrive Sedan (21 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 360 kW EESM,42.4501,285
+2026,BMW,i7 xDrive60 Sedan (19 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.4128,311
+2026,BMW,i7 xDrive60 Sedan (20 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,40.754,296
+2026,BMW,i7 xDrive60 Sedan (21 inch Wheels),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.7685,308
+2026,Cadillac,LYRIQ AWD,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 155, 205 and 220 kW ACPM",39.7147,303
+2026,Cadillac,OPTIQ RWD (11 kW Charger),OPTIQ,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 255 kW ACPM,32.0831,317
+2026,Cadillac,OPTIQ RWD (19 kW Charger),OPTIQ,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 255 kW ACPM,32.0831,317
+2026,Cadillac,OPTIQ AWD (11 kW Charger),OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 155, 205 and 220 kW ACPM",34.0237,303
+2026,Cadillac,OPTIQ AWD (19 kW Charger),OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 155, 205 and 220 kW ACPM",34.0237,303
+2026,Chevrolet,Equinox EV FWD,Equinox,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW AC Induction,31.0762,319
+2026,Chevrolet,Blazer EV AWD SS,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,39.6711,302
+2026,Chevrolet,Equinox EV AWD (11 kW Charger),Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,32.6179,307
+2026,Chevrolet,Equinox EV AWD (19 kW Charger),Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW AC Induction,35.1127,288
+2026,Dodge,Charger Daytona R/T AWD 245/55ZR18,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,40.0,263
+2026,Dodge,Charger Daytona R/T AWD 255/45R20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,35.5778,295
+2026,Dodge,Charger Daytona R/T AWD 275/40R20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,41.0,258
+2026,Hyundai,Ioniq 5 RWD,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.0,318
+2026,Hyundai,Ioniq 5 Standard range,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,29.0,245
+2026,Hyundai,Ioniq 5 AWD (19inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,31.6676,290
+2026,Hyundai,Ioniq 5 AWD (20inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,34.497,269
+2026,Hyundai,Ioniq 5 AWD XRT,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,35.7633,259
+2026,Hyundai,Ioniq 5 N,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,166 and 282 kW PMSM,43.0,221
+2026,Lucid,Air G Touring XR AWD with19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,26.4283,512
+2026,Lucid,Air G Touring XR AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,28.1608,480
+2026,Lucid,Air G Touring XR AWD with 21 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,30.1254,446
+2026,Lucid,Air Pure RWD with 19 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,23.141,420
+2026,Lucid,Air Pure RWD with 20 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,26.1017,372
+2026,Lucid,Air Sapphire AWD,Air,Large Cars,All-Wheel Drive,310 kW ACPM,32.1321,427
+2026,Lucid,Air Touring AWD with 19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,25.1902,431
+2026,Lucid,Air Touring AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,27.3055,396
+2026,Nissan,LEAF 75kWh (18 inch alloy Wheels),LEAF,Small Station Wagons,Front-Wheel Drive,160 kW AC 3-phase,30.0,288
+2026,Nissan,LEAF 75kWh (18 inch steel Wheels),LEAF,Small Station Wagons,Front-Wheel Drive,160 kW AC 3-phase,27.8215,303
+2026,Nissan,LEAF 75kWh (19 inch Wheels),LEAF,Small Station Wagons,Front-Wheel Drive,160 kW AC 3-phase,32.7274,259
+2026,Rolls-Royce,Spectre Black Badge (22 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,45.4265,266
+2026,Rolls-Royce,Spectre Black Badge (23 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,48.2792,251
+2026,Rolls-Royce,Spectre (22 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,43.6454,277
+2026,Rolls-Royce,Spectre (23 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,47.8369,253
+2026,Subaru,Solterra 20 AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167  kW AC Synchronous,28.9223,278
+2026,Subaru,Solterra AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167  kW AC Synchronous,27.9567,288
+2026,Toyota,bZ (energy capacity 200 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167  kW AC Synchronous,25.8352,236
+2026,Toyota,bZ LIMITED (energy capacity 200 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167  kW AC Synchronous,27.488,296
+2026,Toyota,bZ AWD,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167  kW AC Synchronous,27.9956,288
+2026,Toyota,bZ AWD LIMITED,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167  kW AC Synchronous,28.9223,278
+2026,Volkswagen,ID.4,ID.4,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 kW ACPM 3-Phase,29.783,291
+2026,Volkswagen,ID.4 AWD,ID.4,Small Sport Utility Vehicle 4WD,All-Wheel Drive,210 kW ACPM 3-Phase,32.9685,263
+2026,Volvo,EX30 Single motor extended range,EX30,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,200 kW PMSM,29.1651,261
+2026,Volvo,EX30 Cross Country (18 Inch Wheels),EX30,Small Sport Utility Vehicle 4WD,All-Wheel Drive,115 and 200 kW PMSM,37.8118,203
+2026,Volvo,EX30 Cross Country (19 Inch Wheels),EX30,Small Sport Utility Vehicle 4WD,All-Wheel Drive,115 and 200 kW PMSM,34.0919,227
+2026,Volvo,EX30 Twin Performance,EX30,Small Sport Utility Vehicle 4WD,All-Wheel Drive,115 and 200 kW PMSM,31.0632,253
+2026,Acura,ZDX RWD,ZDX,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,255 kW ACPM,36.8622,327
+2026,Acura,ZDX AWD,ZDX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,37.7006,323
+2026,Acura,ZDX AWD Type S,ZDX,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,155 and 220 kW AC Induction,40.5722,296
+2026,Cadillac,OPTIQ AWD V SERIES 11 kW Charger,OPTIQ,Standard Sport Utility Vehicle 2WD,All-Wheel Drive,"140, 155, 205 and 220 kW ACPM",36.6617,278
+2026,Cadillac,OPTIQ AWD V SERIES 19 kW charger,OPTIQ,Standard Sport Utility Vehicle 2WD,All-Wheel Drive,"140, 155, 205 and 220 kW ACPM",41.0,250
+2026,Hyundai,Ioniq 5 Robo taxi,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,47.5266,168
+2026,Lucid,Gravity GT w/20F21R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,32.4302,437
+2026,Mercedes-Benz,CLA250 Plus with EQ Tech,CLA-Class,Compact Cars,Rear-Wheel Drive,200  kW ACPM 3-Phase,31.0,317
+2026,Mercedes-Benz,CLA250 Plus with EQ Tech (R22),CLA-Class,Compact Cars,Rear-Wheel Drive,200  kW ACPM 3-Phase,27.0,374
+2026,Mercedes-Benz,CLA350 4matic with EQ Tech,CLA-Class,Compact Cars,All-Wheel Drive,81 and 210 kW ACPM 3-Phase,29.0,312
+2026,Polestar,4 Long Range Single Motor,4,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,200 kW PMSM,35.0,310
+2026,Polestar,4 Long Range Dual Motor,4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,200 kW PMSM,40.0,280
+2026,Polestar,4 Long Range Dual Motor Performance,4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,200 kW PMSM,44.0,255
+2026,Tesla,Model 3 Performance,Model 3,Midsize Cars,All-Wheel Drive,88 and 208 kW AC Induction,29.585,309
+2026,Tesla,Model 3 Premium AWD,Model 3,Midsize Cars,All-Wheel Drive,88 and 208 kW AC Induction,26.3757,346
+2026,Tesla,Model 3 Premium RWD,Model 3,Midsize Cars,Rear-Wheel Drive,225 kW ACPM 3-Phase,24.6398,363
+2026,Tesla,Cybertruck AWD,Cybertruck,Standard Pickup Trucks 4WD,All-Wheel Drive,223 and 226 kW ACPM 3-Phase,42.9059,325
+2026,Tesla,Model Y Standard RWD (18in Wheels),Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,228 and 243 kW ACPM 3-Phase,24.3451,321
+2026,Tesla,Model Y Standard RWD (19in Wheels),Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,228 and 243 kW ACPM 3-Phase,25.6907,303
+2026,Toyota,bZ (energy capacity 191 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,25.5044,314
+2026,Toyota,bZ LIMITED (energy capacity 191 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,26.8632,299
+2026,Audi,Q4 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 210 kW Asynchron 3-Phase,34.626,251
+2026,Audi,Q4 Sportback 55 e-tron quattro,Q4 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,80 and 210 kW Asynchron 3-Phase,34.626,251
+2026,Audi,RS e-tron GT Performance,RS e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",40.1788,278
+2026,Audi,S e-tron GT (20 inch wheels),S e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",37.6493,300
+2026,Audi,S e-tron GT (21 inch wheels),S e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",38.5,294
+2026,BMW,i4 eDrive35 Gran Coupe (19 inch Wheels),i4,Compact Cars,Rear-Wheel Drive,210 kW EESM,30.8327,251
+2026,BMW,i4 eDrive40 Gran Coupe (18 inch wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,28.527,333
+2026,BMW,i4 eDrive40 Gran Coupe (19 inch Wheels),i4,Compact Cars,Rear-Wheel Drive,250 kW EESM,31.0961,307
+2026,BMW,i4 M60 xDrive Gran Coupe (19 inch Wheels),i4,Compact Cars,All-Wheel Drive,200 and 250 kW EESM,34.3964,278
+2026,BMW,i4 M60 xDrive Gran Coupe (20 inch Wheels),i4,Compact Cars,All-Wheel Drive,200 and 250 kW EESM,41.4376,232
+2026,BMW,i4 xDrive40 Gran Coupe (18 inch Wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,33.4089,287
+2026,BMW,i4 xDrive40 Gran Coupe (19 inch Wheels),i4,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,35.9861,268
+2026,BMW,i5 M60 xDrive Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,192 and 250 kW EESM,34.1426,277
+2026,BMW,i5 M60 xDrive Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,192 and 250 kW EESM,35.8185,266
+2026,BMW,i5 M60 xDrive Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,192 and 250 kW EESM,37.1253,259
+2026,Cadillac,CELESTIQ,CELESTIQ,Small Station Wagons,All-Wheel Drive,205 and 260 kW ACPM,41.6988,303
+2026,Fiat,500e,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,29.1808,149
+2026,Fiat,500e All Season,500e,Minicompact Cars,Front-Wheel Drive,87 kW DCPM,30.5327,141
+2026,Ford,Mustang Mach-E AWD,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,242 kW ACPM,33.6352,240
+2026,Ford,Mustang Mach-E AWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,258 kW ACPM,32.2577,300
+2026,Ford,Mustang Mach-E GT,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,179 kW ACPM,37.393,280
+2026,Ford,Mustang Mach-E Rally,Mustang Mach-E,Small Sport Utility Vehicle 4WD,All-Wheel Drive,179 kW ACPM,40.1534,255
+2026,Ford,Mustang Mach-E RWD,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,197 kW ACPM,31.4375,260
+2026,Ford,Mustang Mach-E RWD Extended,Mustang Mach-E,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,207 kW ACPM,30.6702,320
+2026,Honda,Prologue AWD Touring,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,34.0725,294
+2026,Honda,Prologue AWD Elite,Prologue,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,67 and 180 kW ACPM,35.2951,283
+2026,Honda,Prologue FWD,Prologue,Standard Sport Utility Vehicle 2WD,Front-Wheel Drive,180 kW ACPM,32.5465,308
+2026,Jeep,Wagoneer S AWD (Falken tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,36.2004,294
+2026,Jeep,Wagoneer S AWD (Pirelli tire),Wagoneer,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,39.1118,268
+2026,Kia,EV6 AWD GT,EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,175 and 303 kW PMSM,41.0,231
+2026,Kia,EV6 Long Range AWD (19 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165  kW PMSM,31.5813,295
+2026,Kia,EV6 Long Range AWD (20 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165  kW PMSM,34.5856,270
+2026,Kia,EV6 Long Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168  kW PMSM,29.5817,319
+2026,Kia,EV6 Standard Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125  kW PMSM,29.2248,237
+2026,Lexus,RZ 350e FWD (20 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,28.1333,284
+2026,Lexus,RZ 450e AWD (18 inch wheels),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,30.532,264
+2026,Lexus,RZ 450e AWD (20 inch wheels - 235/50R20),RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,31.1651,257
+2026,Lexus,"RZ 450e AWD (20 inch wheels - 235/50R20,255/45R20)",RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,35.2268,228
+2026,Lexus,RZ 550e AWD,RZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,35.3129,229
+2026,Lucid,Gravity Touring w/20F21R wheels,Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,399 kW ACPM,30.3355,337
+2026,MINI,Countryman SE ALL4 (18 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,34.9904,212
+2026,MINI,Countryman SE ALL4 (19 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,36.8577,204
+2026,Nissan,ARIYA e-4ORCE 63kWh,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW AC 3-phase,35.2939,205
+2026,Nissan,ARIYA e-4ORCE 87kWh,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW AC 3-phase,36.6389,272
+2026,Nissan,ARIYA FWD 63kWh,ARIYA,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,160 kW AC 3-phase,33.2574,216
+2026,Nissan,ARIYA FWD 87kWh,ARIYA,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,178 kW AC 3-phase,34.3726,289
+2026,Nissan,ARIYA PLATINUM+ e-4ORCE 87kWh 19in. Wheels,ARIYA,Small Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW AC 3-phase,37.3979,267
+2026,Polestar,3 Long Range Dual Motor (21 Inch Wheels),3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,150 and 280 kW PMSM,37.5261,312
+2026,Polestar,3 Long Range Dual Motor (22 Inch Wheels),3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,150 and 250 kW PMSM,41.5494,281
+2026,Polestar,3 Long Range Dual Motor Performance Pack,3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,220 and 280 kW PMSM,41.5494,281
+2026,Polestar,3 Long Range Single Motor (20 Inch Wheels),3,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,245 kW PMSM,35.4976,286
+2026,Polestar,3 Long Range Single Motor (21 Inch Wheels),3,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,245 kW PMSM,34.7334,291
+2026,Porsche,Taycan 4 Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,175 and 254 kW ACPM,41.5097,277
+2026,Porsche,Taycan 4 Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,175 and 503 kW ACPM,38.7298,294
+2026,Porsche,Taycan 4S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,201 and 503 kW ACPM,42.2417,272
+2026,Porsche,Taycan 4S Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,150 and 201 kW ACPM,38.5437,295
+2026,Porsche,Taycan 4S Perf Battery Plus 19in All-Season (M+S),Taycan,Compact Cars,All-Wheel Drive,150 and 175 kW ACPM,36.2403,315
+2026,Porsche,Taycan 4S Performance Battery,Taycan,Compact Cars,All-Wheel Drive,235 and 254 kW ACPM,38.4498,252
+2026,Porsche,Taycan GTS,Taycan,Compact Cars,All-Wheel Drive,234 and 503 kW ACPM,38.977,293
+2026,Porsche,Taycan GTS Sport Turismo,Taycan,Midsize Cars,All-Wheel Drive,234 and 415 kW ACPM,41.0496,279
+2026,Porsche,Taycan Performance Battery,Taycan,Compact Cars,Rear-Wheel Drive,300 and 320 kW ACPM,37.0713,274
+2026,Porsche,Taycan Turbo,Taycan,Compact Cars,All-Wheel Drive,234 and 554 kW ACPM,39.3432,292
+2026,Porsche,Taycan Turbo Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,175 and 234 kW ACPM,42.9487,265
+2026,Porsche,Taycan Turbo GT,Taycan,Compact Cars,All-Wheel Drive,190 and 254 kW ACPM,40.8761,276
+2026,Porsche,Taycan Turbo GT with Weissach Package,Taycan,Compact Cars,All-Wheel Drive,234 and 503 kW ACPM,41.7469,269
+2026,Porsche,Taycan Turbo S,Taycan,Compact Cars,All-Wheel Drive,150 and 201 kW ACPM,42.7654,266
+2026,Porsche,Taycan Turbo S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,150 and 234 kW ACPM,43.6145,261
+2026,Tesla,Cybertruck Long Range (20in Cyber wheels),Cybertruck,Standard Pickup Trucks 2WD,Rear-Wheel Drive,240 kW ACPM 3-Phase,43.3555,335
+2026,Tesla,Model 3 Performance AWD,Model 3,Midsize Cars,All-Wheel Drive,88 and 208  kW ACPM 3-Phase,30.2452,314
+2026,Tesla,Model 3 Standard RWD,Model 3,Midsize Cars,Rear-Wheel Drive,225 kW ACPM 3-Phase,24.3033,321
+2026,Tesla,Model S Plaid (21in wheels),Model S,Large Cars,All-Wheel Drive,250 kW ACPM 3-Phase,36.2115,309
+2026,Tesla,Model Y Performance AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,31.977,306
+2026,Volvo,EX90,EX90,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,245 kW PMSM,36.8057,276
+2026,Volvo,EX90 (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,245 kW PMSM,34.4647,291
+2026,Volvo,EX90 Twin Motor,EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,130 and 220 kW PMSM,39.1609,298
+2026,Volvo,EX90 Twin Motor (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,205 and 220 kW PMSM,38.3164,305
+2026,Volvo,EX90 Twin Motor Performance,EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,205 and 280 kW PMSM,39.1609,298
+2026,Volvo,EX90 Twin Motor Performance (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,130 and 280 kW PMSM,38.3164,305
+2026,Lexus,RZ 350e FWD (18 inch wheels),RZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,26.5957,301
+2026,Maserati,Grecale Folgore (19 inch wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,41.7231,268
+2026,Maserati,Grecale Folgore (21 inch wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,46.6576,239
+2026,Porsche,Macan 4 Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",35.3093,304
+2026,Porsche,Macan 4S Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.7931,290
+2026,Porsche,Macan Electric,Macan,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,280 kW ACPM,34.5857,309
+2026,Porsche,Macan GTS Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.7101,294
+2026,Porsche,Macan Turbo Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.8515,293
+2026,Subaru,Trailseeker 20 inch AWD,Trailseeker,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,30.0,274
+2026,Subaru,Trailseeker AWD,Trailseeker,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,29.0,281
+2026,Subaru,Uncharted,Uncharted,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,25.6644,308
+2026,Subaru,Uncharted 20 inch AWD,Uncharted,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.5015,273
+2026,Subaru,Uncharted AWD,Uncharted,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.0,287
+2026,Tesla,Model Y Standard AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,26.499,294
+2026,Toyota,bZ Woodland AWD 235/60R18,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,29.0,281
+2026,Toyota,bZ Woodland AWD 235/65R18,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,30.5844,260
+2026,Toyota,C-HR AWD 18inch,C-HR,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.0,287
+2026,Toyota,C-HR AWD 20inch,C-HR,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.5837,273
+2027,BMW,i5 eDrive40 Sedan (19 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,28.9345,328
+2027,BMW,i5 eDrive40 Sedan (20 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,31.8698,299
+2027,BMW,i5 eDrive40 Sedan (21 inch Wheels),i5,Compact Cars,Rear-Wheel Drive,250 kW EESM,33.8615,280
+2027,BMW,i5 xDrive40 Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,35.0175,273
+2027,BMW,i5 xDrive40 Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,36.5009,262
+2027,Mercedes-Benz,CLA250 Plus with EQ Tech (R22),CLA-Class,Compact Cars,Rear-Wheel Drive,200 kW ACPM 3-Phase,27.0,374
+2027,Audi,A6 e-tron,A6 e-tron,Large Cars,Rear-Wheel Drive,225 and 270 kW Asynchron 3-Phase,30.341,348
+2027,Audi,A6 e-tron quattro,A6 e-tron,Large Cars,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,31.9817,327
+2027,Audi,A6 e-tron quattro ultra,A6 e-tron,Large Cars,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,28.7437,360
+2027,Audi,A6 e-tron ultra,A6 e-tron,Large Cars,Rear-Wheel Drive,225 and 270 kW Asynchron 3-Phase,26.463,395
+2027,Audi,S6 e-tron (20 inch wheels),S6 e-tron,Large Cars,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,32.6585,326
+2027,Audi,S6 e-tron (21 inch wheels),S6 e-tron,Large Cars,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,33.7893,311
+2027,Chevrolet,BOLT,BOLT,Small Station Wagons,Front-Wheel Drive,180 kW ACPM,28.195,262
+2027,Vinfast,VF 7 Plus,VF 7,Small Sport Utility Vehicle 4WD,All-Wheel Drive,130 kW ACPM 3-Phase,44.3737,209
+2027,MINI,Countryman SE ALL4 (18 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,34.5685,216
+2027,Hyundai,Ioniq 9 RWD,Ioniq 9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160 kW PMSM,37.0,335
+2027,Audi,Q6 e-tron quattro (19 inch Tires),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,32.5073,325
+2027,Audi,Q6 e-tron quattro (20 inch Tires),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,35.0867,301
+2027,Audi,Q6 e-tron SB quattro (20 inch Tires),Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,35.0867,301
+2027,Audi,Q6 Sportback e-tron quattro,Q6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,32.5073,325
+2027,Audi,SQ6 e-tron (20 inch Tires),SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,36.5896,285
+2027,Audi,SQ6 e-tron (21 inch Tires),SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,39.6635,264
+2027,Audi,SQ6 Sportback e-tron (20 inch Tires),SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,36.5896,285
+2027,Audi,SQ6 Sportback e-tron (21 inch Tires),SQ6 e-tron,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,225 and 270 kW Asynchron 3-Phase,39.6635,264
+2027,BMW,iX3 50 xDrive (20 inch All-Season Tires),iX3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,33.1009,383
+2027,BMW,iX3 50 xDrive (20 inch Summer Tires),iX3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,28.5528,434
+2027,BMW,iX3 50 xDrive (21 inch All-Season Tires),iX3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,32.2083,399
+2027,BMW,iX3 50 xDrive (22 inch Summer Tires),iX3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,32.4622,392
+2027,Hyundai,Ioniq 9 AWD,Ioniq 9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,66 and 160 kW PMSM,38.0,320
+2027,Hyundai,Ioniq 9 AWD Performance,Ioniq 9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,157 kW PMSM (IPM),40.0,311
+2027,Rivian,R2 Performance AWD (20in AT),R2,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,300 kW ACPM,34.0963,307
+2027,Rivian,R2 Performance AWD (21in),R2,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,300 kW ACPM,32.1727,330
+2026,Jeep,Recon MOAB 4WD,Recon,Small Sport Utility Vehicle 4WD,All-Wheel Drive,250 kW DCPM,47.562,222
+2026,Lexus,ES 350e (19 inch Wheels),ES,Midsize Cars,Front-Wheel Drive,167 kW AC Synchronous,27.0,307
+2026,Lexus,ES 350e (21 inch Wheels),ES,Midsize Cars,Front-Wheel Drive,167 kW AC Synchronous,27.5209,292
+2026,Lexus,ES 500e AWD (19 inch Wheels),ES,Midsize Cars,All-Wheel Drive,88 and 167 kW AC Synchronous,30.0,276
+2026,Lexus,ES 500e AWD (21 inch Wheels),ES,Midsize Cars,All-Wheel Drive,88 and 167 kW AC Synchronous,30.0,272
+2026,Maserati,Grancabrio Folgore,Grancabrio,Subcompact Cars,All-Wheel Drive,275 kW DCPM,40.7187,231
+2026,Maserati,Grecale Folgore (20 inch Wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,41.7231,268
+2026,Porsche,Taycan 4 Perf Battery Plus 19in All-Season (M+S),Taycan,Compact Cars,All-Wheel Drive,"150, 415 and 503 kW ACPM",36.2403,315
+2026,Porsche,Taycan 4 Performance Battery,Taycan,Compact Cars,All-Wheel Drive,"150, 415 and 503 kW ACPM",38.5743,251
+2026,Porsche,Macan Electric 20in Wheels,Macan,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,250 kW ACPM,32.1011,332
+2026,Porsche,Macan 4 Electric 20in Wheels,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",33.0508,324
+2026,Tesla,Cybertruck Dual Motor AWD,Cybertruck,Standard Pickup Trucks 4WD,All-Wheel Drive,223 and 226 kW ACPM 3-Phase,42.9469,325
+2027,Audi,RS e-tron GT Performance,RS e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",40.1788,278
+2027,Audi,S e-tron GT (20 inch wheels),S e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",37.6493,300
+2027,Audi,S e-tron GT (21 inch wheels),S e-tron,Compact Cars,All-Wheel Drive,"176, 252 and 415 kW PSM 3-Phase",38.5,294
+2027,BMW,i5 xDrive40 Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,190 and 230 kW EESM,33.7944,283
+2027,BMW,i7 xDrive50 Sedan (20 inch All-Season Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,37.4407,354
+2027,BMW,i7 xDrive50 Sedan (21 inch All-Season Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,37.4407,354
+2027,BMW,i7 xDrive50 Sedan (21 inch Summer Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,36.7608,364
+2027,BMW,i7 xDrive60 Sedan (20 inch All-Season Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.3792,344
+2027,BMW,i7 xDrive60 Sedan (20 inch Summer Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,36.5061,362
+2027,BMW,i7 xDrive60 Sedan (21 inch All-Season Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.3792,344
+2027,BMW,i7 xDrive60 Sedan (21 inch Summer Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,38.2882,348
+2027,BMW,iX3 50 xDrive (21 inch Summer Tires),iX3,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,31.983,398
+2027,Cadillac,LYRIQ 11kW Charger,LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 260 kW ACPM,36.8206,326
+2027,Cadillac,LYRIQ 19kW Charger,LYRIQ,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 260 kW ACPM,36.8206,326
+2027,Cadillac,LYRIQ AWD 11kW Charger,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",37.9814,319
+2027,Cadillac,LYRIQ AWD 19kW Charger,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",39.7147,303
+2027,Cadillac,LYRIQ AWD V SERIES 11kW Charger,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",42.359,285
+2027,Cadillac,LYRIQ AWD V SERIES 19kW Charger,LYRIQ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",42.359,285
+2027,Cadillac,OPTIQ AWD 11kW Charger,OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",34.0237,303
+2027,Cadillac,OPTIQ AWD 19kW Charger,OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",34.0237,303
+2027,Cadillac,OPTIQ AWD V SERIES 11kW Charger,OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",36.6617,278
+2027,Cadillac,OPTIQ AWD V SERIES 19kW Charger,OPTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",41.0,250
+2027,Cadillac,OPTIQ RWD 11kW Charger,OPTIQ,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 260 kW ACPM,32.0831,317
+2027,Cadillac,OPTIQ RWD 19kW Charger,OPTIQ,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,210 and 260 kW ACPM,32.0831,317
+2027,Cadillac,VISTIQ 11kW Charger,VISTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",39.3469,305
+2027,Cadillac,VISTIQ 19kW Charger,VISTIQ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220 and 260 kW ACPM",39.3469,300
+2027,Chevrolet,Blazer EV AWD,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,70 and 150 kW ACPM,35.6702,283
+2027,Chevrolet,Blazer EV AWD SS,Blazer,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"140, 220  and 260 kW ACPM",39.6711,302
+2027,Chevrolet,Blazer EV FWD,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW ACPM,32.2898,312
+2027,Chevrolet,Blazer EV FWD 22 inch tire,Blazer,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW ACPM,35.6443,283
+2027,Chevrolet,Equinox EV AWD,Equinox,Small Sport Utility Vehicle 4WD,All-Wheel Drive,70 and 150 kW ACPM,32.6179,307
+2027,Dodge,Charger Daytona Scat Pack AWD 305/35ZR20,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,39.1428,267
+2027,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,44.7963,231
+2027,Dodge,Charger Daytona Scat Pack AWD 325/35ZR20 Rear A/S,Charger,Large Cars,All-Wheel Drive,250 and 250 kW DCPM,43.3733,241
+2027,Genesis,Electrified GV70 AWD,GV70,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,160 kW PMSM,37.3208,250
+2027,Genesis,GV60 AWD Prestige (20 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,35.1749,267
+2027,Genesis,GV60 AWD (19 inch Wheels),GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 160 kW PMSM,33.5879,282
+2027,Genesis,GV60 Magma,GV60,Small Sport Utility Vehicle 4WD,All-Wheel Drive,166 and 282 kW PMSM,43.0,222
+2027,Genesis,GV60 RWD,GV60,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.5687,306
+2027,Vinfast,VF 8 Eco,VF 8,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,260 and 300 kW ACPM 3-Phase,46.2475,256
+2027,Vinfast,VF 9 Plus,VF 9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,300 kW ACPM 3-Phase,49.7751,287
+2027,Hyundai,Ioniq 5 AWD (19inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,31.6676,290
+2027,Hyundai,Ioniq 5 AWD (20inch Wheels),Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,34.497,269
+2027,Hyundai,Ioniq 5 AWD XRT,Ioniq 5,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165 kW PMSM,35.7633,259
+2027,Hyundai,Ioniq 5 RWD,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,30.0,318
+2027,Hyundai,Ioniq 5 Standard range,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125 kW PMSM,29.0,245
+2027,Hyundai,Ioniq 6 N,Ioniq 6,Midsize Cars,All-Wheel Drive,166 and 282 kW PMSM,37.9275,245
+2027,Kia,EV3 Long Range AWD,EV3,Small Sport Utility Vehicle 4WD,All-Wheel Drive,70 and 125  kW PMSM,33.0,280
+2027,Kia,EV3 Long Range FWD,EV3,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150  kW PMSM,29.0,321
+2027,Kia,EV3 Long Range GT AWD,EV3,Small Sport Utility Vehicle 4WD,All-Wheel Drive,70 and 145  kW PMSM,33.0,280
+2027,Kia,EV3 Standard Range FWD,EV3,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150  kW PMSM,28.8471,221
+2027,Lucid,Gravity GT w/20F21R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,31.0948,450
+2027,Lucid,Gravity GT w/20F21R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,32.4302,437
+2027,Lucid,Gravity GT w/21F22R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,34.3333,407
+2027,Lucid,Gravity GT w/21F22R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,36.4512,386
+2027,Lucid,Gravity GT w/22F23R wheels (2R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,34.3333,407
+2027,Lucid,Gravity GT w/22F23R wheels (3R),Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,36.4512,386
+2027,Lucid,Gravity Touring w/20F21R wheels,Gravity,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,170 and 448 kW ACPM,30.3355,337
+2027,Mercedes-Benz,CLA250 Plus with EQ Tech,CLA-Class,Compact Cars,Rear-Wheel Drive,200 kW ACPM 3-Phase,31.0,317
+2027,Mercedes-Benz,CLA350 4matic with EQ Tech,CLA-Class,Compact Cars,All-Wheel Drive,81 and 210 kW ACPM 3-Phase,29.0,312
+2027,Mercedes-Benz,EQE 320 Plus (SUV),EQE,Midsize Station Wagons,Rear-Wheel Drive,235 kW ACPM 3-Phase,36.0755,302
+2027,Mercedes-Benz,EQS 400 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 3-Phase,43.0,312
+2027,Mercedes-Benz,EQS 550 4matic (SUV),EQS,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,135 and 265 kW ACPM 3-Phase,42.0,317
+2027,MINI,Countryman SE ALL4 (19 inch Wheels),Countryman,Small Sport Utility Vehicle 4WD,All-Wheel Drive,140 and 140 kW EESM,34.8937,214
+2027,Rivian,R1S Performance (20in AT),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,49.8346,329
+2027,Rivian,R1S Performance (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,46.9882,348
+2027,Rivian,R1S Performance (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 and 233 kW ACPM,44.5717,371
+2027,Rivian,R1S Premium (20in AT),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2027,Rivian,R1S Premium (20in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2027,Rivian,R1S Premium (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2027,Rivian,R1S Premium Long Range (20in AT),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2027,Rivian,R1S Premium Long Range (20in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2027,Rivian,R1S Premium Long Range (22in),R1S,Standard Sport Utility Vehicle 4WD,Part-time 4-Wheel Drive,264 kW ACPM,39.9385,410
+2027,Rivian,R1S Quad (20in AT),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,50.1027,325
+2027,Rivian,R1S Quad (22in UHP),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,47.3466,338
+2027,Rivian,R1S Quad (22in),R1S,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,201 kW ACPM,44.3718,374
+2027,Rivian,R1T Performance (20in AT),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 and 233 kW ACPM,49.8346,329
+2027,Rivian,R1T Performance (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 and 233 kW ACPM,46.9882,348
+2027,Rivian,R1T Performance (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 and 233 kW ACPM,44.5717,371
+2027,Rivian,R1T Premium (20in AT),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,44.3622,289
+2027,Rivian,R1T Premium (20in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,42.8711,300
+2027,Rivian,R1T Premium (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,264 kW ACPM,39.4726,329
+2027,Rivian,R1T Premium Long Range (20in AT),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,43.2248,370
+2027,Rivian,R1T Premium Long Range (20in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,41.9729,380
+2027,Rivian,R1T Premium Long Range (22in),R1T,Standard Pickup Trucks 4WD,Part-time 4-Wheel Drive,264 kW ACPM,38.8406,420
+2027,Rivian,R1T Quad (20in AT),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,50.1027,325
+2027,Rivian,R1T Quad (22in UHP),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,47.3466,338
+2027,Rivian,R1T Quad (22in),R1T,Standard Pickup Trucks 4WD,4-Wheel Drive,201 kW ACPM,44.3718,374
+2027,Subaru,Solterra 20 AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,28.9223,278
+2027,Subaru,Solterra AWD,Solterra,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,27.9567,288
+2027,Subaru,Trailseeker 20 inch AWD,Trailseeker,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,30.0,274
+2027,Subaru,Trailseeker AWD,Trailseeker,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,29.0,281
+2027,Subaru,Uncharted,Uncharted,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,25.6644,308
+2027,Subaru,Uncharted 20 inch AWD,Uncharted,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.5015,273
+2027,Subaru,Uncharted AWD,Uncharted,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.0,287
+2027,Volvo,EX60 P10 AWD electric,EX60,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,200 and 275 kW PMSM,30.0,330
+2027,Volvo,EX60 P6 electric (22 Inch Wheels),EX60,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,275 kW PMSM,29.8495,295
+2027,Volvo,EX90,EX90,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,245 kW PMSM,36.8057,276
+2027,Volvo,EX90 Twin Motor,EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"130, 220 and 280 kW PMSM",39.0,300
+2027,Volvo,EX90 Twin Motor (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"130, 220 and 280 kW PMSM",37.0,310
+2027,Volvo,EX90 Twin Motor Performance,EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"130, 220 and 280 kW PMSM",39.0,300
+2027,Volvo,EX90 Twin Motor Performance (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"130, 220 and 280 kW PMSM",37.0,310
+2027,BMW,i5 M60 xDrive Sedan (19 inch Wheels),i5,Compact Cars,All-Wheel Drive,200 and 250 kW EESM,34.1426,277
+2027,BMW,i5 M60 xDrive Sedan (20 inch Wheels),i5,Compact Cars,All-Wheel Drive,200 and 250 kW EESM,35.8326,266
+2027,BMW,i5 M60 xDrive Sedan (21 inch Wheels),i5,Compact Cars,All-Wheel Drive,200 and 250 kW EESM,37.1253,259
+2027,BMW,i7 xDrive50 Sedan (20 inch Summer Tires),i7,Large Cars,All-Wheel Drive,190 and 230 kW EESM,35.5078,373
+2027,Chevrolet,Equinox EV FWD,Equinox,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,150 kW ACPM,31.0762,319
+2027,Vinfast,VF 8 Plus,VF 8,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,260 and 300 kW ACPM 3-Phase,45.9803,224
+2027,Lucid,Air G Touring XR AWD with19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,26.4283,512
+2027,Lucid,Air G Touring XR AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,28.1608,480
+2027,Lucid,Air G Touring XR AWD with 21 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,30.1254,446
+2027,Lucid,Air Pure RWD with 19 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,23.141,420
+2027,Lucid,Air Pure RWD with 20 inch wheels,Air,Large Cars,Rear-Wheel Drive,330 kW ACPM,26.1017,372
+2027,Lucid,Air Sapphire AWD,Air,Large Cars,All-Wheel Drive,330 kW ACPM,32.1321,427
+2027,Lucid,Air Touring AWD with 19 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,25.1902,431
+2027,Lucid,Air Touring AWD with 20 inch wheels,Air,Large Cars,All-Wheel Drive,178 and 433 kW ACPM,27.3055,396
+2027,Mercedes-Benz,EQE 320 4matic (SUV),EQE,Midsize Station Wagons,All-Wheel Drive,78 and 157 kW ACPM 3-Phase,42.0,253
+2027,Mercedes-Benz,EQS 500 4matic,EQS,Large Cars,All-Wheel Drive,163 and 300 kW ACPM 3-Phase,29.6358,443
+2027,Mercedes-Benz,EQS 580 4matic,EQS,Large Cars,All-Wheel Drive,163 and 300 kW ACPM 3-Phase,29.9828,434
+2027,Mercedes-Benz,G 580 with EQ Technology,G-Class,Standard Sport Utility Vehicle 4WD,4-Wheel Drive,108 kW ACPM 3-Phase,47.781,249
+2027,Mercedes-Benz,GLC400 4matic electric,GLC-Class,Midsize Station Wagons,All-Wheel Drive,163 and 300 kW ACPM 3-Phase,32.958,331
+2027,Mercedes-Benz,GLC400 4matic electric (ST),GLC-Class,Midsize Station Wagons,All-Wheel Drive,163 and 300 kW ACPM 3-Phase,28.2341,350
+2027,Rolls-Royce,Spectre Black Badge (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,41.1453,324
+2027,Rolls-Royce,Spectre Black Badge (23 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,43.1915,308
+2027,Rolls-Royce,Spectre (22 inch wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,41.1453,324
+2027,Rolls-Royce,Spectre (23 inch Wheels),Spectre,Compact Cars,All-Wheel Drive,190 and 360 kW EESM,43.1915,308
+2027,Tesla,Model 3 Performance AWD,Model 3,Midsize Cars,All-Wheel Drive,208 kW ACPM 3-Phase,30.2452,316
+2027,Tesla,Model Y L (20in Wheels),Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,30.0,328
+2027,Toyota,bZ (energy capacity 200 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,124 kW AC Synchronous,25.8352,236
+2027,Toyota,bZ (energy capacity 191 Ah),bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,25.5044,314
+2027,Toyota,bZ AWD,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,27.9956,288
+2027,Toyota,bZ AWD LIMITED,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,28.9223,278
+2027,Toyota,bZ LIMITED,bZ,Small Sport Utility Vehicle 2WD,Front-Wheel Drive,167 kW AC Synchronous,26.8632,299
+2027,Toyota,bZ Woodland AWD 235/60R18,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,29.0,281
+2027,Toyota,bZ Woodland AWD 235/65R18,bZ,Small Sport Utility Vehicle 4WD,All-Wheel Drive,167 kW AC Synchronous,30.5844,260
+2027,Toyota,C-HR AWD 18inch,C-HR,Small Sport Utility Vehicle 4WD,All-Wheel Drive,87 and 167 kW AC Synchronous,29.0,287
+2027,Volvo,EX60 P10 AWD electric (22 Inch Wheels),EX60,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,200 and 275 kW PMSM,32.431,312
+2027,Volvo,EX60 P6 electric,EX60,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,275 kW PMSM,28.6449,307
+2027,Volvo,EX90 (21 Inch Wheels),EX90,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,275 kW PMSM,34.4647,291
+2027,BMW,i3 50 xDrive Sedan (19 inch All-Season Tires),i3,Compact Cars,All-Wheel Drive,123 and 240 kW EESM,28.3278,450
+2027,BMW,i3 50 xDrive Sedan (20 inch All-Season Tires),i3,Compact Cars,All-Wheel Drive,123 and 240 kW EESM,28.623,446
+2027,BMW,i3 50 xDrive Sedan (20 inch Summer Tires),i3,Compact Cars,All-Wheel Drive,123 and 240 kW EESM,27.1972,468
+2027,BMW,i3 50 xDrive Sedan (21 inch Summer Tires),i3,Compact Cars,All-Wheel Drive,123 and 240 kW EESM,27.7466,460
+2027,BMW,iX4 50 xDrive (20 inch All-Season Tires),iX4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,30.9968,408
+2027,BMW,iX4 50 xDrive (20 inch Summer Tires),iX4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,29.4486,428
+2027,BMW,iX4 50 xDrive (21 inch All-Season Tires),iX4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,33.3906,384
+2027,BMW,iX4 50 xDrive (21 inch Summer Tires),iX4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,31.0078,408
+2027,BMW,iX4 50 xDrive (22 inch Summer Tires),iX4,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,123 and 240 kW EESM,31.3468,412
+2027,BMW,iX5 60 xDrive (21 inch Summer Tires),iX5,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,183 and 242 kW EESM,37.7275,456
+2027,BMW,iX5 60 xDrive (22 inch All-Season Tires),iX5,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,183 and 242 kW EESM,41.173,418
+2027,BMW,iX5 60 xDrive (22 inch Summer Tires),iX5,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,183 and 242 kW EESM,40.3036,426
+2027,Chevrolet,Silverado EV Ext Range (11kW Chgr),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,290 and 295 kW ACPM,51.1021,396
+2027,Chevrolet,Silverado EV Ext Range WT (19kW Chgr),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,290 and 295 kW ACPM,47.8421,424
+2027,Chevrolet,Silverado EV Max Range WT (19kW Chgr),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,290 and 295 kW ACPM,49.4829,493
+2027,Chevrolet,Silverado EV Std Range WT (11kW Chgr),Silverado,Standard Pickup Trucks 4WD,4-Wheel Drive,290 and 295 kW ACPM,49.5517,286
+2027,GMC,Sierra EV Ext Range (11kW Chgr),Sierra,Standard Pickup Trucks 4WD,4-Wheel Drive,290 and 295 kW ACPM,51.1021,396
+2027,Hyundai,Ioniq 5 Robo taxi,Ioniq 5,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168 kW PMSM,47.5266,168
+2027,Kia,EV6 Long Range AWD (19 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165  kW PMSM (IPM),31.5813,295
+2027,Kia,EV6 Long Range AWD (20 inch Wheels),EV6,Small Sport Utility Vehicle 4WD,All-Wheel Drive,74 and 165  kW PMSM (IPM),34.5856,270
+2027,Kia,EV6 Long Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,168  kW PMSM (IPM),29.5817,319
+2027,Kia,EV6 Standard Range RWD,EV6,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,125  kW PMSM (IPM),29.2248,237
+2027,Kia,EV9 Long Range AWD,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141  kW PMSM,40.0,283
+2027,Kia,EV9 Long Range AWD GT-Line,EV9,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,141  kW PMSM,41.0,280
+2027,Kia,EV9 Long Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160  kW PMSM,38.0,305
+2027,Kia,EV9 Standard Range RWD,EV9,Standard Sport Utility Vehicle 2WD,Rear-Wheel Drive,160  kW PMSM,38.0,230
+2027,Lexus,ES 350e (19 inch Wheels),ES,Midsize Cars,Front-Wheel Drive,167 kW AC Synchronous,27.0,307
+2027,Lexus,ES 350e (21 inch Wheels),ES,Midsize Cars,Front-Wheel Drive,167 kW AC Synchronous,27.5209,292
+2027,Lexus,ES 500e AWD (19 inch Wheels),ES,Midsize Cars,All-Wheel Drive,88 and 167 kW AC Synchronous,30.0,276
+2027,Lexus,ES 500e AWD (21 inch Wheels),ES,Midsize Cars,All-Wheel Drive,88 and 167 kW AC Synchronous,30.0,272
+2027,Lexus,TZ 450e 11kW  (20 inch Wheels),TZ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,88 and 167 kW AC Synchronous,32.0,253
+2027,Lexus,TZ 450e 19kW (20 inch Wheels),TZ,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,88 and 167 kW AC Synchronous,31.8159,255
+2027,Maserati,Grecale Folgore (19 inch wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,41.7231,268
+2027,Maserati,Grecale Folgore (20 inch Wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,41.7231,268
+2027,Maserati,Grecale Folgore (21 inch wheels),Grecale,Small Sport Utility Vehicle 4WD,All-Wheel Drive,205 kW DCPM,46.6576,239
+2027,Mercedes-Benz,AMG GT 55 4dr Coupe,AMG GT,Large Cars,All-Wheel Drive,225 and 350 kW Axial Flux Motor,33.6325,320
+2027,Mercedes-Benz,AMG GT 63 4dr Coupe,AMG GT,Large Cars,All-Wheel Drive,225 and 350 kW Axial Flux Motor,33.6325,320
+2027,Mitsubishi,Eclipse Sportback,Eclipse Sportback,Small Station Wagons,Front-Wheel Drive,160 kW AC 3-phase,29.9289,282
+2027,Porsche,Macan 4 Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",35.3093,304
+2027,Porsche,Macan 4 Electric 20in Wheels,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",33.0508,324
+2027,Porsche,Macan 4S Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.7931,290
+2027,Porsche,Macan Electric,Macan,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,250 kW ACPM,34.5857,309
+2027,Porsche,Macan Electric 20in Wheels,Macan,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,250 kW ACPM,32.1011,332
+2027,Porsche,Macan GTS Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.7101,294
+2027,Porsche,Macan Turbo Electric,Macan,Small Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 280 and 495 kW ACPM",36.8515,293
+2027,Porsche,Taycan 4 Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",38.7298,294
+2027,Porsche,Taycan 4 Perf Battery Plus 19in All Season,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",36.2403,315
+2027,Porsche,Taycan 4S Cross Turismo,Taycan,Midsize Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",42.2417,272
+2027,Porsche,Taycan 4S Perf Battery Plus,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",38.5437,295
+2027,Porsche,Taycan 4S Perf Battery Plus 19in All Season,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",36.2403,315
+2027,Porsche,Taycan GTS,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",38.977,293
+2027,Porsche,Taycan Turbo,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",39.3432,292
+2027,Porsche,Taycan Turbo GT,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",40.8761,276
+2027,Porsche,Taycan Turbo S,Taycan,Compact Cars,All-Wheel Drive,"176, 415 and 503 kW ACPM",42.7654,266
+2027,Tesla,Model 3 Premium AWD,Model 3,Midsize Cars,All-Wheel Drive,88 and 208 kW ACPM 3-Phase,26.3757,346
+2027,Tesla,Model 3 Premium RWD,Model 3,Midsize Cars,Rear-Wheel Drive,225 kW ACPM 3-Phase,26.0,363
+2027,Tesla,Model 3 RWD,Model 3,Midsize Cars,Rear-Wheel Drive,225 kW ACPM 3-Phase,25.0,321
+2027,Tesla,Model Y AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,27.0,294
+2027,Tesla,Model Y Performance AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,31.977,306
+2027,Tesla,Model Y Premium AWD,Model Y,Small Sport Utility Vehicle 4WD,All-Wheel Drive,91 and 200 kW ACPM 3-Phase,27.4959,327
+2027,Tesla,Model Y Premium RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,243 kW ACPM 3-Phase,26.0,355
+2027,Tesla,Model Y RWD,Model Y,Small Sport Utility Vehicle 2WD,Rear-Wheel Drive,243 kW ACPM 3-Phase,25.0,321
+2026,Maserati,Granturismo Folgore,Granturismo,Subcompact Cars,All-Wheel Drive,275 kW DCPM,40.1197,235
+2026,Porsche,Cayenne Coupe Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",36.4577,326
+2026,Porsche,Cayenne Coupe Electric Range Setup,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",34.9696,339
+2026,Porsche,Cayenne Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",37.3856,317
+2026,Porsche,Cayenne Electric Range Setup,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",35.9112,322
+2026,Porsche,Cayenne S Coupe Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",36.7779,316
+2026,Porsche,Cayenne S Coupe Electric Range Setup,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",34.9948,330
+2026,Porsche,Cayenne S Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",39.2091,299
+2026,Porsche,Cayenne S Electric Range Setup,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",36.2501,325
+2026,Porsche,Cayenne Turbo Coupe Electric w/21in All-Season Tires,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",38.4085,307
+2026,Porsche,Cayenne Turbo Coupe Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",39.1287,302
+2026,Porsche,Cayenne Turbo Electric,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",39.724,298
+2026,Porsche,Cayenne Turbo Electric w/21in All-Season Tires,Cayenne,Standard Sport Utility Vehicle 4WD,All-Wheel Drive,"175, 388 and 600 kW ACPM",38.9967,303
+2026,Porsche,Taycan Turbo S 21in Aero-Design wheel (285/35),Taycan,Compact Cars,All-Wheel Drive,"150, 254 and 503 kW ACPM",37.8465,299

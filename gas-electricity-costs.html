@@ -145,7 +145,8 @@
         <div class="ge-filters" data-nocapture>
           <div class="ge-f">
             <label class="ge-fl" for="ge-ev">1 · Electric car</label>
-            <select class="ge-sel" id="ge-ev"></select>
+            <input class="ge-num" id="ge-evq" type="search" placeholder="Search a model (Model Y, Ioniq, F-150…)" autocomplete="off" data-nofm>
+            <select class="ge-sel" id="ge-ev" data-nofm></select>
             <div class="ge-inline" id="ge-evc-w" style="display:none"><input class="ge-num" id="ge-evc" type="number" min="5" max="60" step="0.1" data-nofm><span class="ge-unit" id="ge-evc-u">kWh/100 km</span></div>
             <span class="ge-hint" id="ge-ev-h"></span>
           </div>
@@ -205,7 +206,7 @@
             <b>Canada</b> (rules as of November 2026): GST 5% everywhere; Quebec + QST 9.975% = 14.975%; Ontario HST 13% (the Ontario Electricity Rebate is already in the CER price); Saskatchewan + PST 6% = 11%; Manitoba + RST 7% = 12% (the RST exemption covers space heating only, not EV charging); Newfoundland and Labrador HST 15%; Nova Scotia, New Brunswick and Prince Edward Island refund the provincial part of the HST on home electricity, so 5%; British Columbia, Alberta and the territories 5%.
             <b>United States (approximate):</b> state sales tax on residential electricity, or the state percentage tax charged on the bill in its place (Alabama utility tax 4%, Florida gross receipts 2.5%, Rhode Island 4%), plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%). Not included: per-kWh excise taxes (Illinois, Virginia), flat monthly utility taxes, city utility taxes, and gross-receipts taxes the utility builds into its rates. Local rates vary by city, so a given address can differ by a few points.</li>
           <li><b>Home charging only:</b> public fast charging often costs 2–4× the home price. Time-of-use or EV-specific rates can be much cheaper than the averages shown.</li>
-          <li><b>EV consumption presets</b> are approximate EPA combined ratings (kWh per 100 miles converted to kWh/100 km). The EPA measures energy from the wall, so charging losses are already included. Winter driving in Canada and the northern states can add 20–35%; use the Custom value to test it.</li>
+          <li><b>EV consumption: every model sold in the US and Canada.</b> The drop-down lists every battery-electric model rated by the US EPA (fueleconomy.gov, file of 4 November 2026; kWh per 100 miles converted to kWh/100 km) and by Natural Resources Canada (Fuel consumption ratings, 29 September 2026), model years 2024 to 2027, each model at its newest model year. A version NRCan also rates is marked as sold in both countries; 10 versions only NRCan rates are marked Canada only. Both agencies use the same 5-cycle test and measure energy from the wall, so charging losses are already included. The “Typical vehicles” at the top are rounded values for quick comparisons. Winter driving in Canada and the northern states can add 20–35%; use the Custom value to test it. Rebuild: <code>scripts/gas_elec/build_ev_models.py</code>.</li>
           <li><b>Currency:</b> Canadian rows are in CAD and US rows in USD at the source; the page converts them with the Bank of Canada's 2026 average exchange rate (<span id="ge-fx-m"></span>).</li>
           <li><b>Rebuild:</b> <code>scripts/gas_elec/build_gas_elec.py</code> reads the source files kept in <code>scripts/gas_elec/src/</code> and writes <code>assets/gas-elec-data.js</code> and the map shapes <code>assets/na-admin1-geo.js</code> (Natural Earth, public domain).</li>
         </ol>
@@ -219,6 +220,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="assets/gas-elec-data.js?v=2"></script>
+<script src="assets/ev-models-data.js?v=1"></script>
 <script src="assets/na-admin1-geo.js?v=1"></script>
 <script src="assets/filter-memory.js?v=5"></script>
 <script>
@@ -237,6 +239,9 @@ const EVS = [
   { id:'f150', n:'Pickup (Ford F-150 Lightning)',          k:29.8 },
   { id:'custom', n:'Custom value…',                        k:null },
 ];
+EVS.forEach(e => e.g = 'Typical vehicles');
+// every battery-electric model rated by the EPA (US) and NRCan (Canada), model years 2024+, newest year per model (assets/ev-models-data.js)
+EV_MODELS.forEach(([mk, md, y, k, km, mkt]) => EVS.push({ id:'m:' + mk + '|' + md, n:mk + ' ' + md, md, g:mk, y, k, km, mkt }));
 const st = { ev:'avg', evCustom:18, units:'metric', iceL:8.5, km:20000, cur:'USD', color:'saved', cty:'all', sort:'sv', dir:-1 };
 
 // ---------- calculation ----------
@@ -331,15 +336,37 @@ function hideTip(){ tip.style.opacity = 0; }
 
 // ---------- controls ----------
 const evSel = $('ge-ev');
-EVS.forEach(e => { const o = document.createElement('option'); o.value = e.id; evSel.appendChild(o); });
+const MKT = { US:' · US only', CA:' · Canada only', 'US+CA':'' };
+const evLabel = (e, us) => e.k == null ? e.n : `${e.g === 'Typical vehicles' ? e.n : e.md + ' (' + e.y + ')'} — ${us ? nf(e.k * KM_MI, 0) + ' kWh/100 mi' : nf(e.k, 1) + ' kWh/100 km'}${e.mkt ? MKT[e.mkt] : ''}`;
+let evBuilt = '';
+function buildEvOptions(){                                   // rebuilt only when the search text or the units change
+  const us = isUS(), q = $('ge-evq').value.trim().toLowerCase(), sig = q + '|' + us;
+  if(sig === evBuilt) return; evBuilt = sig;
+  const words = q.split(/\s+/).filter(Boolean);
+  const show = e => e.id === st.ev || e.id === 'custom' || !words.length || words.every(w => (e.n + ' ' + e.g).toLowerCase().includes(w));
+  evSel.innerHTML = '';
+  let grp = null, gname = null;
+  EVS.filter(show).forEach(e => {
+    if(e.g !== gname){ gname = e.g; grp = document.createElement('optgroup'); grp.label = e.g; evSel.appendChild(grp); }
+    const o = document.createElement('option'); o.value = e.id; o.textContent = evLabel(e, us); grp.appendChild(o);
+  });
+}
+$('ge-evq').addEventListener('input', () => {
+  buildEvOptions(); evSel.value = st.ev;
+  const opts = [...evSel.options].filter(o => o.value !== 'custom' && o.value !== st.ev);
+  const first = opts.find(o => o.value.startsWith('m:')) || opts[0];          // a real model before the rounded "typical" presets
+  if($('ge-evq').value.trim() && first && !EVS.find(e => e.id === st.ev && (e.n + ' ' + e.g).toLowerCase().includes($('ge-evq').value.trim().toLowerCase()))){ st.ev = first.value; render(); }
+});
 function syncInputs(){
   const us = isUS();
-  EVS.forEach((e, i) => { evSel.options[i].textContent = e.k == null ? e.n : `${e.n} — ${us ? nf(e.k * KM_MI, 0) + ' kWh/100 mi' : nf(e.k, 1) + ' kWh/100 km'}`; });
+  buildEvOptions();
   evSel.value = st.ev;
   $('ge-evc-w').style.display = st.ev === 'custom' ? '' : 'none';
   $('ge-evc-u').textContent = us ? 'kWh/100 mi' : 'kWh/100 km';
   if(document.activeElement !== $('ge-evc')) $('ge-evc').value = us ? +(st.evCustom * KM_MI).toFixed(1) : +st.evCustom.toFixed(1);
-  $('ge-ev-h').textContent = 'EPA combined, charging losses included';
+  const ce = EVS.find(e => e.id === st.ev);
+  $('ge-ev-h').textContent = ce && ce.y ? `${ce.mkt === 'CA' ? 'NRCan' : 'EPA'} rating, model year ${ce.y}${ce.km ? ' · range ' + (us ? nf(ce.km / KM_MI) + ' mi' : nf(ce.km) + ' km') : ''} · sold in ${ce.mkt === 'US+CA' ? 'US + Canada' : ce.mkt === 'US' ? 'US' : 'Canada'}`
+    : `${EV_MODELS.length} models listed (EPA + NRCan) · charging losses included`;
   $('ge-ice-u').textContent = us ? 'MPG (US)' : 'L/100 km';
   if(document.activeElement !== $('ge-ice')) $('ge-ice').value = us ? +(MPG_K / st.iceL).toFixed(1) : +st.iceL.toFixed(1);
   $('ge-ice-h').textContent = us ? `= ${nf(st.iceL, 1)} L/100 km` : `= ${nf(MPG_K / st.iceL, 1)} MPG (US)`;
@@ -478,7 +505,8 @@ function render(){
     { t:'Where the EV costs more', v:String(losers), s:losers ? `of ${valid.length} provinces and states` : `none of ${valid.length} provinces and states`, c:losers ? '#dc2626' : '#16a34a' },
   ].map(k => `<div class="ge-kpi" style="--c:${k.c}"><div class="t">${k.t}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
 
-  const evName = st.ev === 'custom' ? 'Custom EV' : EVS.find(e => e.id === st.ev).n;
+  const cur = EVS.find(e => e.id === st.ev);
+  const evName = st.ev === 'custom' ? 'Custom EV' : cur.n + (cur.y ? ' (' + cur.y + ')' : '');
   const evCons = isUS() ? `${nf(evK() * KM_MI, 0)} kWh/100 mi` : `${nf(evK(), 1)} kWh/100 km`;
   const ice = isUS() ? `${nf(MPG_K / st.iceL, 1)} MPG` : `${nf(st.iceL, 1)} L/100 km`;
   const dist = isUS() ? `${nf(st.km / KM_MI)} miles` : `${nf(st.km)} km`;
