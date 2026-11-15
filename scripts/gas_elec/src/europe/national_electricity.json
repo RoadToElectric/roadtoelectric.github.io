@@ -1,0 +1,7 @@
+{
+ "_note": "Household electricity price for European countries Eurostat does not cover (compiled 2026-11-15). Price with all taxes, local currency per kWh.",
+ "UK": {"v": 0.3373, "cur": "GBP", "src": "Ofgem energy price cap 1 Oct-31 Dec 2026, Direct Debit average: 26.32p/kWh + 54.83p/day standing charge spread over 2,700 kWh/yr (Ofgem typical use); electricity zero-rated for VAT in that period"},
+ "CH": {"v": 0.2994, "cur": "CHF", "src": "ElCom median 2026 tariff, typical household H4 (4,500 kWh/yr): 27.7 Rp/kWh, + 8.1% VAT"},
+ "UA": {"v": 4.32, "cur": "UAH", "src": "Regulated household tariff 4.32 UAH/kWh (Cabinet of Ministers, extended to 31 Oct 2026)"},
+ "UAH_per_EUR_2026": 51.0
+}
