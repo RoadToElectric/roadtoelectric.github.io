@@ -21,10 +21,10 @@
 // h2 in a .chart-header-row) -- no host-page markup change needed.
 
 const ELEC_BARS_KEYS = ['bev', 'phev']; // shown by default
-const ELEC_BARS_EXTRA_KEYS = ['hev', 'petrol', 'diesel']; // start hidden/dimmed in the legend -- click to reveal
+const ELEC_BARS_EXTRA_KEYS = ['hev', 'petrol', 'diesel', 'others']; // start hidden/dimmed in the legend -- click to reveal
 const ELEC_BARS_ALL_KEYS = [...ELEC_BARS_KEYS, ...ELEC_BARS_EXTRA_KEYS];
 const ELEC_BARS_MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ELEC_BARS_NOTE = "Battery Electric and Plug-in Hybrid as a share of each period's total registrations -- not stacked to 100% (Others isn't shown). Hybrid, Petrol and Diesel start dimmed in the legend; click any of them (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year projected to a full year (its year-to-date figures carried on to December, the same projection as the rest of the site), then each month of the current year so far (just the projected bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
+const ELEC_BARS_NOTE = "Battery Electric and Plug-in Hybrid as a share of each period's total registrations -- not stacked to 100% unless every powertrain is switched on. Hybrid, Petrol, Diesel and Others (LPG, natural gas, hydrogen, unknown) start dimmed in the legend; click any of them (or a bar segment) to add it to the stack. The last 5 full years (fewer if history is shorter), then the current year projected to a full year (its year-to-date figures carried on to December, the same projection as the rest of the site), then each month of the current year so far (just the projected bar if no monthly breakdown exists). Click a legend swatch or any segment to toggle that powertrain on/off.";
 // how many full annual years (immediately preceding the current one) to show, history permitting
 const ELEC_BARS_YEAR_COUNT = 5;
 // width ratios, relative to a single narrow bar (width 1) -- years widest, the current year's
@@ -51,7 +51,7 @@ function buildElectrificationBarsSeries(country){
     .filter(r => r.period_type === 'ANNUAL')
     .sort((a, b) => a.year - b.year)
     .slice(-ELEC_BARS_YEAR_COUNT)
-    .map(r => ({ label: String(r.year), bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, total: r.total, isPartial: false, isYear: true }));
+    .map(r => ({ label: String(r.year), bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others, total: r.total, isPartial: false, isYear: true }));
 
   // a country can carry more than one YTD row across different years (e.g. a stale prior-year
   // YTD left in place alongside the current year's) -- always take the most recent one, not
@@ -60,9 +60,9 @@ function buildElectrificationBarsSeries(country){
   // the bar of the running year is its projection to a full year when there is one, the year-to-date figures otherwise
   const projRow = ytdRow && yearly.find(r => r.period_type === 'PROJECTED' && r.year === ytdRow.year);
   const ytdPeriod = projRow
-    ? { label: `${projRow.year} Proj.`, bev: projRow.bev, phev: projRow.phev, hev: projRow.hev, petrol: projRow.petrol, diesel: projRow.diesel, total: projRow.total, isPartial: true, isYear: false, isYTD: true, isProjected: true }
+    ? { label: `${projRow.year} Proj.`, bev: projRow.bev, phev: projRow.phev, hev: projRow.hev, petrol: projRow.petrol, diesel: projRow.diesel, others: projRow.others, total: projRow.total, isPartial: true, isYear: false, isYTD: true, isProjected: true }
     : ytdRow
-      ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
+      ? { label: `${ytdRow.year} YTD`, bev: ytdRow.bev, phev: ytdRow.phev, hev: ytdRow.hev, petrol: ytdRow.petrol, diesel: ytdRow.diesel, others: ytdRow.others, total: ytdRow.total, isPartial: true, isYear: false, isYTD: true }
       : null;
 
   let monthPeriods = [];
@@ -73,7 +73,7 @@ function buildElectrificationBarsSeries(country){
       .sort((a, b) => a.ym.localeCompare(b.ym))
       .map(r => {
         const mm = parseInt(r.ym.slice(5, 7), 10);
-        return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${yr.slice(2)}`, bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, total: r.total, isPartial: false, isYear: false };
+        return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${yr.slice(2)}`, bev: r.bev, phev: r.phev, hev: r.hev, petrol: r.petrol, diesel: r.diesel, others: r.others, total: r.total, isPartial: false, isYear: false };
       });
   }
 
@@ -122,7 +122,7 @@ function elecBarsNoDieselNote(countries){
   return `${list} ${many ? 'do' : 'does'} not report diesel separately: ${many ? 'their' : 'its'} combustion cars are all counted as Petrol, so Diesel is empty (not zero) for ${many ? 'them' : 'it'}.`;
 }
 function buildElectrificationBarsSeriesMulti(countries){
-  const KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'total'];
+  const KEYS = ['bev', 'phev', 'hev', 'petrol', 'diesel', 'others', 'total'];
   const add = (acc, r) => { KEYS.forEach(k => { acc[k] = (acc[k] || 0) + (r[k] || 0); }); return acc; };
   const yearly = (typeof COUNTRY_YEARLY !== 'undefined' && COUNTRY_YEARLY) || {};
   const rowOf = (c, y, pt) => (yearly[c] || []).find(r => r.year === y && r.period_type === pt && elecBarsComplete(r));
@@ -164,7 +164,7 @@ function buildElectrificationBarsSeriesMulti(countries){
   withMonths.forEach(c => monthRows(c).forEach(r => { add(byMonth[r.ym] || (byMonth[r.ym] = { n: 0 }), r); byMonth[r.ym].n++; }));
   const monthPeriods = Object.keys(byMonth).sort().filter(ym => byMonth[ym].n >= 0.8 * withMonths.length).map(ym => {
     const mm = parseInt(ym.slice(5, 7), 10), m = byMonth[ym];
-    return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${String(ytdYear).slice(2)}`, bev: m.bev, phev: m.phev, hev: m.hev, petrol: m.petrol, diesel: m.diesel, total: m.total, isPartial: false, isYear: false };
+    return { label: `${ELEC_BARS_MONTH_ABBR[mm - 1]} '${String(ytdYear).slice(2)}`, bev: m.bev, phev: m.phev, hev: m.hev, petrol: m.petrol, diesel: m.diesel, others: m.others, total: m.total, isPartial: false, isYear: false };
   });
   return [...annualPeriods, ytdPeriod, ...monthPeriods];
 }
