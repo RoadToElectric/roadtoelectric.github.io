@@ -102,7 +102,12 @@
   html[data-view="mobile"] .sim-live.away{ opacity:0; pointer-events:none; transform:translateY(-8px); } html[data-view="mobile"] .sim-live{ transition:opacity .2s, transform .2s; } html[data-view="mobile"] .sim-live .go{ flex:none; font-weight:900; font-size:13px; opacity:.9; white-space:nowrap; }
   html[data-view="mobile"] #cmp-res{ scroll-margin-top:calc(var(--m-bar, 0px) + 84px); }
   html[data-view="mobile"] .ge-kpi .v{ font-size:19px; }
-  html[data-view="mobile"] table.cmp-t td:first-child, html[data-view="mobile"] table.cmp-t th:first-child{ position:sticky; left:0; background:var(--surface); z-index:1; }
+  .cmp-mh{ display:flex; flex-direction:column; gap:6px; margin:4px 0 8px; } .cmp-mh[hidden]{ display:none; }
+  .cmp-mh .ge-seg{ display:flex; align-self:stretch; } .cmp-mh .ge-seg button{ flex:1; padding:11px 4px; font-size:14px; }
+  table.cmp-m{ table-layout:fixed; font-size:13px; } table.cmp-m th, table.cmp-m td{ padding:8px 5px; white-space:normal; }
+  table.cmp-m th:first-child, table.cmp-m td:first-child{ width:32%; text-align:left; } table.cmp-m th{ font-size:10.5px; letter-spacing:0; }
+  table.cmp-m td small{ display:block; margin:0; } table.cmp-m tr.tot td{ font-size:13.5px; }
+  html[data-view="mobile"] .ge-tablewrap:has(table.cmp-m){ overflow-x:visible; }
   .ge-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .ge-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .ge-method li{ margin:5px 0; }
   .ge-wip{ display:flex; align-items:center; gap:14px; margin:14px 0 0; padding:12px 16px; border-radius:14px; border:2px solid #1f1f1f;
     background:repeating-linear-gradient(-45deg,#facc15 0 18px,#1f1f1f 18px 36px); }
@@ -266,6 +271,7 @@
 
         <p class="ge-sum" id="cmp-sum"></p>
         <div class="ge-kpis" id="cmp-kpis"></div>
+        <div class="cmp-mh" id="cmp-mh" data-nocapture hidden></div>
         <div class="ge-tablewrap"><table class="ge-t cmp-t" id="cmp-t"></table></div>
         <div class="cmp-chart" id="cmp-chart"></div>
         <div class="ge-leg" id="cmp-leg"></div>
@@ -456,6 +462,7 @@ $('c-reset').addEventListener('click', () => { const reg = cmp.reg; Object.assig
 const setIn = (id, v, force) => { const e = $(id); if(force || document.activeElement !== e) e.value = v; };
 const CAT = { purchase:'#64748b', energy:'#0a80d0', ins:'#cbd5e1', tires:'#7c3aed', oil:'#b45309', oth:'#0d9488' };
 const YEARS = [1, 3, 5, 10];
+let mobH = 10;                                                                  // period shown by the phone table
 
 function render(force){
   const v = vals(), us = isUS(), r = v.r, cs = costs(v);
@@ -530,6 +537,20 @@ function render(force){
     YEARS.map((y, i) => `<td class="${cls(save(y))}${i === 0 ? ' bl' : ''}">${sv(save(y))}</td>`).join('') + '</tr>';
   $('cmp-t').innerHTML = `<thead><tr><th rowspan="2">Cost</th><th class="grp" colspan="2">Cost of each car</th><th class="grp" colspan="4">Saved with the electric car (− = it costs more)</th></tr>
     <tr><th class="bl">Electric car</th><th>Gas car</th>${YEARS.map((y, i) => `<th${i === 0 ? ' class="bl"' : ''}>after ${y} year${y > 1 ? 's' : ''}</th>`).join('')}</tr></thead><tbody>${body}</tbody>`;
+  // phone: 4 narrow columns (cost · EV · gas · EV saves) for one period picked with the year buttons, no sideways scroll
+  const narrow = document.documentElement.dataset.view === 'mobile' || $('cmp-chart').clientWidth < 560;
+  $('cmp-mh').hidden = !narrow; $('cmp-t').classList.toggle('cmp-m', narrow);
+  if(narrow){
+    const N = mobH;
+    $('cmp-mh').innerHTML = '<span class="ge-fl">Show the costs over</span><div class="ge-seg">' + YEARS.map(y => `<button type="button" data-y="${y}"${y === N ? ' class="active"' : ''}>${y} yr${y > 1 ? 's' : ''}</button>`).join('') + '</div>';
+    const mrow = (n, ev, ice, extra = '', note = '') => { const d = ice - ev;
+      return `<tr${extra}><td>${n}${note}</td><td>${M(ev)}</td><td>${M(ice)}</td><td class="${cls(d)}">${sv(d)}</td></tr>`; };
+    let mb = '';
+    if(cmp.prOn) mb += mrow('Purchase price', pEV, pICE, '', '<small>once</small>');
+    cs.forEach(c => { mb += mrow(c.n.replace('Energy (electricity vs gasoline)', 'Energy'), c.ev * N, c.ice * N); });
+    mb += mrow(`Total, ${N} year${N > 1 ? 's' : ''}`, totEV(N), totICE(N), ' class="tot"');
+    $('cmp-t').innerHTML = `<thead><tr><th>Over ${N} year${N > 1 ? 's' : ''}</th><th>⚡ EV</th><th>⛽ Gas</th><th>EV saves</th></tr></thead><tbody>${mb}</tbody>`;
+  }
 
   // ---- chart: total cost after 1, 3, 5, 10 years, purchase price at the bottom of each bar ----
   const items = (cmp.prOn ? [{ k:'purchase', n:'Purchase price', ev:pEV, ice:pICE, once:true }] : []).concat(cs);
@@ -578,10 +599,11 @@ document.querySelectorAll('.ge-share').forEach(bar => bar.addEventListener('clic
     if(++k > 80 || (k > 2 && /📷|🔗/.test(src.textContent))){ clearInterval(t); setTimeout(() => { b.textContent = label; b.classList.remove('ok'); }, 1200); } }, 100);
 }));
 // the live result hides while the real results are on screen
-if('IntersectionObserver' in window){
-  const seen = new Set(), io = new IntersectionObserver(es => { es.forEach(e => e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)); $('sim-live').classList.toggle('away', seen.size > 0); }, { rootMargin:'-80px 0px -35% 0px' });
-  ['cmp-kpis', 'cmp-t', 'cmp-chart'].forEach(id => io.observe($(id)));
+function liveAway(){                                                          // results (year buttons to chart) on screen: hide the pinned result
+  const top = ($('cmp-mh').hidden ? $('cmp-kpis') : $('cmp-kpis')).getBoundingClientRect().top, bot = $('cmp-chart').getBoundingClientRect().bottom;
+  $('sim-live').classList.toggle('away', top < window.innerHeight * 0.7 && bot > 90);
 }
+window.addEventListener('scroll', liveAway, { passive:true }); document.addEventListener('scroll', liveAway, { passive:true, capture:true }); setInterval(liveAway, 500);
 let rsT = null; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => render(), 200); });
 $('sim-live').addEventListener('click', e => { e.preventDefault(); $('cmp-res').scrollIntoView({ behavior:'smooth', block:'start' }); });
 $('m-wob').textContent = EU.periods.gas.replace('EU Weekly Oil Bulletin, ', '');
