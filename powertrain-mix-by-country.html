@@ -3114,7 +3114,7 @@ monthsBox.innerHTML = VISIBLE_MONTHS.map(m => `
 // defaults to the currently-selected period(s); pass an explicit array to aggregate a different
 // period (e.g. ['2026-projection'] or ['2023-annual']) for ranking/fallback purposes
 // ---- Car class filter: the same per-country objects rebuilt from the model tables, keeping only the selected classes ----
-const MODEL_CATCHALL = /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i;
+const MODEL_CATCHALL = /^\((other|unclassified|unspecified)|^other\/discontinued|^(others?|unknown)\b/i;
 const classSig = () => [...selectedClasses].sort().join(',');
 const _classAggCache = new Map();
 // model rows of one country for a period key; monthSet (ytd only) restricts to those month numbers (to compare like with like)
@@ -4903,7 +4903,7 @@ function buildTopBevModels(countries){
     if(!src || !src.rows.length) return;
     anyModelData = true;
     yearsUsed.add(src.label);
-    src.rows.filter(r => r.bev > 0).forEach(r => {
+    src.rows.filter(r => r.bev > 0 && !MODEL_CATCHALL.test(r.model || '')).forEach(r => {      // "(other models)" rows are never ranked
       const key = canonicalModelKey(r.brand, r.model);
       if(!byModel.has(key)) byModel.set(key, { bev: 0, forms: new Map(), brands: new Map() });
       const e = byModel.get(key);
@@ -6389,7 +6389,7 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
   // bucket happens to be large, so every model sort/rank treats them as a separate, lower tier
   // that always sorts after every real model, however big its own total is
   function mfrIsCatchAllModel(model){
-    return /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i.test(String(model || ''));
+    return /^\((other|unclassified|unspecified)|^other\/discontinued|^(others?|unknown)\b/i.test(String(model || ''));
   }
   function mfrModelSortCmp(sortKey){
     return (a, b) => {

@@ -794,7 +794,7 @@ function aggregateBrands(country, p, raw){
 }
 
 // ---------- model data (lazy: ~24 MB, loaded the first time the Model filter is used) ----------
-const CATCHALL_MODEL = /^\((other|unclassified)|^other\/discontinued|^(other|unknown)\b/i;
+const CATCHALL_MODEL = /^\((other|unclassified|unspecified)|^other\/discontinued|^(others?|unknown)\b/i;
 const alnum = x => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const modelBase = m => String(m).replace(/\s+(BEV|PHEV|HEV|ICE)$/i, '');   // the site splits some nameplates into "X BEV / X ICE" rows: one model here
 function modelKey(brand, model){
