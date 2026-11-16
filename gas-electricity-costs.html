@@ -37,6 +37,7 @@
   .ge-map{ position:relative; width:100%; } .ge-map svg{ width:100%; height:auto; display:block; }
   .ge-map path.st{ stroke:var(--surface); stroke-width:.7; cursor:pointer; } .ge-map path.st:hover, .ge-map path.st.hl{ stroke:var(--text); stroke-width:1.6; }
   .ge-map path.na{ fill:var(--ge-na); }
+  .ge-map path.ctx{ fill:var(--surface-alt); stroke:var(--surface); stroke-width:.5; }
   .ge-mapgrid{ display:grid; grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr); gap:14px; align-items:stretch; }
   .ge-rank{ position:relative; min-height:340px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
   .ge-rank-in{ position:absolute; inset:0; overflow-y:auto; padding:0 10px 8px; }
@@ -133,7 +134,7 @@
       <header class="page-header">
         <div class="eyebrow">Trends · Electricity &amp; Gas Costs</div>
         <h1>Electricity &amp; gas costs by region: where does an EV save the most?</h1>
-        <p class="subtitle">Home electricity price (sales tax included) against the 2026 average price of regular gasoline in every Canadian province and territory and every US state. Pick your EV and enter your gas car's fuel use and your yearly distance: the map and the table show how much charging at home saves (green) or costs (red) compared with filling up.</p>
+        <p class="subtitle">Home electricity price (sales tax included) against the 2026 average price of regular gasoline in every Canadian province and territory, every US state and 42 European countries. Pick your EV and enter your gas car's fuel use and your yearly distance: the map and the table show how much charging at home saves (green) or costs (red) compared with filling up.</p>
       <div class="ge-wip" role="note">
         <div class="in"><span class="ic" aria-hidden="true">🚧</span>
           <div><b>Under construction</b>
@@ -143,10 +144,15 @@
       </header>
 
       <div class="card chart-card" id="ge-card">
-        <h2>1 · EV vs gas car: running cost by province and state, 2026</h2>
+        <h2 id="ge-h2">1 · EV vs gas car: running cost by province and state, 2026</h2>
         <p class="ge-note" id="ge-note"></p>
 
         <div class="ge-filters" data-nocapture>
+          <div class="ge-f">
+            <span class="ge-fl">Region</span>
+            <div class="ge-seg" id="ge-reg"><button type="button" data-v="na" class="active">Canada + US</button><button type="button" data-v="eu">Europe</button></div>
+            <span class="ge-hint" id="ge-reg-h"></span>
+          </div>
           <div class="ge-f">
             <label class="ge-fl" for="ge-ev">1 · Electric car</label>
             <input class="ge-num" id="ge-evq" type="search" placeholder="Search a model (Model Y, Ioniq, F-150…)" autocomplete="off" data-nofm>
@@ -171,7 +177,7 @@
           </div>
           <div class="ge-f">
             <span class="ge-fl">Currency</span>
-            <div class="ge-seg" id="ge-cur"><button type="button" data-v="USD" class="active">USD</button><button type="button" data-v="CAD">CAD</button></div>
+            <div class="ge-seg" id="ge-cur"><button type="button" data-v="USD" class="active">USD</button><button type="button" data-v="CAD">CAD</button><button type="button" data-v="EUR">EUR</button></div>
             <span class="ge-hint" id="ge-fx-h"></span>
           </div>
         </div>
@@ -192,7 +198,7 @@
 
         <div class="ge-tfoot" data-nocapture>
           <div class="ge-seg" id="ge-cty"><button type="button" data-v="all" class="active">All</button><button type="button" data-v="CA">Canada</button><button type="button" data-v="US">United States</button></div>
-          <span class="ge-hint">Click a column to sort · <span class="est">≈</span> = estimated state gasoline price</span>
+          <span class="ge-hint">Click a column to sort · <span class="est">≈</span> = <span id="ge-est-h">estimated state gasoline price</span></span>
         </div>
         <div class="ge-tablewrap"><table class="ge-t" id="ge-t"></table></div>
         <p class="ge-note note" id="ge-tnote"></p>
@@ -215,10 +221,11 @@
           <li><b>Sales tax on electricity is included.</b> Both electricity sources give prices before tax, so the page adds the consumption tax a household pays on its electricity bill (the “Elec. tax” column; hover it for the detail), to compare with gasoline prices that already include their taxes.
             <b>Canada</b> (rules as of November 2026): GST 5% everywhere; Quebec + QST 9.975% = 14.975%; Ontario HST 13% (the Ontario Electricity Rebate is already in the CER price); Saskatchewan + PST 6% = 11%; Manitoba + RST 7% = 12% (the RST exemption covers space heating only, not EV charging); Newfoundland and Labrador HST 15%; Nova Scotia, New Brunswick and Prince Edward Island refund the provincial part of the HST on home electricity, so 5%; British Columbia, Alberta and the territories 5%.
             <b>United States (approximate):</b> state sales tax on residential electricity, or the state percentage tax charged on the bill in its place (Alabama utility tax 4%, Florida gross receipts 2.5%, Rhode Island 4%), plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%). Not included: per-kWh excise taxes (Illinois, Virginia), flat monthly utility taxes, city utility taxes, and gross-receipts taxes the utility builds into its rates. Local rates vary by city, so a given address can differ by a few points.</li>
-          <li><b>Full cost comparison</b> (purchase price, insurance, tires, oil changes, other yearly costs, Europe): see the <a href="ev-vs-ice-cost.html">EV vs ICE Cost</a> page.</li>
+          <li><b>Europe (42 countries):</b> electricity = Eurostat household price (2,500–4,999 kWh a year band), first half of 2026, <b>all taxes and levies already included</b>, for the EU, Iceland, Liechtenstein, Norway, the Western Balkans, Moldova, Georgia and Türkiye; United Kingdom = Ofgem price cap Oct–Dec 2026 (26.32p/kWh + 54.83p/day standing charge over 2,700 kWh a year, electricity zero-rated for VAT in that period); Switzerland = ElCom 2026 median household tariff 27.7 Rp/kWh + 8.1% VAT; Ukraine = regulated tariff 4.32 UAH/kWh. Gasoline = European Commission Weekly Oil Bulletin, Euro-super 95 with all taxes, average of every week of 2026, for the 27 EU countries; outside the EU there is no official series, so one reading of globalpetrolprices.com (9 November 2026) is converted at that day's rate and scaled to the 2026 average with the EU's own ratio (marked ≈); Liechtenstein uses the Swiss price; Kosovo has none. Rebuild: <code>scripts/gas_elec/build_europe.py</code>.</li>
+          <li><b>Full cost comparison</b> (purchase price, insurance, tires, oil changes, other yearly costs): see the <a href="ev-vs-ice-cost.html">EV vs ICE Cost</a> page.</li>
           <li><b>Home charging only:</b> public fast charging often costs 2–4× the home price. Time-of-use or EV-specific rates can be much cheaper than the averages shown.</li>
           <li><b>EV consumption: every model sold in the US and Canada.</b> The drop-down lists every battery-electric model rated by the US EPA (fueleconomy.gov, file of 4 November 2026; kWh per 100 miles converted to kWh/100 km) and by Natural Resources Canada (Fuel consumption ratings, 29 September 2026), model years 2024 to 2027, each model at its newest model year. A version NRCan also rates is marked as sold in both countries; 10 versions only NRCan rates are marked Canada only. Both agencies use the same 5-cycle test and measure energy from the wall, so charging losses are already included. The “Typical vehicles” at the top are rounded values for quick comparisons. Winter driving in Canada and the northern states can add 20–35%; use the Custom value to test it. Rebuild: <code>scripts/gas_elec/build_ev_models.py</code>.</li>
-          <li><b>Currency:</b> Canadian rows are in CAD and US rows in USD at the source; the page converts them with the Bank of Canada's 2026 average exchange rate (<span id="ge-fx-m"></span>).</li>
+          <li><b>Currency:</b> Canadian rows are in CAD, US rows in USD and European rows in EUR at the source; the page converts them with the Bank of Canada's 2026 average exchange rate (<span id="ge-fx-m"></span>).</li>
           <li><b>Rebuild:</b> <code>scripts/gas_elec/build_gas_elec.py</code> reads the source files kept in <code>scripts/gas_elec/src/</code> and writes <code>assets/gas-elec-data.js</code> and the map shapes <code>assets/na-admin1-geo.js</code> (Natural Earth, public domain).</li>
         </ol>
       </details>
@@ -233,6 +240,8 @@
 <script src="assets/gas-elec-data.js?v=2"></script>
 <script src="assets/ev-models-data.js?v=1"></script>
 <script src="assets/na-admin1-geo.js?v=1"></script>
+<script src="assets/europe-cost-data.js?v=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="assets/filter-memory.js?v=5"></script>
 <script>
 const D = GAS_ELEC, FX = D.cadPerUsd, KM_MI = 1.609344, L_GAL = 3.785411784, MPG_K = 235.214583;
@@ -253,15 +262,23 @@ const EVS = [
 EVS.forEach(e => e.g = 'Typical vehicles');
 // every battery-electric model rated by the EPA (US) and NRCan (Canada), model years 2024+, newest year per model (assets/ev-models-data.js)
 EV_MODELS.forEach(([mk, md, y, k, km, mkt]) => EVS.push({ id:'m:' + mk + '|' + md, n:mk + ' ' + md, md, g:mk, y, k, km, mkt }));
-const st = { ev:'avg', evCustom:18, units:'metric', iceL:8.5, km:20000, cur:'USD', color:'saved', cty:'all', sort:'sv', dir:-1 };
+const st = { reg:'na', ev:'avg', evCustom:18, units:'metric', iceL:8.5, km:20000, cur:'USD', color:'saved', cty:'all', sort:'sv', dir:-1 };
+
+// ---------- rows: Canada + US (sales tax added on the page) and Europe (Eurostat prices already include every tax) ----------
+const EU = EUROPE;
+const PER_USD = { USD:1, CAD:FX, EUR:EU.eurPerUsd };                 // units of each currency for 1 USD
+const ROWS = D.rows.map(r => Object.assign({}, r, { reg:'na', cur:r.c === 'CA' ? 'CAD' : 'USD' })).concat(
+  EU.rows.map(r => ({ id:r.id, c:r.eu27 ? 'EU' : r.ab, ab:r.ab, n:r.n, reg:'eu', cur:'EUR', e:r.e, t:0, incl:true, es:r.es, ep:r.ep, g:r.g, gs:r.gs, eu27:r.eu27,
+    tn: r.es === 'eurostat' ? 'all taxes included (Eurostat)' : 'all taxes included (' + (r.ep || '').split(':')[0] + ')' })));
+const EST = r => r.gs === 'est' || r.gs === 'gpp' || r.gs === 'gpp-ch';      // gasoline price that is an estimate / third-party reading
 
 // ---------- calculation ----------
-const toCur = (v, c) => c === st.cur ? v : (st.cur === 'USD' ? v / FX : v * FX);      // v in the row's own currency
+const toCur = (v, c) => v / PER_USD[c] * PER_USD[st.cur];          // v in currency c -> the currency picked
 const evK = () => st.ev === 'custom' ? st.evCustom : EVS.find(e => e.id === st.ev).k;
 function calc(){
   const k = evK();
-  return D.rows.map(r => {
-    const cc = r.c === 'CA' ? 'CAD' : 'USD';
+  return ROWS.filter(r => r.reg === st.reg).map(r => {
+    const cc = r.cur;
     const e0 = toCur(r.e, cc), e = e0 * (1 + r.t), g = r.g == null ? null : toCur(r.g, cc);     // e = home electricity price with sales tax
     const ev100 = k * e, ice100 = g == null ? null : st.iceL * g;     // per 100 km
     const ok = ice100 != null && ev100 > 0;
@@ -274,10 +291,10 @@ const isUS = () => st.units === 'us';
 const dUnit = () => isUS() ? 'mi' : 'km';
 const per100 = v => isUS() ? v * KM_MI : v;                        // cost per 100 km -> per 100 mi
 const gasShown = g => isUS() ? g * L_GAL : g;                      // per litre -> per gallon
-const sym = () => st.cur === 'CAD' ? 'C$' : '$';
+const sym = () => ({ USD:'$', CAD:'C$', EUR:'€' })[st.cur];
 const money = (v, d = 0) => v == null ? '–' : (v < 0 ? '−' : '') + sym() + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
 const fmtRatio = v => v == null ? '–' : v.toFixed(v >= 10 ? 1 : 2) + '×';
-const cents = v => (v * 100).toFixed(1) + '¢';
+const cents = v => (v * 100).toFixed(1) + (st.cur === 'EUR' ? ' c€' : '¢');
 const pct = t => parseFloat((t * 100).toFixed(3)) + '%';         // 5%, 2.75%, 14.975%
 const nf = (v, d = 0) => v.toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
 
@@ -296,8 +313,8 @@ const textOn = c => { const l = d3.lab(c).l; return l > 60 ? '#06182e' : '#fffff
 
 // ---------- map ----------
 const W = 960, H = 640;
-const byId = new Map(D.rows.map(r => [r.id, r]));
-const svg = d3.select('#ge-map').insert('svg', '#ge-tip').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Map of Canada and the United States coloured by EV savings');
+const byId = new Map(ROWS.map(r => [r.id, r]));
+const svg = d3.select('#ge-map').insert('svg', '#ge-tip').attr('id', 'ge-svg-na').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Map of Canada and the United States coloured by EV savings');
 const mainFeats = { type:'FeatureCollection', features: NA_ADMIN1.features.filter(f => f.id !== 'US-HI') };
 const hiFeat = NA_ADMIN1.features.find(f => f.id === 'US-HI');
 const proj = d3.geoAlbers().rotate([97, 0]).center([0, 50]).parallels([38, 66]).fitExtent([[10, 6], [W - 10, H - 6]], mainFeats);
@@ -321,21 +338,50 @@ const labels = gLabels.selectAll('text').data(NA_ADMIN1.features.filter(f => {
     return `translate(${c[0]},${c[1]})`;
   }).text(f => f.id.slice(3));
 
+// Europe map (world-atlas 1:50m, loaded once); countries without data drawn as context
+const EU_NUM = { AT:40, BE:56, BG:100, HR:191, CY:196, CZ:203, DK:208, EE:233, FI:246, FR:250, DE:276, EL:300, HU:348, IE:372, IT:380, LV:428, LT:440,
+  LU:442, MT:470, NL:528, PL:616, PT:620, RO:642, SK:703, SI:705, ES:724, SE:752, IS:352, LI:438, NO:578, CH:756, UK:826, AL:8, BA:70, GE:268,
+  MD:498, ME:499, MK:807, RS:688, TR:792, UA:804 };
+const NUM_EU = Object.fromEntries(Object.entries(EU_NUM).map(([k, v]) => [v, 'EU-' + k]));
+const euSvg = d3.select('#ge-map').insert('svg', '#ge-tip').attr('id', 'ge-svg-eu').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+  .attr('aria-label', 'Map of Europe coloured by EV savings').style('display', 'none');
+let euShapes = d3.select(null), euLabels = d3.select(null);
+const allShapes = () => d3.selectAll('#ge-map path.st');
+const euReady = fetch('assets/countries-50m.json').then(r => r.json()).then(topo => {
+  const feats = topojson.feature(topo, topo.objects.countries).features;
+  feats.forEach(f => { f.id = f.properties.name === 'Kosovo' ? 'EU-XK' : (NUM_EU[+f.id] || 'X' + f.id); });
+  const box = { type:'Feature', geometry:{ type:'Polygon', coordinates:[[[-24, 34], [-24, 71.5], [45, 71.5], [45, 34], [-24, 34]]] } };
+  const p = d3.geoConicConformal().rotate([-12, 0]).parallels([40, 62]).fitExtent([[6, 6], [W - 6, H - 6]], box).clipExtent([[0, 0], [W, H]]);
+  const pth = d3.geoPath(p);
+  const near = feats.filter(f => { const b = d3.geoBounds(f); return b[1][0] > -30 && b[0][0] < 60 && b[1][1] > 30 && b[0][1] < 75; });
+  euSvg.append('g').selectAll('path').data(near.filter(f => !f.id.startsWith('EU-'))).join('path').attr('class', 'ctx').attr('d', pth);
+  euShapes = euSvg.append('g').selectAll('path').data(near.filter(f => f.id.startsWith('EU-'))).join('path').attr('class', 'st').attr('d', pth);
+  const SKIP = new Set(['EU-LI', 'EU-LU', 'EU-MT', 'EU-ME', 'EU-XK', 'EU-SI', 'EU-MK', 'EU-AL', 'EU-BA', 'EU-CY', 'EU-MD', 'EU-BE', 'EU-NL', 'EU-DK']);
+  const NUDGE = { 'EU-NO':[-60, 70], 'EU-SE':[-10, 40], 'EU-FI':[0, 30], 'EU-FR':[18, -20], 'EU-UK':[12, 30], 'EU-HR':[-12, -10] };
+  euLabels = euSvg.append('g').selectAll('text').data(near.filter(f => f.id.startsWith('EU-') && !SKIP.has(f.id) && pth.area(f) > 250)).join('text').attr('class', 'lb')
+    .attr('transform', f => { let c = pth.centroid(f); const n = NUDGE[f.id]; if(n) c = [c[0] + n[0], c[1] + n[1]]; return `translate(${c[0]},${c[1]})`; })
+    .text(f => f.id.slice(3));
+  render();
+}).catch(() => {});
+
 const tip = $('ge-tip');
 function showTip(ev, r){
   if(!r) return;
   const box = $('ge-map').getBoundingClientRect();
   const u = dUnit();
   const gas = r.g == null ? '<div class="r"><span>Gasoline</span><b>no data</b></div>' :
-    `<div class="r"><span>Gasoline</span><b>${money(gasShown(r.g), 2)}/${isUS() ? 'gal' : 'L'}${r.gs === 'est' ? ' ≈' : ''}</b></div>`;
+    `<div class="r"><span>Gasoline</span><b>${money(gasShown(r.g), 2)}/${isUS() ? 'gal' : 'L'}${EST(r) ? ' ≈' : ''}</b></div>`;
   tip.innerHTML = `<h4>${r.n}</h4>${gas}
     <div class="r"><span>Home electricity, with tax</span><b>${cents(r.e)}/kWh</b></div>
-    <div class="r"><span>&nbsp; before tax · sales tax</span><b>${cents(r.e0)} · ${pct(r.t)}</b></div>
+    ${r.incl ? '' : `<div class="r"><span>&nbsp; before tax · sales tax</span><b>${cents(r.e0)} · ${pct(r.t)}</b></div>`}
     <div class="r"><span>EV cost per 100 ${u}</span><b>${money(per100(r.ev100), 2)}</b></div>
     <div class="r"><span>Gas car cost per 100 ${u}</span><b>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</b></div>
     <div class="r"><span>Ratio (gas ÷ EV)</span><b>${fmtRatio(r.ratio)}</b></div>
     <div class="r big"><span>${r.sv == null ? 'Saved per year' : r.sv >= 0 ? 'EV saves per year' : 'EV costs more per year'}</span><b>${r.sv == null ? '–' : money(Math.abs(r.sv))}</b></div>
     ${r.gs === 'est' ? `<div class="est">≈ State gasoline price estimated from the EIA ${r.gr} average and AAA state prices.</div>` : ''}
+    ${r.gs === 'gpp' ? '<div class="est">≈ Gasoline: third-party reading (globalpetrolprices.com, 9 Nov 2026) scaled to the 2026 average; no official series outside the EU.</div>' : ''}
+    ${r.gs === 'gpp-ch' ? '<div class="est">≈ Gasoline: Swiss price (same market).</div>' : ''}
+    ${r.gs === 'wob' ? '<div class="est">Gasoline: EU Weekly Oil Bulletin, Euro-super 95, 2026 average.</div>' : ''}
     <div class="est">Electricity tax: ${r.tn}${r.c === 'US' ? ' (approximate)' : ''}.</div>
     ${r.c === 'CA' && r.gc ? `<div class="est">Gasoline: ${r.gc} (StatCan cities).</div>` : ''}`;
   tip.style.opacity = 1;
@@ -384,7 +430,7 @@ function syncInputs(){
   $('ge-dist-u').textContent = us ? 'miles' : 'km';
   if(document.activeElement !== $('ge-dist')) $('ge-dist').value = us ? Math.round(st.km / KM_MI) : Math.round(st.km);
   $('ge-dist-h').textContent = us ? `= ${nf(st.km)} km` : `= ${nf(st.km / KM_MI)} miles`;
-  $('ge-fx-h').textContent = `2026 avg: 1 USD = ${FX.toFixed(4)} CAD`;
+  $('ge-fx-h').textContent = `2026 avg: 1 USD = ${FX.toFixed(4)} CAD = ${PER_USD.EUR.toFixed(4)} EUR`;
 }
 evSel.addEventListener('change', () => { st.ev = evSel.value; render(); });
 $('ge-evc').addEventListener('input', e => { const v = parseFloat(e.target.value); if(v > 0){ st.evCustom = isUS() ? v / KM_MI : v; render(); } });
@@ -398,12 +444,27 @@ function seg(id, key){
     st[key] = b.dataset.v; render();
   });
 }
-seg('ge-units', 'units'); seg('ge-cur', 'cur'); seg('ge-color', 'color'); seg('ge-cty', 'cty');
+seg('ge-units', 'units'); seg('ge-cur', 'cur'); seg('ge-color', 'color');
+// table filter: Canada / US for North America, EU / outside the EU for Europe (buttons rebuilt with the region)
+function buildCty(){
+  const opts = st.reg === 'eu' ? [['all', 'All'], ['EU27', 'EU'], ['NONEU', 'Outside the EU']] : [['all', 'All'], ['CA', 'Canada'], ['US', 'United States']];
+  if(!opts.some(o => o[0] === st.cty)) st.cty = 'all';
+  $('ge-cty').innerHTML = opts.map(([v, l]) => `<button type="button" data-v="${v}"${v === st.cty ? ' class="active"' : ''}>${l}</button>`).join('');
+}
+$('ge-cty').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; st.cty = b.dataset.v; buildCty(); render(); });
+$('ge-reg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b || b.dataset.v === st.reg) return;
+  st.reg = b.dataset.v; [...$('ge-reg').children].forEach(x => x.classList.toggle('active', x === b));
+  st.cur = st.reg === 'eu' ? 'EUR' : 'USD';                                     // local currency; it can be changed after
+  [...$('ge-cur').children].forEach(x => x.classList.toggle('active', x.dataset.v === st.cur));
+  st.cty = 'all'; buildCty(); render();
+});
+buildCty();
 
 // ---------- table ----------
 const COLS = [
   { k:'rk',  h:'#' },
-  { k:'n',   h:'Province / state' },
+  { k:'n',   h:() => st.reg === 'eu' ? 'Country' : 'Province / state' },
   { k:'g',   h:() => `Gasoline /${isUS() ? 'gal' : 'L'}` },
   { k:'e',   h:'Electricity /kWh, tax incl.' },
   { k:'t',   h:'Elec. tax' },
@@ -419,7 +480,7 @@ $('ge-t').addEventListener('click', e => {
   render();
 });
 function drawTable(rows, col){
-  let list = rows.filter(r => st.cty === 'all' || r.c === st.cty);
+  let list = rows.filter(r => st.cty === 'all' || (st.cty === 'EU27' ? r.eu27 : st.cty === 'NONEU' ? r.reg === 'eu' && !r.eu27 : r.c === st.cty));
   const k = st.sort;
   list.sort((a, b) => {
     const va = a[k], vb = b[k];
@@ -430,10 +491,10 @@ function drawTable(rows, col){
   const body = list.map((r, i) => {
     const c = col.of(r);
     return `<tr data-id="${r.id}"><td class="rk">${i + 1}</td>
-      <td><span class="cc">${r.c}</span>${r.n}</td>
-      <td>${r.g == null ? '–' : money(gasShown(r.g), 2)}${r.gs === 'est' ? ' <span class="est" title="Estimated: EIA ' + r.gr + ' average × AAA state price relative">≈</span>' : ''}</td>
+      <td><span class="cc">${r.reg === 'eu' ? r.ab : r.c}</span>${r.n}</td>
+      <td>${r.g == null ? '–' : money(gasShown(r.g), 2)}${EST(r) ? ` <span class="est" title="${r.gs === 'est' ? 'Estimated: EIA ' + r.gr + ' average × AAA state price relative' : 'Third-party reading (globalpetrolprices.com, 9 Nov 2026), scaled to the 2026 average'}">≈</span>` : ''}</td>
       <td>${cents(r.e)}</td>
-      <td title="${r.tn}${r.c === 'US' ? ' (approximate)' : ''}">${pct(r.t)}</td>
+      <td title="${r.tn}${r.c === 'US' ? ' (approximate)' : ''}">${r.incl ? 'incl.' : pct(r.t)}</td>
       <td>${money(per100(r.ev100), 2)}</td>
       <td>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</td>
       <td>${fmtRatio(r.ratio)}</td>
@@ -441,8 +502,8 @@ function drawTable(rows, col){
   }).join('');
   $('ge-t').innerHTML = head + '<tbody>' + body + '</tbody>';
 }
-$('ge-t').addEventListener('mouseover', e => { const tr = e.target.closest('tr[data-id]'); shapes.classed('hl', f => tr && f.id === tr.dataset.id); });
-$('ge-t').addEventListener('mouseleave', () => shapes.classed('hl', false));
+$('ge-t').addEventListener('mouseover', e => { const tr = e.target.closest('tr[data-id]'); allShapes().classed('hl', f => tr && f.id === tr.dataset.id); });
+$('ge-t').addEventListener('mouseleave', () => allShapes().classed('hl', false));
 
 // ---------- legend ----------
 function drawLegend(col){
@@ -463,7 +524,8 @@ function drawLegend(col){
 // ---------- ranking bars beside the map (same measure and colours as the map) ----------
 const SHORT = { 'Newfoundland and Labrador':'Newfoundland', 'Prince Edward Island':'P.E.I.', 'Northwest Territories':'N.W.T.', 'British Columbia':'B.C.',
                 'New Brunswick':'N. Brunswick', 'New Hampshire':'N. Hampshire', 'North Carolina':'N. Carolina', 'South Carolina':'S. Carolina',
-                'North Dakota':'N. Dakota', 'South Dakota':'S. Dakota', 'West Virginia':'W. Virginia', 'Massachusetts':'Massachusetts' };
+                'North Dakota':'N. Dakota', 'South Dakota':'S. Dakota', 'West Virginia':'W. Virginia', 'Massachusetts':'Massachusetts',
+                'Bosnia and Herzegovina':'Bosnia & Herz.', 'North Macedonia':'N. Macedonia', 'United Kingdom':'United Kingdom' };
 function drawRank(rows, col){
   const isS = st.color === 'saved';
   const val = r => isS ? r.sv : r.ratio;
@@ -474,7 +536,7 @@ function drawRank(rows, col){
   const html = list.map((r, i) => {
     const v = val(r), a = x(v), c = col.of(r);
     return `<div class="ge-br" data-id="${r.id}" title="${r.n}: ${isS ? money(v) + ' a year' : fmtRatio(v)}">
-      <span class="rk">${i + 1}</span><span class="n"><small>${r.c}</small>${SHORT[r.n] || r.n}</span>
+      <span class="rk">${i + 1}</span><span class="n"><small>${r.reg === 'eu' ? r.ab : r.c}</small>${SHORT[r.n] || r.n}</span>
       <span class="t">${lo < base ? `<u style="left:${z}%"></u>` : ''}<i style="left:${Math.min(a, z)}%;width:${Math.max(Math.abs(a - z), 0.6)}%;background:${c}"></i></span>
       <span class="v${v < base ? ' neg' : ''}">${isS ? money(v) : fmtRatio(v)}</span></div>`;
   }).join('');
@@ -488,17 +550,20 @@ function markRank(id){
   const el = document.querySelector(`#ge-rank .ge-br[data-id="${id}"]`);
   if(el){ el.classList.add('hl'); const box = $('ge-rank'), top = el.offsetTop - box.clientHeight / 2; if(el.offsetTop < box.scrollTop + 30 || el.offsetTop > box.scrollTop + box.clientHeight - 30) box.scrollTo({ top, behavior:'smooth' }); }
 }
-$('ge-rank').addEventListener('mouseover', e => { const b = e.target.closest('.ge-br'); shapes.classed('hl', f => b && f.id === b.dataset.id); });
-$('ge-rank').addEventListener('mouseleave', () => shapes.classed('hl', false));
+$('ge-rank').addEventListener('mouseover', e => { const b = e.target.closest('.ge-br'); allShapes().classed('hl', f => b && f.id === b.dataset.id); });
+$('ge-rank').addEventListener('mouseleave', () => allShapes().classed('hl', false));
 
 // ---------- render ----------
 function render(){
   syncInputs();
   const rows = calc(), col = colorFn(rows), rb = new Map(rows.map(r => [r.id, r]));
-  shapes.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c || null; })
+  const eu = st.reg === 'eu';
+  $('ge-svg-na').style.display = eu ? 'none' : ''; $('ge-svg-eu').style.display = eu ? '' : 'none';
+  [eu ? euShapes : shapes].forEach(sel => sel.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c || null; })
     .classed('na', f => { const r = rb.get(f.id); return !r || r.sv == null; })
-    .on('mousemove', (ev, f) => { showTip(ev, rb.get(f.id)); markRank(f.id); }).on('mouseleave', () => { hideTip(); markRank(null); });
-  labels.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c ? textOn(c) : 'var(--text-muted)'; });
+    .on('mousemove', (ev, f) => { showTip(ev, rb.get(f.id)); markRank(f.id); }).on('mouseleave', () => { hideTip(); markRank(null); }));
+  [eu ? euLabels : labels].forEach(sel => sel.attr('fill', f => { const r = rb.get(f.id); const c = r && col.of(r); return c ? textOn(c) : 'var(--text-muted)'; }));
+  $('ge-h2').textContent = eu ? '1 · EV vs gas car: running cost by country, Europe 2026' : '1 · EV vs gas car: running cost by province and state, 2026';
   drawLegend(col);
   drawRank(rows, col);
   drawTable(rows, col);
@@ -506,14 +571,16 @@ function render(){
   const valid = rows.filter(r => r.sv != null).sort((a, b) => b.sv - a.sv);
   const best = valid[0], worst = valid[valid.length - 1], med = valid[Math.floor(valid.length / 2)];
   const losers = valid.filter(r => r.sv < 0).length;
-  const ca = valid.filter(r => r.c === 'CA'), us = valid.filter(r => r.c === 'US');
-  const avg = a => a.reduce((s, r) => s + r.sv, 0) / a.length;
+  const avg = a => a.length ? a.reduce((s, r) => s + r.sv, 0) / a.length : null;
+  const split = eu ? `EU ${money(avg(valid.filter(r => r.eu27)))} · outside the EU ${money(avg(valid.filter(r => !r.eu27)))}`
+                   : `Canada ${money(avg(valid.filter(r => r.c === 'CA')))} · US ${money(avg(valid.filter(r => r.c === 'US')))}`;
+  const what = eu ? 'countries' : 'provinces and states';
   $('ge-kpis').innerHTML = [
     { t:'Saves the most', v:money(best.sv), s:`${best.n} · ratio ${fmtRatio(best.ratio)}`, c:'#16a34a' },
     { t:'Saves the least', v:money(worst.sv), s:`${worst.n} · ratio ${fmtRatio(worst.ratio)}`, c:worst.sv < 0 ? '#dc2626' : '#84cc16' },
     { t:'Middle of the pack', v:money(med.sv), s:`${med.n} · ratio ${fmtRatio(med.ratio)}`, c:'#0a80d0' },
-    { t:'Average saving', v:money(avg(valid)), s:`Canada ${money(avg(ca))} · US ${money(avg(us))}`, c:'#7c3aed' },
-    { t:'Where the EV costs more', v:String(losers), s:losers ? `of ${valid.length} provinces and states` : `none of ${valid.length} provinces and states`, c:losers ? '#dc2626' : '#16a34a' },
+    { t:'Average saving', v:money(avg(valid)), s:split, c:'#7c3aed' },
+    { t:'Where the EV costs more', v:String(losers), s:losers ? `of ${valid.length} ${what}` : `none of ${valid.length} ${what}`, c:losers ? '#dc2626' : '#16a34a' },
   ].map(k => `<div class="ge-kpi" style="--c:${k.c}"><div class="t">${k.t}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
 
   const cur = EVS.find(e => e.id === st.ev);
@@ -522,8 +589,14 @@ function render(){
   const ice = isUS() ? `${nf(MPG_K / st.iceL, 1)} MPG` : `${nf(st.iceL, 1)} L/100 km`;
   const dist = isUS() ? `${nf(st.km / KM_MI)} miles` : `${nf(st.km)} km`;
   $('ge-sum').innerHTML = `<b>${evName}</b> (${evCons}) vs a gas car at <b>${ice}</b>, <b>${dist}</b> a year, home charging, amounts in <b>${st.cur}</b>.`;
-  $('ge-note').textContent = `Gasoline: 2026 average (Canada ${D.periods.caGas}, US ${D.periods.usGas}). Electricity: US residential average ${D.periods.usEl}; Canada ${D.periods.caEl} (CER, 1,000 kWh/month). Electricity prices include sales tax (GST/HST/QST/PST in Canada; state + typical local sales tax in the US, approximate). Nunavut has no gasoline series.`;
-  $('ge-tnote').textContent = `${valid.length} provinces, territories and states. Hover a row to find it on the map. ≈ = estimated state gasoline price (41 states). Canadian and US prices converted at the Bank of Canada 2026 average, 1 USD = ${FX.toFixed(4)} CAD.`;
+  $('ge-note').textContent = eu
+    ? `Gasoline: EU Weekly Oil Bulletin, Euro-super 95, 2026 average (EU countries); outside the EU, a third-party reading of 9 Nov 2026 scaled to the 2026 average (≈). Electricity: Eurostat household price, first half of 2026, all taxes included; UK Ofgem cap Oct–Dec 2026, Switzerland ElCom 2026, Ukraine regulated tariff. Kosovo has no gasoline price.`
+    : `Gasoline: 2026 average (Canada ${D.periods.caGas}, US ${D.periods.usGas}). Electricity: US residential average ${D.periods.usEl}; Canada ${D.periods.caEl} (CER, 1,000 kWh/month). Electricity prices include sales tax (GST/HST/QST/PST in Canada; state + typical local sales tax in the US, approximate). Nunavut has no gasoline series.`;
+  $('ge-tnote').textContent = eu
+    ? `${valid.length} countries. Hover a row to find it on the map. ≈ = gasoline from a third-party reading (countries outside the EU). Prices in euros at the source, converted at Bank of Canada 2026 averages (1 USD = ${FX.toFixed(4)} CAD = ${PER_USD.EUR.toFixed(4)} EUR).`
+    : `${valid.length} provinces, territories and states. Hover a row to find it on the map. ≈ = estimated state gasoline price (41 states). Canadian and US prices converted at the Bank of Canada 2026 average, 1 USD = ${FX.toFixed(4)} CAD.`;
+  $('ge-est-h').textContent = eu ? 'gasoline from a third-party reading (outside the EU)' : 'estimated state gasoline price';
+  $('ge-reg-h').textContent = eu ? '42 countries · prices in EUR at the source' : 'Provinces, territories and states';
 }
 
 document.querySelectorAll('[data-p]').forEach(e => e.textContent = D.periods[e.dataset.p]);
