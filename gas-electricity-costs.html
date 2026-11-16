@@ -305,9 +305,12 @@ function colorFn(rows){
   const val = r => st.color === 'saved' ? r.sv : (r.ratio == null ? null : Math.log(r.ratio));
   const vs = rows.map(val).filter(v => v != null);
   const maxP = Math.max(0, ...vs), maxN = Math.max(0, ...vs.map(v => -v));
+  // when every region saves money the greens run from the smallest saving (palest) to the largest (darkest), not from 0,
+  // so a region at 40% of the top saving looks clearly different from one at 100%; with losers, green starts at 0 (red/green split)
+  const minP = maxN > 0 ? 0 : Math.min(...vs.filter(v => v >= 0));
   const gi = d3.interpolateLab(g0, g1), ri = d3.interpolateLab(r0, r1);
-  const f = v => v == null ? null : v >= 0 ? gi(maxP ? 0.08 + 0.92 * v / maxP : 0.08) : ri(maxN ? 0.08 + 0.92 * -v / maxN : 0.08);
-  return { of: r => f(val(r)), f, maxP, maxN, gi, ri };
+  const f = v => v == null ? null : v >= 0 ? gi(maxP > minP ? 0.06 + 0.94 * Math.max(0, (v - minP) / (maxP - minP)) : 0.5) : ri(maxN ? 0.08 + 0.92 * -v / maxN : 0.08);
+  return { of: r => f(val(r)), f, maxP, maxN, minP, gi, ri };
 }
 const textOn = c => { const l = d3.lab(c).l; return l > 60 ? '#06182e' : '#ffffff'; };
 
@@ -511,11 +514,11 @@ function drawLegend(col){
   const isS = st.color === 'saved';
   const lab = v => isS ? money(v) : fmtRatio(Math.exp(v));
   let s = `<svg viewBox="0 0 ${w} ${h}"><defs>
-    <linearGradient id="lgG"><stop offset="0" stop-color="${col.gi(0.08)}"/><stop offset="1" stop-color="${col.gi(1)}"/></linearGradient>
+    <linearGradient id="lgG"><stop offset="0" stop-color="${col.gi(0.06)}"/><stop offset="1" stop-color="${col.gi(1)}"/></linearGradient>
     <linearGradient id="lgR"><stop offset="0" stop-color="${col.ri(1)}"/><stop offset="1" stop-color="${col.ri(0.08)}"/></linearGradient></defs>`;
   if(mid > 0) s += `<rect x="0" y="4" width="${mid}" height="12" rx="3" fill="url(#lgR)"/>`;
   s += `<rect x="${mid}" y="4" width="${w - mid}" height="12" rx="3" fill="url(#lgG)"/>`;
-  s += `<text x="0" y="31">${col.maxN > 0 ? lab(-col.maxN) : lab(0)}</text>`;
+  s += `<text x="0" y="31">${col.maxN > 0 ? lab(-col.maxN) : lab(col.minP)}</text>`;
   if(mid > 30 && mid < w - 60) s += `<text x="${mid}" y="31" text-anchor="middle">${isS ? sym() + '0' : '1.00×'}</text>`;
   s += `<text x="${w}" y="31" text-anchor="end">${lab(col.maxP)}</text></svg>`;
   $('ge-leg').innerHTML = s + `<span>${isS ? 'Green: the EV saves money · red: it costs more than gas' : 'Ratio = gas cost ÷ EV cost; above 1× the EV is cheaper'}</span><span><i></i>no data</span>`;
