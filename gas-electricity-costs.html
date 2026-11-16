@@ -116,10 +116,10 @@
       <a href="charging-stations.html"><span class="dot"></span>EV Charging</a>
       <a href="world-population.html"><span class="dot"></span>World Population</a>
       <a href="energy-mix.html"><span class="dot"></span>Energy Mix</a>
+      <a href="gas-electricity-costs.html" aria-current="page"><span class="dot"></span>Electricity &amp; Gas Costs per Country</a>
 
       <div class="nav-heading">Trends</div>
       <a class="nav-hot" href="eu-fsd-vote.html"><span class="dot"></span>EU Vote on Tesla FSD</a>
-      <a href="gas-electricity-costs.html" aria-current="page"><span class="dot"></span>Electricity &amp; Gas Costs per Country</a>
       <a href="ev-vs-ice-cost.html"><span class="dot"></span>EV vs ICE Costs Simulator</a>
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
@@ -136,15 +136,9 @@
   <main class="main">
     <div class="page ge-page">
       <header class="page-header">
-        <div class="eyebrow">Trends · Electricity &amp; Gas Costs per Country</div>
+        <div class="eyebrow">Markets · Electricity &amp; Gas Costs per Country</div>
         <h1>Electricity &amp; gas costs by region: where does an EV save the most?</h1>
         <p class="subtitle">Home electricity price (sales tax included) against the 2026 average price of regular gasoline in every Canadian province and territory, every US state and 42 European countries. Pick your EV and enter your gas car's fuel use and your yearly distance: the map and the table show how much charging at home saves (green) or costs (red) compared with filling up.</p>
-      <div class="ge-wip" role="note">
-        <div class="in"><span class="ic" aria-hidden="true">🚧</span>
-          <div><b>Under construction</b>
-          <span>This page is not finished yet. The numbers and the layout may still change, and some figures are estimates still being checked (US state gasoline prices for 41 states, US electricity sales tax). Please don't quote them yet.</span></div>
-        </div>
-      </div>
       </header>
 
       <div class="card chart-card" id="ge-card">
@@ -205,7 +199,7 @@
 
         <div class="ge-tfoot" data-nocapture>
           <div class="ge-seg" id="ge-cty"><button type="button" data-v="all" class="active">All</button><button type="button" data-v="CA">Canada</button><button type="button" data-v="US">United States</button></div>
-          <span class="ge-hint">Click a column to sort · <span class="est">≈</span> = <span id="ge-est-h">estimated state gasoline price</span></span>
+          <span class="ge-hint">Click a column to sort<span id="ge-est-w"> · <span class="est">≈</span> = <span id="ge-est-h"></span></span></span>
         </div>
         <div class="ge-tablewrap"><table class="ge-t" id="ge-t"></table></div>
         <p class="ge-note note" id="ge-tnote"></p>
@@ -222,12 +216,12 @@
         <ol>
           <li><b>The calculation.</b> EV cost per 100 km = the car's consumption (kWh/100 km) × the home electricity price. Gas car cost per 100 km = its fuel use (L/100 km) × the gasoline price. <b>Ratio</b> = gas car cost ÷ EV cost: 3.0× means the EV costs a third as much per kilometre. <b>$ saved in gas</b> = (gas car cost − EV cost) × your yearly distance. A negative number (red) means charging at home costs more than filling up.</li>
           <li><b>Gasoline, Canada:</b> Statistics Canada table 18-10-0001-01, regular unleaded at self-service stations, monthly, <span data-p="caGas"></span>. StatCan publishes cities, not provinces, so each province is the plain average of its cities: Ontario = Toronto, Ottawa and Thunder Bay; Quebec = Montréal and Québec City; Alberta = Calgary and Edmonton; Saskatchewan = Regina and Saskatoon; British Columbia = Vancouver and Victoria; the others one city each; Yukon = Whitehorse, Northwest Territories = Yellowknife. <b>Nunavut has no StatCan city and is left blank.</b></li>
-          <li><b>Gasoline, United States:</b> EIA monthly retail price of regular gasoline, taxes included, <span data-p="usGas"></span>. The EIA publishes its own series for only 9 states (California, Colorado, Florida, Massachusetts, Minnesota, New York, Ohio, Texas, Washington); those are used as is. <b>The other 41 states are estimates (marked ≈):</b> the 2026 average of the state's EIA region (New England, Central Atlantic, Lower Atlantic, Midwest, Gulf Coast, Rocky Mountain, West Coast) × how that state's AAA price compares with the AAA prices of the region's other states (AAA state averages, one-day reading of 14 November 2026). Tested on the 8 states EIA does publish, the estimate lands within ±6% of the real figure.</li>
+          <li><b>Gasoline, United States:</b> EIA monthly retail price of regular gasoline, taxes included, <span data-p="usGas"></span>, for the 9 states with their own EIA series (California, Colorado, Florida, Massachusetts, Minnesota, New York, Ohio, Texas, Washington). <b>The other 41 states: AAA's state averages</b> (regular unleaded), read about twice a month over the same months (<span id="ge-aaa-n"></span> readings, <span id="ge-aaa-p"></span>, from archived copies of AAA's state table), averaged, then put on EIA's level with one factor (×<span id="ge-aaa-c"></span>: AAA reads about 2.5% above EIA's survey). Checked on the states EIA publishes, the result lands within ±2.2% of EIA's own figure.</li>
           <li><b>Electricity, United States:</b> EIA Electric Power Monthly, table 5.6.B, average residential price, January to August 2026. This is revenue ÷ kWh sold, so fixed monthly charges are spread over the kWh; it is a price before sales tax, which the page then adds (see below).</li>
           <li><b>Electricity, Canada:</b> Canada Energy Regulator, market snapshot “How much do your neighbours across Canada pay for electricity?” (4 March 2026): modelled price for a home using 1,000 kWh a month, fixed and delivery charges and direct rebates included, <b>taxes excluded</b>, rates in force in November 2025 (Manitoba 1 January 2026, Nunavut 1 October 2022). Canada has no observed 2026 provincial average price, so this is the closest comparable measure.</li>
           <li><b>Sales tax on electricity is included.</b> Both electricity sources give prices before tax, so the page adds the consumption tax a household pays on its electricity bill (the “Elec. tax” column; hover it for the detail), to compare with gasoline prices that already include their taxes.
             <b>Canada</b> (rules as of November 2026): GST 5% everywhere; Quebec + QST 9.975% = 14.975%; Ontario HST 13% (the Ontario Electricity Rebate is already in the CER price); Saskatchewan + PST 6% = 11%; Manitoba + RST 7% = 12% (the RST exemption covers space heating only, not EV charging); Newfoundland and Labrador HST 15%; Nova Scotia, New Brunswick and Prince Edward Island refund the provincial part of the HST on home electricity, so 5%; British Columbia, Alberta and the territories 5%.
-            <b>United States (approximate):</b> state sales tax on residential electricity, or the state percentage tax charged on the bill in its place (Alabama utility tax 4%, Florida gross receipts 2.5%, Rhode Island 4%), plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%). Not included: per-kWh excise taxes (Illinois, Virginia), flat monthly utility taxes, city utility taxes, and gross-receipts taxes the utility builds into its rates. Local rates vary by city, so a given address can differ by a few points.</li>
+            <b>United States:</b> the EIA price is revenue ÷ kWh as utilities report it (forms EIA-861 / 861M): it already includes the taxes and charges the utility bills itself (franchise fees, gross-receipts taxes, surcharges), but not the sales tax collected for the state. So the page adds the state sales tax on residential electricity, plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%); some exempt part of it (Maine: the first 750 kWh a month; Minnesota and Wisconsin: winter heating only) or tax it at a reduced rate (Michigan 4%, Utah ~3%); Iowa and Kansas leave only the local tax. Rules checked against state law summaries (Bloomberg BNA utilities chart, state revenue departments). Not included: per-kWh excise taxes (Illinois, Virginia) and flat monthly or city utility taxes. Local rates vary by city, so a given address can differ by a point or two.</li>
           <li><b>Europe (42 countries):</b> electricity = Eurostat household price (2,500–4,999 kWh a year band), first half of 2026, <b>all taxes and levies already included</b>, for the EU, Iceland, Liechtenstein, Norway, the Western Balkans, Moldova, Georgia and Türkiye; United Kingdom = Ofgem price cap Oct–Dec 2026 (26.32p/kWh + 54.83p/day standing charge over 2,700 kWh a year, electricity zero-rated for VAT in that period); Switzerland = ElCom 2026 median household tariff 27.7 Rp/kWh + 8.1% VAT; Ukraine = regulated tariff 4.32 UAH/kWh. Gasoline = European Commission Weekly Oil Bulletin, Euro-super 95 with all taxes, average of every week of 2026, for the 27 EU countries; outside the EU there is no official series, so one reading of globalpetrolprices.com (9 November 2026) is converted at that day's rate and scaled to the 2026 average with the EU's own ratio (marked ≈); Liechtenstein uses the Swiss price; Kosovo has none. Rebuild: <code>scripts/gas_elec/build_europe.py</code>.</li>
           <li><b>Full cost comparison</b> (purchase price, insurance, tires, oil changes, other yearly costs): see the <a href="ev-vs-ice-cost.html">EV vs ICE Costs Simulator</a>.</li>
           <li><b>Home charging only:</b> public fast charging often costs 2–4× the home price. Time-of-use or EV-specific rates can be much cheaper than the averages shown.</li>
@@ -244,7 +238,7 @@
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-<script src="assets/gas-elec-data.js?v=2"></script>
+<script src="assets/gas-elec-data.js?v=3"></script>
 <script src="assets/ev-models-data.js?v=1"></script>
 <script src="assets/na-admin1-geo.js?v=1"></script>
 <script src="assets/europe-cost-data.js?v=1"></script>
@@ -277,7 +271,7 @@ const PER_USD = { USD:1, CAD:FX, EUR:EU.eurPerUsd };                 // units of
 const ROWS = D.rows.map(r => Object.assign({}, r, { reg:'na', cur:r.c === 'CA' ? 'CAD' : 'USD' })).concat(
   EU.rows.map(r => ({ id:r.id, c:r.eu27 ? 'EU' : r.ab, ab:r.ab, n:r.n, reg:'eu', cur:'EUR', e:r.e, t:0, incl:true, es:r.es, ep:r.ep, g:r.g, gs:r.gs, eu27:r.eu27,
     tn: r.es === 'eurostat' ? 'all taxes included (Eurostat)' : 'all taxes included (' + (r.ep || '').split(':')[0] + ')' })));
-const EST = r => r.gs === 'est' || r.gs === 'gpp' || r.gs === 'gpp-ch';      // gasoline price that is an estimate / third-party reading
+const EST = r => r.gs === 'gpp' || r.gs === 'gpp-ch';      // gasoline price that is an estimate / third-party reading
 
 // ---------- calculation ----------
 const toCur = (v, c) => v / PER_USD[c] * PER_USD[st.cur];          // v in currency c -> the currency picked
@@ -388,11 +382,12 @@ function showTip(ev, r){
     <div class="r"><span>Gas car cost per 100 ${u}</span><b>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</b></div>
     <div class="r"><span>Ratio (gas ÷ EV)</span><b>${fmtRatio(r.ratio)}</b></div>
     <div class="r big"><span>${r.sv == null ? 'Saved per year' : r.sv >= 0 ? 'EV saves per year' : 'EV costs more per year'}</span><b>${r.sv == null ? '–' : money(Math.abs(r.sv))}</b></div>
-    ${r.gs === 'est' ? `<div class="est">≈ State gasoline price estimated from the EIA ${r.gr} average and AAA state prices.</div>` : ''}
+    ${r.gs === 'aaa' ? `<div class="est">Gasoline: AAA state average, ${D.aaa.n} readings ${D.aaa.first.slice(5)} to ${D.aaa.last.slice(5)} 2026, put on EIA's level (×${D.aaa.calib}).</div>` : ''}
+    ${r.gs === 'eia' ? '<div class="est">Gasoline: EIA state series, 2026 average.</div>' : ''}
     ${r.gs === 'gpp' ? '<div class="est">≈ Gasoline: third-party reading (globalpetrolprices.com, 9 Nov 2026) scaled to the 2026 average; no official series outside the EU.</div>' : ''}
     ${r.gs === 'gpp-ch' ? '<div class="est">≈ Gasoline: Swiss price (same market).</div>' : ''}
     ${r.gs === 'wob' ? '<div class="est">Gasoline: EU Weekly Oil Bulletin, Euro-super 95, 2026 average.</div>' : ''}
-    <div class="est">Electricity tax: ${r.tn}${r.c === 'US' ? ' (approximate)' : ''}.</div>
+    <div class="est">Electricity tax: ${r.tn}${r.c === 'US' ? ' (typical local rate)' : ''}.</div>
     ${r.c === 'CA' && r.gc ? `<div class="est">Gasoline: ${r.gc} (StatCan cities).</div>` : ''}`;
   tip.style.opacity = 1;
   const x = ev.clientX - box.left, y = ev.clientY - box.top, tw = tip.offsetWidth, th = tip.offsetHeight;
@@ -504,7 +499,7 @@ function drawTable(rows, col){
       <td><span class="cc">${r.reg === 'eu' ? r.ab : r.c}</span>${r.n}</td>
       <td>${r.g == null ? '–' : money(gasShown(r.g), 2)}${EST(r) ? ` <span class="est" title="${r.gs === 'est' ? 'Estimated: EIA ' + r.gr + ' average × AAA state price relative' : 'Third-party reading (globalpetrolprices.com, 9 Nov 2026), scaled to the 2026 average'}">≈</span>` : ''}</td>
       <td>${cents(r.e)}</td>
-      <td title="${r.tn}${r.c === 'US' ? ' (approximate)' : ''}">${r.incl ? 'incl.' : pct(r.t)}</td>
+      <td title="${r.tn}${r.c === 'US' ? ' (typical local rate)' : ''}">${r.incl ? 'incl.' : pct(r.t)}</td>
       <td>${money(per100(r.ev100), 2)}</td>
       <td>${r.ice100 == null ? '–' : money(per100(r.ice100), 2)}</td>
       <td>${fmtRatio(r.ratio)}</td>
@@ -601,15 +596,16 @@ function render(){
   $('ge-sum').innerHTML = `<b>${evName}</b> (${evCons}) vs a gas car at <b>${ice}</b>, <b>${dist}</b> a year, home charging, amounts in <b>${st.cur}</b>.`;
   $('ge-note').textContent = eu
     ? `Gasoline: EU Weekly Oil Bulletin, Euro-super 95, 2026 average (EU countries); outside the EU, a third-party reading of 9 Nov 2026 scaled to the 2026 average (≈). Electricity: Eurostat household price, first half of 2026, all taxes included; UK Ofgem cap Oct–Dec 2026, Switzerland ElCom 2026, Ukraine regulated tariff. Kosovo has no gasoline price.`
-    : `Gasoline: 2026 average (Canada ${D.periods.caGas}, US ${D.periods.usGas}). Electricity: US residential average ${D.periods.usEl}; Canada ${D.periods.caEl} (CER, 1,000 kWh/month). Electricity prices include sales tax (GST/HST/QST/PST in Canada; state + typical local sales tax in the US, approximate). Nunavut has no gasoline series.`;
+    : `Gasoline: 2026 average (Canada ${D.periods.caGas}, US ${D.periods.usGas}). Electricity: US residential average ${D.periods.usEl}; Canada ${D.periods.caEl} (CER, 1,000 kWh/month). Electricity prices include sales tax (GST/HST/QST/PST in Canada; state + typical local sales tax in the US). Nunavut has no gasoline series.`;
   $('ge-tnote').textContent = eu
     ? `${valid.length} countries. Hover a row to find it on the map. ≈ = gasoline from a third-party reading (countries outside the EU). Prices in euros at the source, converted at Bank of Canada 2026 averages (1 USD = ${FX.toFixed(4)} CAD = ${PER_USD.EUR.toFixed(4)} EUR).`
-    : `${valid.length} provinces, territories and states. Hover a row to find it on the map. ≈ = estimated state gasoline price (41 states). Canadian and US prices converted at the Bank of Canada 2026 average, 1 USD = ${FX.toFixed(4)} CAD.`;
-  $('ge-est-h').textContent = eu ? 'gasoline from a third-party reading (outside the EU)' : 'estimated state gasoline price';
+    : `${valid.length} provinces, territories and states. Hover a row to find it on the map. US gasoline: EIA (9 states) and AAA state averages (41 states). Canadian and US prices converted at the Bank of Canada 2026 average, 1 USD = ${FX.toFixed(4)} CAD.`;
+  $('ge-est-h').textContent = 'gasoline from a third-party reading (outside the EU)'; $('ge-est-w').style.display = eu ? '' : 'none';
   $('ge-reg-h').textContent = eu ? '42 countries · prices in EUR at the source' : 'Provinces, territories and states';
 }
 
 document.querySelectorAll('[data-p]').forEach(e => e.textContent = D.periods[e.dataset.p]);
+$('ge-aaa-n').textContent = D.aaa.n; $('ge-aaa-p').textContent = D.aaa.first + ' to ' + D.aaa.last; $('ge-aaa-c').textContent = D.aaa.calib;
 $('ge-fx-m').textContent = `1 USD = ${FX.toFixed(4)} CAD, daily average from ${D.fxPeriod.replace(' to ', ' to ')}`;
 // "Copy as image" / "Copy link" under the filters: they run the card's own 📷 / 🔗 buttons (assets/section-link.js) and show their result
 document.querySelectorAll('.ge-share').forEach(bar => bar.addEventListener('click', e => {

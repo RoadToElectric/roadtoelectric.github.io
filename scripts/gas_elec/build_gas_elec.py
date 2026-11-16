@@ -4,7 +4,9 @@ Inputs (scripts/gas_elec/src/):
   statcan_18100001_regular_self_2026.csv   Statistics Canada 18-10-0001-01, regular self-service, cents/L, per city, Jan-Sep 2026
   eia/*.xls                                 EIA monthly retail regular gasoline (EMM_EPMR_PTE_<area>_DPG), USD/gal, Jan-Oct 2026:
                                             US, PADD subregions, 9 states with their own series
-  aaa_2026-11-14.json                       AAA state averages, regular, USD/gal, one-day snapshot (gasprices.aaa.com, 14 Nov 2026)
+  aaa_state_regular_2026_readings.json      AAA state averages, regular, USD/gal: 21 readings (about twice a month) Jan-Nov 2026, from
+                                            Internet Archive copies of gasprices.aaa.com/state-gas-price-averages + a live reading 14 Nov 2026
+  aaa_2026-11-14.json                       (the live 14 Nov 2026 reading on its own, kept for reference)
   eia_res_electricity_2026_jan_aug.csv      EIA Electric Power Monthly table 5.6.B, residential, Jan-Aug 2026 YTD, USD/kWh
   cer_residential_1000kwh.json              CER market snapshot (2026-03-04), cents/kWh at 1,000 kWh/month, before tax
   boc_fxusdcad_2026.json                    Bank of Canada Valet FXUSDCAD daily, 2026
@@ -14,9 +16,10 @@ Inputs (scripts/gas_elec/src/):
 Gasoline method
   Canada: the province = plain average of its StatCan cities (ON: Toronto, Ottawa, Thunder Bay; QC: Montreal, Quebec;
           AB/SK/BC: 2 cities; others 1). Territories YT/NT from Whitehorse/Yellowknife. Nunavut has no StatCan city -> blank.
-  US:     9 states = own EIA series. The other 41 + DC are estimates: their EIA subregion's 2026 average x
-          (AAA state price today / plain average of AAA prices for that subregion's states today).
-          The 9 known states are run through the same formula as a check (printed).
+  US:     9 states = own EIA series. The other 41 = average of the AAA state readings over the EIA months (Jan-Oct 2026),
+          x one calibration factor (median EIA / AAA over the 9 EIA states, ~0.975: AAA reads ~2.5% above EIA's survey).
+          The 9 EIA states are run through the same formula as a check (printed; within about +/-2%).
+          (Until 2026-11-16 the 41 states were estimated from one AAA day and the EIA region average: off by up to +12%.)
 
 usage (repo root): python -I scripts/gas_elec/build_gas_elec.py   -> assets/gas-elec-data.js, assets/na-admin1-geo.js
 """
@@ -93,21 +96,27 @@ US_NAMES = {
     'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon',
     'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
     'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'}
-aaa_by_name = json.load(open(os.path.join(SRC, 'aaa_2026-11-14.json')))
-aaa = {ab: aaa_by_name[n] for ab, n in US_NAMES.items()}
+# AAA state averages read about twice a month in 2026 (archived copies of gasprices.aaa.com + one live reading), averaged over the same
+# months as the EIA series (Jan-Oct), then put on EIA's level with one factor = median of EIA / AAA over the 9 states EIA publishes
+import statistics
+AAA_R = json.load(open(os.path.join(SRC, 'aaa_state_regular_2026_readings.json')))['readings']
+last_eia = '2026-%02d-31' % US_LAST_M
+aaa_win = {d: v for d, v in AAA_R.items() if d <= last_eia}
+aaa_avg = {s: sum(v[s] for v in aaa_win.values()) / len(aaa_win) for s in US_NAMES}
+AAA_CALIB = statistics.median(eia[ST_SERIES[s]][0] / aaa_avg[s] for s in ST_SERIES)
+AAA_N, AAA_FIRST, AAA_LAST = len(aaa_win), min(aaa_win), max(aaa_win)
 us_gas, us_gas_src, us_region = {}, {}, {}
-print('check of the estimate on the states EIA publishes (estimate vs EIA, USD/gal):')
+print('AAA %d readings %s..%s, calibration to EIA x%.4f; check on the 9 EIA states (AAA x calib vs EIA):' % (AAA_N, AAA_FIRST, AAA_LAST, AAA_CALIB))
 for reg, sts in REGION.items():
-    mean = sum(aaa[s] for s in sts) / len(sts)
     for s in sts:
         us_region[s] = reg
-        est = eia[reg][0] * aaa[s] / mean
+        est = aaa_avg[s] * AAA_CALIB
         if s in ST_SERIES:
             act = eia[ST_SERIES[s]][0]
-            print('  %s  est %.3f  EIA %.3f  diff %+.1f%%' % (s, est, act, (est / act - 1) * 100))
+            print('  %s  AAA %.3f  EIA %.3f  diff %+.1f%%' % (s, est, act, (est / act - 1) * 100))
             us_gas[s], us_gas_src[s] = act, 'eia'
         else:
-            us_gas[s], us_gas_src[s] = est, 'est'
+            us_gas[s], us_gas_src[s] = est, 'aaa'
 us_gas['CA'], us_gas_src['CA'], us_region['CA'] = eia['SCA'][0], 'eia', 'R50'
 
 # ---------- electricity ----------
@@ -144,6 +153,7 @@ data = {
     'cadPerUsd': CAD_PER_USD, 'fxPeriod': FX_PERIOD,
     'periods': {'caGas': CA_GAS_PERIOD, 'usGas': US_GAS_PERIOD, 'usEl': 'Jan to Aug 2026', 'caEl': 'rates as of Nov 2025'},
     'usAvg': {'gasGal': round(eia['NUS'][0], 3)},
+    'aaa': {'n': AAA_N, 'first': AAA_FIRST, 'last': AAA_LAST, 'calib': round(AAA_CALIB, 4)},
     'rows': rows,
 }
 out = os.path.join(ROOT, 'assets', 'gas-elec-data.js')

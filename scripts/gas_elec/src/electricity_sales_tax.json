@@ -1,70 +1,259 @@
 {
- "_note": "Consumption tax charged on a residential electricity bill, in percent, after point-of-sale rebates. Compiled 2026-11-14. Canada: GST/HST/QST/PST rules per province. US: state sales tax (or a state percentage tax that replaces it on the bill) + a typical local add-on where local sales tax applies; per-kWh excise taxes, flat monthly utility taxes, gross-receipts taxes built into the rates and city utility taxes are NOT included. US rates are approximate (local rates vary by city).",
+ "_note": "Consumption tax charged on a residential electricity bill, in percent, after point-of-sale rebates. Reviewed 2026-11-16. Canada: GST/HST/QST/PST rules per province (the CER price excludes all taxes). US: the EIA average price (revenue / kWh, forms EIA-861/861M) already includes taxes and charges the utility itself bills (income and franchise taxes, surcharges, gross receipts taxes), but not the sales tax collected for the state; so only the state sales tax on residential electricity is added, plus a typical local add-on where local sales tax applies. State rules checked against the Bloomberg BNA 'Taxability of utilities in the state sales tax' chart (Tax Foundation, 2015) and state revenue department rules for the residential exemptions (e.g. CO, CT, KY, LA, MD, MA, MS, OK, PA, SC, TN, VT residential exemptions; IA, KS state exemption with local tax; ME first 750 kWh; MN, WI winter-heating exemption only; MI 4% and UT reduced residential rates). Local rates vary by city, so these are typical values.",
  "CA": {
-  "NL": [15, "HST 15%"],
-  "PE": [5, "HST 15% less the provincial 10% rebate on residential electricity = 5%"],
-  "NS": [5, "HST 14% less the provincial-portion rebate on home energy = 5% GST"],
-  "NB": [5, "HST 15% less the 10% provincial electricity rebate (since Jan 2025) = 5%"],
-  "QC": [14.975, "GST 5% + QST 9.975%"],
-  "ON": [13, "HST 13% (the Ontario Electricity Rebate is already in the CER price)"],
-  "MB": [12, "GST 5% + RST 7% (RST exemption covers space heating only, not EV charging)"],
-  "SK": [11, "GST 5% + PST 6%"],
-  "AB": [5, "GST 5%"],
-  "BC": [5, "GST 5% (no PST on residential electricity)"],
-  "YT": [5, "GST 5%"],
-  "NT": [5, "GST 5%"],
-  "NU": [5, "GST 5%"]
+  "NL": [
+   15,
+   "HST 15%"
+  ],
+  "PE": [
+   5,
+   "HST 15% less the provincial 10% rebate on residential electricity = 5%"
+  ],
+  "NS": [
+   5,
+   "HST 14% less the provincial-portion rebate on home energy = 5% GST"
+  ],
+  "NB": [
+   5,
+   "HST 15% less the 10% provincial electricity rebate (since Jan 2025) = 5%"
+  ],
+  "QC": [
+   14.975,
+   "GST 5% + QST 9.975%"
+  ],
+  "ON": [
+   13,
+   "HST 13% (the Ontario Electricity Rebate is already in the CER price)"
+  ],
+  "MB": [
+   12,
+   "GST 5% + RST 7% (RST exemption covers space heating only, not EV charging)"
+  ],
+  "SK": [
+   11,
+   "GST 5% + PST 6%"
+  ],
+  "AB": [
+   5,
+   "GST 5%"
+  ],
+  "BC": [
+   5,
+   "GST 5% (no PST on residential electricity)"
+  ],
+  "YT": [
+   5,
+   "GST 5%"
+  ],
+  "NT": [
+   5,
+   "GST 5%"
+  ],
+  "NU": [
+   5,
+   "GST 5%"
+  ]
  },
  "US": {
-  "AL": [4, "4% utility gross receipts tax on the bill (no sales tax)"],
-  "AK": [0, "no state sales tax"],
-  "AZ": [8, "transaction privilege tax 5.6% + typical city tax"],
-  "AR": [9, "6.5% state + typical local"],
-  "CA": [0, "residential electricity exempt"],
-  "CO": [0, "residential energy exempt from state tax (some cities tax it)"],
-  "CT": [0, "residential electricity exempt"],
-  "DE": [0, "no sales tax"],
-  "FL": [2.5, "sales-tax exempt; 2.5% gross receipts tax (city public-service taxes not included)"],
-  "GA": [7, "4% state + typical local"],
-  "HI": [0, "no general excise tax on utility electricity (public service company tax is in the rates)"],
-  "ID": [0, "electricity exempt"],
-  "IL": [0, "no sales tax; per-kWh electricity excise tax not included"],
-  "IN": [7, "7% state sales tax"],
-  "IA": [1, "residential energy exempt from state tax; local option ~1%"],
-  "KS": [2, "residential exempt from state tax; local sales tax ~2%"],
-  "KY": [0, "residential electricity exempt"],
-  "LA": [0, "residential electricity exempt"],
-  "ME": [5.5, "5.5% on residential use above 750 kWh/month (EV charging is on top of normal use)"],
-  "MD": [0, "residential electricity exempt"],
-  "MA": [0, "residential electricity exempt"],
-  "MI": [4, "reduced 4% rate on residential energy"],
-  "MN": [7.5, "6.875% state + local; the residential exemption covers winter heating only"],
-  "MS": [0, "residential electricity exempt"],
-  "MO": [0, "residential electricity exempt from state tax (some cities tax it)"],
-  "MT": [0, "no sales tax"],
-  "NE": [7, "5.5% state + typical local"],
-  "NV": [0, "electricity exempt"],
-  "NH": [0, "no sales tax"],
-  "NJ": [6.625, "6.625% state sales tax"],
-  "NM": [7.6, "gross receipts tax, typical combined rate"],
-  "NY": [3, "0% state on residential energy; typical local tax ~3%"],
-  "NC": [7, "7% combined state + local rate on electricity"],
-  "ND": [0, "electricity exempt from sales tax"],
-  "OH": [0, "sales-tax exempt; kWh excise tax is in the rates"],
-  "OK": [0, "residential electricity exempt from state tax"],
-  "OR": [0, "no sales tax"],
-  "PA": [0, "sales-tax exempt; gross receipts tax is in the rates"],
-  "RI": [4, "sales-tax exempt; 4% gross receipts tax on the bill"],
-  "SC": [0, "residential electricity exempt"],
-  "SD": [6.2, "4.2% state + typical local"],
-  "TN": [0, "residential electricity exempt"],
-  "TX": [0, "residential electricity exempt from state tax (a few cities tax it)"],
-  "UT": [3, "reduced residential energy rate, state + local ~3%"],
-  "VT": [0, "residential electricity exempt"],
-  "VA": [0, "no sales tax; per-kWh consumption tax and flat local utility tax not included"],
-  "WA": [0, "no sales tax on electricity (utility taxes are in the rates)"],
-  "WV": [0, "residential electricity exempt"],
-  "WI": [2.75, "5% state + local May-Oct, exempt Nov-Apr: about half the year"],
-  "WY": [5.4, "4% state + typical local"]
+  "AL": [
+   0,
+   "no sales tax on utility electricity; the 4% utility gross receipts tax is paid by the utility and already inside the EIA price"
+  ],
+  "AK": [
+   0,
+   "no state sales tax"
+  ],
+  "AZ": [
+   8,
+   "transaction privilege tax 5.6% + typical city tax"
+  ],
+  "AR": [
+   9,
+   "6.5% state + typical local"
+  ],
+  "CA": [
+   0,
+   "residential electricity exempt"
+  ],
+  "CO": [
+   0,
+   "residential energy exempt from state tax (some cities tax it)"
+  ],
+  "CT": [
+   0,
+   "residential electricity exempt"
+  ],
+  "DE": [
+   0,
+   "no sales tax"
+  ],
+  "FL": [
+   0,
+   "residential electricity exempt from sales tax; the 2.5% gross receipts tax is already inside the EIA price"
+  ],
+  "GA": [
+   7,
+   "4% state + typical local (residential electricity taxable; an exemption bill exists but is not law)"
+  ],
+  "HI": [
+   0,
+   "no general excise tax on utility electricity (public service company tax is in the rates)"
+  ],
+  "ID": [
+   0,
+   "electricity exempt"
+  ],
+  "IL": [
+   0,
+   "no sales tax; per-kWh electricity excise tax not included"
+  ],
+  "IN": [
+   7,
+   "7% state sales tax"
+  ],
+  "IA": [
+   1,
+   "residential energy exempt from state tax; local option ~1%"
+  ],
+  "KS": [
+   2,
+   "residential exempt from state tax; local sales tax ~2%"
+  ],
+  "KY": [
+   0,
+   "residential electricity exempt"
+  ],
+  "LA": [
+   0,
+   "residential electricity exempt"
+  ],
+  "ME": [
+   5.5,
+   "5.5% on residential use above 750 kWh/month (EV charging is on top of normal use)"
+  ],
+  "MD": [
+   0,
+   "residential electricity exempt"
+  ],
+  "MA": [
+   0,
+   "residential electricity exempt"
+  ],
+  "MI": [
+   4,
+   "reduced 4% rate on residential energy"
+  ],
+  "MN": [
+   7.5,
+   "6.875% state + local; the residential exemption covers winter heating only"
+  ],
+  "MS": [
+   0,
+   "residential electricity exempt"
+  ],
+  "MO": [
+   0,
+   "residential electricity exempt from state tax (some cities tax it)"
+  ],
+  "MT": [
+   0,
+   "no sales tax"
+  ],
+  "NE": [
+   7,
+   "5.5% state + typical local"
+  ],
+  "NV": [
+   0,
+   "electricity exempt"
+  ],
+  "NH": [
+   0,
+   "no sales tax"
+  ],
+  "NJ": [
+   6.625,
+   "6.625% state sales tax"
+  ],
+  "NM": [
+   7.6,
+   "gross receipts tax, typical combined rate"
+  ],
+  "NY": [
+   3,
+   "0% state on residential energy; typical local tax ~3%"
+  ],
+  "NC": [
+   7,
+   "7% combined state + local rate on electricity"
+  ],
+  "ND": [
+   0,
+   "electricity exempt from sales tax"
+  ],
+  "OH": [
+   0,
+   "sales-tax exempt; kWh excise tax is in the rates"
+  ],
+  "OK": [
+   0,
+   "residential electricity exempt from state tax"
+  ],
+  "OR": [
+   0,
+   "no sales tax"
+  ],
+  "PA": [
+   0,
+   "sales-tax exempt; gross receipts tax is in the rates"
+  ],
+  "RI": [
+   0,
+   "residential electricity exempt from sales tax; the 4% gross earnings tax is already inside the EIA price"
+  ],
+  "SC": [
+   0,
+   "residential electricity exempt"
+  ],
+  "SD": [
+   6.2,
+   "4.2% state + typical local"
+  ],
+  "TN": [
+   0,
+   "residential electricity exempt"
+  ],
+  "TX": [
+   0,
+   "residential electricity exempt from state tax (a few cities tax it)"
+  ],
+  "UT": [
+   3,
+   "reduced residential energy rate, state + local ~3%"
+  ],
+  "VT": [
+   0,
+   "residential electricity exempt"
+  ],
+  "VA": [
+   0,
+   "no sales tax; per-kWh consumption tax and flat local utility tax not included"
+  ],
+  "WA": [
+   0,
+   "no sales tax on electricity (utility taxes are in the rates)"
+  ],
+  "WV": [
+   0,
+   "residential electricity exempt"
+  ],
+  "WI": [
+   2.75,
+   "5% state + local May-Oct, exempt Nov-Apr: about half the year"
+  ],
+  "WY": [
+   5.45,
+   "4% state + local: residential electricity is taxable (Wyoming DOR); 5.45% = weighted state + local rate used in the 2025 SF0128 fiscal note"
+  ]
  }
 }
