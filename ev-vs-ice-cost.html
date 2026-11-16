@@ -50,6 +50,7 @@
   .cmp-col{ display:flex; flex-direction:column; gap:6px; padding:12px 14px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); min-width:0; }
   .cmp-h{ font-size:14px; font-weight:900; margin-bottom:2px; }
   .cmp-col .ge-fl{ margin-top:4px; }
+  .cmp-reg{ display:flex; gap:8px; } .cmp-reg > div{ flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; } .cmp-reg > div[hidden]{ display:none; }
   .cmp-opts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px 12px; margin:0 0 12px; align-items:start; }
   .cmp-opt{ border:1px solid var(--border); border-radius:14px; padding:10px 14px; background:var(--surface); }
   .cmp-ck{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:800; cursor:pointer; } .cmp-ck input{ width:17px; height:17px; accent-color:var(--accent); }
@@ -141,8 +142,10 @@
         <div class="cmp-grid" data-nocapture>
           <div class="cmp-col">
             <div class="cmp-h">📍 Where &amp; how far</div>
-            <label class="ge-fl" for="c-reg">Country / province / state</label>
-            <select class="ge-sel" id="c-reg"></select>
+            <div class="cmp-reg">
+              <div><label class="ge-fl" for="c-ctry">Country</label><select class="ge-sel" id="c-ctry"></select></div>
+              <div id="c-sub-w"><label class="ge-fl" for="c-sub" id="c-sub-l">Province</label><select class="ge-sel" id="c-sub"></select></div>
+            </div>
             <label class="ge-fl" for="c-km">Distance per year</label>
             <div class="ge-inline"><input class="ge-num" id="c-km" type="number" min="0" step="500"><span class="ge-unit" id="c-km-u">km</span></div>
             <label class="ge-fl" for="c-el">Home electricity, tax incl.</label>
@@ -317,16 +320,31 @@ function makePicker(selId, qId, list, label, key){
 const evPick = makePicker('c-ev', 'c-evq', evList, evLab, 'ev');
 const icePick = makePicker('c-ice', 'c-iceq', iceList, iceLab, 'ice');
 
-// region drop-down
+// country drop-down (Canada, United States, then the European countries); Canada and the US open a second list of provinces / states
+const SUB_DEF = { CA:'CA-QC', US:'US-CA' };                                     // province / state picked when a country is chosen
+const lastSub = { CA:null, US:null };
+const ctryOf = id => id.startsWith('CA-') ? 'CA' : id.startsWith('US-') ? 'US' : id;
 (() => {
-  const s = $('c-reg');
-  ['Canada', 'United States', 'Europe'].forEach(gn => {
-    const g = document.createElement('optgroup'); g.label = gn;
-    REG.filter(r => r.grp === gn).sort((a, b) => a.n.localeCompare(b.n)).forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.n; g.appendChild(o); });
-    s.appendChild(g);
-  });
-  s.addEventListener('change', () => setRegion(s.value));
+  const s = $('c-ctry');
+  s.innerHTML = '<optgroup label="North America"><option value="CA">Canada</option><option value="US">United States</option></optgroup>' +
+    '<optgroup label="Europe">' + REG.filter(r => r.grp === 'Europe').sort((a, b) => a.n.localeCompare(b.n)).map(r => `<option value="${r.id}">${r.n}</option>`).join('') + '</optgroup>';
+  s.addEventListener('change', () => { const c = s.value; setRegion(c === 'CA' || c === 'US' ? (lastSub[c] || SUB_DEF[c]) : c); });
+  $('c-sub').addEventListener('change', () => setRegion($('c-sub').value));
 })();
+function syncRegion(){
+  const c = ctryOf(cmp.reg), sub = c === 'CA' || c === 'US';
+  $('c-ctry').value = c;
+  $('c-sub-w').hidden = !sub;
+  if(sub){
+    lastSub[c] = cmp.reg;
+    $('c-sub-l').textContent = c === 'CA' ? 'Province / territory' : 'State';
+    if($('c-sub').dataset.c !== c){
+      $('c-sub').dataset.c = c;
+      $('c-sub').innerHTML = REG.filter(r => ctryOf(r.id) === c).sort((a, b) => a.n.localeCompare(b.n)).map(r => `<option value="${r.id}">${r.n}</option>`).join('');
+    }
+    $('c-sub').value = cmp.reg;
+  }
+}
 function setRegion(id){
   const old = region(), r = RB.get(id);
   cmp.reg = id; cmp.el = null; cmp.gas = null;
@@ -388,7 +406,7 @@ const YEARS = [1, 3, 5, 10];
 function render(force){
   const v = vals(), us = isUS(), r = v.r, cs = costs(v);
   // ---- controls ----
-  $('c-reg').value = cmp.reg;
+  syncRegion();
   [['c-units', 'units'], ['c-cur', 'cur']].forEach(([id, k]) => [...$(id).children].forEach(b => b.classList.toggle('active', b.dataset.v === cmp[k])));
   evPick.build(); icePick.build();
   setIn('c-km', Math.round(us ? v.km / KM_MI : v.km), force);
@@ -483,7 +501,7 @@ $('m-wob').textContent = EU.periods.gas.replace('EU Weekly Oil Bulletin, ', '');
 $('m-cad').textContent = PER_USD.CAD.toFixed(4); $('m-eur').textContent = PER_USD.EUR.toFixed(4);
 render(true);
 
-FilterMemory.auto({ exclude:['c-reg', 'c-ev', 'c-ice', 'c-units', 'c-cur', 'c-ins', 'c-tir', 'c-oil', 'c-oth'], extra:[
+FilterMemory.auto({ exclude:['c-ctry', 'c-sub','c-ev', 'c-ice', 'c-units', 'c-cur', 'c-ins', 'c-tir', 'c-oil', 'c-oth'], extra:[
   { key:'cmp', type:'fn', get:() => { const o = {}; Object.keys(DEF).forEach(k => { if(cmp[k] !== DEF[k]) o[k] = cmp[k]; }); return JSON.stringify(o); },
                           set:v => { try{ const o = JSON.parse(v); Object.keys(o).forEach(k => { if(k in DEF) cmp[k] = o[k]; });
                             if(!RB.has(cmp.reg)) cmp.reg = DEF.reg; if(!evList().some(e => e.id === cmp.ev)) cmp.ev = DEF.ev; if(!iceList().some(e => e.id === cmp.ice)) cmp.ice = DEF.ice;
