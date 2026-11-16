@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EV vs ICE Cost — Road to Electric</title>
+<title>EV vs ICE Costs Simulator — Road to Electric</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/mobile.css?v=10">
@@ -61,6 +61,48 @@
   .cmp-chart text{ fill:var(--text-muted); font-size:12px; } .cmp-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
   .cmp-chart text.tot{ fill:var(--text); font-weight:900; font-size:12.5px; text-anchor:middle; } .cmp-chart text.cap{ font-weight:800; text-anchor:middle; fill:var(--text); }
   .cmp-chart text.sv{ font-weight:900; font-size:13px; text-anchor:middle; } .cmp-chart text.yr{ font-weight:900; font-size:13px; text-anchor:middle; fill:var(--text); }
+  /* steps */
+  .sim-steps{ grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+  .cmp-h{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .sim-n{ display:inline-flex; align-items:center; justify-content:center; flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; font-size:14px; font-weight:900; }
+  .sim-step .ge-seg{ align-self:stretch; display:flex; } .sim-step .ge-seg button{ flex:1; padding:7px 6px; }
+  .sim-extras{ margin:4px 0 12px; } .sim-extras > .cmp-h{ margin:6px 0 8px; } .sim-extras .cmp-opts{ margin-bottom:10px; }
+  /* copy / link buttons under the filters */
+  .ge-share{ display:flex; justify-content:flex-end; gap:8px; margin:6px 0 12px; }
+  .ge-share button{ appearance:none; border:1px solid var(--accent); background:var(--surface); color:var(--accent); border-radius:999px; padding:7px 14px; font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
+  .ge-share button:hover{ background:var(--accent); color:#fff; } .ge-share button.ok{ background:#16a34a; border-color:#16a34a; color:#fff; }
+  /* live result (phone only) */
+  .sim-live{ display:none; }
+  /* chart drawn as HTML bars on narrow screens */
+  .mch-g{ margin:0 0 14px; } .mch-h{ display:flex; justify-content:space-between; gap:8px; font-size:13.5px; margin-bottom:5px; } .mch-h b{ color:var(--text); }
+  .mch-h .pos{ color:var(--ge-pos); font-weight:900; } .mch-h .neg{ color:var(--ge-neg); font-weight:900; }
+  .mch-r{ display:grid; grid-template-columns:62px 1fr 78px; align-items:center; gap:8px; margin:3px 0; font-size:12.5px; }
+  .mch-l{ font-weight:800; color:var(--text-muted); } .mch-t{ display:flex; height:20px; border-radius:6px; overflow:hidden; background:var(--surface-alt); } .mch-t i{ height:100%; }
+  .mch-v{ text-align:right; font-weight:900; font-variant-numeric:tabular-nums; }
+  /* ---------- phone: big, finger-friendly controls ---------- */
+  html[data-view="mobile"] .sim-steps{ gap:14px; }
+  html[data-view="mobile"] .sim-step{ padding:16px; gap:9px; border-radius:18px; }
+  html[data-view="mobile"] .cmp-h{ font-size:18px; gap:10px; } html[data-view="mobile"] .sim-n{ width:32px; height:32px; font-size:17px; }
+  html[data-view="mobile"] #cmp-card .ge-sel, html[data-view="mobile"] #cmp-card .ge-num{ min-height:50px; font-size:16px; border-radius:12px; padding:10px 12px; }
+  html[data-view="mobile"] #cmp-card .ge-fl{ font-size:12.5px; margin-top:6px; }
+  html[data-view="mobile"] #cmp-card .ge-unit{ font-size:13.5px; } html[data-view="mobile"] #cmp-card .ge-hint{ font-size:12.5px; line-height:1.45; }
+  html[data-view="mobile"] #cmp-card .ge-seg button{ padding:13px 6px; font-size:14.5px; }
+  html[data-view="mobile"] .sim-extras{ padding:16px; border:1px solid var(--border); border-radius:18px; background:var(--surface-alt); }
+  html[data-view="mobile"] .cmp-opts{ gap:10px; }
+  html[data-view="mobile"] .cmp-opt{ padding:12px 14px; border-radius:14px; }
+  html[data-view="mobile"] .cmp-ck{ font-size:16px; min-height:40px; } html[data-view="mobile"] .cmp-ck input{ width:24px; height:24px; }
+  html[data-view="mobile"] .cmp-opt.off .cmp-of{ display:none; }
+  html[data-view="mobile"] .cmp-of label{ font-size:12.5px; }
+  html[data-view="mobile"] .cmp-reset{ width:100%; padding:13px; font-size:14px; }
+  html[data-view="mobile"] .ge-share{ justify-content:stretch; } html[data-view="mobile"] .ge-share button{ flex:1; padding:13px 8px; font-size:14px; }
+  html[data-view="mobile"] .sim-live{ display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:calc(var(--m-bar, 0px) + 6px); z-index:30;
+    margin:0 58px 12px 0; padding:10px 14px; border-radius:14px; text-decoration:none; color:#fff; background:linear-gradient(135deg,#0a6fb8,#0f8a5f); box-shadow:0 8px 22px rgba(0,30,60,.25); font-size:14px; line-height:1.3; }
+  html[data-view="mobile"] .sim-live.neg{ background:linear-gradient(135deg,#9f1239,#b45309); }
+  html[data-view="mobile"] .sim-live b{ font-size:16.5px; } html[data-view="mobile"] .sim-live small{ font-size:12.5px; opacity:.92; }
+  html[data-view="mobile"] .sim-live.away{ opacity:0; pointer-events:none; transform:translateY(-8px); } html[data-view="mobile"] .sim-live{ transition:opacity .2s, transform .2s; } html[data-view="mobile"] .sim-live .go{ flex:none; font-weight:900; font-size:13px; opacity:.9; white-space:nowrap; }
+  html[data-view="mobile"] #cmp-res{ scroll-margin-top:calc(var(--m-bar, 0px) + 84px); }
+  html[data-view="mobile"] .ge-kpi .v{ font-size:19px; }
+  html[data-view="mobile"] table.cmp-t td:first-child, html[data-view="mobile"] table.cmp-t th:first-child{ position:sticky; left:0; background:var(--surface); z-index:1; }
   .ge-method{ margin:12px 0 4px; padding:12px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface-alt); font-size:13px; line-height:1.55; } .ge-method summary{ cursor:pointer; font-weight:800; font-size:14px; } .ge-method li{ margin:5px 0; }
   .ge-wip{ display:flex; align-items:center; gap:14px; margin:14px 0 0; padding:12px 16px; border-radius:14px; border:2px solid #1f1f1f;
     background:repeating-linear-gradient(-45deg,#facc15 0 18px,#1f1f1f 18px 36px); }
@@ -101,8 +143,8 @@
 
       <div class="nav-heading">Trends</div>
       <a class="nav-hot" href="eu-fsd-vote.html"><span class="dot"></span>EU Vote on Tesla FSD</a>
-      <a href="gas-electricity-costs.html"><span class="dot"></span>Electricity &amp; Gas Costs</a>
-      <a href="ev-vs-ice-cost.html" aria-current="page"><span class="dot"></span>EV vs ICE Cost</a>
+      <a href="gas-electricity-costs.html"><span class="dot"></span>Electricity &amp; Gas Costs per Country</a>
+      <a href="ev-vs-ice-cost.html" aria-current="page"><span class="dot"></span>EV vs ICE Costs Simulator</a>
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
       <div class="nav-heading nav-about">About</div>
@@ -118,8 +160,8 @@
   <main class="main">
     <div class="page ge-page">
       <header class="page-header">
-        <div class="eyebrow">Trends · EV vs ICE Cost</div>
-        <h1>EV vs gas car: the complete cost comparator</h1>
+        <div class="eyebrow">Trends · EV vs ICE Costs Simulator</div>
+        <h1>EV vs gas car: costs simulator</h1>
         <p class="subtitle">Pick where you live, an electric car and a gas car: the comparator fills in the local home electricity price (taxes included), the 2026 gasoline price and each car's official consumption. Add the purchase prices, insurance, tires, oil changes and any other yearly cost, and see what each car costs after 1, 3, 5 and 10 years. Canada, the United States and 42 European countries.</p>
         <div class="ge-wip" role="note">
           <div class="in"><span class="ic" aria-hidden="true">🚧</span>
@@ -130,85 +172,97 @@
       </header>
 
       <div class="card chart-card" id="cmp-card">
-        <h2>EV vs ICE: complete cost comparator</h2>
-        <p class="ge-note">Every consumption, price and cost below can be changed. Prices are converted to the currency you pick.</p>
+        <h2>EV vs ICE costs simulator</h2>
+        <p class="ge-note">Four quick steps, then your result. Everything is filled in for you: change what you know.</p>
+        <a class="sim-live" id="sim-live" href="#cmp-res" data-nocapture></a>
 
-        <div class="cmp-top" data-nocapture>
-          <span><span class="ge-fl">Units</span> <span class="ge-seg" id="c-units"><button type="button" data-v="metric" class="active">L/100 km · km</button><button type="button" data-v="us">MPG · miles</button></span></span>
-          <span><span class="ge-fl">Currency</span> <span class="ge-seg" id="c-cur"><button type="button" data-v="USD">USD</button><button type="button" data-v="CAD" class="active">CAD</button><button type="button" data-v="EUR">EUR</button></span></span>
-          <span class="ge-hint" id="c-fx"></span>
-        </div>
-
-        <div class="cmp-grid" data-nocapture>
-          <div class="cmp-col">
-            <div class="cmp-h">📍 Where &amp; how far</div>
+        <div class="cmp-grid sim-steps" data-nocapture>
+          <section class="cmp-col sim-step">
+            <div class="cmp-h"><span class="sim-n">1</span>Where do you drive?</div>
             <div class="cmp-reg">
               <div><label class="ge-fl" for="c-ctry">Country</label><select class="ge-sel" id="c-ctry"></select></div>
               <div id="c-sub-w"><label class="ge-fl" for="c-sub" id="c-sub-l">Province</label><select class="ge-sel" id="c-sub"></select></div>
             </div>
             <label class="ge-fl" for="c-km">Distance per year</label>
-            <div class="ge-inline"><input class="ge-num" id="c-km" type="number" min="0" step="500"><span class="ge-unit" id="c-km-u">km</span></div>
-            <label class="ge-fl" for="c-el">Home electricity, tax incl.</label>
-            <div class="ge-inline"><input class="ge-num" id="c-el" type="number" min="0" step="0.1"><span class="ge-unit" id="c-el-u">¢/kWh</span></div>
-            <label class="ge-fl" for="c-gas">Gasoline</label>
-            <div class="ge-inline"><input class="ge-num" id="c-gas" type="number" min="0" step="0.01"><span class="ge-unit" id="c-gas-u">$/L</span></div>
-            <span class="ge-hint" id="c-price-h"></span>
-          </div>
-          <div class="cmp-col">
-            <div class="cmp-h">⚡ Electric car</div>
-            <input class="ge-num" id="c-evq" type="search" placeholder="Search a model (Model Y, Renault 5, Ioniq…)" autocomplete="off">
-            <select class="ge-sel" id="c-ev"></select>
+            <div class="ge-inline"><input class="ge-num" id="c-km" type="number" min="0" step="500" inputmode="numeric"><span class="ge-unit" id="c-km-u">km</span></div>
+            <span class="ge-fl">Units</span>
+            <div class="ge-seg" id="c-units"><button type="button" data-v="metric" class="active">L/100 km · km</button><button type="button" data-v="us">MPG · miles</button></div>
+            <span class="ge-fl">Currency</span>
+            <div class="ge-seg" id="c-cur"><button type="button" data-v="USD">USD</button><button type="button" data-v="CAD" class="active">CAD</button><button type="button" data-v="EUR">EUR</button></div>
+            <span class="ge-hint" id="c-fx"></span>
+          </section>
+          <section class="cmp-col sim-step">
+            <div class="cmp-h"><span class="sim-n">2</span>Your electric car</div>
+            <input class="ge-num" id="c-evq" type="search" placeholder="🔍 Search: Model Y, Renault 5, Ioniq…" autocomplete="off" aria-label="Search an electric car">
+            <select class="ge-sel" id="c-ev" aria-label="Electric car"></select>
             <label class="ge-fl" for="c-evk">Consumption</label>
-            <div class="ge-inline"><input class="ge-num" id="c-evk" type="number" min="5" step="0.1"><span class="ge-unit" id="c-evk-u">kWh/100 km</span></div>
+            <div class="ge-inline"><input class="ge-num" id="c-evk" type="number" min="5" step="0.1" inputmode="decimal"><span class="ge-unit" id="c-evk-u">kWh/100 km</span></div>
             <span class="ge-hint" id="c-ev-h"></span>
             <label class="ge-fl" for="c-prev">Purchase price <span class="ge-hint">(optional)</span></label>
-            <div class="ge-inline"><input class="ge-num" id="c-prev" type="number" min="0" step="500" placeholder="e.g. 45000"><span class="ge-unit c-cur1">$</span></div>
-          </div>
-          <div class="cmp-col">
-            <div class="cmp-h">⛽ Gas car</div>
-            <input class="ge-num" id="c-iceq" type="search" placeholder="Search a model (Civic, RAV4, Golf…)" autocomplete="off">
-            <select class="ge-sel" id="c-ice"></select>
+            <div class="ge-inline"><input class="ge-num" id="c-prev" type="number" min="0" step="500" inputmode="numeric" placeholder="e.g. 45000"><span class="ge-unit c-cur1">$</span></div>
+          </section>
+          <section class="cmp-col sim-step">
+            <div class="cmp-h"><span class="sim-n">3</span>The gas car to compare</div>
+            <input class="ge-num" id="c-iceq" type="search" placeholder="🔍 Search: Civic, RAV4, Golf…" autocomplete="off" aria-label="Search a gas car">
+            <select class="ge-sel" id="c-ice" aria-label="Gas car"></select>
             <label class="ge-fl" for="c-icel">Fuel use</label>
-            <div class="ge-inline"><input class="ge-num" id="c-icel" type="number" min="1" step="0.1"><span class="ge-unit" id="c-icel-u">L/100 km</span></div>
+            <div class="ge-inline"><input class="ge-num" id="c-icel" type="number" min="1" step="0.1" inputmode="decimal"><span class="ge-unit" id="c-icel-u">L/100 km</span></div>
             <span class="ge-hint" id="c-ice-h"></span>
             <label class="ge-fl" for="c-price">Purchase price <span class="ge-hint">(optional)</span></label>
-            <div class="ge-inline"><input class="ge-num" id="c-price" type="number" min="0" step="500" placeholder="e.g. 36000"><span class="ge-unit c-cur1">$</span></div>
-          </div>
+            <div class="ge-inline"><input class="ge-num" id="c-price" type="number" min="0" step="500" inputmode="numeric" placeholder="e.g. 36000"><span class="ge-unit c-cur1">$</span></div>
+          </section>
+          <section class="cmp-col sim-step">
+            <div class="cmp-h"><span class="sim-n">4</span>Energy prices</div>
+            <span class="ge-hint">Filled in for the place you picked. Change them if you know your own.</span>
+            <label class="ge-fl" for="c-el">Home electricity, tax incl.</label>
+            <div class="ge-inline"><input class="ge-num" id="c-el" type="number" min="0" step="0.1" inputmode="decimal"><span class="ge-unit" id="c-el-u">¢/kWh</span></div>
+            <label class="ge-fl" for="c-gas">Gasoline</label>
+            <div class="ge-inline"><input class="ge-num" id="c-gas" type="number" min="0" step="0.01" inputmode="decimal"><span class="ge-unit" id="c-gas-u">$/L</span></div>
+            <span class="ge-hint" id="c-price-h"></span>
+          </section>
         </div>
 
-        <div class="cmp-opts" data-nocapture>
-          <div class="cmp-opt">
-            <label class="cmp-ck"><input type="checkbox" id="c-ins"> Insurance</label>
-            <div class="cmp-of">
-              <label>Electric car <span class="ge-inline"><input class="ge-num" id="c-insev" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
-              <label>Gas car <span class="ge-inline"><input class="ge-num" id="c-insice" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
+        <div class="sim-extras" data-nocapture>
+          <div class="cmp-h"><span class="sim-n">5</span>Extra costs <span class="ge-hint">optional · tick what applies</span></div>
+          <div class="cmp-opts">
+            <div class="cmp-opt">
+              <label class="cmp-ck"><input type="checkbox" id="c-ins"> Insurance</label>
+              <div class="cmp-of">
+                <label>Electric car <span class="ge-inline"><input class="ge-num" id="c-insev" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
+                <label>Gas car <span class="ge-inline"><input class="ge-num" id="c-insice" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
+              </div>
             </div>
-          </div>
-          <div class="cmp-opt">
-            <label class="cmp-ck"><input type="checkbox" id="c-tir"> Extra tire wear on the electric car</label>
-            <div class="cmp-of">
-              <label>Set of 4 tires <span class="ge-inline"><input class="ge-num" id="c-tirp" type="number" min="0" step="50"><span class="ge-unit c-cur1">$</span></span></label>
-              <label>Gas car tire life <span class="ge-inline"><input class="ge-num" id="c-tirl" type="number" min="1000" step="5000"><span class="ge-unit c-dist">km</span></span></label>
-              <label>EV wears them faster by <span class="ge-inline"><input class="ge-num" id="c-tirx" type="number" min="0" max="200" step="5"><span class="ge-unit">%</span></span></label>
+            <div class="cmp-opt">
+              <label class="cmp-ck"><input type="checkbox" id="c-tir"> Extra tire wear on the electric car</label>
+              <div class="cmp-of">
+                <label>Set of 4 tires <span class="ge-inline"><input class="ge-num" id="c-tirp" type="number" min="0" step="50"><span class="ge-unit c-cur1">$</span></span></label>
+                <label>Gas car tire life <span class="ge-inline"><input class="ge-num" id="c-tirl" type="number" min="1000" step="5000"><span class="ge-unit c-dist">km</span></span></label>
+                <label>EV wears them faster by <span class="ge-inline"><input class="ge-num" id="c-tirx" type="number" min="0" max="200" step="5"><span class="ge-unit">%</span></span></label>
+              </div>
             </div>
-          </div>
-          <div class="cmp-opt">
-            <label class="cmp-ck"><input type="checkbox" id="c-oil"> Oil changes for the gas car</label>
-            <div class="cmp-of">
-              <label>Price per oil change <span class="ge-inline"><input class="ge-num" id="c-oilp" type="number" min="0" step="5"><span class="ge-unit c-cur1">$</span></span></label>
-              <label>One change every <span class="ge-inline"><input class="ge-num" id="c-oilk" type="number" min="500" step="500"><span class="ge-unit c-dist">km</span></span></label>
+            <div class="cmp-opt">
+              <label class="cmp-ck"><input type="checkbox" id="c-oil"> Oil changes for the gas car</label>
+              <div class="cmp-of">
+                <label>Price per oil change <span class="ge-inline"><input class="ge-num" id="c-oilp" type="number" min="0" step="5"><span class="ge-unit c-cur1">$</span></span></label>
+                <label>One change every <span class="ge-inline"><input class="ge-num" id="c-oilk" type="number" min="500" step="500"><span class="ge-unit c-dist">km</span></span></label>
+              </div>
             </div>
-          </div>
-          <div class="cmp-opt">
-            <label class="cmp-ck"><input type="checkbox" id="c-oth"> Other yearly costs</label>
-            <div class="cmp-of">
-              <label>Electric car <span class="ge-inline"><input class="ge-num" id="c-othev" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
-              <label>Gas car <span class="ge-inline"><input class="ge-num" id="c-othice" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
-              <span class="ge-hint">Registration, maintenance, parking, tolls, a home charger spread over its life…</span>
+            <div class="cmp-opt">
+              <label class="cmp-ck"><input type="checkbox" id="c-oth"> Other yearly costs</label>
+              <div class="cmp-of">
+                <label>Electric car <span class="ge-inline"><input class="ge-num" id="c-othev" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
+                <label>Gas car <span class="ge-inline"><input class="ge-num" id="c-othice" type="number" min="0" step="50"><span class="ge-unit c-cur">$/yr</span></span></label>
+                <span class="ge-hint">Registration, maintenance, parking, tolls, a home charger spread over its life…</span>
+              </div>
             </div>
           </div>
           <button type="button" class="cmp-reset" id="c-reset">↺ Reset everything</button>
         </div>
+
+        <div class="ge-share" data-nocapture data-card="cmp-card">
+          <button type="button" data-act="copy">📷 Copy as image</button><button type="button" data-act="link">🔗 Copy link</button>
+        </div>
+        <div id="cmp-res"></div>
 
         <p class="ge-sum" id="cmp-sum"></p>
         <div class="ge-kpis" id="cmp-kpis"></div>
@@ -222,7 +276,7 @@
         <summary>How these numbers are built — read before quoting them</summary>
         <ol>
           <li><b>The calculation.</b> Yearly cost of each car = distance × consumption × energy price, plus the optional items you tick: insurance and other yearly costs (your amounts), tires (a set every <i>tire life</i> km for the gas car, every <i>tire life ÷ (1 + extra wear %)</i> km for the EV) and oil changes (one every <i>x</i> km for the gas car). The purchase price is paid once. Cost after <i>N</i> years = purchase price + <i>N</i> × yearly cost, at today's prices: no financing, resale value, incentives or price changes over the years. <b>Break-even</b> = extra purchase price of the EV ÷ what it saves each year.</li>
-          <li><b>Canada and the United States</b> use the data of the <a href="gas-electricity-costs.html">Electricity &amp; Gas Costs</a> page: gasoline 2026 averages (Statistics Canada cities; EIA, with 41 US states estimated from their EIA region and AAA state prices), home electricity (EIA residential average Jan–Aug 2026; Canada Energy Regulator modelled price at 1,000 kWh/month) plus the sales tax on the electricity bill. Car ratings: US EPA (fueleconomy.gov) and Natural Resources Canada, model years 2024–2027, combined cycle, energy measured from the wall.</li>
+          <li><b>Canada and the United States</b> use the data of the <a href="gas-electricity-costs.html">Electricity &amp; Gas Costs per Country</a> page: gasoline 2026 averages (Statistics Canada cities; EIA, with 41 US states estimated from their EIA region and AAA state prices), home electricity (EIA residential average Jan–Aug 2026; Canada Energy Regulator modelled price at 1,000 kWh/month) plus the sales tax on the electricity bill. Car ratings: US EPA (fueleconomy.gov) and Natural Resources Canada, model years 2024–2027, combined cycle, energy measured from the wall.</li>
           <li><b>Europe, electricity:</b> Eurostat household price (consumption band 2,500–4,999 kWh a year), all taxes and levies included, first half of 2026, for the EU countries, Iceland, Liechtenstein, Norway, the Western Balkans, Moldova, Georgia and Türkiye. The United Kingdom: Ofgem price cap for October–December 2026 (Direct Debit average 26.32p/kWh plus a 54.83p/day standing charge spread over 2,700 kWh a year; electricity is zero-rated for VAT in that period). Switzerland: ElCom median 2026 tariff for a typical household (27.7 Rp/kWh) + 8.1% VAT. Ukraine: the regulated household tariff of 4.32 UAH/kWh.</li>
           <li><b>Europe, gasoline:</b> EU countries: the European Commission's Weekly Oil Bulletin, Euro-super 95 with all taxes, average of every week of 2026 (<span id="m-wob"></span>). Countries outside the EU: one reading of globalpetrolprices.com (9 November 2026, Octane-95), converted at that day's exchange rate and scaled to the 2026 average with the EU's own Jan–Nov / 9 Nov ratio; checked against the EU countries that both sources cover, that site's level matches the Oil Bulletin within a few percent on average. Liechtenstein uses the Swiss price. <b>Kosovo: no gasoline price found</b>, enter one.</li>
           <li><b>Europe, cars:</b> every electric model and every petrol and petrol-hybrid version registered new in 2025 in the EU, Iceland and Norway (European Environment Agency CO2 monitoring data, 2025 provisional; electric models with 100+ and petrol versions with 200+ registrations), with the registration-weighted average WLTP consumption. WLTP electric consumption is measured at the plug, so charging losses are included, but WLTP figures are 10–20% more optimistic than the US EPA cycle, and both are lower than winter or motorway driving. A few registry entries with impossible values were left out.</li>
@@ -337,7 +391,7 @@ function syncRegion(){
   $('c-sub-w').hidden = !sub;
   if(sub){
     lastSub[c] = cmp.reg;
-    $('c-sub-l').textContent = c === 'CA' ? 'Province / territory' : 'State';
+    $('c-sub-l').textContent = c === 'CA' ? 'Province' : 'State';
     if($('c-sub').dataset.c !== c){
       $('c-sub').dataset.c = c;
       $('c-sub').innerHTML = REG.filter(r => ctryOf(r.id) === c).sort((a, b) => a.n.localeCompare(b.n)).map(r => `<option value="${r.id}">${r.n}</option>`).join('');
@@ -443,7 +497,8 @@ function render(force){
   // ---- results ----
   if(cs.some(c => c.ice == null)){
     $('cmp-sum').textContent = `There is no gasoline price for ${r.n}: enter one in “Gasoline” to see the comparison.`;
-    ['cmp-kpis', 'cmp-t', 'cmp-chart', 'cmp-leg'].forEach(id => $(id).innerHTML = ''); return;
+    ['cmp-kpis', 'cmp-t', 'cmp-chart', 'cmp-leg'].forEach(id => $(id).innerHTML = '');
+    $('sim-live').className = 'sim-live neg'; $('sim-live').innerHTML = '<span>⛽ Enter a gasoline price in step 4 to see the result</span>'; return;
   }
   const yEV = cs.reduce((s, c) => s + c.ev, 0), yICE = cs.reduce((s, c) => s + c.ice, 0), ySave = yICE - yEV;
   cmp.prOn = cmp.prEV > 0 || cmp.prICE > 0;                                     // purchase prices count as soon as one is entered
@@ -458,6 +513,9 @@ function render(force){
   YEARS.slice(1).forEach(n => kp.push({ t:`${save(n) >= 0 ? 'EV saves' : 'EV costs more'} after ${n} years`, v:M(Math.abs(save(n))), s:`total EV ${M(totEV(n))} · gas ${M(totICE(n))}`, c:col(save(n)) }));
   if(cmp.prOn) kp.push({ t:'Break-even', v: pDiff >= 0 ? 'day 1' : be != null ? (be < 1 ? nf(be * 12) + ' months' : nf(be, 1) + ' years') : 'never',
     s: pDiff >= 0 ? 'the EV is not more expensive to buy' : be != null ? `the EV's extra ${M(-pDiff)} is paid back` : 'running costs do not pay back the price gap', c: pDiff >= 0 || (be != null && be <= 10) ? '#16a34a' : '#dc2626' });
+  // live result, pinned at the top of the screen on a phone while the steps are filled in
+  $('sim-live').className = 'sim-live' + (save(10) < 0 ? ' neg' : '');
+  $('sim-live').innerHTML = `<span>⚡ ${ySave >= 0 ? 'EV saves' : 'EV costs'} <b>${M(Math.abs(ySave))}</b>/yr<br><small>${save(10) >= 0 ? 'saves' : 'costs'} ${M(Math.abs(save(10)))} over 10 years${cmp.prOn ? ', purchase incl.' : ''}</small></span><span class="go">Results ↓</span>`;
   $('cmp-kpis').innerHTML = kp.map(k => `<div class="ge-kpi" style="--c:${k.c}"><div class="t">${k.t}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
 
   const cls = x => x > 0.005 ? 'pos' : x < -0.005 ? 'neg' : '';
@@ -475,6 +533,20 @@ function render(force){
 
   // ---- chart: total cost after 1, 3, 5, 10 years, purchase price at the bottom of each bar ----
   const items = (cmp.prOn ? [{ k:'purchase', n:'Purchase price', ev:pEV, ice:pICE, once:true }] : []).concat(cs);
+  $('cmp-leg').innerHTML = items.map(c => `<span><i style="background:${CAT[c.k]}"></i>${c.n}</span>`).join('');
+  $('cmp-tnote').textContent = `${r.cont === 'EU' ? 'European car ratings: EEA WLTP (2025 registrations).' : 'Car ratings: US EPA and Natural Resources Canada.'} Home charging at the residential price shown. Totals at today's prices; no financing, resale value or incentives.`;
+  if(document.documentElement.dataset.view === 'mobile' || $('cmp-chart').clientWidth < 560){        // phone: plain horizontal bars, readable without zooming
+    const max = Math.max(totEV(10), totICE(10)) || 1;
+    $('cmp-chart').innerHTML = YEARS.map(n => {
+      const d = save(n);
+      const bar = (side, cap) => { let segs = '', acc = 0;
+        items.forEach(c => { const val = c.once ? c[side] : c[side] * n; if(val <= 0) return; acc += val;
+          segs += `<i style="width:${val / max * 100}%;background:${CAT[c.k]}" title="${cap} · ${c.n}: ${M(val)}"></i>`; });
+        return `<div class="mch-r"><span class="mch-l">${cap}</span><span class="mch-t">${segs}</span><span class="mch-v">${M(acc)}</span></div>`; };
+      return `<div class="mch-g"><div class="mch-h"><b>After ${n} year${n > 1 ? 's' : ''}</b><span class="${d >= 0 ? 'pos' : 'neg'}">EV ${d >= 0 ? 'saves' : 'costs'} ${M(Math.abs(d))}</span></div>${bar('ev', '⚡ EV')}${bar('ice', '⛽ Gas')}</div>`;
+    }).join('');
+    return;
+  }
   const W2 = 760, H2 = 340, mL = 70, mR = 10, mT = 36, mB = 46;
   const maxV = usdTo(Math.max(totEV(10), totICE(10))) || 1;
   const yD = d3.scaleLinear().domain([0, maxV]).nice().range([H2 - mB, mT]), y = vv => yD(usdTo(vv));
@@ -494,9 +566,24 @@ function render(force){
     s += `<text class="sv" x="${x0 + gx.bandwidth() / 2}" y="${mT - 18}" style="fill:${d >= 0 ? 'var(--ge-pos)' : 'var(--ge-neg)'}">${d >= 0 ? 'EV saves ' : 'EV costs '}${M(Math.abs(d))}</text>`;
   });
   $('cmp-chart').innerHTML = s + '</svg>';
-  $('cmp-leg').innerHTML = items.map(c => `<span><i style="background:${CAT[c.k]}"></i>${c.n}</span>`).join('');
-  $('cmp-tnote').textContent = `${r.cont === 'EU' ? 'European car ratings: EEA WLTP (2025 registrations).' : 'Car ratings: US EPA and Natural Resources Canada.'} Home charging at the residential price shown. Totals at today's prices; no financing, resale value or incentives.`;
 }
+// "Copy as image" / "Copy link" under the steps: they run the card's own 📷 / 🔗 buttons (assets/section-link.js) and show their result
+document.querySelectorAll('.ge-share').forEach(bar => bar.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const card = $(bar.dataset.card), src = card && card.querySelector(b.dataset.act === 'copy' ? ':scope > .rte-copy-chart' : ':scope > .rte-sec-link');
+  if(!src) return;
+  const label = b.textContent; src.click();
+  const MSG = { '✓': b.dataset.act === 'copy' ? '✓ Image copied' : '✓ Link copied', '⬇': '⬇ Saved as PNG', '⚠': '⚠ Could not copy', '…': '… Making the image' };
+  let k = 0; const t = setInterval(() => { const m = MSG[src.textContent.trim()]; if(m){ b.textContent = m; b.classList.toggle('ok', m[0] === '✓' || m[0] === '⬇'); }
+    if(++k > 80 || (k > 2 && /📷|🔗/.test(src.textContent))){ clearInterval(t); setTimeout(() => { b.textContent = label; b.classList.remove('ok'); }, 1200); } }, 100);
+}));
+// the live result hides while the real results are on screen
+if('IntersectionObserver' in window){
+  const seen = new Set(), io = new IntersectionObserver(es => { es.forEach(e => e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)); $('sim-live').classList.toggle('away', seen.size > 0); }, { rootMargin:'-80px 0px -35% 0px' });
+  ['cmp-kpis', 'cmp-t', 'cmp-chart'].forEach(id => io.observe($(id)));
+}
+let rsT = null; window.addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => render(), 200); });
+$('sim-live').addEventListener('click', e => { e.preventDefault(); $('cmp-res').scrollIntoView({ behavior:'smooth', block:'start' }); });
 $('m-wob').textContent = EU.periods.gas.replace('EU Weekly Oil Bulletin, ', '');
 $('m-cad').textContent = PER_USD.CAD.toFixed(4); $('m-eur').textContent = PER_USD.EUR.toFixed(4);
 render(true);

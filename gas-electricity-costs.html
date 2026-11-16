@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Electricity &amp; Gas Costs — Road to Electric</title>
+<title>Electricity &amp; Gas Costs per Country — Road to Electric</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/mobile.css?v=10">
@@ -72,6 +72,10 @@
   table.ge-t td.sv{ font-weight:900; font-size:13.5px; color:var(--ge-pos); } table.ge-t td.sv.neg{ color:var(--ge-neg); }
   table.ge-t td.sv i{ display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; vertical-align:0; box-shadow:0 0 0 1px rgba(0,0,0,.12); }
   .ge-tfoot{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; }
+  .ge-share{ display:flex; justify-content:flex-end; gap:8px; margin:-4px 0 10px; }
+  .ge-share button{ appearance:none; border:1px solid var(--accent); background:var(--surface); color:var(--accent); border-radius:999px; padding:7px 14px; font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
+  .ge-share button:hover{ background:var(--accent); color:#fff; } .ge-share button.ok{ background:#16a34a; border-color:#16a34a; color:#fff; }
+  html[data-view="mobile"] .ge-share button{ flex:1; padding:12px 8px; font-size:13.5px; }
   .ge-next{ display:flex; align-items:center; gap:14px; text-decoration:none; color:var(--text); border:1px solid var(--border); border-left:5px solid var(--accent); }
   .ge-next:hover{ border-color:var(--accent); } .ge-next b{ display:block; font-size:16px; margin-bottom:3px; } .ge-next span span{ display:block; font-size:13px; color:var(--text-muted); line-height:1.45; }
   .ge-next-ic{ font-size:30px; flex:none; } .ge-next-go{ margin-left:auto; font-size:26px; font-weight:900; color:var(--accent); flex:none; }
@@ -115,8 +119,8 @@
 
       <div class="nav-heading">Trends</div>
       <a class="nav-hot" href="eu-fsd-vote.html"><span class="dot"></span>EU Vote on Tesla FSD</a>
-      <a href="gas-electricity-costs.html" aria-current="page"><span class="dot"></span>Electricity &amp; Gas Costs</a>
-      <a href="ev-vs-ice-cost.html"><span class="dot"></span>EV vs ICE Cost</a>
+      <a href="gas-electricity-costs.html" aria-current="page"><span class="dot"></span>Electricity &amp; Gas Costs per Country</a>
+      <a href="ev-vs-ice-cost.html"><span class="dot"></span>EV vs ICE Costs Simulator</a>
       <a href="biggest-movers.html"><span class="dot"></span>Biggest Movers</a>
 
       <div class="nav-heading nav-about">About</div>
@@ -132,7 +136,7 @@
   <main class="main">
     <div class="page ge-page">
       <header class="page-header">
-        <div class="eyebrow">Trends · Electricity &amp; Gas Costs</div>
+        <div class="eyebrow">Trends · Electricity &amp; Gas Costs per Country</div>
         <h1>Electricity &amp; gas costs by region: where does an EV save the most?</h1>
         <p class="subtitle">Home electricity price (sales tax included) against the 2026 average price of regular gasoline in every Canadian province and territory, every US state and 42 European countries. Pick your EV and enter your gas car's fuel use and your yearly distance: the map and the table show how much charging at home saves (green) or costs (red) compared with filling up.</p>
       <div class="ge-wip" role="note">
@@ -182,6 +186,9 @@
           </div>
         </div>
 
+        <div class="ge-share" data-nocapture data-card="ge-card">
+          <button type="button" data-act="copy">📷 Copy map + table as image</button><button type="button" data-act="link">🔗 Copy link</button>
+        </div>
         <p class="ge-sum" id="ge-sum"></p>
         <div class="ge-kpis" id="ge-kpis"></div>
 
@@ -206,7 +213,7 @@
 
       <a class="card ge-next" href="ev-vs-ice-cost.html">
         <span class="ge-next-ic" aria-hidden="true">⚖️</span>
-        <span><b>EV vs ICE: complete cost comparator</b><span>Pick a place, an electric car and a gas car, add the purchase prices, insurance, tires, oil changes and other yearly costs: what each one costs after 1, 3, 5 and 10 years. Canada, the US and 42 European countries.</span></span>
+        <span><b>EV vs ICE Costs Simulator</b><span>Pick a place, an electric car and a gas car, add the purchase prices, insurance, tires, oil changes and other yearly costs: what each one costs after 1, 3, 5 and 10 years. Canada, the US and 42 European countries.</span></span>
         <span class="ge-next-go" aria-hidden="true">→</span>
       </a>
 
@@ -222,7 +229,7 @@
             <b>Canada</b> (rules as of November 2026): GST 5% everywhere; Quebec + QST 9.975% = 14.975%; Ontario HST 13% (the Ontario Electricity Rebate is already in the CER price); Saskatchewan + PST 6% = 11%; Manitoba + RST 7% = 12% (the RST exemption covers space heating only, not EV charging); Newfoundland and Labrador HST 15%; Nova Scotia, New Brunswick and Prince Edward Island refund the provincial part of the HST on home electricity, so 5%; British Columbia, Alberta and the territories 5%.
             <b>United States (approximate):</b> state sales tax on residential electricity, or the state percentage tax charged on the bill in its place (Alabama utility tax 4%, Florida gross receipts 2.5%, Rhode Island 4%), plus a typical local rate where local sales tax applies. About half the states exempt residential electricity (0%). Not included: per-kWh excise taxes (Illinois, Virginia), flat monthly utility taxes, city utility taxes, and gross-receipts taxes the utility builds into its rates. Local rates vary by city, so a given address can differ by a few points.</li>
           <li><b>Europe (42 countries):</b> electricity = Eurostat household price (2,500–4,999 kWh a year band), first half of 2026, <b>all taxes and levies already included</b>, for the EU, Iceland, Liechtenstein, Norway, the Western Balkans, Moldova, Georgia and Türkiye; United Kingdom = Ofgem price cap Oct–Dec 2026 (26.32p/kWh + 54.83p/day standing charge over 2,700 kWh a year, electricity zero-rated for VAT in that period); Switzerland = ElCom 2026 median household tariff 27.7 Rp/kWh + 8.1% VAT; Ukraine = regulated tariff 4.32 UAH/kWh. Gasoline = European Commission Weekly Oil Bulletin, Euro-super 95 with all taxes, average of every week of 2026, for the 27 EU countries; outside the EU there is no official series, so one reading of globalpetrolprices.com (9 November 2026) is converted at that day's rate and scaled to the 2026 average with the EU's own ratio (marked ≈); Liechtenstein uses the Swiss price; Kosovo has none. Rebuild: <code>scripts/gas_elec/build_europe.py</code>.</li>
-          <li><b>Full cost comparison</b> (purchase price, insurance, tires, oil changes, other yearly costs): see the <a href="ev-vs-ice-cost.html">EV vs ICE Cost</a> page.</li>
+          <li><b>Full cost comparison</b> (purchase price, insurance, tires, oil changes, other yearly costs): see the <a href="ev-vs-ice-cost.html">EV vs ICE Costs Simulator</a>.</li>
           <li><b>Home charging only:</b> public fast charging often costs 2–4× the home price. Time-of-use or EV-specific rates can be much cheaper than the averages shown.</li>
           <li><b>EV consumption: every model sold in the US and Canada.</b> The drop-down lists every battery-electric model rated by the US EPA (fueleconomy.gov, file of 4 November 2026; kWh per 100 miles converted to kWh/100 km) and by Natural Resources Canada (Fuel consumption ratings, 29 September 2026), model years 2024 to 2027, each model at its newest model year. A version NRCan also rates is marked as sold in both countries; 10 versions only NRCan rates are marked Canada only. Both agencies use the same 5-cycle test and measure energy from the wall, so charging losses are already included. The “Typical vehicles” at the top are rounded values for quick comparisons. Winter driving in Canada and the northern states can add 20–35%; use the Custom value to test it. Rebuild: <code>scripts/gas_elec/build_ev_models.py</code>.</li>
           <li><b>Currency:</b> Canadian rows are in CAD, US rows in USD and European rows in EUR at the source; the page converts them with the Bank of Canada's 2026 average exchange rate (<span id="ge-fx-m"></span>).</li>
@@ -604,6 +611,16 @@ function render(){
 
 document.querySelectorAll('[data-p]').forEach(e => e.textContent = D.periods[e.dataset.p]);
 $('ge-fx-m').textContent = `1 USD = ${FX.toFixed(4)} CAD, daily average from ${D.fxPeriod.replace(' to ', ' to ')}`;
+// "Copy as image" / "Copy link" under the filters: they run the card's own 📷 / 🔗 buttons (assets/section-link.js) and show their result
+document.querySelectorAll('.ge-share').forEach(bar => bar.addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const card = $(bar.dataset.card), src = card && card.querySelector(b.dataset.act === 'copy' ? ':scope > .rte-copy-chart' : ':scope > .rte-sec-link');
+  if(!src) return;
+  const label = b.textContent; src.click();
+  const MSG = { '✓': b.dataset.act === 'copy' ? '✓ Image copied' : '✓ Link copied', '⬇': '⬇ Saved as PNG', '⚠': '⚠ Could not copy', '…': '… Making the image' };
+  let k = 0; const t = setInterval(() => { const m = MSG[src.textContent.trim()]; if(m){ b.textContent = m; b.classList.toggle('ok', m[0] === '✓' || m[0] === '⬇'); }
+    if(++k > 80 || (k > 2 && /📷|🔗/.test(src.textContent))){ clearInterval(t); setTimeout(() => { b.textContent = label; b.classList.remove('ok'); }, 1200); } }, 100);
+}));
 render();
 
 FilterMemory.auto({ exclude:['ge-ev'], extra:[
