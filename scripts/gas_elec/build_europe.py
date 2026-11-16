@@ -21,7 +21,7 @@ Liechtenstein uses the Swiss gasoline price (same market). Kosovo: no gasoline p
 
 usage (repo root): python -I scripts/gas_elec/build_europe.py  -> assets/europe-cost-data.js
 """
-import csv, json, os, re, statistics
+import csv, datetime, json, os, re, statistics
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, 'src', 'europe')
@@ -80,16 +80,44 @@ EUGPP = {'AT': 'Austria', 'BE': 'Belgium', 'BG': 'Bulgaria', 'HR': 'Croatia', 'C
          'FI': 'Finland', 'FR': 'France', 'DE': 'Germany', 'EL': 'Greece', 'HU': 'Hungary', 'IE': 'Ireland', 'IT': 'Italy', 'LV': 'Latvia',
          'LT': 'Lithuania', 'LU': 'Luxembourg', 'MT': 'Malta', 'NL': 'Netherlands', 'PL': 'Poland', 'PT': 'Portugal', 'RO': 'Romania',
          'SK': 'Slovakia', 'SI': 'Slovenia', 'ES': 'Spain', 'SE': 'Sweden'}
-calib = statistics.median(float(nov9[WOB.get(c, c)]) / 1000 / (gpp[n] / EURUSD_NOV9) for c, n in EUGPP.items())
-season = wob_avg['EU'] / (float(nov9['EU']) / 1000)
+# Non-EU countries: every 2026 archived copy of globalpetrolprices' Europe page (gpp_gasoline_2026_readings.json) + the live 9 Nov reading.
+# For each reading date t: price in EUR at that day's rate; k_t = median over the EU countries of (Oil Bulletin week of t / reading),
+# which puts that reading on the bulletin's level; the country's level relative to the EU average that week = reading x k_t / bulletin EU(t).
+# The 2026 price = mean of those relative levels x the bulletin's EU 2026 average. Readings are sparse (8), so relative levels are used
+# rather than plain averages: they cancel the timing of the readings (a country missing from early copies is not biased by the season).
+GPP_R = J('gpp_gasoline_2026_readings.json')['readings']
+GPP_R.setdefault('2026-11-09', {})['Georgia'] = J('gpp_gasoline_extra.json')['GE']['usd_per_l']
+GPP['GE'] = 'Georgia'
+def on_or_before(series, d):
+    ks = sorted(k for k in series if k <= d)
+    return series[ks[-1]] if ks else series[min(series)]
+def eur_per_usd(d):
+    return on_or_before(usdcad, d) / on_or_before(eurcad, d)
+def wob_week(d):
+    return min(wob, key=lambda r: abs((datetime.date.fromisoformat(r['date']) - datetime.date.fromisoformat(d)).days))
+rel, kt = {}, {}
+for d, rd in GPP_R.items():
+    w, e = wob_week(d), eur_per_usd(d)
+    pairs = [(float(w[WOB.get(c, c)]) / 1000, rd[n] * e) for c, n in EUGPP.items() if n in rd and w.get(WOB.get(c, c))]
+    k = statistics.median(a / b for a, b in pairs)
+    kt[d] = k
+    eu_t = float(w['EU']) / 1000
+    for n, v in rd.items():
+        rel.setdefault(n, []).append(v * e * k / eu_t)
+gpp_year = {n: statistics.mean(v) * wob_avg['EU'] for n, v in rel.items()}
+chk = sorted((gpp_year[n] / wob_avg[WOB.get(c, c)] - 1, c) for c, n in EUGPP.items() if n in gpp_year)
+GPP_CHECK = max(abs(x) for x, _ in chk)
+print('globalpetrolprices: %d readings %s..%s, k_t %s' % (len(GPP_R), min(GPP_R), max(GPP_R), ' '.join('%.3f' % k for k in kt.values())))
+print('  check on the 27 EU countries (method vs Oil Bulletin 2026 average): median abs %.1f%%, max %.1f%% (%s)' %
+      (100 * statistics.median(abs(x) for x, _ in chk), 100 * GPP_CHECK, max(chk, key=lambda z: abs(z[0]))[1]))
 gas = {}
 for c in NAMES:
     if c in EU27:
         gas[c] = (round(wob_avg[WOB.get(c, c)], 4), 'wob')
-    elif c in GPP:
-        gas[c] = (round(gpp[GPP[c]] / EURUSD_NOV9 * season * calib, 4), 'gpp')
+    elif c in GPP and GPP[c] in gpp_year:
+        gas[c] = (round(gpp_year[GPP[c]], 4), 'gpp')
 gas['LI'] = (gas['CH'][0], 'gpp-ch')
-print('globalpetrolprices -> bulletin level x%.3f, Nov 9 -> 2026 average x%.3f, EURUSD 9 Nov %.4f' % (calib, season, EURUSD_NOV9))
+GPP_N = {c: len(rel[GPP[c]]) for c in GPP if GPP[c] in rel}
 
 rows = []
 for c, n in NAMES.items():
@@ -163,8 +191,8 @@ cover_ev = sum(e[3] for e in ev_list) / reg_ev
 
 data = {'built': '2026-11-15', 'eurPerUsd': round(1 / (avg(eurcad) / avg(usdcad)), 5), 'fx': {k: round(v, 5) for k, v in EUR_PER.items()},
         'periods': {'elec': 'Eurostat 2026 first half (household, 2,500-4,999 kWh/yr, all taxes)', 'gas': 'EU Weekly Oil Bulletin, ' + WOB_PERIOD,
-                    'gasOther': 'globalpetrolprices.com reading of 9 Nov 2026, scaled to the 2026 average and to the Oil Bulletin level'},
-        'gppCalib': round(calib, 4), 'gppSeason': round(season, 4),
+                    'gasOther': 'globalpetrolprices.com, %d readings %s to %s, put on the Oil Bulletin level' % (len(GPP_R), min(GPP_R), max(GPP_R))},
+        'gpp': {'n': len(GPP_R), 'first': min(GPP_R), 'last': max(GPP_R), 'check': round(GPP_CHECK, 4), 'perCountry': GPP_N},
         'rows': rows, 'ev': ev_list, 'ice': gas_list, 'evCover': round(cover_ev, 3)}
 open(os.path.join(ROOT, 'assets', 'europe-cost-data.js'), 'w', encoding='utf-8', newline='\n').write(
     '// Built by scripts/gas_elec/build_europe.py - do not edit by hand. Prices in EUR. ev: [make, model, kWh/100 km WLTP, 2025 registrations];\n'
