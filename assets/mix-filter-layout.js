@@ -145,7 +145,7 @@
     bar = document.createElement('div'); bar.className = 'fl-bar';
     const chips = document.createElement('div'); chips.className = 'fl-chips';
     GROUPS.forEach((g, i) => {
-      const w = document.createElement('div'); w.className = 'fl-chipwrap' + (g.wide ? ' fl-pop-wide' : '') + (i >= GROUPS.length - 2 ? ' fl-pop-right' : '');
+      const w = document.createElement('div'); w.className = 'fl-chipwrap' + (g.wide ? ' fl-pop-wide' : '') + (g.key === 'period' ? ' fl-pop-narrow' : '') + (i >= GROUPS.length - 2 ? ' fl-pop-right' : '');
       const b = document.createElement('button'); b.type = 'button'; b.className = 'fl-chip'; b.setAttribute('aria-expanded', 'false');
       b.innerHTML = `<span class="fl-chip-k">${g.title}</span><span class="fl-chip-v"></span><span class="fl-caret">▾</span>`;
       const pop = document.createElement('div'); pop.className = 'fl-pop'; pop.hidden = true; pop.append(g.el);

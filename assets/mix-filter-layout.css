@@ -94,6 +94,7 @@ body[data-fl-mode="drawer"] .filters-panel{ display:none; }
   border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.28);
 }
 .fl-chipwrap.fl-pop-wide .fl-pop{ width:380px; }
+.fl-chipwrap.fl-pop-narrow .fl-pop{ width:196px; }      /* Period: the longest label is ~94 px, 300 px was empty space */
 .fl-chipwrap.fl-pop-right .fl-pop{ left:auto; right:0; }
 .fl-pop[hidden]{ display:none; }
 .fl-pop .filter-group{ box-shadow:none; }
