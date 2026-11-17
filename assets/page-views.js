@@ -17,6 +17,8 @@
   var bot = !!navigator.webdriver || /bot|crawl|spider|headless|preview/i.test(navigator.userAgent || '');
   var mine = false; try{ mine = localStorage.getItem('rte-notrack') === '1' || localStorage.getItem('rte-optout') === '1'; }catch(e){}       // rte-notrack: the owner's browser; rte-optout: a reader's "Don't count my visits" switch (contact.html#privacy)
   var count = !local && !seen && !bot && !mine;
+  // second, independent counter (GoatCounter: no cookies, no advertising) to cross-check the numbers above; same exclusions: localhost, crawlers, the owner's browser, readers who opted out
+  if(!local && !bot && !mine){ var gc = document.createElement('script'); gc.async = true; gc.src = 'https://gc.zgo.at/count.js'; gc.setAttribute('data-goatcounter', 'https://roadtoelectric.goatcounter.com/count'); document.head.appendChild(gc); }
   // new or returning reader: only 'new' / 'back' and 'first view of the day' leave the browser, never an identifier
   var RK = 'rte-seen', today = (function(){ try{ return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto' }).format(new Date()); }catch(e){ return new Date().toISOString().slice(0, 10); } })(), mark = null;
   try{ var rawMark = JSON.parse(localStorage.getItem(RK) || 'null'); if(rawMark && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.f) && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(rawMark.l) && (Date.parse(today) - Date.parse(rawMark.l)) / 864e5 < 390) mark = rawMark; }catch(e){}
