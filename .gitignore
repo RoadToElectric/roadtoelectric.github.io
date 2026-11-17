@@ -4,3 +4,6 @@ scripts/__pycache__/
 scripts/energy/all_*.json
 YouTube/
 assets/private/
+
+# ElevenLabs API key
+.env.local
