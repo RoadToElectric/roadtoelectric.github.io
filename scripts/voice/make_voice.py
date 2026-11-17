@@ -5,7 +5,7 @@ never stored in code. eleven_v4_turbo only works over the Text to Dialogue
 WebSocket, so the text is streamed there paragraph by paragraph.
 
 Usage:
-  python scripts/voice/make_voice.py <voiceover.txt> [-o out.mp3] [--voice NAME_OR_ID]
+  python scripts/voice/make_voice.py <voiceover.txt> [-o out.mp3] [--voice NAME_OR_ID] [--model eleven_v4]
   python scripts/voice/make_voice.py --list-voices
 
 Default output: <name>_voiceover.txt -> <name>_voice.mp3 (else <name>.mp3),
@@ -26,8 +26,8 @@ from elevenlabs import ElevenLabs
 REPO = Path(__file__).resolve().parents[2]
 load_dotenv(REPO / ".env.local")
 
-DEFAULT_VOICE = "JBFqnCBsd6RMkjVDRZzb"  # George (pre-made, narrative)
-MODEL = "eleven_v4_turbo"
+DEFAULT_VOICE = "mGetNfupYuyABoOVawCR"  # "Frank's voice" (instant clone, the channel voice)
+MODEL = "eleven_v4_turbo"  # default; --model eleven_v4 uses the HTTP endpoint
 WS_URL = "wss://api.elevenlabs.io/v1/text-to-dialogue/stream-input"
 
 
@@ -54,6 +54,18 @@ def resolve_voice(arg):
 def paragraphs(text):
     parts = [p.strip().replace("\n", " ") for p in text.split("\n\n")]
     return [p for p in parts if p]
+
+
+def synth_http(paras, voice_id, out, stability, similarity, fmt, model):
+    from elevenlabs import VoiceSettings
+    audio = client().text_to_speech.convert(
+        text="\n\n".join(paras), voice_id=voice_id, model_id=model, output_format=fmt,
+        voice_settings=VoiceSettings(stability=stability, similarity_boost=similarity))
+    tmp = out.with_suffix(out.suffix + ".part")
+    with open(tmp, "wb") as f:
+        for chunk in audio:
+            f.write(chunk)
+    tmp.replace(out)
 
 
 async def synth(paras, voice_id, out, stability, similarity, fmt):
@@ -95,7 +107,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("text_file", nargs="?")
     ap.add_argument("-o", "--out")
-    ap.add_argument("--voice", help="voice name or id (default George)")
+    ap.add_argument("--voice", help="voice name or id (default Frank's voice)")
+    ap.add_argument("--model", default=MODEL, help="eleven_v4_turbo (default, WebSocket) or eleven_v4 etc. (HTTP)")
     ap.add_argument("--stability", type=float, default=0.5)
     ap.add_argument("--similarity", type=float, default=0.75)
     ap.add_argument("--format", default="mp3_44100_128")
@@ -120,8 +133,11 @@ def main():
 
     voice_id = resolve_voice(a.voice)
     print(f"{src.name}: {chars:,} characters in {len(paras)} paragraphs -> {out}")
-    print(f"model {MODEL}, voice {voice_id}")
-    asyncio.run(synth(paras, voice_id, out, a.stability, a.similarity, a.format))
+    print(f"model {a.model}, voice {voice_id}")
+    if a.model == "eleven_v4_turbo":
+        asyncio.run(synth(paras, voice_id, out, a.stability, a.similarity, a.format))
+    else:
+        synth_http(paras, voice_id, out, a.stability, a.similarity, a.format, a.model)
     print(f"saved {out} ({out.stat().st_size / 1024:,.0f} KB)")
 
 
