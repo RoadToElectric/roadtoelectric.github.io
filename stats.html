@@ -142,7 +142,11 @@
     </div>
 
     <section class="st-card" id="x-card">
-      <h2>X posts <span class="st-muted" style="font-weight:600">@RoadToElectrik</span></h2>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-bottom:4px">
+        <h2 style="margin:0">X posts <span class="st-muted" style="font-weight:600">@RoadToElectrik</span></h2>
+        <div class="st-bar" id="x-rep" role="group" aria-label="Show replies"><span class="st-muted" style="font-size:12.5px;font-weight:700">Show replies</span>
+          <button type="button" class="st-btn" data-rep="1">YES</button><button type="button" class="st-btn" data-rep="0">NO</button></div>
+      </div>
       <p class="st-note" id="x-note"></p>
       <div id="x-kpis" class="st-kpis" style="margin-bottom:10px"></div>
       <div class="xc" id="x-charts"></div>
@@ -287,18 +291,31 @@
     fetch(RPCX, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:API, Authorization:'Bearer ' + API }, body:JSON.stringify({ p_key:key }) })
       .then(function(r){ return r.ok ? r.json() : null; }).then(function(x){ if(x && !x.error) showX(x); }).catch(function(){});
   }
+  var lastX = null, showRep = true;
+  try{ showRep = localStorage.getItem('rte-x-replies') !== '0'; }catch(e){}
+  $('x-rep').addEventListener('click', function(e){ var b = e.target.closest('[data-rep]'); if(!b) return; showRep = b.dataset.rep === '1'; try{ localStorage.setItem('rte-x-replies', showRep ? '1' : '0'); }catch(e2){} if(lastX) showX(lastX); });
   function showX(x){
-    var P = x.posts || [], sum = function(k){ return P.reduce(function(s, p){ return s + (p[k] || 0); }, 0); }, acc = x.account || [], a = acc[acc.length - 1] || {}, a0 = acc.length > 1 ? acc[acc.length - 2] : null;
+    lastX = x;
+    document.querySelectorAll('#x-rep [data-rep]').forEach(function(b){ b.classList.toggle('on', (b.dataset.rep === '1') === showRep); });
+    var all = x.posts || [], nRep = all.filter(function(p){ return /^\[reply\]/.test(p.excerpt || ''); }).length;
+    var P = showRep ? all : all.filter(function(p){ return !/^\[reply\]/.test(p.excerpt || ''); }), sum = function(k){ return P.reduce(function(s, p){ return s + (p[k] || 0); }, 0); }, acc = x.account || [], a = acc[acc.length - 1] || {}, a0 = acc.length > 1 ? acc[acc.length - 2] : null;
     var delta = function(now, prev){ return prev == null ? '' : (now - prev === 0 ? '' : ' <span class="' + (now - prev > 0 ? '' : 'st-muted') + '" style="color:' + (now - prev > 0 ? '#2fae4e' : 'inherit') + ';font-size:11px">' + (now - prev > 0 ? '+' : '') + fmt(now - prev) + '</span>'); };
-    $('x-note').textContent = P.length ? 'Public numbers of ' + P.length + ' posts, read from the account page by hand (not automatic): last reading ' + new Date(x.last_reading).toLocaleString() + ', ' + x.readings + ' reading' + (x.readings > 1 ? 's' : '') + '. The green figures are the change since the reading before. Ask Claude to read the page again to refresh.' : 'No reading yet.';
-    var views = sum('views'), eng = sum('likes') + sum('reposts') + sum('replies');
+    $('x-note').textContent = P.length ? 'Public numbers of ' + P.length + ' posts, read from the account page by hand (not automatic): last reading ' + new Date(x.last_reading).toLocaleString() + ', ' + x.readings + ' reading' + (x.readings > 1 ? 's' : '') + '. The green figures are the change since the reading before. Ask Claude to read the page again to refresh.' +
+      (x.private_reading ? ' Engagements, detail expands, profile visits and link clicks are owner-only numbers from each post\'s analytics page, last read ' + new Date(x.private_reading).toLocaleString() + ' (' + P.filter(function(p){ return p.engagements != null; }).length + ' of ' + P.length + ' posts read so far; their totals cover only those posts).' : ' Engagements, detail expands, profile visits and link clicks: not read yet.') +
+      (showRep ? ' Replies included (' + nRep + ').' : ' Replies hidden (' + nRep + ').') : 'No reading yet.';
+    var views = sum('views'), hasPriv = P.some(function(p){ return p.engagements != null; });
+    var psum = function(k){ return hasPriv ? sum(k) : null; }, pdel = function(k){ var Q = P.filter(function(p){ return p[k + '_prev'] != null; }); return Q.length ? delta(sum(k), P.reduce(function(s, p){ return s + (p[k + '_prev'] != null ? p[k + '_prev'] : (p[k] || 0)); }, 0)) : ''; };
+    var eng = hasPriv ? sum('engagements') : sum('likes') + sum('reposts') + sum('replies');
     $('x-kpis').innerHTML = [['Followers', a.followers, a0 ? delta(a.followers, a0.followers) : ''], ['Posts read', P.length, ''], ['Views', views, delta(views, P.some(function(p){ return p.views_prev != null; }) ? P.reduce(function(s, p){ return s + (p.views_prev || 0); }, 0) : null)],
-      ['Likes', sum('likes'), ''], ['Reposts', sum('reposts'), ''], ['Replies', sum('replies'), ''], ['Engagement', views ? pct(eng, views) + '%' : '—', '']]
+      ['Likes', sum('likes'), ''], ['Reposts', sum('reposts'), ''], ['Replies', sum('replies'), ''],
+      ['Engagements', psum('engagements'), pdel('engagements')], ['Detail expands', psum('detail_expands'), pdel('detail_expands')], ['Profile visits', psum('profile_visits'), pdel('profile_visits')], ['Link clicks', psum('link_clicks'), pdel('link_clicks')],
+      ['Engagement rate', (function(){ var vv = hasPriv ? P.reduce(function(s, p){ return s + (p.engagements != null ? (p.views || 0) : 0); }, 0) : views; return vv ? pct(eng, vv) + '%' : '—'; })(), '']]
       .map(function(k){ return '<div class="st-kpi"><div class="l">' + k[0] + '</div><div class="v" style="font-size:22px">' + (typeof k[1] === 'number' ? fmt(k[1]) : (k[1] == null ? '—' : k[1])) + k[2] + '</div></div>'; }).join('');
     xCharts(P, acc);
-    $('x-posts').innerHTML = P.length ? '<details><summary>All ' + P.length + ' posts, newest first (table)</summary><table class="st-t"><thead><tr><th>Posted</th><th>Post</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Reposts</th><th class="n">Replies</th></tr></thead><tbody>' +
+    $('x-posts').innerHTML = P.length ? '<details><summary>All ' + P.length + ' posts, newest first (table)</summary><table class="st-t"><thead><tr><th>Posted</th><th>Post</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Reposts</th><th class="n">Replies</th><th class="n" title="Engagements (owner-only)">Eng.</th><th class="n" title="Detail expands">Expands</th><th class="n" title="Profile visits">Profile</th><th class="n" title="Link clicks">Links</th></tr></thead><tbody>' +
       P.map(function(p){ return '<tr><td class="st-muted" style="white-space:nowrap">' + esc(new Date(p.posted_at).toLocaleDateString(undefined, { month:'short', day:'numeric' }) + ' ' + new Date(p.posted_at).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })) + '</td>' +
-        '<td><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(p.excerpt) + '…</a></td><td class="n">' + fmt(p.views) + delta(p.views, p.views_prev) + '</td><td class="n">' + fmt(p.likes) + delta(p.likes, p.likes_prev) + '</td><td class="n">' + fmt(p.reposts) + delta(p.reposts, p.reposts_prev) + '</td><td class="n">' + fmt(p.replies) + delta(p.replies, p.replies_prev) + '</td></tr>'; }).join('') + '</tbody></table></details>' : '';
+        '<td><a href="https://x.com/RoadToElectrik/status/' + esc(p.id) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(p.excerpt) + '…</a></td><td class="n">' + fmt(p.views) + delta(p.views, p.views_prev) + '</td><td class="n">' + fmt(p.likes) + delta(p.likes, p.likes_prev) + '</td><td class="n">' + fmt(p.reposts) + delta(p.reposts, p.reposts_prev) + '</td><td class="n">' + fmt(p.replies) + delta(p.replies, p.replies_prev) + '</td>' +
+        ['engagements', 'detail_expands', 'profile_visits', 'link_clicks'].map(function(k){ return '<td class="n">' + (p[k] == null ? '<span class="st-muted">—</span>' : fmt(p[k]) + delta(p[k], p[k + '_prev'])) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></details>' : '';
   }
   // charts of the X card: views of every post in order, followers at each reading, the best posts (inline SVG, no library)
   function xCharts(P, acc){
