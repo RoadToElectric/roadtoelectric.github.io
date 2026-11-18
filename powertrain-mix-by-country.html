@@ -6254,8 +6254,9 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
   // rows (see fullMfrRows('mfgcountry')) into per-country totals. A few brand labels in the sales
   // data are combined multi-brand reporting entities (e.g. a group that only discloses "BMW,
   // Mini" together) rather than real `manufacturers` rows, so those are mapped by hand below;
-  // "Other (unclassified)" has no knowable country and is intentionally left unmapped, which
-  // excludes it from this section's totals (its units still count in Sales by Brand).
+  // "Other (unclassified)" (and any brand missing from this map, or a row with no brand) has no
+  // knowable country: mfrMfgCountryOf() puts those units in an "Other (unclassified)" row, shown
+  // last and never ranked, so this section's total matches Sales by Brand's.
   const MFR_BRAND_COUNTRY = {"Abarth":"Italy","Acura":"Japan","AITO":"China","Aiways":"China","Alfa Romeo":"Italy","Alpine":"France","Aston Martin":"United Kingdom","Audi":"Germany","Avatr":"China","Baojun":"China","Belgee":"Belarus","Bentley":"United Kingdom","Bestune":"China","BMW":"Germany","Buick":"United States","BYD":"China","Cadillac":"United States","Changan":"China","Chery":"China","Chevrolet":"United States","Chrysler":"United States","Citroen":"France","Cupra":"Spain","Dacia":"Romania","Daewoo":"South Korea","DAF Trucks":"Netherlands","Daihatsu":"Japan","Deepal":"China","Denza":"China","Dodge":"United States","Dongfeng":"China","DS":"France","Ferrari":"Italy","Fiat":"Italy","Fisker":"United States","Ford":"United States","GAC Motor":"China","Geely":"China","General Motors":"United States","Genesis":"South Korea","GMC":"United States","Great Wall Motors":"China","Honda":"Japan","Hongqi":"China","Hyundai":"South Korea","INEOS":"United Kingdom","Infiniti":"Japan","Iran Khodro":"Iran","Isuzu":"Japan","Iveco":"Italy","JAC":"China","Jaecoo":"China","Jaguar":"United Kingdom","Jeep":"United States","Karma":"United States","KGM":"South Korea","Kia":"South Korea","Lada":"Russia","Lamborghini":"Italy","Lancia":"Italy","Land Rover":"United Kingdom","Leapmotor":"China","Lexus":"Japan","Lincoln":"United States","Lotus":"United Kingdom","Lucid":"United States","Lynk & Co":"China","Mahindra":"India","MAN":"Germany","Maruti Suzuki":"Japan","Maserati":"Italy","Maxus":"China","Maybach":"Germany","Mazda":"Japan","McLaren":"United Kingdom","Mercedes-Benz":"Germany","MG":"China","MG Roewe":"China","Mini":"United Kingdom","Mitsubishi":"Japan","Mitsubishi Fuso":"Japan","Morgan":"United Kingdom","Neta":"China","NIO":"China","Nissan":"Japan","Omoda":"China","Opel":"Germany","Perodua":"Malaysia","Peugeot":"France","Polestar":"Sweden","Porsche":"Germany","Proton":"Malaysia","Ram":"United States","Renault":"France","Rivian":"United States","Roewe":"China","Rolls-Royce":"United Kingdom","Saab":"Sweden","Saipa":"Iran","Seat":"Spain","Skoda":"Czech Republic","smart":"Germany","SsangYong":"South Korea","Subaru":"Japan","Suzuki":"Japan","Tata Motors":"India","Tesla":"United States","TOGG":"Turkey","Toyota":"Japan","VinFast":"Vietnam","Volkswagen":"Germany","Volvo":"Sweden","Voyah":"China","Wiesmann":"Germany","Wuling":"China","Xiaomi Auto":"China","XPeng":"China","Zeekr":"China","BMW, Mini":"Germany","Chrysler, Jeep, Dodge":"United States","Nissan, Infiniti":"Japan","Renault, Dacia":"France","Toyota, Lexus":"Japan","Toyota (TCI: Toyota+Lexus combined)":"Japan","Jaguar Land Rover":"United Kingdom","Bollore":"France","Bugatti":"France","Mobilize":"France","Skoda-Volkswagen India":"Germany","Ssangyong":"South Korea","Jetour":"China","Kaiyi":"China","Karry":"China","Forthing":"China","Soueast":"China","Foton":"China","JMC":"China","Hino":"Japan","212":"China","Sinotruk":"China","Higer":"China","IM":"China","Kama":"China","Rox":"China","ZX Auto":"China","BAIC":"China","Exlantix":"China","Seres":"China","Moke":"United Kingdom","Amatør Bil":"Norway","Bygg Bil":"Norway","Aion":"China","Ariel":"United Kingdom","Austin":"United Kingdom","Austin-Healey":"United Kingdom","Caterham":"United Kingdom","Coleman Milne":"United Kingdom","Corvette":"United States","DFSK":"China","Daimler":"United Kingdom","Datsun":"Japan","Gordon Murray":"United Kingdom","Hummer":"United States","Jensen":"United Kingdom","LEVC":"United Kingdom","Mercury":"United States","Morris":"United Kingdom","Oldsmobile":"United States","Plymouth":"United States","Pontiac":"United States","Renault Trucks":"France","Rover":"United Kingdom","Skywell":"China","Sunbeam":"United Kingdom","Triumph":"United Kingdom","Vauxhall":"United Kingdom","Westfield":"United Kingdom","Geely Galaxy":"China","Li Auto":"China","Xiaomi":"China","iCAR":"China","Haval":"China","Tank":"China","Ora":"China","GAC Aion":"China","GAC Trumpchi":"China","GWM":"China","GAC":"China","Isuzu Ute":"Japan","LDV":"China","Omoda Jaecoo":"China","Farizon":"China","Holden":"Australia","Skyworth":"China","Renault Korea":"South Korea","Smart":"Germany","Togg":"Turkey","Karsan":"Turkey","Exeed":"China","Solaris":"Russia","UAZ":"Russia","Tenet":"Russia","Jeland":"Russia","iCAUR":"China","Mitsuoka":"Japan","Alpina":"Germany","Bluecar":"France","Eveasy":"China","International":"United States","Italdesign":"Italy","Leyland":"United Kingdom","Nash":"United States","Pagani":"Italy","Panther":"United Kingdom","Standard":"United Kingdom","Xpeng":"China","Arcfox":"China","JMEV":"China","KYC":"China","RAM":"United States","Shineray":"China","Lifan":"China","Rely":"China","Fonix":"China","Xev":"Italy","Tata":"India","Borgward":"Germany","Brilliance":"China","Jensen Healey":"United Kingdom","Lea Francis":"United Kingdom","Austin Healey":"United Kingdom","Maextro":"China","Oltcit":"Romania","Panhard & Levassor":"France","Pierce Arrow":"United States","Simca":"France","Rauch & Lang":"United States","Abt":"Germany","Brabus":"Germany","Caterham Cars Ltd":"United Kingdom","Donkervoort":"Netherlands","Ineos":"United Kingdom","Koenigsegg":"Sweden","Levc":"United Kingdom","FAW":"China","SWM":"China","DR":"Italy","Allied Vehicles Ltd":"United Kingdom","Baic":"China","Livan":"China","Ruf":"Germany","Secma":"France","Tiger":"United Kingdom","Edward Davies":"United Kingdom","Allied Vehicles":"United Kingdom","Nevs":"Sweden","Riddara":"China","Lepas":"China","Nammi":"China","Yutong":"China","Swm":"China","Gecko":"China","JIM":"China","Landking":"China","ZXAuto":"China","Zna":"China","Omoda & Jaecoo":"China","Fuso":"Japan","Volkswagen Group":"Germany","BMW Group":"Germany","Stellantis":"France","Thaco Truck":"Vietnam","CMC":"Taiwan","Foxtron":"Taiwan","Citroën":"France","Kenworth":"United States","Forland":"China","Scania":"Sweden","Zhidou":"China","Juneyao":"China","Kymco":"Taiwan","Yamaha":"Japan","Piaggio":"Italy","Can-Am":"Canada","GAZ":"Russia","Howo":"China","JAC Trucks":"China","KAMAZ":"Russia","ROX":"China","Maple":"China","Nevo":"China","XEV":"Italy","Avantier":"China","Ashok Leyland":"India","Eicher":"India","Genlyon":"China","Man":"Germany","Rosenbauer":"Austria","Shacman":"China","UD Trucks":"Japan","Zamyad":"Iran","Firefly":"China","Gumpert":"Germany","Henrey":"China","IM Motors":"China","Lingbox":"China","SGMW":"China","Keraboss":"China","Yudo":"China","Jiayuan":"China","DFM":"China","BAW":"China","Ebro":"Spain","Yangwang":"China","Evo":"China","Sportequipe":"Czechia","Rimac":"Croatia","ACS":"Germany","Caterham Cars":"United Kingdom","Elaris":"Germany","KTM":"Austria","Kutsenits":"Austria","Puch":"Austria","Cavan":"China","King Long":"China","Linxys":"China","Poer":"China","SRM":"China","Sumota":"China","Joyear":"China","EVO":"China","Aletra":"China","Polytron":"Indonesia","Dadao":"China","JMT":"China","Rowor":"China","ZX":"China","FAW Trucks":"China","Daimler Truck":"Germany","Volvo Group":"Sweden","Powerstar":"Ireland","VECV South Africa":"India","Babcock":"South Africa","Salvador Caetano Group":"Portugal","MMC (Mitsubishi + Hyundai)":"Japan","Mack":"United States","Golden Dragon":"China","Aro":"Romania","Autobianchi":"Italy","Innocenti":"Italy","Polski":"Poland","Rolls-Royce/Bentley":"United Kingdom","Santana":"Spain","Talbot":"France","Talbot Matra":"France","Zastava":"Serbia"};
   let mfrCountryGroupMode = 'raw'; // 'pct' or 'raw' -- manufacturing-country section
 
@@ -6350,12 +6351,12 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
   // up a genuine "% of market" denominator -- the denominator must come from every tracked
   // row, not just the 20 shown, or a market with a long tail of small brands/models would
   // understate everyone's share
+  function mfrMfgCountryOf(brand){ return MFR_BRAND_COUNTRY[brand] || 'Other (unclassified)'; }
   function fullMfrRows(kind){
     if(kind === 'mfgcountry'){
       const byCountry = new Map();
       fullMfrRows('brand').forEach(r => {
-        const country = MFR_BRAND_COUNTRY[r.brand];
-        if(!country) return; // e.g. "Other (unclassified)" -- no knowable manufacturing country
+        const country = mfrMfgCountryOf(r.brand); // unmapped brands / "Other (unclassified)" -> the Other (unclassified) row
         if(!byCountry.has(country)) byCountry.set(country, { label: country, bev: 0, phev: 0, hev: 0, petrol: 0, diesel: 0, others: 0, total: 0 });
         const agg = byCountry.get(country);
         MFR_FUEL_KEYS.forEach(k => { agg[k] += r[k] || 0; });
@@ -6587,9 +6588,7 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
   }
   // A handful of brand rows (mainly "Other (unclassified)" -- a catch-all a source lumps small/
   // minor brands into) have no knowable manufacturing country (see MFR_BRAND_COUNTRY), so this
-  // section's total is a few percent below Sales by Brand's total whenever one of those brands
-  // has real volume in the current period. Flagged here rather than leaving the two totals to
-  // silently disagree.
+  // section groups them in an "Other (unclassified)" row; this note names the brands in it.
   function updateMfrCountryGroupCoverageNote(){
     if(!mfrCountryGroupCoverageNote) return;
     if(mfrCountrySection.classList.contains('mfr-card-empty')){ mfrCountryGroupCoverageNote.classList.add('hidden'); return; }
@@ -6598,7 +6597,7 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
     const excludedTotal = excluded.reduce((s, r) => s + r.total, 0);
     const names = excluded.map(r => r.brand).join(', ');
     mfrCountryGroupCoverageNote.classList.remove('hidden');
-    mfrCountryGroupCoverageNote.innerHTML = `⚠ ${excludedTotal.toLocaleString('en-US')} units (${names}) have no known manufacturing country and are excluded here -- Sales by Brand's total for this period is real and includes them.`;
+    mfrCountryGroupCoverageNote.innerHTML = `${excludedTotal.toLocaleString('en-US')} units (${names}) have no known manufacturing country: they are grouped in "Other (unclassified)" at the bottom, which is never ranked, so this card's total matches Sales by Brand.`;
   }
   // --- the Period filter (Monthly/Yearly toggle + month <select> + year <select>) lives in the Manufacturing Country header; the Brand and
   // Model headers repeat it (same options, same value, same visibility). A mirror just drives its primary control, which keeps its existing
@@ -7205,7 +7204,7 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
     if(!MANUFACTURER_YEARLY[mfrCountry]) return [];
     const byYear = new Map();
     MANUFACTURER_YEARLY[mfrCountry].forEach(r => {
-      if(MFR_BRAND_COUNTRY[r.brand] !== country) return;
+      if(mfrMfgCountryOf(r.brand) !== country) return;
       if(!byYear.has(r.year)) byYear.set(r.year, { year: r.year, total: 0 });
       byYear.get(r.year).total += r.total || 0;
     });
@@ -7215,11 +7214,11 @@ if(window.RTEPrivate) RTEPrivate.mixNotes({MFR_SOURCE_NOTE, MFR_YEARLY_MODEL_SOU
     const svgEl = document.getElementById('mfr-country-group-year-preview-svg');
     if(!svgEl) return;
     const rows = buildMfrCountryGroupYearRows(country);
-    const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MONTHLY[mfrCountry], r => MFR_BRAND_COUNTRY[r.brand] === country);
+    const hasMonthlyThisYear = mfrHasMonthlyThisYear(MANUFACTURER_MONTHLY[mfrCountry], r => mfrMfgCountryOf(r.brand) === country);
     renderMfrYearBarChart(svgEl, rows, { hasMonthlyThisYear });
   }
   function buildMfrCountryGroupBrandRows(country){
-    return fullMfrRows('brand').filter(r => MFR_BRAND_COUNTRY[r.brand] === country).sort((a,b) => b.total - a.total);
+    return fullMfrRows('brand').filter(r => mfrMfgCountryOf(r.brand) === country).sort((a,b) => b.total - a.total);
   }
   function renderMfrCountryGroupBrandsChart(country){
     const svgEl = document.getElementById('mfr-country-group-brands-preview-svg');
