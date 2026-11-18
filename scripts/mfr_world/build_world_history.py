@@ -48,6 +48,8 @@ REPORTED = {
               {2013: 22400, 2014: 31700, 2015: 50600, 2016: 76200, 2017: 103100, 2018: 245240, 2019: 367656, 2020: 499647, 2021: 936222, 2022: 1313851, 2023: 1808581, 2024: 1789226, 2025: 1636129}),
     'Renault Group': ('2021-2025 are the group own reported sales (Renault, Dacia, Alpine, Renault Korea; 2021 also Lada and Jinbei/Huasong; Russia is out from 2022, so 2021 is not comparable)',
                       {2021: 2696401, 2022: 2051174, 2023: 2235345, 2024: 2264815, 2025: 2336807}),
+    'Mazda': ('2001-2020 from the compilation; 2021-2025 are Mazda own global sales (retail), January-December, from its "Production and Sales Results" December releases (newsroom.mazda.com, Global Sales table)',
+              {2021: 1287548, 2022: 1116107, 2023: 1244613, 2024: 1277578, 2025: 1256215}),
 }
 STELLANTIS_PARTS = {
     'fiat': ['Fiat'], 'chrysler': ['Chrysler'], 'fca': ['Fiat Chrysler', 'FCA', 'Fiat-Chrysler'], 'psa': ['PSA Peugeot Citroën', 'Groupe PSA', 'PSA Group'], 'stl': ['Stellantis'],
@@ -97,7 +99,7 @@ for key, (rnote, vals) in REPORTED.items():
     d['note'] = rnote
     d['s'] = dict(sorted(d['s'].items(), key=lambda kv: int(kv[0]))); d['b'] = {k: d['b'][k] for k in d['s']}
 meta = {'years': [2001, 2025], 'p': 'OICA world ranking of manufacturers: motor vehicle production (cars, light and heavy commercial vehicles, buses), 2001-2017',
-        's': 'F&I Tools USA worldwide sales by group, 2018-2025', 'r': 'Company-reported worldwide deliveries / sales (Tesla 2013-2025, Renault Group 2021-2025): see each group note', 'via': 'Wikipedia "List of automotive manufacturers by production" (compiled 2026-10-28)',
+        's': 'F&I Tools USA worldwide sales by group, 2018-2025', 'r': 'Company-reported worldwide deliveries / sales (Tesla 2013-2025, Renault Group 2021-2025, Mazda 2021-2025): see each group note', 'via': 'Wikipedia "List of automotive manufacturers by production" (compiled 2026-10-28)',
         'url': 'https://en.wikipedia.org/wiki/List_of_automotive_manufacturers_by_production'}
 js = '// World volume per manufacturer group: OICA production 2001-2017, F&I Tools sales 2018-2025 (series break at 2018). Built by scripts/mfr_world/build_world_history.py\nconst MFR_WORLD_HISTORY = ' + json.dumps({'meta': meta, 'groups': out}, ensure_ascii=False, separators=(',', ':')) + ';\n'
 open(os.path.join(ROOT, 'assets', 'manufacturer-world-history.js'), 'w', encoding='utf8').write(js)
