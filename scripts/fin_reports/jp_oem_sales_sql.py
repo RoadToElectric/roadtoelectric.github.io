@@ -8,7 +8,7 @@ rows = list(csv.DictReader(open(os.path.join(HERE, 'jp_oem_sales.csv'), encoding
 q = lambda s: 'null' if s in ('', None) else "'" + str(s).replace("'", "''") + "'"
 META = ('group_name', 'brand', 'basis', 'confidence', 'source_doc', 'source_url', 'notes')
 os.makedirs(os.path.join(HERE, 'out'), exist_ok=True)
-CH = 1100
+CH = 400
 for n in range(0, len(rows), CH):
     part = rows[n:n + CH]; ids = {}
     for r in part:
