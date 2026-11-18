@@ -565,9 +565,9 @@
 <script src="assets/rte-private.js"></script>
 <script src="assets/manufacturer-holdings-data.js"></script>
 <script src="assets/model-class-data.js"></script>
-<script src="assets/manufacturer-fin-report-sales.js?v=20261118"></script>
+<script src="assets/manufacturer-fin-report-sales.js?v=20261118b"></script>
 <script src="assets/world-car-sales-data.js"></script>
-<script src="assets/manufacturer-world-history.js?v=20261118"></script>
+<script src="assets/manufacturer-world-history.js?v=20261118b"></script>
 <script src="assets/tesla-world-estimates.js"></script>
 <script src="assets/country-yearly-data.js"></script>
 <script>
@@ -742,7 +742,7 @@ const HOLDS_LIKE = { 'Vauxhall':'Opel', 'Haval':'Great Wall Motors', 'Tank':'Gre
 const EXTRA_HOLDERS = { 'Bugatti':[[1998, 'Volkswagen AG'], [2022, 'Bugatti Rimac (Rimac / Porsche)']], 'Scania':[[1998, 'Scania AB (independent)'], [2008, 'Volkswagen AG']] };
 // the one name under which each group's world volume (world-history series) is shown: other names that merely resemble a group (FCA / PSA before Stellantis, joint ventures...) carry only their own tracked sales
 const GROUP_HIST_NAME = { 'Toyota Motor Corporation':'Toyota Motor Corporation', 'Volkswagen Group':'Volkswagen Group', 'General Motors':'General Motors', 'Hyundai Motor Group':'Hyundai Motor Group', 'Ford Motor Company':'Ford Motor Company',
-  'Honda':'Honda Motor Co.', 'Nissan':'Nissan Motor Corporation', 'Renault Group':'Renault Group', 'BMW Group':'BMW AG', 'Mazda':'Mazda Motor Corporation', 'Suzuki':'Suzuki Motor Corporation', 'Mercedes-Benz Group':'Mercedes-Benz Group AG',
+  'Honda':'Honda Motor Co.', 'Nissan':'Nissan Motor Corporation', 'Renault Group':'Renault Group', 'BMW Group':'BMW AG', 'Mazda':'Mazda Motor Corporation', 'Subaru':'Subaru Corporation (Fuji Heavy Industries)', 'Suzuki':'Suzuki Motor Corporation', 'Mercedes-Benz Group':'Mercedes-Benz Group AG',
   'Stellantis':'Stellantis N.V.', 'SAIC Motor':'SAIC Motor Corporation', 'Geely Holding':'Zhejiang Geely Holding Group', 'Changan Automobile':'Changan Automobile', 'BYD':'BYD Company Ltd.', 'Chery Automobile':'Chery Automobile Co. / Chery Holding Group',
   'FAW Group':'FAW Group', 'Dongfeng Motor':'Dongfeng Motor Corporation', 'BAIC Group':'BAIC Group', 'Tata Motors':'Tata Motors (Jaguar Land Rover)', 'Great Wall Motor':'Great Wall Motor Company Limited', 'Tesla':'Tesla, Inc.' };
 // collapse raw spelling/casing variants ("Baic"/"BAIC", "Toyota, Lexus"/"Toyota (TCI: ...)",
@@ -2706,7 +2706,7 @@ function bwChartMulti(host, series){
 // manufacturer / brand -> history group: by the parent group the holdings file gives
 const HIST_RULES = [[/toyota|lexus|daihatsu|hino/i, 'Toyota Motor Corporation'], [/volkswagen|(?<![a-z])audi(?![a-z])|porsche|škoda|(?<![a-z])skoda(?![a-z])|(?<![a-z])seat(?![a-z])|cupra|bentley|lamborghini|bugatti/i, 'Volkswagen Group'], [/general motors|chevrolet|buick|gmc|cadillac|holden/i, 'General Motors'],
   [/hyundai|kia|genesis/i, 'Hyundai Motor Group'], [/ford motor|^ford$|lincoln/i, 'Ford Motor Company'], [/honda|acura/i, 'Honda'], [/nissan|infiniti/i, 'Nissan'], [/renault|dacia|alpine/i, 'Renault Group'],
-  [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/^daimler ag$|mercedes|smart$/i, 'Mercedes-Benz Group'],
+  [/bmw|mini$|rolls/i, 'BMW Group'], [/mazda/i, 'Mazda'], [/subaru/i, 'Subaru'], [/suzuki|maruti/i, 'Suzuki'], [/mitsubishi/i, 'Mitsubishi Motors'], [/^daimler ag$|mercedes|smart$/i, 'Mercedes-Benz Group'],
   [/stellantis|fiat|psa|peugeot|citro|jeep|opel|vauxhall|chrysler|dodge|ram$|alfa|ds$|maserati/i, 'Stellantis'], [/saic|mg$|roewe|wuling|baojun|maxus/i, 'SAIC Motor'], [/^(zhejiang )?geely( holding group| automobile)?$|volvo car|polestar|lynk|zeekr/i, 'Geely Holding'],
   [/changan|avatr|deepal/i, 'Changan Automobile'], [/byd|denza|fangchengbao/i, 'BYD'], [/chery|jetour|omoda|jaecoo|exeed/i, 'Chery Automobile'], [/faw|hongqi|bestune/i, 'FAW Group'], [/dongfeng|voyah|nammi/i, 'Dongfeng Motor'],
   [/baic|beijing auto|arcfox/i, 'BAIC Group'], [/tata|jaguar|land rover/i, 'Tata Motors'], [/great wall|gwm|haval|ora$|tank$|wey/i, 'Great Wall Motor'], [/tesla/i, 'Tesla']];

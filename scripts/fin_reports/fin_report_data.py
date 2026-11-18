@@ -566,3 +566,5 @@ for _y, _r in _jp(_SG, _SB, 'FY', 'World').items():
     for _reg in ('Japan', 'North America', 'Europe/Russia' if _y <= 2020 else 'Europe', 'Australia', 'China', 'Other regions'):
         _d = _jp(_SG, _SB, 'FY', _reg)
         _jadd(SB, _d[_y] if _y in _d else _jp(_SG, 'derived', 'FY', _reg)[_y], 'wholesale', region=_reg)
+for _y, _r in _jp(_SG, _SB, 'CY', 'World').items():     # calendar years 2008-2025, derived from FY + Apr-Dec (page compares calendar years)
+    _jadd(SB, _r, 'wholesale', scope='Subaru consolidated automobile unit sales, January-December, derived from fiscal years and Apr-Dec nine-month results')
