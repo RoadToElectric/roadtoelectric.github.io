@@ -472,3 +472,97 @@ add('Mazda Motor', 2025, 'CY', 1256215 - 410345 - 158922 - 74847 - 149481, 'reta
 add(V2, 2023, 'CY', 708716 - 294794 - 128701, 'retail', 'derived', 'Volvo Cars 2023: world minus Europe and United States', VU2, region='Rest of world (incl. China)')
 add(CHN, 2024, 'CY', 2684000 - 536196, 'wholesale', 'derived', 'Changan 2024: total minus overseas', CHU, region='China (domestic)')
 add(GW, 2024, 'CY', 1233292 - 453141, 'wholesale', 'derived', 'GWM 2024: total minus overseas', GWU, region='China (domestic)')
+
+# =====================================================================================================================
+# ---- Japanese OEM history (2026-11-18): Toyota, Honda, Nissan, Mazda, Subaru from scripts/fin_reports/jp_oem_sales.csv
+# (company documents: 20-F filings, results summaries/presentations, company Excel files, monthly releases; built by .scratch/jp_oems/build_rows.py).
+# One additive region set per entity; memo lines (U.S., China inside a larger region) additive=False.
+# Kept from above: Toyota CY 2022-2025, Honda CY 2024-2025 (media), Nissan CY 2024-2025.
+import csv as _csv, os as _os, sys as _sys
+_HERE = _os.path.dirname(_os.path.abspath(__file__))
+_J = list(_csv.DictReader(open(_os.path.join(_HERE, 'jp_oem_sales.csv'), encoding='utf-8')))
+
+
+def _jp(group, basis, pt, region, powertrain='all'):
+    return {int(r['year']): r for r in _J if r['group_name'] == group and r['basis'] == basis and r['period_type'] == pt and r['region'] == region and r['powertrain'] == powertrain}
+
+
+def _jadd(ent, r, basis, region='World', additive=True, segment='All', scope=''):
+    add(ent, int(r['year']), r['period_type'], int(r['units']), basis, r['confidence'], r['source_doc'], r['source_url'],
+        region=region, segment=segment, scope=scope, notes=r['notes'], additive=additive)
+
+
+# Toyota group CY 2007-2021: group total (Toyota + Lexus + Daihatsu + Hino) from brand_history_data; Toyota + Lexus regions from Toyota's Excel files
+_sys.path.insert(0, _HERE)
+from brand_history_data import T_CY as _TCY, D_CY as _DCY, H_CY as _HCY
+_TG = 'Toyota Motor Corporation'
+_TX = 'https://global.toyota/pages/global_toyota/company/profile/production-sales-figures/production_sales_figures_en_202412.xls'
+_TREG = {'Japan': 'Japan', 'North America': 'North America', 'Latin America': 'Latin America', 'Europe': 'Europe', 'Asia': 'Asia (excl. Japan)',
+         'Oceania': 'Oceania', 'Middle East': 'Middle East', 'Africa': 'Africa'}
+for _y in range(2007, 2022):
+    add(T, _y, 'CY', _TCY[_y] + _DCY[_y] + _HCY[_y], 'retail', 'press_release', 'Toyota "Sales, Production, and Export Results" Excel files (Dec 2024 / Dec 2025), sheet Sales: Toyota + Lexus + Daihatsu + Hino',
+        _TX, scope='Toyota + Lexus + Daihatsu + Hino')
+    add(T, _y, 'CY', _TCY[_y], 'retail', 'press_release', 'Toyota Excel, sheet Sales', _TX, segment='Toyota + Lexus')
+    add(T, _y, 'CY', _DCY[_y], 'retail', 'press_release', 'Toyota Excel, sheet Sales', _TX, segment='Daihatsu')
+    add(T, _y, 'CY', _HCY[_y], 'retail', 'press_release', 'Toyota Excel, sheet Sales', _TX, segment='Hino')
+    for _src, _reg in _TREG.items():
+        _jadd(T, _jp(_TG, 'sales', 'CY', _src)[_y], 'retail', region=_reg, segment='Toyota + Lexus')
+    _jadd(T, _jp(_TG, 'sales', 'CY', 'Asia > China')[_y], 'retail', region='China (memo)', segment='Toyota + Lexus', additive=False)
+    _u = _jp(_TG, 'sales', 'CY', 'Unallocated ("Others" line)').get(_y)
+    if _u and int(_u['units']):
+        _jadd(T, _u, 'retail', region='Unallocated (Toyota "Others" line)', segment='Toyota + Lexus')
+
+# Honda FY2006-2025: Honda Group automobile unit sales (incl. China JVs) by region, Form 20-F; consolidated total as a segment line
+HO = 'Honda Motor'
+drop(HO, ptype='FY'); up(HO)
+_HG = 'Honda Motor Co., Ltd.'
+for _b in ('unit sales (pre-FY2010 single series)', 'Honda Group unit sales (incl. equity-method JVs, e.g. China)'):
+    for _y, _r in _jp(_HG, _b, 'FY', 'World').items():
+        _jadd(HO, _r, 'wholesale', scope='Honda Group automobile unit sales incl. equity-method affiliates (China JVs); FY label = year the FY starts')
+        for _reg, _reg2 in [('Japan', 'Japan'), ('North America', 'North America'), ('Europe', 'Europe'), ('Asia', 'Asia (incl. China)'), ('Other Regions', 'Other regions')]:
+            _jadd(HO, _jp(_HG, _b, 'FY', _reg)[_y], 'wholesale', region=_reg2)
+for _y, _r in _jp(_HG, 'consolidated unit sales (excl. equity-method JVs)', 'FY', 'World').items():
+    _jadd(HO, _r, 'wholesale', segment='Consolidated unit sales (excl. JVs)')
+
+# Nissan FY2007-2025: global retail sales by region (results summaries / IR datasheet)
+_NG = 'Nissan Motor Co., Ltd.'
+drop(N, ptype='FY'); up(N)
+_NR = 'global retail sales'
+for _y, _r in _jp(_NG, _NR, 'FY', 'World').items():
+    _jadd(N, _r, 'retail', scope='Nissan, Infiniti, Datsun, retail; China and Taiwan Jan-Dec; FY label = year the FY starts')
+    _regs = ['Japan (incl. mini vehicles)', 'North America', 'Europe']
+    _regs += ['Asia (incl. China)', 'Others (Latin America, Middle East, Africa, Oceania)'] if _y >= 2009 else ['Others (incl. Asia; before the FY2010 region split)']
+    for _reg in _regs:
+        _jadd(N, _jp(_NG, _NR, 'FY', _reg)[_y], 'retail', region=_reg.replace(' (incl. mini vehicles)', ''))
+    for _reg in ('U.S.', 'China'):
+        _d = _jp(_NG, _NR, 'FY', _reg)
+        if _y in _d:
+            _jadd(N, _d[_y], 'retail', region=_reg + ' (memo)', additive=False)
+
+# Mazda CY2009-2025: global sales volume (retail). 2009-2018 derived from FY + Apr-Dec results slides (thousands); 2019-2025 exact monthly releases
+M = 'Mazda Motor'
+drop(M)
+_MG = 'Mazda Motor Corporation'
+_MP, _MX = 'global sales volume (retail), results presentation, thousand units', 'global sales volume (retail), monthly release, exact units'
+for _y in range(2009, 2026):
+    _b = _MP if _y <= 2018 else _MX
+    _jadd(M, _jp(_MG, _b, 'CY', 'World')[_y], 'retail')
+    if _y <= 2018:
+        for _reg in ('Japan', 'North America', 'Europe', 'China', 'Other markets'):
+            _jadd(M, _jp(_MG, _b, 'CY', _reg)[_y], 'retail', region=_reg)
+        _d = _jp(_MG, _b, 'CY', 'U.S.')
+        if _y in _d:
+            _jadd(M, _d[_y], 'retail', region='United States (memo)', additive=False)
+    else:
+        for _reg, _reg2 in [('Japan', 'Japan'), ('U.S.', 'United States'), ('Europe', 'Europe'), ('China', 'China'), ('Others (all other markets incl. Canada, Mexico, Australia)', 'Other markets')]:
+            _jadd(M, _jp(_MG, _b, 'CY', _reg)[_y], 'retail', region=_reg2)
+
+# Subaru FY2007-2025: consolidated automobile unit sales (wholesale) by region (Fact Book 2017, FY results summaries); replaces the 'retail' tag used before
+SB = 'Subaru Corporation'
+drop(SB); up(SB)
+_SG, _SB = 'Subaru Corporation', 'consolidated automobile unit sales (wholesale)'
+for _y, _r in _jp(_SG, _SB, 'FY', 'World').items():
+    _jadd(SB, _r, 'wholesale', scope='Subaru consolidated automobile unit sales (shipments to distributors); FY label = year the FY starts')
+    for _reg in ('Japan', 'North America', 'Europe/Russia' if _y <= 2020 else 'Europe', 'Australia', 'China', 'Other regions'):
+        _d = _jp(_SG, _SB, 'FY', _reg)
+        _jadd(SB, _d[_y] if _y in _d else _jp(_SG, 'derived', 'FY', _reg)[_y], 'wholesale', region=_reg)
