@@ -1,0 +1,31 @@
+{
+"2026-05": {
+"heavy_total": 2489,
+"heavy_el": 135
+},
+"2026-06": {
+"heavy_total": 3764,
+"heavy_el": 256
+},
+"2026-07": {
+"heavy_total": 2327,
+"heavy_el": 96
+},
+"2026-08": {
+"heavy_total": 1795,
+"heavy_el": 77
+},
+"2026-09": {
+"heavy_total": 2567,
+"heavy_el": 107
+},
+"2026-10": {
+"heavy_total": 3060,
+"heavy_el": 162
+},
+"ytd": {
+"to": "2026-10",
+"heavy_total": 26967,
+"heavy_el": 1425
+}
+}

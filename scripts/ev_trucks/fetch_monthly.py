@@ -11,6 +11,8 @@ Sources (all free, no key, re-run any time; each one only adds months, nothing i
                Heavy = 16 t and over; medium = 3.5-16 t. "EL" = battery-electric. Published 1st working day.
   Finland      Traficom PxWeb 040_ensirek_tau_104 (trafi2.stat.fi): first registrations, Lorries > 3.5 t, by driving power
                (Electricity + Hydrogen). Published ~1st week.
+  Germany      KBA FZ28 monthly xlsx (new vehicles with alternative drive): semi-tractors (Sattelzugmaschinen) only,
+               battery-electric + fuel cell; heavy view only (KBA's truck row includes vans). Row exists from May 2026.
   Netherlands  RDW open data (SODA m9d7-ebf2 registry + 8ys7-d773 fuel): EU category N2 (3.5-12 t) and N3 (> 12 t),
                first registration in NL in the month AND first admission no earlier than the previous month (= new,
                not a used import). Electric = only fuel "Elektriciteit". The registry only holds vehicles still
@@ -194,6 +196,46 @@ def fetch_nl():
     save('nl', out)
 
 
+# ---------- Germany ----------
+def de_parse(blob):
+    import openpyxl
+    wb = openpyxl.load_workbook(io.BytesIO(blob), data_only=True)
+    ws = wb[next(n for n in wb.sheetnames if n.replace(' ', '').startswith('FZ28.1'))]
+    rows = [[v for v in r if v not in (None, '')] for r in ws.iter_rows(values_only=True)]
+    num = lambda v: v if isinstance(v, (int, float)) else 0
+    sat = [r for r in rows if r and str(r[0]).startswith('darunter Sattel')]
+    if len(sat) < 2:
+        return None
+    # columns after the label: total, alternative total, share, electric total, share, BEV, fuel cell, PHEV, ...
+    f = lambda r: {'total': int(num(r[1])), 'el': int(num(r[6]) + num(r[7]))}
+    return f(sat[0]), f(sat[1])
+
+
+def fetch_de():
+    """KBA FZ28 'Neuzulassungen von Kraftfahrzeugen mit alternativem Antrieb' (monthly xlsx). Only the semi-tractor row
+    (Sattelzugmaschinen, heavy) is used: its 'Lastkraftwagen' row includes vans up to 3.5 t. The semi-tractor row exists
+    from the May 2026 file on; the latest file's year-to-date row is kept as `ytd`."""
+    import datetime
+    f = os.path.join(DATA, 'de.json')
+    prev = json.load(open(f)) if os.path.exists(f) else {}
+    out = {k: v for k, v in prev.items() if k != 'ytd'}; ytd = prev.get('ytd')
+    t = datetime.date.today(); y, m = 2026, 5
+    while (y, m) < (t.year, t.month):
+        k = ym(y, m)
+        if k not in out:
+            try:
+                r = de_parse(get(f'https://www.kba.de/SharedDocs/Downloads/DE/Statistik/Fahrzeuge/FZ28/fz28_{y}_{m:02d}.xlsx?__blob=publicationFile'))
+            except Exception:
+                r = None    # not published yet (KBA serves an HTML 404 page)
+            if r:
+                out[k] = {'heavy_total': r[0]['total'], 'heavy_el': r[0]['el']}
+                ytd = {'to': k, 'heavy_total': r[1]['total'], 'heavy_el': r[1]['el']}
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    if ytd:
+        out['ytd'] = ytd
+    save('de', out)
+
+
 # ---------- build ----------
 def build():
     import datetime
@@ -204,8 +246,11 @@ def build():
         f = os.path.join(DATA, code + '.json')
         if not os.path.exists(f):
             continue
-        rows = {k: v for k, v in json.load(open(f)).items() if k < cur and v.get('total')}   # drop the running month
+        raw = json.load(open(f)); ytd = raw.pop('ytd', None)
+        rows = {k: v for k, v in raw.items() if k < cur and (v.get('total') or v.get('heavy_total'))}   # drop the running month
         countries[code] = dict(info, rows=rows, last=max(rows))
+        if ytd:
+            countries[code]['ytd'] = ytd
     months = sorted({k for c in countries.values() for k in c['rows']})
     out = {'built': today.isoformat(), 'months': months, 'countries': countries,
            'china': meta['china'], 'eu': meta['eu'], 'aceaQ3': meta['aceaQ3']}
@@ -219,7 +264,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if '--build' not in args:
         skip = set(args[args.index('--skip') + 1].split(',')) if '--skip' in args else set()
-        for code, fn in (('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
+        for code, fn in (('de', fetch_de), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
             if code in skip:
                 continue
             try:

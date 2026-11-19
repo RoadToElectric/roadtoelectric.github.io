@@ -1,5 +1,13 @@
 {
  "countries": {
+  "de": {
+   "name": "Germany",
+   "color": "#111827",
+   "basis": "Heavy only: new semi-tractors (Sattelzugmaschinen); electric = battery + fuel cell. KBA's truck row includes vans, so Germany has no all-trucks line; monthly from May 2026, January-April only as part of the year-to-date total",
+   "source": "KBA, FZ28 monthly",
+   "url": "https://www.kba.de/DE/Statistik/Fahrzeuge/Neuzulassungen/Umwelt/n_umwelt_node.html",
+   "lag": "~mid-month"
+  },
   "no": {
    "name": "Norway",
    "color": "#dc2626",

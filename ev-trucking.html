@@ -1059,7 +1059,7 @@ function moSeries(){
   const M = (typeof EVTM === 'undefined') ? null : EVTM; if(!M) return null;
   const hv = moScope === 'heavy', fT = hv ? 'heavy_total' : 'total', fE = hv ? 'heavy_el' : 'el';
   const xs = M.months.filter(k => k >= '2024-01');
-  const ser = Object.entries(M.countries).filter(([, c]) => !hv || Object.values(c.rows).some(r => r[fT])).map(([code, c]) => {
+  const ser = Object.entries(M.countries).filter(([, c]) => Object.values(c.rows).some(r => r[fT])).map(([code, c]) => {
     const g = k => c.rows[k] && c.rows[k][fT] ? c.rows[k] : null;
     const vals = xs.map((k, i) => {
       const r = g(k); if(!r) return null;
@@ -1127,7 +1127,8 @@ function monthly(){
         .style('left', (x(i) * bb.width / W > bb.width / 2 ? Math.max(0, x(i) * bb.width / W - 250) : x(i) * bb.width / W + 12) + 'px').style('top', '8px');
     }).on('pointerleave', () => { tip.style('opacity', 0); cross.style('opacity', 0); });
   // KPIs
-  const ytd = (c, f1, f2, y) => { const L = c.last, mo = +L.slice(5); let e = 0, t = 0; for(let i = 1; i <= mo; i++){ const r = c.rows[y + '-' + String(i).padStart(2, '0')]; if(r){ e += r[f1] || 0; t += r[f2] || 0; } } return { e, t, s: t ? 100 * e / t : null }; };
+  const ytd = (c, f1, f2, y) => { if(c.ytd && c.ytd[f2] != null && c.ytd.to === c.last){ if(y !== c.last.slice(0, 4)) return { e:0, t:0, s:null }; return { e:c.ytd[f1], t:c.ytd[f2], s:100 * c.ytd[f1] / c.ytd[f2] }; }
+    const L = c.last, mo = +L.slice(5); let e = 0, t = 0; for(let i = 1; i <= mo; i++){ const r = c.rows[y + '-' + String(i).padStart(2, '0')]; if(r){ e += r[f1] || 0; t += r[f2] || 0; } } return { e, t, s: t ? 100 * e / t : null }; };
   const rowsM = ser.map(s => ({ s, a: ytd(s.c, fE, fT, '2026'), b: ytd(s.c, fE, fT, '2025') })).filter(r => r.a.t);
   const top = rowsM.slice().sort((p, q) => q.a.s - p.a.s)[0], fast = rowsM.filter(r => r.b.e >= 20).sort((p, q) => q.a.e / q.b.e - p.a.e / p.b.e)[0];
   const euQ = M.aceaQ3.rows.EU[hv ? 'heavy' : 'all'], euS = 100 * euQ[0] / euQ[2], euP = 100 * euQ[1] / euQ[3];
@@ -1148,7 +1149,7 @@ function monthly(){
   h += `<tr class="grp"><td colspan="8">China and the EU</td></tr>`;
   h += tr('China (heavy trucks)', ymLbl(cnY.to), fmt(cnY.units), pct(cnY.share), '–', '–', cnY.growth ? `<span class="tk-up">+${cnY.growth}%</span>` : '–', 'Insurance registrations, trade press');
   h += tr('European Union', 'Sep 2026', fmt(euQ[0]), pct(euS), pct(euP), ch(euS, euP), gr(euQ[0], euQ[1]), `<a href="${M.eu.links[0][1]}" target="_blank" rel="noopener">ACEA, quarterly</a>`);
-  const monthlyNames = new Set(Object.values(M.countries).map(c => c.name));
+  const monthlyNames = new Set(rowsM.map(r => r.s.name));
   const ac = Object.entries(M.aceaQ3.rows).filter(([n, r]) => !['EU', 'EFTA', 'EU + EFTA + UK'].includes(n) && !monthlyNames.has(n) && r.all[0] >= 50).sort((p, q) => q[1][hv ? 'heavy' : 'all'][0] - p[1][hv ? 'heavy' : 'all'][0]);
   h += `<tr class="grp"><td colspan="8">Other European markets, quarterly (ACEA, January–September)</td></tr>`;
   ac.forEach(([n, r]) => { const v = r[hv ? 'heavy' : 'all'], s = v[2] ? 100 * v[0] / v[2] : null, s0 = v[3] ? 100 * v[1] / v[3] : null;
@@ -1159,8 +1160,8 @@ function monthly(){
   document.getElementById('mo-foot').innerHTML = (units ? 'Electric truck registrations per month. China (tens of thousands a month) and the EU are left out of this view. ' :
     moView === 'avg' ? 'Each point is the electric share of the three months ending that month, which irons out the small-number jumps of single months. ' :
     'Small markets jump from month to month (Finland sells about 250 trucks a month, so a few deliveries move the line); switch to the 3-month average for the trend. ') +
-    (hv ? 'Heavy only: Sweden 16 t and over, the Netherlands EU class N3 (over 12 t), Denmark road tractors; China heavy trucks; EU 16 t and over. Norway and Finland do not publish a heavy-only split. ' :
-    'Part of the jump since 2025 in the Netherlands and Sweden comes from electric vans of up to 4.25 t, which count as light trucks (N2, 3.5–6 t) because the battery is allowed to push them past 3.5 t. Use "Heavy trucks only" to leave them out. ') +
+    (hv ? 'Heavy only: Germany and Denmark road (semi-)tractors, Sweden 16 t and over, the Netherlands EU class N3 (over 12 t); China heavy trucks; EU 16 t and over. Germany\'s monthly line starts in May 2026, when the KBA added semi-tractors to its monthly table. Norway and Finland do not publish a heavy-only split. ' :
+    'Germany appears only under "Heavy trucks only" (its monthly truck figure includes vans); its all-trucks share is in the ACEA rows of the table. ' + 'Part of the jump since 2025 in the Netherlands and Sweden comes from electric vans of up to 4.25 t, which count as light trucks (N2, 3.5–6 t) because the battery is allowed to push them past 3.5 t. Use "Heavy trucks only" to leave them out. ') +
     `China: ${esc(M.china.basis)} Diamonds: ${esc(M.eu.basis)}.`;
   document.getElementById('mo-tnote').innerHTML = basis + ` "Electric" in the ACEA rows = electrically chargeable (battery-electric + plug-in hybrid). Monthly rows run from January to the latest month each country has published and are compared with the same months of 2025. Data refreshed ${esc(M.built)} by <code>scripts/ev_trucks/fetch_monthly.py</code>.`;
 }
