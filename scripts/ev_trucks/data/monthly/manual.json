@@ -47,6 +47,22 @@
    "source": "Traficom statistics",
    "url": "https://trafi2.stat.fi/PXWeb/pxweb/en/TraFi/TraFi__Ensirekisteroinnit/040_ensirek_tau_104.px/",
    "lag": "~1 week"
+  },
+  "ch": {
+   "name": "Switzerland",
+   "color": "#db2777",
+   "basis": "New trucks (Lastwagen) + semi-tractors; electric = battery + fuel cell. Heavy = semi-tractors (Sattelschlepper). Recent months are provisional",
+   "source": "Federal Statistical Office (BFS), monthly",
+   "url": "https://stats.swiss/vis?lc=de&df%5bds%5d=disseminate&df%5bid%5d=DF_IVS_0_GENERAL_M&df%5bag%5d=CH1.MFZ_IVS",
+   "lag": "~10 days"
+  },
+  "es": {
+   "name": "Spain",
+   "color": "#ca8a04",
+   "basis": "New N2 + N3 trucks from the vehicle-registration microdata; electric = battery + fuel cell. Heavy = N3 (over 12 t). Monthly from January 2025",
+   "source": "DGT, monthly registration microdata",
+   "url": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-mensual.html",
+   "lag": "~2 weeks"
   }
  },
  "china": {

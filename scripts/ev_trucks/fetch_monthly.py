@@ -13,6 +13,8 @@ Sources (all free, no key, re-run any time; each one only adds months, nothing i
                (Electricity + Hydrogen). Published ~1st week.
   Germany      KBA FZ28 monthly xlsx (new vehicles with alternative drive): semi-tractors (Sattelzugmaschinen) only,
                battery-electric + fuel cell; heavy view only (KBA's truck row includes vans). Row exists from May 2026.
+  Switzerland  BFS monthly SDMX (disseminate.stats.swiss, DF_IVS_0_GENERAL_M): new Lastwagen + semi-tractors by fuel; heavy = semi-tractors.
+  Spain        DGT monthly registration microdata (export_mensual_mat_YYYYMM.zip): new N2/N3; heavy = N3.
   Netherlands  RDW open data (SODA m9d7-ebf2 registry + 8ys7-d773 fuel): EU category N2 (3.5-12 t) and N3 (> 12 t),
                first registration in NL in the month AND first admission no earlier than the previous month (= new,
                not a used import). Electric = only fuel "Elektriciteit". The registry only holds vehicles still
@@ -236,6 +238,70 @@ def fetch_de():
     save('de', out)
 
 
+# ---------- Switzerland ----------
+def fetch_ch():
+    """BFS new registrations of road vehicles, monthly SDMX (dataflow CH1.MFZ_IVS / DF_IVS_0_GENERAL_M on
+    disseminate.stats.swiss). Key = canton.owner.registration.vehicle_type.fuel.freq; N = new vehicles;
+    035 Lastwagen (trucks over 3.5 t), 036 Sattelmotorfahrzeug, 038 Sattelschlepper (semi-tractors, = heavy);
+    EL = battery-electric, FC = fuel cell. Figures for recent months are provisional and get small revisions."""
+    import csv
+    url = ('https://disseminate.stats.swiss/rest/data/CH1.MFZ_IVS,DF_IVS_0_GENERAL_M/_T._T.N.035+036+038._T+EL+FC.M'
+           f'?startPeriod={START}&dimensionAtObservation=AllDimensions')
+    txt = get(url, headers={'Accept': 'application/vnd.sdmx.data+csv;version=1.0.0'}).decode('utf-8-sig')
+    out = collections.defaultdict(lambda: {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0})
+    for x in csv.DictReader(io.StringIO(txt)):
+        k, typ, fuel = x['TIME_PERIOD'], x['UV_RV_VEHICLE_GROUP_AND_TYPE'], x['UV_RV_FUEL']
+        if k < START or not x['OBS_VALUE']:
+            continue
+        v = int(float(x['OBS_VALUE'])); f = 'total' if fuel == '_T' else 'el'
+        out[k][f] += v
+        if typ == '038':
+            out[k]['heavy_' + f] += v
+    save('ch', out)
+
+
+# ---------- Spain ----------
+ES_LEN = [8, 1, 8, 30, 22, 1, 21, 2, 1, 5, 6, 6, 6, 3, 2, 2, 2, 2, 24, 2, 2, 1, 8, 5, 8, 1, 1, 9, 3, 5, 30, 7, 3, 5, 1, 1, 1, 1, 1, 1, 11, 25, 25, 35, 70, 6, 6, 4, 4, 3, 8, 4, 4, 4, 6]
+
+
+def fetch_es(start='2025-01'):
+    """DGT monthly registration microdata (MATRABA, fixed width, ~17 MB zip / 130 MB text a month). Field layout:
+    dgt.es .../matraba/MATRICULACIONES_MATRABA.pdf. New vehicle = IND_NUEVO_USADO (field 26) 'N'; EU category (field 48)
+    N2/N3; electric = propulsion code (field 9) '2' or electric category (field 54) BEV/FCEV. Heavy = N3.
+    Only months not yet in es.json are downloaded (each file is published mid-next-month)."""
+    import datetime, zipfile
+    off = [0]
+    for n in ES_LEN:
+        off.append(off[-1] + n)
+    F = lambda s, i: s[off[i - 1]:off[i]].strip()
+    f = os.path.join(DATA, 'es.json')
+    out = json.load(open(f)) if os.path.exists(f) else {}
+    t = datetime.date.today(); y, m = int(start[:4]), int(start[5:])
+    while (y, m) < (t.year, t.month):
+        k = ym(y, m)
+        if k not in out:
+            try:
+                blob = get(f'https://www.dgt.es/microdatos/salida/{y}/{m}/vehiculos/matriculaciones/export_mensual_mat_{y}{m:02d}.zip', timeout=600)
+                z = zipfile.ZipFile(io.BytesIO(blob))
+            except Exception:
+                z = None    # not published yet
+            if z:
+                e = {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0}
+                with z.open(z.namelist()[0]) as fh:
+                    for line in io.TextIOWrapper(fh, encoding='latin1'):
+                        cat = line[off[47]:off[48]].strip()
+                        if cat not in ('N2', 'N3') or F(line, 26) != 'N':
+                            continue
+                        el = F(line, 9) == '2' or F(line, 54) in ('BEV', 'FCEV')
+                        e['total'] += 1; e['el'] += el
+                        if cat == 'N3':
+                            e['heavy_total'] += 1; e['heavy_el'] += el
+                out[k] = e
+                print('  es', k, e)
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    save('es', out)
+
+
 # ---------- build ----------
 def build():
     import datetime
@@ -264,7 +330,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if '--build' not in args:
         skip = set(args[args.index('--skip') + 1].split(',')) if '--skip' in args else set()
-        for code, fn in (('de', fetch_de), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
+        for code, fn in (('de', fetch_de), ('ch', fetch_ch), ('es', fetch_es), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
             if code in skip:
                 continue
             try:
