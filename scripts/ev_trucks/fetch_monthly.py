@@ -19,6 +19,12 @@ Sources (all free, no key, re-run any time; each one only adds months, nothing i
                first registration in NL in the month AND first admission no earlier than the previous month (= new,
                not a used import). Electric = only fuel "Elektriciteit". The registry only holds vehicles still
                registered, so trucks exported since are missing: older months read a little low.
+India (BROWSER STEP, not downloaded by this script): the VAHAN dashboard JSON answers only from a page on its own
+  origin (curl gets 401). Open https://analytics.parivahan.gov.in/analytics/publicdashboard/vahan?lang=en in a browser,
+  run IN_BROWSER_JS below in the page (devtools console / javascript tool), and save the JSON string it returns as
+  scripts/ev_trucks/data/monthly/in.json (replace the file: it re-pulls 2024 to today, and the live register keeps
+  adding late registrations to recent months). Goods Vehicle group, sub-categories MEDIUM GOODS VEHICLE (7.5-12 t) +
+  HEAVY GOODS VEHICLE (over 12 t); electric = PURE EV + ELECTRIC(BOV) + FUEL CELL HYDROGEN; heavy = HGV.
 Hand-entered (scripts/ev_trucks/data/monthly/manual.json): China heavy-truck new-energy share (press reports of
 compulsory-insurance registrations), ACEA EU year-to-date shares and the ACEA Q1-Q3 country table.
 
@@ -196,6 +202,20 @@ def fetch_nl():
         if x['europese_voertuigcategorie'] == 'N3':
             e['heavy_total'] += 1; e['heavy_el'] += el
     save('nl', out)
+
+
+# ---------- India (run in a browser on analytics.parivahan.gov.in, see the docstring) ----------
+IN_BROWSER_JS = r"""
+const B='/analytics/publicdashboard/vahandashboard/durationWiseRegistrationTable?';
+const M={January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12};
+const EL='PURE EV,ELECTRIC(BOV),FUEL CELL HYDROGEN'; const out={}; const Y=new Date().getFullYear();
+for (let y=2024; y<=Y; y++) for (const [sc,key] of [['HEAVY GOODS VEHICLE','h'],['MEDIUM GOODS VEHICLE','m']]) for (const [f,fk] of [[null,'t'],[EL,'e']]) {
+  const p={fromYear:y,toYear:y,calendarType:3,vehicleCategoryGroup:'Goods Vehicle',vehicleSubCategories:sc}; if(f) p.vehicleFuels=f;
+  const j=await (await fetch(B+new URLSearchParams(p))).json();
+  for (const x of j){ const [yy,mn]=x.yearAsString.split('-'); const k=yy+'-'+String(M[mn]).padStart(2,'0'); (out[k]=out[k]||{})[key+fk]=x.registeredVehicleCount; } }
+const res={}; Object.keys(out).sort().forEach(k=>{const v=out[k]; res[k]={total:(v.ht||0)+(v.mt||0), el:(v.he||0)+(v.me||0), heavy_total:v.ht||0, heavy_el:v.he||0};});
+JSON.stringify(res)
+"""
 
 
 # ---------- Germany ----------

@@ -63,6 +63,14 @@
    "source": "DGT, monthly registration microdata",
    "url": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-mensual.html",
    "lag": "~2 weeks"
+  },
+  "in": {
+   "name": "India",
+   "color": "#16a34a",
+   "basis": "New goods vehicles in the VAHAN register: medium (7.5-12 t) + heavy (over 12 t) goods vehicles; electric = pure EV, battery-operated (BOV) and fuel cell. Heavy = heavy goods vehicles (over 12 t). Live register: the latest month rises for weeks as late registrations land; light goods vehicles (up to 7.5 t) are left out",
+   "source": "VAHAN dashboard (Ministry of Road Transport)",
+   "url": "https://analytics.parivahan.gov.in/analytics/publicdashboard/vahan?lang=en",
+   "lag": "live, refresh the previous month too"
   }
  },
  "china": {
