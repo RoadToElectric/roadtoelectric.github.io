@@ -3,8 +3,8 @@
      P = the regulator or ministry itself, C = a company statement read second-hand, T = a tracker or a news article citing its own sources.
    Populations are in millions, as used by the FSD-EU-Tracker (CC BY 4.0). Nothing here is estimated by us. */
 const EU_FSD = {
-  asOf: '2026-11-11',                 // last event in the data (Finland, announced 11 Nov)
-  checked: '2026-11-13',
+  asOf: '2026-11-19',                 // last event in the data (Italy, recognition dated 19 Nov, announced 20 Nov)
+  checked: '2026-11-23',
   source: { label:'FSD-EU-Tracker.de (CC BY 4.0); each approval cites a national authority or news item', url:'https://fsd-eu-tracker.de/en/', tier:'T' },
   needStates: 15, needPop: 65,        // qualified majority: 15 of 27 states AND 65% of the EU population; 4 states with more than 35% block
   // [iso, name, population M, status (approved | review | none), approved since, who announced it / note]
@@ -20,9 +20,9 @@ const EU_FSD = {
     ['SK','Slovakia',5.4,'approved','2026-10-16','Ministry of Transport (MD SR)'],
     ['LV','Latvia',1.9,'approved','2026-10-26','CSDD (via LETA)'],
     ['FI','Finland',5.6,'approved','2026-11-10','Traficom (says its recognition does not bind Finland in the EU vote)'],
+    ['IT','Italy',59.0,'approved','2026-11-19','MIT / Motorizzazione recognised the Dutch approval on 19 Nov, announced by the ministry and Minister Salvini on 20 Nov 2026 (via Italpress, Dire, Il Sole 24 Ore, FSD-EU-Tracker)'],
     ['DE','Germany',83.4,'review','','Transport ministry, 6 Oct 2026: open to approval, wants a name change and the speed offset capped at +10%'],
     ['FR','France',68.3,'review','','Reuters'],
-    ['IT','Italy',59.0,'review','','Review open since July; Salvini backs a swift EU approval (29 Oct 2026), no national decision'],
     ['ES','Spain',48.6,'review','','Minister Hereu'],
     ['GR','Greece',10.4,'review','','ETSC'],
     ['SE','Sweden',10.6,'review','','Trafikverket recommended the EU reject it while the system can exceed speed limits (June 2026)'],
@@ -45,6 +45,7 @@ const EU_FSD = {
     ['2026-10-21','Tesla’s Q3 call: Musk hopes for EU-wide approval within a few months and says he would be surprised if it took longer than Q1 2027 (Not a Tesla App recap of the call).'],
     ['2026-10-29','Italy’s transport minister Salvini backs a swift EU approval, without recognising the Dutch approval nationally.'],
     ['2026-11-10','Finland recognises the Dutch approval: the eleventh EU country. In Europe the system is now branded "Tesla Assisted Driving".'],
+    ['2026-11-19','Italy recognises the Dutch approval: the twelfth EU country and the first of the four most populous (Germany, France, Italy, Spain). The Motorizzazione gave it effect on 19 Nov; the transport ministry and Minister Salvini announced it on 20 Nov. Tesla has not given a customer rollout date in Italy. On 22 Nov the ministry said it did not favour Tesla and had worked on the file since July (Italpress, Dire, Il Sole 24 Ore, via FSD-EU-Tracker).'],
     ['December','Next scheduled TCMV meeting. Germany’s ministry says a vote is "envisaged"; the RDW says the procedure is still running and a vote is expected at that meeting at the earliest, not confirmed. We could not find the exact day.']
   ],
   sources: [
@@ -52,6 +53,7 @@ const EU_FSD = {
     { t:'T', label:'EU delays the Tesla FSD vote to December (Electrek, 25 Sep 2026)', url:'https://electrek.co/2026/09/25/eu-delays-tesla-fsd-vote-december-tcmv-agenda/' },
     { t:'T', label:'Germany confirms a December EU vote (Not a Tesla App)', url:'https://www.notateslaapp.com/news/4749/germany-says-it-is-open-to-tesla-fsd-approval-confirms-eu-wide-vote-in-december' },
     { t:'T', label:'Dutch approval of FSD (Supervised) (electrive, 13 Apr 2026)', url:'https://www.electrive.com/2026/04/13/tesla-secures-first-european-approval-for-fsd-supervised-driver-assistance-system/' },
+    { t:'T', label:'Italy clears Tesla Assisted Driving (Trasporti-Italia, 21 Nov 2026)', url:'https://www.trasporti-italia.com/auto/tesla-fsd-arriva-italia-guida-quasi-autonoma-via-libera-del-mit-cosa-cambia/1573725/' },
     { t:'C', label:'Tesla Q3 2026 earnings call (transcript)', url:'https://evwire.com/p/tesla-tsla-q3-2026-earnings-call-full-transcript' }
   ]
 };
