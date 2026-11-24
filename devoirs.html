@@ -282,6 +282,7 @@
     <div class="tabs" id="admTabs">
       <button data-t="results" class="on" type="button">Résultats</button>
       <button data-t="progress" type="button">Progression</button>
+      <button data-t="missed" type="button">Mots ratés</button>
       <button data-t="words" type="button">Mots</button>
       <button data-t="verbs" type="button">Verbes</button>
       <button data-t="phrases" type="button">Phrases</button>
@@ -745,7 +746,8 @@ function finish(){
 function saveResult(ok, ko){
   var sv = $('rSave'); sv.textContent = 'Enregistrement…';
   var args = {p_eleve:S.who.name, p_annee:S.who.annee, p_cat:S.cat, p_mode:S.mode, p_temps:S.cat==='verbes'?S.tenses:null, p_nb:S.answers.length, p_ok:ok, p_ko:ko,
-              p_answers:S.answers.map(function(a){ return {key:a.key,item:a.item,tense:a.tense,pron:a.pron,answer:a.answer,expected:a.expected,ok:a.ok}; })};
+              p_answers:S.answers.map(function(a){ return {key:a.key,item:a.item,tense:a.tense,pron:a.pron,answer:a.answer,expected:a.expected,ok:a.ok}; }),
+              p_liste:(S.cat==='verbes' ? (S.blocSel&&S.blocSel.length ? 'Bloc '+S.blocSel.join(', ') : null) : (S.listSel&&S.listSel.length ? S.listSel.join(', ') : null))};
   rpc('devoirs_save', args).then(function(id){
     sv.textContent = 'Résultat enregistré ✓';
     return fetch(SB+'/functions/v1/devoirs-notify', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:id})})
@@ -855,9 +857,24 @@ document.querySelectorAll('#admTabs button').forEach(function(b){ b.addEventList
 function admTab(t){
   document.querySelectorAll('#admTabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   var body = $('admBody'); body.textContent = 'Chargement…';
-  if(t==='results') admResults(body); else if(t==='progress') admProgress(body); else if(t==='words') admList(body,'vocabulaire'); else if(t==='verbs') admList(body,'verbes'); else if(t==='phrases') admPhrases(body); else admImport(body);
+  if(t==='results') admResults(body); else if(t==='progress') admProgress(body); else if(t==='missed') admMissed(body); else if(t==='words') admList(body,'vocabulaire'); else if(t==='verbs') admList(body,'verbes'); else if(t==='phrases') admPhrases(body); else admImport(body);
 }
 function fdate(s){ var d = new Date(s); return d.toLocaleDateString('fr-CA')+' '+d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}); }
+function admMissed(body){
+  rpc('devoirs_admin_results',{p_key:PIN,p_limit:500}).then(function(d){
+    if(d.error){ body.textContent='Accès refusé.'; return; }
+    var m = {};
+    (d.rows||[]).forEach(function(r){ if(r.categorie==='dictee') return;
+      (Array.isArray(r.details)?r.details:[]).forEach(function(a){ if(a.ok) return;
+        var q = a.item + (a.tense ? ' · '+a.tense+(a.pron?' · '+a.pron:'') : ''), k = r.eleve+'|'+r.categorie+'|'+q;
+        var o = m[k] || (m[k] = {eleve:r.eleve, cat:r.categorie, q:q, exp:a.expected, n:0, last:r.played_at, liste:r.liste, ans:[]});
+        o.n++; if(r.played_at > o.last){ o.last = r.played_at; o.liste = r.liste; } if(a.answer && o.ans.indexOf(a.answer)<0 && o.ans.length<3) o.ans.push(a.answer); }); });
+    var list = Object.keys(m).map(function(k){ return m[k]; }).sort(function(a,b){ return a.eleve.localeCompare(b.eleve) || b.n-a.n || (a.last<b.last?1:-1); });
+    body.innerHTML = '<h2>Mots ratés</h2><p class="small-t">Tous les mots ratés dans les exercices enregistrés (500 derniers résultats), du plus raté au moins raté, pour chaque enfant.</p>' +
+      (list.length ? '<div style="overflow:auto"><table><thead><tr><th>Enfant</th><th>Mot</th><th>Bonne réponse</th><th>Réponses données</th><th>Ratés</th><th>Dernière fois</th><th>Liste</th></tr></thead><tbody>' +
+      list.map(function(o){ return '<tr><td>'+esc(o.eleve)+'</td><td>'+esc(o.q)+'</td><td class="good">'+esc(o.exp)+'</td><td class="bad">'+esc(o.ans.join(' · '))+'</td><td>'+o.n+'</td><td>'+esc(fdate(o.last))+'</td><td class="small-t">'+esc(o.liste||'')+'</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">Aucun mot raté pour l’instant.</p>');
+  }).catch(function(){ body.textContent='Erreur de connexion.'; });
+}
 function admResults(body){
   rpc('devoirs_admin_results',{p_key:PIN,p_limit:200}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
