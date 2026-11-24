@@ -432,7 +432,7 @@ function lineChart(el, lgEl, hid, cfg){
     g += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.dash ? 2 : 2.8) + '"' + (s.dash ? ' stroke-dasharray="6 5" opacity=".85"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>';
     s.values.forEach(function(v, i){ if(v == null) return; g += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (s.dash ? 2.6 : 3.8) + '" fill="' + (s.dash ? s.color : 'var(--surface)') + '" stroke="' + s.color + '" stroke-width="2.4"/>'; });
   });
-  if(vis.length <= 4 && n <= 16) vis.forEach(function(s){ if(s.dash) return; s.values.forEach(function(v, i){ if(v == null) return; g += '<text class="dl" x="' + X(i).toFixed(1) + '" y="' + (Y(v) - 8).toFixed(1) + '" text-anchor="middle">' + (cfg.zero ? sg(v) : f0(v)) + '</text>'; }); });
+  if(vis.length <= 4 && n <= 16 && !(cfg.zero && S.subj.size > 1)) vis.forEach   /* gap lines: no numbers when several subjects are chosen */(function(s){ if(s.dash) return; s.values.forEach(function(v, i){ if(v == null) return; g += '<text class="dl" x="' + X(i).toFixed(1) + '" y="' + (Y(v) - 8).toFixed(1) + '" text-anchor="middle">' + (cfg.zero ? sg(v) : f0(v)) + '</text>'; }); });
   g += '<line class="guide" x1="0" x2="0" y1="' + mt + '" y2="' + (H - mb) + '"/><rect class="ov" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/></svg><div class="bl-tip"></div>';
   el.innerHTML = g;
   var svg = el.querySelector('svg'), guide = el.querySelector('.guide'), tip = el.querySelector('.bl-tip');
