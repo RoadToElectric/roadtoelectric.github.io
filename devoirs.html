@@ -176,6 +176,18 @@
     </div>
   </section>
 
+  <!-- 2c. CHOIX DES VERBES (tous cochés, on peut en retirer) -->
+  <section id="s-verbpick" class="hidden">
+    <div class="card">
+      <h2 class="center">Quels verbes ?</h2>
+      <p class="center small-t">Tous les verbes sont cochés. Décoche ceux que tu veux retirer.</p>
+      <div class="chips" id="verbChips"></div>
+      <div class="row" style="gap:8px;margin-bottom:8px"><button class="alt small" id="verbsAll" type="button">Tout cocher</button><button class="alt small" id="verbsNone" type="button">Tout décocher</button></div>
+      <p id="verbsMsg" class="small-t" style="color:var(--red);min-height:1.2em"></p>
+      <button class="big green" id="verbsOk" type="button">Continuer ➜</button>
+    </div>
+  </section>
+
   <!-- 3. MODE -->
   <section id="s-mode" class="hidden">
     <div class="card">
@@ -335,7 +347,7 @@ $('voiceSel').addEventListener('change', function(){ ls('dv_voice', $('voiceSel'
 $('voiceTest').addEventListener('click', function(){ audio(); speak('Bonjour, voici une dictée de mots.'); });
 
 /* ----------------------------------------------------------- NAVIGATION */
-var SCREENS = ['home','pin','subject','lists','blocs','tenses','mode','count','quiz','result','admin'];
+var SCREENS = ['home','pin','subject','lists','blocs','tenses','verbpick','mode','count','quiz','result','admin'];
 function show(id){ SCREENS.forEach(function(s){ $('s-'+s).classList.toggle('hidden', s!==id); }); window.scrollTo(0,0); }
 var S = { who:null, cat:null, mode:null, tenses:[], n:15, data:null, qs:[], i:0, answers:[], answered:false, key:null };
 function setWho(p){ S.who = p; var w = $('who'); if(p){ w.classList.remove('hidden'); w.innerHTML = '<span class="av" style="background:'+p.color+'">'+esc(p.name[0])+'</span>'+esc(p.name)+' · '+p.annee+'e'; } else w.classList.add('hidden'); }
@@ -400,7 +412,7 @@ $('listsOk').addEventListener('click', function(){
 
 /* Verbes : cases à cocher pour les blocs (A, B, C...), puis les temps */
 $('bVerb').addEventListener('click', function(){
-  S.cat='verbes'; S.listSel=null; S.blocSel=null;
+  S.cat='verbes'; S.listSel=null; S.blocSel=null; S.verbSel=null;
   var items = (S.counts.verbes && S.counts.verbes.data.items) || [], blocs = {}, order = [];
   items.forEach(function(v){ var b = v.bloc || ''; if(!(b in blocs)){ blocs[b] = 0; order.push(b); } blocs[b]++; });
   order.sort(function(a,b){ return a==='' ? 1 : b==='' ? -1 : a < b ? -1 : 1; });
@@ -421,6 +433,22 @@ function showTenses(){
 $('tensesOk').addEventListener('click', function(){
   S.tenses = Array.prototype.map.call(document.querySelectorAll('#tenseChips input:checked'), function(i){ return i.value; });
   if(!S.tenses.length){ alert('Choisis au moins un temps.'); return; }
+  showVerbPick();
+});
+/* après les temps : tous les verbes des blocs choisis, cochés ; on peut en retirer */
+function showVerbPick(){
+  var items = (S.counts.verbes && S.counts.verbes.data.items) || [];
+  var list = items.filter(function(v){ return v.forms && (!S.blocSel || S.blocSel.indexOf(v.bloc || '') >= 0); });
+  list.sort(function(a,b){ return a.item < b.item ? -1 : 1; });
+  $('verbChips').innerHTML = list.map(function(v){ return chipHtml(v.item, v.item, true); }).join('');
+  $('verbsMsg').textContent = ''; show('verbpick');
+}
+function verbBoxes(){ return Array.prototype.slice.call(document.querySelectorAll('#verbChips input')); }
+$('verbsAll').addEventListener('click', function(){ verbBoxes().forEach(function(b){ b.checked = true; }); });
+$('verbsNone').addEventListener('click', function(){ verbBoxes().forEach(function(b){ b.checked = false; }); });
+$('verbsOk').addEventListener('click', function(){
+  S.verbSel = verbBoxes().filter(function(b){ return b.checked; }).map(function(b){ return b.value; });
+  if(!S.verbSel.length){ $('verbsMsg').textContent = 'Garde au moins un verbe.'; return; }
   show('mode');
 });
 $('mTrain').addEventListener('click', function(){ S.mode='entrainement'; askCount(); });
@@ -458,6 +486,7 @@ function buildQuestions(n){
     items.forEach(function(v){
       if(!v.forms) return;
       if(S.blocSel && S.blocSel.indexOf(v.bloc || '') < 0) return;
+      if(S.verbSel && S.verbSel.indexOf(v.item) < 0) return;
       S.tenses.forEach(function(t){
         if(!v.forms[t]) return;
         var key = v.item+'|'+t, p = prog[key]||{ok:0,ko:0};
