@@ -7,6 +7,8 @@
 <title>Bulletins — Zoé et Léo · Road to Electric</title>
 <link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
 <link rel="stylesheet" href="assets/styles.css">
+<script src="assets/section-link.js?v=4" defer></script>
+<script src="assets/deeplink.js?v=2"></script>
 <style>
   /* Private page: not linked, noindex, no page-view counter. Nothing is in this file: the grades come from the database function
      school_reports(), which checks the same passphrase as stats.html. Styling follows ev-trucking.html (hero, rounded cards, pill buttons, sortable tables). */
@@ -143,14 +145,14 @@
   </aside>
 
   <main class="bl-main">
-    <section class="bl-card bl-lock" id="lock" hidden>
+    <section class="bl-card card chart-card bl-lock" id="lock" hidden>
       <h2 style="font-size:20px">Bulletins — page privée</h2>
       <p class="bl-note">Entrez le mot de passe pour voir les résultats.</p>
       <input type="password" id="lock-in" placeholder="Mot de passe" autocomplete="current-password">
       <div class="bl-err" id="lock-err"></div>
       <button type="button" class="bl-btn" id="lock-go" style="background:linear-gradient(135deg,var(--a),var(--b));color:#fff;border-color:transparent">Ouvrir</button>
     </section>
-    <div class="bl-page" id="page" hidden>
+    <div class="bl-page page" id="page" hidden>
       <section class="bl-hero">
         <div class="eb">Bulletins · école primaire</div>
         <h2>Les résultats de Zoé et de Léo</h2>
@@ -159,9 +161,9 @@
       </section>
       <div class="bl-ins" id="insights"></div>
 
-      <section class="bl-card" id="c-sum">
+      <section class="bl-card card chart-card" id="c-sum">
         <div class="bl-head"><h2 id="sum-title">Sommaire</h2>
-          <div class="bl-seg" id="sum-view" role="group" aria-label="Vue">
+          <div class="bl-seg" data-nocapture id="sum-view" role="group" aria-label="Vue">
             <button type="button" data-v="avg" class="on">Moyenne générale</button>
             <button type="button" data-v="subj">Par matière</button>
             <button type="button" data-v="gap">Écart au groupe</button>
@@ -172,7 +174,7 @@
         <div class="bl-chart" id="sum-chart"></div>
       </section>
 
-      <section class="bl-card" id="c-se">
+      <section class="bl-card card chart-card" id="c-se">
         <div class="bl-head"><h2>Meilleur au début ou à la fin de l’année ?</h2></div>
         <p class="bl-note" id="se-note"></p>
         <div class="bl-kp" id="se-kp"></div>
@@ -184,25 +186,25 @@
         <div class="bl-tw"><table class="bl-t" id="t-se"></table></div>
       </section>
 
-      <section class="bl-card" id="c-yr">
+      <section class="bl-card card chart-card" id="c-yr">
         <div class="bl-head"><h2>Moyennes et écarts-types par année et par étape</h2></div>
         <p class="bl-note">Une ligne par enfant, année et étape : moyenne des matières choisies, écart-type entre les matières, et comparaison avec la moyenne du groupe (classe). Cliquez sur un titre de colonne pour trier.</p>
         <div class="bl-tw"><table class="bl-t" id="t-yr"></table></div>
       </section>
 
-      <section class="bl-card" id="c-sb">
+      <section class="bl-card card chart-card" id="c-sb">
         <div class="bl-head"><h2>Sommaire par matière</h2></div>
         <p class="bl-note">Toutes les années et étapes cochées : moyenne, écart-type, moyenne du groupe, écart moyen (résultat − groupe) et part des bulletins au-dessus de la moyenne du groupe.</p>
         <div class="bl-tw"><table class="bl-t" id="t-sb"></table></div>
       </section>
 
-      <section class="bl-card" id="c-dt">
+      <section class="bl-card card chart-card" id="c-dt">
         <div class="bl-head"><h2>Résultats détaillés</h2></div>
         <p class="bl-note">Chaque ligne = un résultat de bulletin. « Écart » = résultat − moyenne du groupe. « Progression » = résultat − résultat de l’étape précédente (l’étape 1 se compare à la dernière étape notée de l’année d’avant). NE = non évalué.</p>
         <div class="bl-tw"><table class="bl-t" id="t-dt"></table></div>
       </section>
 
-      <section class="bl-card bl-notes" id="c-nt">
+      <section class="bl-card card chart-card bl-notes" id="c-nt">
         <h2>Notes sur les chiffres</h2>
         <ul id="notes"></ul>
       </section>
@@ -210,6 +212,7 @@
   </main>
 </div>
 
+<script src="assets/filter-memory.js?v=5"></script>
 <script>
 (function(){
 'use strict';
@@ -291,6 +294,12 @@ function init(d){
   if(!S.kids.size){ KIDS.forEach(function(k){ S.kids.add(k.kid); }); YEARS.forEach(function(y){ S.years.add(y); }); SUBJ.forEach(function(s){ S.subj.add(s.code); }); }
   $('lock').hidden = true; $('side').hidden = false; $('page').hidden = false;
   buildFilters(); render();
+  if(window.FilterMemory && !window.__blFM){ window.__blFM = 1;     /* filters kept between visits and carried in the shared link (?fm=) */
+    FilterMemory.attach([{ key:'bl', type:'fn',
+      get:function(){ return { k:Array.from(S.kids), y:Array.from(S.years), s:Array.from(S.subj), t:Array.from(S.steps), m:S.mode, c:S.comp, g:S.group, v:S.view }; },
+      set:function(v){ if(!v || !v.k) return; S.kids = new Set(v.k); S.years = new Set(v.y); S.subj = new Set(v.s); S.steps = new Set(v.t); S.mode = v.m || 'steps'; S.comp = !!v.c; S.group = v.g !== false; S.view = v.v || 'avg'; buildFilters(); render(); } }]);
+    FilterMemory.restore();
+  }
 }
 
 /* ---------- filters ---------- */
