@@ -12,7 +12,7 @@
 <style>
   /* Private page: not linked, noindex, no page-view counter. Nothing is in this file: the grades come from the database function
      school_reports(), which checks the same passphrase as stats.html. Styling follows ev-trucking.html (hero, rounded cards, pill buttons, sortable tables). */
-  .bl{ --z:#e8590c; --z2:#c81e1e; --l:#1d6fd8; --l2:#0f766e; --a:#f59e0b; --b:#e11d48; }
+  .bl{ --z:#dc2626; --z2:#c81e1e; --l:#1d6fd8; --l2:#0f766e; --a:#f59e0b; --b:#e11d48; }
   [hidden]{ display:none !important; }
   .bl-shell{ display:flex; align-items:stretch; min-height:100vh; }
   /* left filter column: always visible while the page scrolls */
@@ -41,7 +41,7 @@
   .bl-page{ max-width:2000px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
   /* hero */
   .bl-hero{ border-radius:22px; padding:24px 26px 22px; color:#fff; box-shadow:0 18px 44px rgba(15,18,38,.35);
-    background:radial-gradient(800px 380px at 0% 0%, rgba(249,115,22,.55), transparent 62%), radial-gradient(800px 420px at 100% 100%, rgba(14,165,233,.5), transparent 62%), radial-gradient(500px 300px at 100% 0%, rgba(34,197,94,.25), transparent 60%), linear-gradient(135deg,#0f1226,#1b1f3b 55%,#16213b); }
+    background:radial-gradient(800px 380px at 0% 0%, rgba(220,38,38,.55), transparent 62%), radial-gradient(800px 420px at 100% 100%, rgba(14,165,233,.5), transparent 62%), radial-gradient(500px 300px at 100% 0%, rgba(34,197,94,.25), transparent 60%), linear-gradient(135deg,#0f1226,#1b1f3b 55%,#16213b); }
   .bl-hero .eb{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#fcd34d; }
   .bl-hero h2{ margin:4px 0 2px; font-size:clamp(26px,4vw,40px); font-weight:900; letter-spacing:-.03em; }
   .bl-hero .sub{ font-size:13.5px; color:#d6d9ee; max-width:640px; line-height:1.5; }
@@ -239,7 +239,7 @@ var SUBJ = [
   { code:'ER', name:'Éthique et culture religieuse',    short:'Éthique et cult. rel.', z:'#9a3412', l:'#166534' }
 ];
 var BY_NAME = {}, BY_CODE = {}; SUBJ.forEach(function(s){ BY_NAME[s.name] = s; BY_CODE[s.code] = s; });
-var KID_COL = { Zoe:'#e8590c', Leo:'#1d6fd8' }, KID_COL2 = { Zoe:'#c81e1e', Leo:'#16a34a' };
+var KID_COL = { Zoe:'#dc2626', Leo:'#1d6fd8' }, KID_COL2 = { Zoe:'#9f1239', Leo:'#16a34a' };
 function subjColor(kid, s){ return kid === 'Zoe' ? s.z : s.l; }
 
 /* ---------- number helpers ---------- */
