@@ -129,7 +129,7 @@
     <a class="bl-back" href="index.html">← Road to Electric</a>
     <h1>Bulletins<small>privé</small></h1>
     <div class="bl-fg"><h3>Enfant</h3><div class="bl-kids" id="f-kids"></div></div>
-    <div class="bl-fg"><h3>Année <span><a data-all="years">tout</a><a data-none="years">aucun</a></span></h3><div id="f-years"></div></div>
+    <div class="bl-fg"><h3>Année scolaire <span><a data-all="years">tout</a><a data-none="years">aucun</a></span></h3><div id="f-years"></div></div>
     <div class="bl-fg"><h3>Matière <span><a data-all="subj">tout</a><a data-none="subj">aucun</a></span></h3><div id="f-subj"></div></div>
     <div class="bl-fg"><h3>Étapes <span><a data-all="steps">tout</a><a data-none="steps">aucun</a></span></h3><div id="f-steps"></div></div>
     <div class="bl-fg"><h3>Affichage</h3>
@@ -283,9 +283,9 @@ function init(d){
   var seqs = {};
   ROWS.forEach(function(r){ if(r.step === 'FINAL' || r.score == null) return; var k = r.kid + '|' + r.subj.code + '|' + (r.comp || ''); (seqs[k] = seqs[k] || []).push(r); });
   Object.keys(seqs).forEach(function(k){ var a = seqs[k]; a.sort(function(x, y){ return x.year < y.year ? -1 : x.year > y.year ? 1 : STEP_IDX[x.step] - STEP_IDX[y.step]; }); for(var i = 1; i < a.length; i++) a[i].prev = a[i - 1]; });
-  var ys = {}; ROWS.forEach(function(r){ ys[r.year] = 1; }); YEARS = Object.keys(ys).sort();
+  var ys = {}; ROWS.forEach(function(r){ ys[r.grade] = 1; }); YEARS = Object.keys(ys).sort();   /* YEARS = school grades (1re année, 2e année…) as strings */
   LATEST = {};
-  ROWS.forEach(function(r){ if(r.comp || r.score == null || r.step === 'FINAL') return; var o = LATEST[r.kid]; var v = r.year + '|' + STEP_IDX[r.step]; if(!o || v > o.v) LATEST[r.kid] = { v:v, year:r.year, step:r.step }; });
+  ROWS.forEach(function(r){ if(r.comp || r.score == null || r.step === 'FINAL') return; var o = LATEST[r.kid]; var v = r.grade + '|' + STEP_IDX[r.step]; if(!o || v > o.v) LATEST[r.kid] = { v:v, year:r.year, step:r.step }; });
   if(!S.kids.size){ KIDS.forEach(function(k){ S.kids.add(k.kid); }); YEARS.forEach(function(y){ S.years.add(y); }); SUBJ.forEach(function(s){ S.subj.add(s.code); }); }
   $('lock').hidden = true; $('side').hidden = false; $('page').hidden = false;
   buildFilters(); render();
@@ -294,9 +294,9 @@ function init(d){
 /* ---------- filters ---------- */
 function buildFilters(){
   $('f-kids').innerHTML = KIDS.map(function(k){ return '<button type="button" class="bl-kid' + (S.kids.has(k.kid) ? ' on' : '') + '" data-kid="' + k.kid + '" style="--c:' + KID_COL[k.kid] + '"><img src="' + esc(k.avatar) + '" alt="">' + esc(k.name) + '</button>'; }).join('');
-  var gl = {}; ROWS.forEach(function(r){ var k = r.year; (gl[k] = gl[k] || {})[r.kid] = r.grade; });
-  $('f-years').innerHTML = YEARS.slice().reverse().map(function(y){ var g = gl[y]; var t = Object.keys(g).map(function(k){ return KNAME[k] + ' ' + gradeLbl(g[k]); }).join(' · ');
-    return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + yShort(y) + '<small>' + esc(t) + '</small></label>'; }).join('');
+  var gl = {}; ROWS.forEach(function(r){ (gl[r.grade] = gl[r.grade] || {})[r.kid] = r.year; });
+  $('f-years').innerHTML = YEARS.slice().reverse().map(function(y){ var g = gl[y]; var t = Object.keys(g).map(function(k){ return KNAME[k] + ' ' + yShort(g[k]); }).join(' · ');
+    return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + gradeLbl(+y) + ' année<small>' + esc(t) + '</small></label>'; }).join('');
   var present = {}; ROWS.forEach(function(r){ present[r.subj.code] = 1; });
   $('f-subj').innerHTML = SUBJ.filter(function(s){ return present[s.code]; }).map(function(s){
     return '<label class="bl-ck"><input type="checkbox" data-s="' + s.code + '"' + (S.subj.has(s.code) ? ' checked' : '') + '><span class="sw"><i style="background:' + s.z + '"></i><i style="background:' + s.l + '"></i></span>' + esc(s.short) + '</label>'; }).join('');
@@ -337,7 +337,7 @@ $('hero-kids').addEventListener('click', function(e){ var im = e.target.closest(
 $('sum-view').addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; S.view = b.dataset.v; renderSummary(); });
 
 /* ---------- selections ---------- */
-function selRows(o){ o = o || {}; return ROWS.filter(function(r){ return S.kids.has(r.kid) && S.years.has(r.year) && S.subj.has(r.subj.code) && (o.allSteps ? true : S.steps.has(r.step)) && !(o.noFinal && r.step === 'FINAL') && (o.comp || !r.comp); }); }
+function selRows(o){ o = o || {}; return ROWS.filter(function(r){ return S.kids.has(r.kid) && S.years.has(String(r.grade)) && S.subj.has(r.subj.code) && (o.allSteps ? true : S.steps.has(r.step)) && !(o.noFinal && r.step === 'FINAL') && (o.comp || !r.comp); }); }
 function graded(rs){ return rs.filter(function(r){ return !r.comp && r.score != null; }); }
 function paired(rs){ return rs.filter(function(r){ return !r.comp && r.score != null && r.group != null; }); }
 function groupBy(arr, fn){ var m = {}, order = []; arr.forEach(function(x){ var k = fn(x); if(!m[k]){ m[k] = []; order.push(k); } m[k].push(x); }); return { m:m, order:order }; }
@@ -351,7 +351,7 @@ function render(){
 function renderHero(){
   var all = graded(ROWS.filter(function(r){ return !r.comp; }));
   var nb = ROWS.filter(function(r){ return !r.comp && r.step !== 'FINAL' && r.score != null; }).length;
-  $('hero-sub').innerHTML = 'Bulletins de ' + YEARS[0].slice(0, 4) + ' à ' + YEARS[YEARS.length - 1].slice(5) + ' · ' + nb + ' résultats de matières, comparés à la moyenne du groupe (la classe). Les filtres à gauche s’appliquent à toute la page.';
+  $('hero-sub').innerHTML = 'Bulletins de la ' + gradeLbl(+YEARS[0]) + ' à la ' + gradeLbl(+YEARS[YEARS.length - 1]) + ' année · ' + nb + ' résultats de matières, comparés à la moyenne du groupe (la classe). Les filtres à gauche s’appliquent à toute la page.';
   $('hero-kids').innerHTML = KIDS.map(function(k){
     var on = S.kids.has(k.kid);
     var rs = graded(selRows({ noFinal:true })).filter(function(r){ return r.kid === k.kid; });
@@ -362,7 +362,7 @@ function renderHero(){
     var lt = LATEST[k.kid];
     return '<div class="bl-hk' + (on ? '' : ' off') + '" style="--c1:' + KID_COL[k.kid] + ';--c2:' + KID_COL2[k.kid] + '">' +
       '<img src="' + esc(k.avatar) + '" alt="' + esc(k.name) + '" data-kid="' + k.kid + '" title="Cliquer pour afficher ou masquer">' +
-      '<div><div class="nm">' + esc(k.name) + '<small>' + (lt ? gradeLbl(ROWS.filter(function(r){ return r.kid === k.kid && r.year === lt.year; })[0].grade) + ' année · ' + STEP_SH[lt.step] + ' ' + yShort(lt.year) : '') + '</small></div>' +
+      '<div><div class="nm">' + esc(k.name) + '<small>' + (lt ? gradeLbl(ROWS.filter(function(r){ return r.kid === k.kid && r.year === lt.year; })[0].grade) + ' année · ' + STEP_SH[lt.step] + '' : '') + '</small></div>' +
       '<div class="ks"><div class="k"><div class="v">' + (m.n ? f1(m.mean) + ' %' : '–') + '</div><div class="l">moyenne des matières choisies</div></div>' +
       '<div class="k"><div class="v ' + cls(gp.mean) + '">' + (gp.n ? sg(gp.mean) + ' pts' : '–') + '</div><div class="l">écart moyen au groupe</div></div>' +
       '<div class="k"><div class="v">' + (above == null ? '–' : pc(above)) + '</div><div class="l">des résultats au-dessus du groupe</div></div>' +
@@ -442,9 +442,9 @@ function lineChart(el, lgEl, hid, cfg){
 }
 
 /* ---------- summary chart (timeline) ---------- */
-function timeline(rs){ var seen = {}, out = []; rs.forEach(function(r){ var k = r.year + '|' + STEP_IDX[r.step]; if(!seen[k]){ seen[k] = 1; out.push({ key:k, year:r.year, step:r.step }); } });
+function timeline(rs){ var seen = {}, out = []; rs.forEach(function(r){ var k = r.grade + '|' + STEP_IDX[r.step]; if(!seen[k]){ seen[k] = 1; out.push({ key:k, grade:r.grade, step:r.step }); } });
   out.sort(function(a, b){ return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; });
-  return out.map(function(c){ return { key:c.key, label:STEP_SH[c.step], sub:yShort(c.year), full:STEP_LBL[c.step] + ' · ' + yShort(c.year) }; }); }
+  return out.map(function(c){ return { key:c.key, label:STEP_SH[c.step], sub:gradeLbl(c.grade) + ' année', full:STEP_LBL[c.step] + ' · ' + gradeLbl(c.grade) + ' année' }; }); }
 function renderSummary(){
   document.querySelectorAll('#sum-view button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === S.view); });
   var rs = graded(selRows()), cats = timeline(rs), ix = {}; cats.forEach(function(c, i){ ix[c.key] = i; });
@@ -459,14 +459,14 @@ function renderSummary(){
   kidsSel.forEach(function(k){
     var mine = rs.filter(function(r){ return r.kid === k.kid; });
     if(S.view === 'avg' || S.view === 'gap'){
-      var by = groupBy(mine, function(r){ return r.year + '|' + STEP_IDX[r.step]; }), v = cats.map(function(){ return null; }), vg = cats.map(function(){ return null; });
+      var by = groupBy(mine, function(r){ return r.grade + '|' + STEP_IDX[r.step]; }), v = cats.map(function(){ return null; }), vg = cats.map(function(){ return null; });
       by.order.forEach(function(kk){ var a = by.m[kk], p = paired(a); if(S.view === 'avg'){ v[ix[kk]] = stats(a.map(function(r){ return r.score; })).mean; if(p.length) vg[ix[kk]] = stats(p.map(function(r){ return r.group; })).mean; } else if(p.length) v[ix[kk]] = stats(p.map(function(r){ return r.score - r.group; })).mean; });
       series.push({ id:k.kid, name:k.name, color:KID_COL[k.kid], values:v });
       if(S.view === 'avg' && S.group) series.push({ id:k.kid + '_g', name:k.name + ' · groupe', color:KID_COL[k.kid], dash:true, values:vg });
     } else {
       var bs = groupBy(mine, function(r){ return r.subj.code; });
       SUBJ.forEach(function(s){ var a = bs.m[s.code]; if(!a) return; var v = cats.map(function(){ return null; }), vg = cats.map(function(){ return null; });
-        a.forEach(function(r){ var i = ix[r.year + '|' + STEP_IDX[r.step]]; if(S.view === 'subj'){ v[i] = r.score; vg[i] = r.group; } else if(r.group != null) v[i] = r.score - r.group; });
+        a.forEach(function(r){ var i = ix[r.grade + '|' + STEP_IDX[r.step]]; if(S.view === 'subj'){ v[i] = r.score; vg[i] = r.group; } else if(r.group != null) v[i] = r.score - r.group; });
         series.push({ id:k.kid + s.code, name:k.name + ' · ' + s.short, color:subjColor(k.kid, s), values:v });
         if(S.view === 'subj' && S.group) series.push({ id:k.kid + s.code + '_g', name:k.name + ' · ' + s.short + ' · groupe', color:subjColor(k.kid, s), dash:true, values:vg }); });
     }
@@ -504,7 +504,7 @@ function renderSE(){
   var vd = function(d){ return d > 0 ? 'Mieux à la fin' : d < 0 ? 'Mieux au début' : 'Égal'; };
   table($('t-se'), 'se', [
     { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:function(r){ return '<i class="kd" style="background:' + KID_COL[r.kid] + '"></i>' + esc(KNAME[r.kid]); } },
-    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return gradeLbl(r.grade) + ' année'; } },
     { k:'subj', t:'Matière', l:1, v:function(r){ return r.subj.short; }, f:function(r){ return '<i class="kd" style="background:' + subjColor(r.kid, r.subj) + '"></i>' + esc(r.subj.short); } },
     { k:'e1', t:'Étape 1', v:function(r){ return r.e1; }, f:function(r){ return f0(r.e1); } },
     { k:'e3', t:'Étape 3', v:function(r){ return r.e3; }, f:function(r){ return f0(r.e3); } },
@@ -535,7 +535,7 @@ var kidCell = function(r){ return '<i class="kd" style="background:' + KID_COL[r
 function renderTables(){
   /* 1) per kid / year / step */
   var rs = paired(selRows()).concat(graded(selRows()).filter(function(r){ return r.group == null; })), all = graded(selRows());
-  var g = groupBy(all, function(r){ return r.kid + '|' + r.year + '|' + STEP_IDX[r.step]; }), yr = [];
+  var g = groupBy(all, function(r){ return r.kid + '|' + r.grade + '|' + STEP_IDX[r.step]; }), yr = [];
   all = all; var allNF = all.filter(function(r){ return r.step !== 'FINAL'; });
   g.order.forEach(function(k){ var a = g.m[k], p = paired(a), m = stats(a.map(function(r){ return r.score; })), gm = stats(p.map(function(r){ return r.group; })), gap = stats(p.map(function(r){ return r.score - r.group; }));
     var best = a.slice().sort(function(x, y){ return y.score - x.score; })[0], low = a.slice().sort(function(x, y){ return x.score - y.score; })[0];
@@ -545,7 +545,7 @@ function renderTables(){
   byk.order.forEach(function(k){ var a = byk.m[k]; for(var i = 0; i < a.length; i++) a[i].dprev = i ? a[i].mean - a[i - 1].mean : null; });
   table($('t-yr'), 'yr', [
     { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
-    { k:'year', t:'Année', l:1, v:function(r){ return r.year + STEP_IDX[r.step]; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year + STEP_IDX[r.step]; }, f:function(r){ return gradeLbl(r.grade) + ' année'; } },
     { k:'step', t:'Étape', l:1, v:function(r){ return STEP_IDX[r.step]; }, f:function(r){ return STEP_LBL[r.step]; } },
     { k:'n', t:'Matières', v:function(r){ return r.n; }, f:function(r){ return r.n; } },
     { k:'mean', t:'Moyenne', v:function(r){ return r.mean; }, f:function(r){ return f1(r.mean); } },
@@ -578,14 +578,14 @@ function renderTables(){
     { k:'gap', t:'Écart moyen', v:function(r){ return r.gap; }, f:function(r){ return sg(r.gap); }, c:function(r){ return cls(r.gap); } },
     { k:'gapsd', t:'Écart-type de l’écart', v:function(r){ return r.gapsd; }, f:function(r){ return f1(r.gapsd); } },
     { k:'above', t:'Au-dessus du groupe', v:function(r){ return r.above; }, f:function(r){ return pc(r.above); } },
-    { k:'last', t:'Dernier résultat', v:function(r){ return r.last.score; }, f:function(r){ return r.last.score + ' <span style="color:var(--text-muted);font-size:11px">(' + STEP_SH[r.last.step] + ' ' + yShort(r.last.year) + ')</span>'; } }
+    { k:'last', t:'Dernier résultat', v:function(r){ return r.last.score; }, f:function(r){ return r.last.score + ' <span style="color:var(--text-muted);font-size:11px">(' + STEP_SH[r.last.step] + ' ' + gradeLbl(r.last.grade) + ' a.' + ')</span>'; } }
   ], sb, ['gap', -1]);
   /* 3) detail */
   var dt = selRows({ comp:S.comp }).map(function(r){ var p = r.prev; return { r:r, kid:r.kid, year:r.year, grade:r.grade, step:r.step, subj:r.subj, comp:r.comp, score:r.score, group:r.group, ne:r.ne,
-      gap:(r.score != null && r.group != null) ? r.score - r.group : null, pscore:p ? p.score : null, plbl:p ? STEP_SH[p.step] + ' ' + yShort(p.year) : null, prog:(p && r.score != null) ? r.score - p.score : null, teacher:r.teacher }; });
+      gap:(r.score != null && r.group != null) ? r.score - r.group : null, pscore:p ? p.score : null, plbl:p ? STEP_SH[p.step] + ' ' + gradeLbl(p.grade) + ' a.' : null, prog:(p && r.score != null) ? r.score - p.score : null, teacher:r.teacher }; });
   table($('t-dt'), 'dt', [
     { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
-    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return gradeLbl(r.grade) + ' année'; } },
     { k:'step', t:'Étape', l:1, v:function(r){ return STEP_IDX[r.step]; }, f:function(r){ return STEP_LBL[r.step]; } },
     { k:'subj', t:'Matière', l:1, v:function(r){ return r.subj.short + (r.comp ? ' › ' + r.comp : ''); }, f:function(r){ return r.comp ? esc(r.comp) : '<i class="kd" style="background:' + subjColor(r.kid, r.subj) + '"></i>' + esc(r.subj.short); }, sub:function(r){ return !!r.comp; } },
     { k:'score', t:'Résultat', v:function(r){ return r.score; }, f:function(r){ return r.score != null ? '<b>' + r.score + '</b>' : (r.ne ? 'NE' : '–'); } },
@@ -608,7 +608,7 @@ function renderNotes(){
     'Les matières ne sont pas toutes notées à chaque étape (par exemple la musique et les arts plastiques commencent souvent à l’étape 2) : la moyenne générale d’une étape dépend donc des matières notées cette étape-là.',
     'Chaque année terminée a un résultat final : c’est celui que l’école calcule à partir des trois étapes (l’étape 3 pèse le plus). Il est affiché comme un 4e point après l’étape 3, mais il n’entre pas dans les moyennes par matière (pour ne pas compter deux fois la même année). Pour 2026-27, l’année n’est pas terminée : pas encore de résultat final.',
     'Les compétences (Lire, Écrire, Résoudre une situation-problème…) sont des sous-notes d’une matière ; elles n’ont pas de moyenne du groupe et n’entrent dans aucune moyenne. Cochez « Compétences » à gauche pour les voir dans le tableau détaillé.',
-    'Les niveaux changent d’année : les années 2022-23 à 2024-25 de Léo sont en 1re à 3e année, celles de Zoé en 1re et 2e année (2026-27 : 3e année). Les groupes-classes ne sont donc pas les mêmes d’une année à l’autre.',
+    'Les années sont des années scolaires (1re année, 2e année…), pas des années du calendrier : Zoé et Léo se comparent au même niveau scolaire. Léo : 1re année en 2022-23 jusqu’à la 5e année en 2026-27. Zoé : 1re année en 2024-25 jusqu’à la 3e année en 2026-27. Les groupes-classes changent d’une année à l’autre.',
     nes
   ].filter(Boolean).map(function(t){ return '<li>' + t + '</li>'; }).join('');
 }
