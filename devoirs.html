@@ -137,11 +137,33 @@
     </div>
   </section>
 
-  <!-- 2a. LISTE DE MOTS -->
+  <!-- 2a. LISTES DE MOTS (cases à cocher) -->
   <section id="s-lists" class="hidden">
     <div class="card">
-      <h2 class="center">Quelle liste de mots ?</h2>
-      <div id="listBtns"></div>
+      <h2 class="center">Quelles listes de mots ?</h2>
+      <p class="center small-t">Coche une ou plusieurs listes.</p>
+      <div class="chips" id="listChips"></div>
+      <div class="row" style="align-items:center;gap:8px;margin:6px 0 4px">
+        <span style="font-weight:700">Liste de</span>
+        <input id="rgFrom" type="number" min="1" inputmode="numeric" style="width:84px;padding:8px">
+        <span style="font-weight:700">à</span>
+        <input id="rgTo" type="number" min="1" inputmode="numeric" style="width:84px;padding:8px">
+        <button class="alt small" id="rgGo" type="button">Cocher</button>
+      </div>
+      <div class="row" style="gap:8px;margin-bottom:8px"><button class="alt small" id="listsAll" type="button">Tout cocher</button><button class="alt small" id="listsNone" type="button">Tout décocher</button></div>
+      <p id="listsMsg" class="small-t" style="color:var(--red);min-height:1.2em"></p>
+      <button class="big green" id="listsOk" type="button">Continuer ➜</button>
+    </div>
+  </section>
+
+  <!-- 2a'. BLOCS DE VERBES (cases à cocher) -->
+  <section id="s-blocs" class="hidden">
+    <div class="card">
+      <h2 class="center">Quels blocs de verbes ?</h2>
+      <p class="center small-t">Coche un ou plusieurs blocs.</p>
+      <div class="chips" id="blocChips"></div>
+      <p id="blocsMsg" class="small-t" style="color:var(--red);min-height:1.2em"></p>
+      <button class="big green" id="blocsOk" type="button">Continuer ➜</button>
     </div>
   </section>
 
@@ -162,6 +184,8 @@
       <p class="center small-t">Les mots réussis 2 fois ne reviennent plus. Les mots ratés reviennent.</p>
       <button class="big purple" id="mTest" type="button">📝 Test</button>
       <p class="center small-t">Sans aide, une seule chance par question.</p>
+      <button class="big alt" id="mQA" type="button">🧪 QA (essai)</button>
+      <p class="center small-t">Pour essayer : rien n'est enregistré, aucun courriel, la progression ne change pas.</p>
     </div>
   </section>
 
@@ -196,6 +220,7 @@
   <section id="s-result" class="hidden">
     <div class="card">
       <div class="bigscore" id="rTitle"></div>
+      <div class="bigscore" id="rPct" style="font-size:2.2rem;margin-top:-4px"></div>
       <div class="pair"><div class="okb"><b id="rOk">0</b>réussites</div><div class="kob"><b id="rKo">0</b>échecs</div></div>
       <p class="center" id="rMsg" style="font-weight:700;font-size:1.2rem"></p>
       <p class="center small-t" id="rSave"></p>
@@ -310,7 +335,7 @@ $('voiceSel').addEventListener('change', function(){ ls('dv_voice', $('voiceSel'
 $('voiceTest').addEventListener('click', function(){ audio(); speak('Bonjour, voici une dictée de mots.'); });
 
 /* ----------------------------------------------------------- NAVIGATION */
-var SCREENS = ['home','pin','subject','lists','tenses','mode','count','quiz','result','admin'];
+var SCREENS = ['home','pin','subject','lists','blocs','tenses','mode','count','quiz','result','admin'];
 function show(id){ SCREENS.forEach(function(s){ $('s-'+s).classList.toggle('hidden', s!==id); }); window.scrollTo(0,0); }
 var S = { who:null, cat:null, mode:null, tenses:[], n:15, data:null, qs:[], i:0, answers:[], answered:false, key:null };
 function setWho(p){ S.who = p; var w = $('who'); if(p){ w.classList.remove('hidden'); w.innerHTML = '<span class="av" style="background:'+p.color+'">'+esc(p.name[0])+'</span>'+esc(p.name)+' · '+p.annee+'e'; } else w.classList.add('hidden'); }
@@ -337,22 +362,62 @@ function chooseSubject(p){
     }).catch(function(){ (cat==='vocabulaire' ? $('vocInfo') : $('verbInfo')).textContent = 'Connexion impossible. Vérifie internet.'; });
   });
 }
+/* Vocabulaire : cases à cocher = GÉNÉRAL (mots de 3e) + Liste 1, 2, 3... (+ autres listes nommées) */
+function chipHtml(value, label, checked){ return '<label class="chip"><input type="checkbox" value="'+esc(value)+'"'+(checked?' checked':'')+'><span>'+esc(label)+'</span></label>'; }
 $('bVoc').addEventListener('click', function(){
-  S.cat='vocabulaire'; S.tenses=[]; S.liste=null;
-  var items = (S.counts.vocabulaire && S.counts.vocabulaire.data.items) || [], names = [], cnt = {};
-  items.forEach(function(it){ var l = it.liste || ''; if(!(l in cnt)){ cnt[l] = 0; names.push(l); } cnt[l]++; });
-  if(names.length < 2){ show('mode'); return; }
-  var box = $('listBtns'); box.innerHTML = '';
-  names.sort().forEach(function(l){ var b = document.createElement('button'); b.type='button'; b.className='big green'; b.textContent = l + ' (' + cnt[l] + ')'; b.addEventListener('click', function(){ S.liste = l; show('mode'); }); box.appendChild(b); });
-  var all = document.createElement('button'); all.type='button'; all.className='big alt'; all.textContent = 'Toutes les listes (' + items.length + ')'; all.addEventListener('click', function(){ S.liste = null; show('mode'); }); box.appendChild(all);
+  S.cat='vocabulaire'; S.tenses=[]; S.listSel=null; S.blocSel=null;
+  var items = (S.counts.vocabulaire && S.counts.vocabulaire.data.items) || [], groups = {}, order = [];
+  items.forEach(function(it){
+    var l = it.liste || ''; if(!groups[l]){ groups[l] = {name:l, no:it.liste_no, general:!!it.general, n:0}; order.push(l); } groups[l].n++;
+  });
+  var gen = order.filter(function(l){ return groups[l].general; }), num = order.filter(function(l){ return !groups[l].general && groups[l].no != null; }), oth = order.filter(function(l){ return !groups[l].general && groups[l].no == null; });
+  num.sort(function(a,b){ return groups[a].no - groups[b].no; }); oth.sort();
+  S.listGroups = groups;
+  if(gen.length + num.length + oth.length < 2){ S.listSel = order; show('mode'); return; }   // only one list: no question
+  var html = '';
+  gen.forEach(function(l){ html += chipHtml(l, 'GÉNÉRAL ('+groups[l].n+')', false); });
+  num.forEach(function(l){ html += chipHtml(l, 'Liste '+groups[l].no+' ('+groups[l].n+')', false); });
+  oth.forEach(function(l){ html += chipHtml(l, l+' ('+groups[l].n+')', false); });
+  $('listChips').innerHTML = html; $('listsMsg').textContent = ''; $('rgFrom').value = ''; $('rgTo').value = '';
   show('lists');
 });
+function listBoxes(){ return Array.prototype.slice.call(document.querySelectorAll('#listChips input')); }
+$('listsAll').addEventListener('click', function(){ listBoxes().forEach(function(b){ b.checked = true; }); });
+$('listsNone').addEventListener('click', function(){ listBoxes().forEach(function(b){ b.checked = false; }); });
+$('rgGo').addEventListener('click', function(){
+  var a = parseInt($('rgFrom').value,10), b = parseInt($('rgTo').value,10);
+  if(isNaN(a) && isNaN(b)){ $('listsMsg').textContent = 'Écris le numéro de départ et de fin.'; return; }
+  if(isNaN(a)) a = b; if(isNaN(b)) b = a; if(a > b){ var t = a; a = b; b = t; }
+  var n = 0;
+  listBoxes().forEach(function(box){ var g = S.listGroups[box.value]; if(g && g.no != null && g.no >= a && g.no <= b){ box.checked = true; n++; } });
+  $('listsMsg').textContent = n ? '' : 'Aucune liste entre ' + a + ' et ' + b + '.';
+});
+$('listsOk').addEventListener('click', function(){
+  S.listSel = listBoxes().filter(function(b){ return b.checked; }).map(function(b){ return b.value; });
+  if(!S.listSel.length){ $('listsMsg').textContent = 'Coche au moins une liste.'; return; }
+  show('mode');
+});
+
+/* Verbes : cases à cocher pour les blocs (A, B, C...), puis les temps */
 $('bVerb').addEventListener('click', function(){
-  S.cat='verbes';
+  S.cat='verbes'; S.listSel=null; S.blocSel=null;
+  var items = (S.counts.verbes && S.counts.verbes.data.items) || [], blocs = {}, order = [];
+  items.forEach(function(v){ var b = v.bloc || ''; if(!(b in blocs)){ blocs[b] = 0; order.push(b); } blocs[b]++; });
+  order.sort(function(a,b){ return a==='' ? 1 : b==='' ? -1 : a < b ? -1 : 1; });
+  if(order.length < 2){ S.blocSel = order; showTenses(); return; }
+  $('blocChips').innerHTML = order.map(function(b){ return chipHtml(b, (b ? 'Bloc '+b : 'Autres verbes')+' ('+blocs[b]+')', true); }).join('');
+  $('blocsMsg').textContent = ''; show('blocs');
+});
+$('blocsOk').addEventListener('click', function(){
+  S.blocSel = Array.prototype.map.call(document.querySelectorAll('#blocChips input:checked'), function(i){ return i.value; });
+  if(!S.blocSel.length){ $('blocsMsg').textContent = 'Coche au moins un bloc.'; return; }
+  showTenses();
+});
+function showTenses(){
   var box = $('tenseChips'); box.innerHTML = '';
   TENSES.forEach(function(t){ var l = document.createElement('label'); l.className='chip'; l.innerHTML = '<input type="checkbox" value="'+t.id+'"'+(t.on?' checked':'')+'><span>'+t.label+'</span>'; box.appendChild(l); });
   show('tenses');
-});
+}
 $('tensesOk').addEventListener('click', function(){
   S.tenses = Array.prototype.map.call(document.querySelectorAll('#tenseChips input:checked'), function(i){ return i.value; });
   if(!S.tenses.length){ alert('Choisis au moins un temps.'); return; }
@@ -360,6 +425,7 @@ $('tensesOk').addEventListener('click', function(){
 });
 $('mTrain').addEventListener('click', function(){ S.mode='entrainement'; askCount(); });
 $('mTest').addEventListener('click', function(){ S.mode='test'; askCount(); });
+$('mQA').addEventListener('click', function(){ S.mode='qa'; askCount(); });
 function askCount(){
   var box = $('nqBtns'); box.innerHTML = '';
   [5,10,15,20,30].forEach(function(n){ var b = document.createElement('button'); b.type='button'; b.textContent = n; b.addEventListener('click', function(){ start(n); }); box.appendChild(b); });
@@ -383,7 +449,7 @@ function buildQuestions(n){
   if(S.cat==='vocabulaire'){
     var seen = {};
     items.forEach(function(it){
-      if(S.liste && it.liste !== S.liste) return;
+      if(S.listSel && S.listSel.indexOf(it.liste) < 0) return;
       if(seen[it.item]) return; seen[it.item] = 1;       // the same word in two lists is asked once
       var p = prog[it.item]||{ok:0,ko:0};
       pool.push({key:it.item, item:it.item, details:it.details, p:p, kind:'vocab'});
@@ -391,6 +457,7 @@ function buildQuestions(n){
   } else {
     items.forEach(function(v){
       if(!v.forms) return;
+      if(S.blocSel && S.blocSel.indexOf(v.bloc || '') < 0) return;
       S.tenses.forEach(function(t){
         if(!v.forms[t]) return;
         var key = v.item+'|'+t, p = prog[key]||{ok:0,ko:0};
@@ -408,7 +475,7 @@ function buildQuestions(n){
     if(q.kind==='verb'){
       if(q.tense==='participe_passe'){ q.expected = [].concat(q.forms); q.label = ''; }
       else { var p = PRON[Math.floor(Math.random()*PRON.length)]; var f = q.forms[p]; q.pron = p; q.expected = [].concat(f); q.label = pronLabel(p, q.tense, [].concat(f)[0]); }
-    } else q.expected = [q.item];
+    } else { var bare = q.item.replace(/^(un|une|le|la|les|des|du|l') ?/i, ''); q.expected = bare && bare !== q.item ? [q.item, bare] : [q.item]; }
     return q;
   });
 }
@@ -428,7 +495,7 @@ function qText(q){
 }
 function showQ(){
   var q = S.qs[S.i]; S.answered = false;
-  $('qnum').textContent = 'Question '+(S.i+1)+' sur '+S.qs.length;
+  $('qnum').textContent = 'Question '+(S.i+1)+' sur '+S.qs.length + (S.mode==='qa' ? ' · 🧪 QA : rien n\'est enregistré' : '');
   $('prog').style.width = (S.i/S.qs.length*100)+'%';
   $('prompt').textContent = qText(q);
   var test = S.mode==='test';
@@ -441,7 +508,10 @@ function showQ(){
   }
   $('hint').textContent = hint;
   var fb = $('fb'); fb.className='fb hidden'; fb.innerHTML=''; $('nextWrap').classList.add('hidden'); $('check').classList.remove('hidden');
-  var a = $('ans'); a.value=''; a.disabled=false; a.focus();
+  var a = $('ans'); a.disabled=false;
+  // verbes : la personne est déjà écrite dans la case (sauf pour le participe passé)
+  q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
+  a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
   setTimeout(function(){ sayQ(); }, 250);
 }
 function sayQ(rate){
@@ -482,26 +552,28 @@ function diffHtml(mine, right){
 function check(){
   if(S.answered) return;
   var q = S.qs[S.i], raw = $('ans').value;
-  if(!raw.trim()){ $('ans').focus(); return; }
+  if(!raw.trim() || norm(raw) === norm(q.prefill||'')){ $('ans').focus(); return; }
   S.answered = true; $('ans').disabled = true; $('check').classList.add('hidden');
   var user = stripPron(norm(raw), q);
   var ok = q.expected.some(function(e){ return norm(e) === user; });
   var shown = q.expected[0];
-  var rec = {key:q.key, item:q.item, tense:q.tense||null, pron:q.pron||null, answer:raw.trim(), expected:shown, ok:ok};
+  var mine = raw.trim();
+  if(q.prefill && norm(mine).indexOf(norm(q.prefill)) === 0){ var cut = mine.slice(q.prefill.trim().length).replace(/^[' ]+/, ''); if(cut) mine = cut; }   // la personne pré-écrite n'est pas une faute
+  var rec = {key:q.key, item:q.item, tense:q.tense||null, pron:q.pron||null, answer:mine, expected:shown, ok:ok};
   S.answers.push(rec);
   var fb = $('fb');
   if(ok){
     fb.className = 'fb ok pop'; fb.innerHTML = '<h2>✅ ' + ['Bravo','Super','Excellent','Génial','Parfait','Bien joué'][Math.floor(Math.random()*6)] + ' !</h2><div class="word">'+esc(shown)+'</div>';
     celebrate();
   } else {
-    var df = diffHtml(raw.trim(), shown);
-    var accentOnly = norm(raw).normalize('NFD').replace(/[̀-ͯ]/g,'') === norm(shown).normalize('NFD').replace(/[̀-ͯ]/g,'');
+    var df = diffHtml(mine, shown);
+    var accentOnly = norm(mine).normalize('NFD').replace(/[̀-ͯ]/g,'') === norm(shown).normalize('NFD').replace(/[̀-ͯ]/g,'');
     fb.className = 'fb ko';
     fb.innerHTML = '<h2>❌ ' + (accentOnly ? 'Presque ! Attention aux accents' : 'Pas tout à fait…') + '</h2>'
       + '<div class="small-t">Ta réponse</div><div class="word mine">'+df.mine+'</div>'
       + '<div class="small-t" style="margin-top:8px">Il fallait écrire</div><div class="word">'+df.right+'</div>';
     failFx();
-    if(S.mode==='entrainement') setTimeout(function(){ speak(shown, 0.6); }, 450);
+    if(S.mode!=='test') setTimeout(function(){ speak(shown, 0.6); }, 450);
   }
   $('nextWrap').classList.remove('hidden');
   $('next').textContent = (S.i===S.qs.length-1) ? 'Voir mon résultat 🏆' : 'Suite ➜';
@@ -514,6 +586,7 @@ function finish(){
   var ok = S.answers.filter(function(a){ return a.ok; }).length, ko = S.answers.length - ok;
   $('prog').style.width = '100%';
   $('rTitle').textContent = ok + ' / ' + S.answers.length;
+  $('rPct').textContent = Math.round(ok / S.answers.length * 100) + ' %';
   $('rOk').textContent = ok; $('rKo').textContent = ko;
   var pct = ok/S.answers.length;
   $('rMsg').textContent = pct===1 ? 'Parfait ! Tout est réussi ! 🏆' : pct>=0.8 ? 'Très bien ! 🎉' : pct>=0.6 ? 'Bon travail, continue ! 👍' : pct>=0.4 ? 'On s\'entraîne encore et ça ira mieux ! 💪' : 'Pas grave : on apprend en s\'entraînant ! 🌱';
@@ -525,6 +598,7 @@ function finish(){
   }).join('');
   show('result');
   if(pct>=0.6) celebrate();
+  if(S.mode==='qa'){ $('rSave').textContent = '🧪 Mode QA : rien n\'est enregistré, aucun courriel envoyé.'; return; }
   saveResult(ok, ko);
 }
 function saveResult(ok, ko){
