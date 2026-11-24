@@ -134,6 +134,8 @@
       <p class="center small-t" id="vocInfo"></p>
       <button class="big purple" id="bVerb" type="button">✏️ Verbes</button>
       <p class="center small-t" id="verbInfo"></p>
+      <button class="big" id="bDict" type="button" style="background:#0ea5e9;box-shadow:0 5px 0 #0369a1">✍️ Dictée</button>
+      <p class="center small-t" id="dictInfo"></p>
     </div>
   </section>
 
@@ -151,6 +153,7 @@
         </div>
         <p id="rgInfo" class="center small-t" style="min-height:1.4em"></p>
       </div>
+      <label id="dictVerbBox" class="hidden" style="display:flex;align-items:center;gap:10px;font-weight:700;margin:10px 0"><input type="checkbox" id="dictVerbs" checked style="width:26px;height:26px"> Inclure aussi les phrases avec les verbes à l'étude</label>
       <p id="listsMsg" class="small-t" style="color:var(--red);min-height:1.2em"></p>
       <button class="big green" id="listsOk" type="button">Continuer ➜</button>
     </div>
@@ -204,7 +207,7 @@
   <!-- 4. COMBIEN -->
   <section id="s-count" class="hidden">
     <div class="card">
-      <h2 class="center">Combien de questions ?</h2>
+      <h2 class="center" id="nqTitle">Combien de questions ?</h2>
       <div class="row nq" id="nqBtns"></div>
       <p class="center small-t" style="margin-top:16px">Ou un autre nombre :</p>
       <div class="row"><input id="nqCustom" type="number" min="1" max="100" inputmode="numeric" placeholder="Nombre" style="flex:1 1 120px"><button class="green" id="nqGo" type="button" style="flex:1 1 120px">Commencer</button></div>
@@ -226,6 +229,34 @@
       <p style="margin-top:12px"><button class="big green" id="check" type="button">✔ Vérifier</button></p>
       <div id="fb" class="fb hidden" role="status" aria-live="polite"></div>
       <p id="nextWrap" class="hidden"><button class="big" id="next" type="button">Suite ➜</button></p>
+    </div>
+  </section>
+
+  <!-- DICTÉE -->
+  <section id="s-dict" class="hidden">
+    <div class="qnum" id="dtNum"></div>
+    <div class="bar"><i id="dtProg"></i></div>
+    <div class="card">
+      <div id="dtPlay">
+        <div class="prompt" style="font-size:1.4rem">✍️ Écris la phrase sur ta feuille.</div>
+        <p class="center small-t" id="dtState" style="min-height:1.4em"></p>
+        <div class="row" style="gap:10px;margin:10px 0">
+          <button class="purple" id="dtPause" type="button" style="flex:1 1 160px;font-size:1.3rem">⏸ Pause</button>
+          <button class="purple" id="dtBack" type="button" style="flex:1 1 160px;font-size:1.3rem">⏪ Reculer 5 s</button>
+        </div>
+        <div class="row" style="gap:10px;margin:10px 0">
+          <button class="alt" id="dtRepeat" type="button" style="flex:1 1 160px">🔁 Répéter la phrase</button>
+          <button class="alt" id="dtSlow" type="button" style="flex:1 1 160px">🐢 Plus lentement</button>
+        </div>
+        <p><button class="big green" id="dtNext" type="button">Phrase suivante ➜</button></p>
+      </div>
+      <div id="dtEnd" class="hidden center">
+        <div class="bigscore">✍️ Dictée terminée !</div>
+        <p id="dtEndMsg" class="small-t"></p>
+        <p style="font-size:1.1rem">Montre ta feuille à Papa pour la correction.</p>
+        <button class="big green" id="dtAgain" type="button">🔁 Une autre dictée</button>
+        <button class="big alt" id="dtHome" type="button">🏠 Accueil</button>
+      </div>
     </div>
   </section>
 
@@ -253,6 +284,7 @@
       <button data-t="progress" type="button">Progression</button>
       <button data-t="words" type="button">Mots</button>
       <button data-t="verbs" type="button">Verbes</button>
+      <button data-t="phrases" type="button">Phrases</button>
       <button data-t="import" type="button">Importer</button>
     </div>
     <div class="card" id="admBody">Chargement…</div>
@@ -361,12 +393,12 @@ $('voiceSel').addEventListener('change', function(){ ls('dv_voice', $('voiceSel'
 $('voiceTest').addEventListener('click', function(){ audio(); speak('Bonjour, voici une dictée de mots.'); });
 
 /* ----------------------------------------------------------- NAVIGATION */
-var SCREENS = ['home','pin','subject','lists','blocs','tenses','verbpick','mode','count','quiz','result','admin'];
+var SCREENS = ['home','pin','subject','lists','blocs','tenses','verbpick','mode','count','quiz','dict','result','admin'];
 function show(id){ SCREENS.forEach(function(s){ $('s-'+s).classList.toggle('hidden', s!==id); }); window.scrollTo(0,0); }
 var S = { who:null, cat:null, mode:null, tenses:[], n:15, data:null, qs:[], i:0, answers:[], answered:false, key:null };
 function setWho(p){ S.who = p; var w = $('who'); if(p){ w.classList.remove('hidden'); w.innerHTML = '<span class="av" style="background:'+p.color+'">'+esc(p.name[0])+'</span>'+esc(p.name)+' · '+p.annee+'e'; } else w.classList.add('hidden'); }
 function goHome(){ if(typeof stopTalk==='function') stopTalk(); else if(synth) synth.cancel(); setWho(null); $('sub').textContent = 'Écoute, écris, apprends !'; show('home'); }
-$('btnHome').addEventListener('click', function(){ if(!$('s-quiz').classList.contains('hidden') && S.answers.length && !confirm('Arrêter cet exercice ? Il ne sera pas enregistré.')) return; goHome(); });
+$('btnHome').addEventListener('click', function(){ if(!$('s-quiz').classList.contains('hidden') && S.answers.length && !confirm('Arrêter cet exercice ? Il ne sera pas enregistré.')) return; if(!$('s-dict').classList.contains('hidden') && !$('dtPlay').classList.contains('hidden') && !confirm('Arrêter la dictée ? Elle ne sera pas enregistrée.')) return; goHome(); });
 $('rHome').addEventListener('click', goHome);
 
 $('pZoe').addEventListener('click', function(){ audio(); chooseSubject(PUPILS.zoe); });
@@ -376,7 +408,9 @@ $('pPapa').addEventListener('click', function(){ $('pin').value=''; $('pinErr').
 function chooseSubject(p){
   setWho(p); $('sub').textContent = 'Bonjour ' + p.name + ' !';
   S.counts = {}; show('subject');
-  ['voc','verb'].forEach(function(k){ $(k+'Info').textContent = '…'; });
+  ['voc','verb','dict'].forEach(function(k){ $(k+'Info').textContent = '…'; });
+  S.phrases = null; $('bDict').disabled = true;
+  rpc('devoirs_phrases_list', {p_annee:p.annee}).then(function(r){ S.phrases = r||[]; $('bDict').disabled = !S.phrases.length; $('dictInfo').textContent = S.phrases.length ? S.phrases.length+' phrases' : 'Bientôt : les phrases arrivent.'; }).catch(function(){ $('dictInfo').textContent = 'Connexion impossible.'; });
   ['vocabulaire','verbes'].forEach(function(cat){
     rpc('devoirs_start', {p_eleve:p.name, p_annee:p.annee, p_cat:cat}).then(function(d){
       var items = d.items||[], prog = d.progress||{}, mastered = 0;
@@ -390,7 +424,8 @@ function chooseSubject(p){
 }
 /* Vocabulaire : GÉNÉRAL (mots de 3e) en case à cocher + « Liste de début » et « Liste de fin » (tous les mots des listes de l'intervalle) */
 function chipHtml(value, label, checked){ return '<label class="chip"><input type="checkbox" value="'+esc(value)+'"'+(checked?' checked':'')+'><span>'+esc(label)+'</span></label>'; }
-$('bVoc').addEventListener('click', function(){
+function openLists(dict){
+  S.dict = !!dict; $('dictVerbBox').classList.toggle('hidden', !dict);
   S.cat='vocabulaire'; S.tenses=[]; S.listSel=null; S.blocSel=null;
   var items = (S.counts.vocabulaire && S.counts.vocabulaire.data.items) || [], groups = {}, order = [];
   items.forEach(function(it){
@@ -399,7 +434,7 @@ $('bVoc').addEventListener('click', function(){
   var gen = order.filter(function(l){ return groups[l].general; }), num = order.filter(function(l){ return !groups[l].general && groups[l].no != null; }), oth = order.filter(function(l){ return !groups[l].general && groups[l].no == null; });
   num.sort(function(a,b){ return groups[a].no - groups[b].no; }); oth.sort();
   S.listGroups = groups; S.numLists = num;
-  if(gen.length + num.length + oth.length < 2){ S.listSel = order; show('mode'); return; }   // une seule liste : pas de question
+  if(gen.length + num.length + oth.length < 2){ S.listSel = order; if(S.dict) askCount(); else show('mode'); return; }   // une seule liste : pas de question
   var html = '';
   gen.forEach(function(l){ html += chipHtml(l, 'GÉNÉRAL ('+groups[l].n+' mots)', false); });
   oth.forEach(function(l){ html += chipHtml(l, l+' ('+groups[l].n+' mots)', false); });
@@ -409,7 +444,9 @@ $('bVoc').addEventListener('click', function(){
   $('rgBox').classList.toggle('hidden', !num.length);
   $('listsMsg').textContent = ''; updateRangeInfo();
   show('lists');
-});
+}
+$('bVoc').addEventListener('click', function(){ openLists(false); });
+$('bDict').addEventListener('click', function(){ openLists(true); });
 // les listes numérotées dont le numéro est entre début et fin (fin vide = même liste que le début)
 function rangeLists(){
   var a = parseInt($('rgFrom').value,10), b = parseInt($('rgTo').value,10);
@@ -427,7 +464,7 @@ $('listsOk').addEventListener('click', function(){
   var sel = Array.prototype.map.call(document.querySelectorAll('#listChips input:checked'), function(i){ return i.value; });
   S.listSel = sel.concat(rangeLists());
   if(!S.listSel.length){ $('listsMsg').textContent = 'Choisis GÉNÉRAL, ou une liste de début et de fin.'; return; }
-  show('mode');
+  if(S.dict) askCount(); else show('mode');
 });
 
 /* Verbes : cases à cocher pour les blocs (A, B, C...), puis les temps */
@@ -471,15 +508,16 @@ $('verbsOk').addEventListener('click', function(){
   if(!S.verbSel.length){ $('verbsMsg').textContent = 'Garde au moins un verbe.'; return; }
   show('mode');
 });
-$('mTrain').addEventListener('click', function(){ S.mode='entrainement'; askCount(); });
-$('mTest').addEventListener('click', function(){ S.mode='test'; askCount(); });
-$('mQA').addEventListener('click', function(){ S.mode='qa'; askCount(); });
+$('mTrain').addEventListener('click', function(){ S.mode='entrainement'; S.dict=false; askCount(); });
+$('mTest').addEventListener('click', function(){ S.mode='test'; S.dict=false; askCount(); });
+$('mQA').addEventListener('click', function(){ S.mode='qa'; S.dict=false; askCount(); });
 function askCount(){
   var box = $('nqBtns'); box.innerHTML = '';
-  [5,10,15,20,30].forEach(function(n){ var b = document.createElement('button'); b.type='button'; b.textContent = n; b.addEventListener('click', function(){ start(n); }); box.appendChild(b); });
+  $('nqTitle').textContent = S.dict ? 'Combien de phrases ?' : 'Combien de questions ?';
+  (S.dict ? [3,5,8,10,15] : [5,10,15,20,30]).forEach(function(n){ var b = document.createElement('button'); b.type='button'; b.textContent = n; b.addEventListener('click', function(){ S.dict ? startDict(n) : start(n); }); box.appendChild(b); });
   $('nqMsg').textContent = ''; $('nqCustom').value = ''; show('count');
 }
-$('nqGo').addEventListener('click', function(){ var n = parseInt($('nqCustom').value,10); if(!(n>=1 && n<=100)){ $('nqMsg').textContent = 'Écris un nombre entre 1 et 100.'; return; } start(n); });
+$('nqGo').addEventListener('click', function(){ var n = parseInt($('nqCustom').value,10); if(!(n>=1 && n<=100)){ $('nqMsg').textContent = 'Écris un nombre entre 1 et 100.'; return; } S.dict ? startDict(n) : start(n); });
 
 /* ----------------------------------------------------------------- QUIZ */
 function norm(s){ return String(s||'').trim().replace(/\s+/g,' ').toLowerCase().replace(/[’‘`´]/g,"'").replace(/œ/g,'oe').replace(/æ/g,'ae'); }
@@ -656,7 +694,7 @@ function lockNext(ms){
 }
 function next(){ if(!S.answered || $('next').disabled) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
 
-function stopTalk(){ S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
+function stopTalk(){ if(typeof dtStop==='function') dtStop(); S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
 function finish(){
   stopTalk();
   var ok = S.answers.filter(function(a){ return a.ok; }).length, ko = S.answers.length - ok;
@@ -692,6 +730,90 @@ function saveResult(ok, ko){
 }
 $('rAgain').addEventListener('click', function(){ start(S.n); });
 
+
+/* ------------------------------------------------------------- DICTÉE */
+// Les phrases sont écrites d'avance (table devoirs_phrases). L'élève écrit sur papier ; Papa corrige.
+var D = {phr:[], i:0, segs:[], si:0, state:'idle', rate:0.85, gen:0, t:null, startT:null};
+var STOPW = {};
+('et ou le la les un une des du de en au aux il elle on je tu nous vous ils elles mon ma mes ton ta tes son sa ses ce cet cette ces dans avec pour par sur sous que qui mais est sont ont avoir être très pas ne se si y là où quand comme plus aussi tout tous bien rien').split(' ').forEach(function(w){ STOPW[w] = 1; });
+function bareTok(item){ return String(item).trim().toLowerCase().replace(/^(une|un|les|des|du|le|la) +|^l'/, ''); }
+function startDict(n){
+  audio();
+  var data = S.counts && S.counts.vocabulaire && S.counts.vocabulaire.data, phr = S.phrases || [];
+  if(!data || !phr.length){ $('nqMsg').textContent = 'Les phrases ne sont pas chargées. Reviens à l\'accueil.'; return; }
+  var pool = {}, inclV = $('dictVerbs').checked;
+  (data.items||[]).forEach(function(it){ if(S.listSel && S.listSel.indexOf(it.liste) < 0) return; var b = bareTok(it.item); if(b.length >= 3 && b.indexOf(' ') < 0 && b.indexOf("'") < 0 && !STOPW[b]) pool[b] = 1; });
+  var ok = phr.filter(function(f){ return (f.mots||[]).some(function(m){ return pool[m]; }) || (inclV && (f.verbes||[]).length); });
+  if(!ok.length){ $('nqMsg').textContent = 'Aucune phrase pour ces listes. Choisis d\'autres listes.'; return; }
+  var seen = {}; try{ (JSON.parse(localStorage.getItem('dv_dict_'+S.who.name)||'[]')).forEach(function(i){ seen[i] = 1; }); }catch(e){}
+  var fresh = shuffle(ok.filter(function(f){ return !seen[f.id]; })), old = shuffle(ok.filter(function(f){ return seen[f.id]; }));
+  D.phr = fresh.concat(old).slice(0, n);
+  try{ var all = Object.keys(seen).map(Number).concat(D.phr.map(function(f){ return f.id; })); localStorage.setItem('dv_dict_'+S.who.name, JSON.stringify(all.slice(-300))); }catch(e){}
+  D.i = 0; D.rate = 0.85; $('dtSlow').textContent = '🐢 Plus lentement';
+  $('dtPlay').classList.remove('hidden'); $('dtEnd').classList.add('hidden');
+  show('dict'); dtShow();
+  if(D.phr.length < n) $('dtNum').textContent += ' · seulement ' + D.phr.length + ' phrases pour ce choix';
+}
+function segsOf(text){
+  var parts = text.match(/[^,;:.!?]+[,;:.!?]*/g) || [text], out = [];
+  parts.forEach(function(p){ var w = p.trim().split(/\s+/); for(var k = 0; k < w.length; k += 4) out.push(w.slice(k, k+4).join(' ')); });
+  return out;
+}
+function segSec(s){ return s.length / (14 * D.rate / 0.85) + 0.35; }   // durée estimée d'un morceau, en secondes
+function dtStop(){ D.gen++; clearTimeout(D.t); clearTimeout(D.startT); if(synth) synth.cancel(); }
+function dtLabels(){
+  var st = D.state;
+  $('dtPause').textContent = st==='paused' ? '▶️ Reprendre' : '⏸ Pause';
+  $('dtState').textContent = st==='paused' ? 'En pause' : st==='done' ? 'Fin de la phrase : réécoute ou passe à la suivante.' : st==='play' ? '🔊 Écoute…' : '';
+}
+function dtShow(){
+  dtStop();
+  $('dtNum').textContent = 'Phrase ' + (D.i+1) + ' sur ' + D.phr.length;
+  $('dtProg').style.width = (D.i / D.phr.length * 100) + '%';
+  D.segs = segsOf(D.phr[D.i].phrase); D.si = 0; D.state = 'idle'; dtLabels();
+  var g = D.gen; D.startT = setTimeout(function(){ if(g === D.gen) dtPlayFrom(0); }, 1000);
+}
+function dtPlayFrom(i){
+  if(!synth) return; dtStop(); D.si = Math.max(0, i); D.state = 'play'; dtLabels(); dtSeg(D.gen);
+}
+function dtSeg(g){
+  if(g !== D.gen || D.state !== 'play') return;
+  if(D.si >= D.segs.length){ D.state = 'done'; dtLabels(); return; }
+  var u = new SpeechSynthesisUtterance(D.segs[D.si]); u.lang = 'fr-CA';
+  var v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
+  u.rate = D.rate; var done = false;
+  function nxt(){ if(done || g !== D.gen) return; done = true; D.si++; D.t = setTimeout(function(){ dtSeg(g); }, 350); }
+  u.onend = nxt; u.onerror = function(){ done = true; };
+  setTimeout(nxt, 8000);
+  synth.speak(u);
+}
+$('dtPause').addEventListener('click', function(){
+  if(D.state === 'play'){ dtStop(); D.state = 'paused'; dtLabels(); }
+  else if(D.state === 'paused'){ dtPlayFrom(D.si); }
+  else dtPlayFrom(0);
+});
+$('dtBack').addEventListener('click', function(){
+  var j = Math.min(D.si, D.segs.length - 1), acc = 0;
+  while(j > 0 && acc < 5){ j--; acc += segSec(D.segs[j]); }
+  dtPlayFrom(j);
+});
+$('dtRepeat').addEventListener('click', function(){ dtPlayFrom(0); });
+$('dtSlow').addEventListener('click', function(){ D.rate = D.rate > 0.7 ? 0.6 : 0.85; $('dtSlow').textContent = D.rate > 0.7 ? '🐢 Plus lentement' : '🚶 Vitesse normale'; dtPlayFrom(0); });
+$('dtNext').addEventListener('click', function(){
+  dtStop();
+  if(D.i < D.phr.length - 1){ D.i++; dtShow(); } else dtFinish();
+});
+function dtFinish(){
+  dtStop(); $('dtProg').style.width = '100%'; $('dtNum').textContent = '';
+  $('dtPlay').classList.add('hidden'); $('dtEnd').classList.remove('hidden');
+  var msg = $('dtEndMsg'); msg.textContent = 'Enregistrement…';
+  rpc('devoirs_dictee_save', {p_eleve:S.who.name, p_annee:S.who.annee, p_phrases:D.phr.map(function(f){ return {id:f.id, phrase:f.phrase}; })})
+    .then(function(){ msg.textContent = D.phr.length + ' phrases dictées · enregistré ✓ (Papa les verra dans ses résultats)'; })
+    .catch(function(){ msg.textContent = '⚠️ Pas de connexion : la dictée n\'est pas enregistrée.'; });
+}
+$('dtAgain').addEventListener('click', function(){ S.dict = true; askCount(); });
+$('dtHome').addEventListener('click', goHome);
+
 /* ----------------------------------------------------------------- ADMIN */
 var PIN = null;
 $('pinOk').addEventListener('click', function(){
@@ -706,7 +828,7 @@ document.querySelectorAll('#admTabs button').forEach(function(b){ b.addEventList
 function admTab(t){
   document.querySelectorAll('#admTabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   var body = $('admBody'); body.textContent = 'Chargement…';
-  if(t==='results') admResults(body); else if(t==='progress') admProgress(body); else if(t==='words') admList(body,'vocabulaire'); else if(t==='verbs') admList(body,'verbes'); else admImport(body);
+  if(t==='results') admResults(body); else if(t==='progress') admProgress(body); else if(t==='words') admList(body,'vocabulaire'); else if(t==='verbs') admList(body,'verbes'); else if(t==='phrases') admPhrases(body); else admImport(body);
 }
 function fdate(s){ var d = new Date(s); return d.toLocaleDateString('fr-CA')+' '+d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}); }
 function admResults(body){
@@ -714,7 +836,13 @@ function admResults(body){
     if(d.error){ body.textContent='Accès refusé.'; return; }
     var rows = d.rows||[];
     body.innerHTML = '<h2>Résultats</h2>' + (rows.length ? '<div class="row" style="margin-bottom:10px;align-items:center"><button class="alt small" id="rSel" type="button">Tout sélectionner</button><button class="small" id="rDel" type="button" style="background:var(--red);box-shadow:0 5px 0 #991b1b">Supprimer la sélection</button><span class="small-t" id="rMsg">La progression (mots maîtrisés) n\'est pas touchée.</span></div><div class="overflow"><table><thead><tr><th></th><th>Date et heure</th><th>Élève</th><th>Matière</th><th>Mode</th><th>Réussites</th><th>Échecs</th><th>Courriel</th></tr></thead><tbody>'
-      + rows.map(function(r){ return '<tr><td><input type="checkbox" class="rc" data-id="'+esc(r.id)+'" style="width:22px;height:22px"></td><td>'+esc(fdate(r.played_at))+'</td><td>'+esc(r.eleve)+'</td><td>'+esc(r.categorie)+(r.temps?' ('+esc((r.temps||[]).join(', '))+')':'')+'</td><td>'+esc(r.mode)+'</td><td class="good">'+r.nb_ok+'</td><td class="bad">'+r.nb_ko+'</td><td>'+(r.emailed_at?'envoyé':'—')+'</td></tr>'; }).join('')
+      + rows.map(function(r){
+          var chk = '<td><input type="checkbox" class="rc" data-id="'+esc(r.id)+'" style="width:22px;height:22px"></td><td>'+esc(fdate(r.played_at))+'</td><td>'+esc(r.eleve)+'</td>';
+          if(r.categorie==='dictee'){
+            var ph = (Array.isArray(r.details) ? r.details : []).map(function(a, i){ return '<li>'+esc(a.phrase)+'</li>'; }).join('');
+            return '<tr>'+chk+'<td>✍️ Dictée</td><td>dictée</td><td colspan="3"><details><summary>'+r.nb_questions+' phrases à corriger</summary><ol style="margin:6px 0 0 18px">'+ph+'</ol></details></td></tr>';
+          }
+          return '<tr>'+chk+'<td>'+esc(r.categorie)+(r.temps?' ('+esc((r.temps||[]).join(', '))+')':'')+'</td><td>'+esc(r.mode)+'</td><td class="good">'+r.nb_ok+'</td><td class="bad">'+r.nb_ko+'</td><td>'+(r.emailed_at?'envoyé':'—')+'</td></tr>'; }).join('')
       + '</tbody></table></div>' : '<p class="muted">Aucun résultat pour l\'instant.</p>');
     if(!rows.length) return;
     var boxes = function(){ return Array.prototype.slice.call(body.querySelectorAll('.rc')); };
@@ -768,6 +896,28 @@ function admList(body, cat){
     $('lfBody').addEventListener('change', function(e){ var id = e.target.dataset.id; if(id) save(id); });
     if($('lfList')){ var seenL = {}; rows.forEach(function(r){ if(r.liste && !seenL[r.liste]){ seenL[r.liste]=1; var o = document.createElement('option'); o.value = r.liste; o.textContent = r.liste; $('lfList').appendChild(o); } }); $('lfList').addEventListener('change', render); }
     $('lfYear').addEventListener('change', render); $('lfQ').addEventListener('input', render); render();
+  }).catch(function(){ body.textContent='Erreur de connexion.'; });
+}
+function admPhrases(body){
+  rpc('devoirs_admin_phrases',{p_key:PIN}).then(function(d){
+    if(d.error){ body.textContent='Accès refusé.'; return; }
+    var rows = d.rows||[];
+    body.innerHTML = '<h2>Phrases de dictée ('+rows.length+')</h2><p class="small-t">Écrites d\'avance. Tu peux corriger une phrase ou la désactiver (case décochée = plus dictée). La colonne « Mots » montre les mots des listes repérés dans la phrase.</p>'
+      + '<div class="row" style="margin-bottom:10px"><select id="pfYear" style="flex:1 1 120px"><option value="">Toutes</option><option value="3">3e année</option><option value="5">5e année</option></select><input id="pfQ" type="text" placeholder="Chercher…" style="flex:2 1 160px"></div>'
+      + '<div class="small-t" id="pfCount"></div><div class="overflow"><table><thead><tr><th>Année</th><th>Phrase</th><th>Mots</th><th>Actif</th></tr></thead><tbody id="pfBody"></tbody></table></div>';
+    function render(){
+      var y = $('pfYear').value, q = norm($('pfQ').value);
+      var f = rows.filter(function(r){ return (!y || String(r.annee)===y) && (!q || norm(r.phrase).indexOf(q)>=0); });
+      $('pfCount').textContent = f.length + ' phrase(s)' + (f.length>150 ? ' — 150 affichées' : '');
+      $('pfBody').innerHTML = f.slice(0,150).map(function(r){ return '<tr><td>'+r.annee+'e</td><td><input type="text" class="pt" data-id="'+r.id+'" value="'+esc(r.phrase)+'" style="min-width:260px;padding:6px"></td><td class="small-t">'+esc((r.mots||[]).concat((r.verbes||[]).map(function(v){ return v+' (v.)'; })).join(', '))+'</td><td><input type="checkbox" class="pa" data-id="'+r.id+'"'+(r.actif?' checked':'')+' style="width:22px;height:22px"></td></tr>'; }).join('');
+    }
+    $('pfBody').addEventListener('change', function(e){
+      var id = e.target.dataset.id; if(!id) return;
+      var r = rows.filter(function(x){ return String(x.id)===id; })[0], t = $('pfBody').querySelector('.pt[data-id="'+id+'"]'), a = $('pfBody').querySelector('.pa[data-id="'+id+'"]');
+      r.phrase = t.value.trim() || r.phrase; r.actif = a.checked;
+      rpc('devoirs_admin_phrase_set',{p_key:PIN,p_id:r.id,p_phrase:r.phrase,p_actif:r.actif});
+    });
+    $('pfYear').addEventListener('change', render); $('pfQ').addEventListener('input', render); render();
   }).catch(function(){ body.textContent='Erreur de connexion.'; });
 }
 function addVerbsForm(){
