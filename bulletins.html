@@ -487,7 +487,7 @@ function renderSummary(){
         if(S.view === 'subj' && S.group) series.push({ id:k.kid + s.code + '_g', name:k.name + ' · ' + s.short + ' · groupe', color:subjColor(k.kid, s), dash:true, values:vg }); });
     }
   });
-  lineChart($('sum-chart'), $('sum-lg'), hidden.sum, { cats:cats, series:series, zero:S.view === 'gap' || S.view === 'gapsubj', sub:true, aria:titles[S.view] });
+  lineChart($('sum-chart'), $('sum-lg'), hidden.sum, { cats:cats, series:series, h:560, zero:S.view === 'gap' || S.view === 'gapsubj', sub:true, aria:titles[S.view] });
 }
 
 /* ---------- start vs end ---------- */
