@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Bulletins — Zoé et Léo · Road to Electric</title>
+<link rel="icon" type="image/png" href="assets/favicon-road-to-electric.png">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  /* Private page: not linked, noindex, no page-view counter. Nothing is in this file: the grades come from the database function
+     school_reports(), which checks the same passphrase as stats.html. Styling follows ev-trucking.html (hero, rounded cards, pill buttons, sortable tables). */
+  .bl{ --z:#e8590c; --z2:#c81e1e; --l:#1d6fd8; --l2:#0f766e; --a:#f59e0b; --b:#e11d48; }
+  [hidden]{ display:none !important; }
+  .bl-shell{ display:flex; align-items:stretch; min-height:100vh; }
+  /* left filter column: always visible while the page scrolls */
+  .bl-side{ position:sticky; top:0; align-self:flex-start; width:272px; flex:none; height:100vh; overflow-y:auto; box-sizing:border-box; padding:16px 16px 22px; background:var(--surface); border-right:1px solid var(--border); }
+  .bl-side h1{ font-size:19px; margin:0; font-weight:900; letter-spacing:-.01em; }
+  .bl-side h1 small{ font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); border:1px solid var(--border); border-radius:999px; padding:2px 8px; margin-left:6px; vertical-align:2px; }
+  .bl-back{ display:block; font-size:12px; font-weight:700; color:var(--accent); text-decoration:none; margin-bottom:10px; }
+  .bl-fg{ margin-top:16px; }
+  .bl-fg h3{ display:flex; justify-content:space-between; align-items:baseline; margin:0 0 7px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); }
+  .bl-fg h3 span{ font-size:11px; letter-spacing:0; text-transform:none; font-weight:700; }
+  .bl-fg h3 a{ color:var(--accent); cursor:pointer; margin-left:8px; text-decoration:none; }
+  .bl-kids{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .bl-kid{ appearance:none; cursor:pointer; text-align:center; padding:8px 4px 7px; border-radius:14px; border:2px solid var(--border); background:var(--surface); color:var(--text); font:inherit; font-weight:800; font-size:13px; }
+  .bl-kid img{ display:block; width:62px; height:62px; border-radius:50%; object-fit:cover; margin:0 auto 5px; border:3px solid var(--c); opacity:.45; filter:grayscale(.7); transition:.15s; }
+  .bl-kid.on{ border-color:var(--c); background:color-mix(in srgb, var(--c) 10%, var(--surface)); }
+  .bl-kid.on img{ opacity:1; filter:none; }
+  .bl-ck{ display:flex; align-items:center; gap:8px; padding:3px 2px; font-size:13px; font-weight:600; cursor:pointer; line-height:1.25; }
+  .bl-ck input{ accent-color:var(--accent); width:15px; height:15px; margin:0; flex:none; }
+  .bl-ck .sw{ display:inline-flex; gap:2px; flex:none; }
+  .bl-ck .sw i{ width:9px; height:15px; border-radius:3px; display:block; }
+  .bl-ck small{ color:var(--text-muted); font-weight:600; margin-left:auto; font-size:11px; white-space:nowrap; }
+  .bl-reset{ margin-top:16px; width:100%; }
+  .bl-btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:7px 13px; font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; }
+  .bl-btn:hover{ background:var(--surface-alt); }
+  .bl-main{ flex:1; min-width:0; padding:30px 32px 80px; }
+  .bl-page{ max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+  /* hero */
+  .bl-hero{ border-radius:22px; padding:24px 26px 22px; color:#fff; box-shadow:0 18px 44px rgba(15,18,38,.35);
+    background:radial-gradient(800px 380px at 0% 0%, rgba(249,115,22,.55), transparent 62%), radial-gradient(800px 420px at 100% 100%, rgba(14,165,233,.5), transparent 62%), radial-gradient(500px 300px at 100% 0%, rgba(34,197,94,.25), transparent 60%), linear-gradient(135deg,#0f1226,#1b1f3b 55%,#16213b); }
+  .bl-hero .eb{ font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#fcd34d; }
+  .bl-hero h2{ margin:4px 0 2px; font-size:clamp(26px,4vw,40px); font-weight:900; letter-spacing:-.03em; }
+  .bl-hero .sub{ font-size:13.5px; color:#d6d9ee; max-width:640px; line-height:1.5; }
+  .bl-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px; }
+  @media (max-width:1000px){ .bl-two{ grid-template-columns:1fr; } }
+  .bl-hk{ border-radius:18px; padding:14px 16px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:center; position:relative; overflow:hidden; }
+  .bl-hk::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:linear-gradient(180deg,var(--c1),var(--c2)); }
+  .bl-hk.off{ opacity:.35; }
+  .bl-hk img{ width:92px; height:92px; border-radius:50%; object-fit:cover; border:4px solid var(--c1); box-shadow:0 6px 18px rgba(0,0,0,.35); cursor:pointer; }
+  .bl-hk .nm{ font-size:22px; font-weight:900; letter-spacing:-.02em; }
+  .bl-hk .nm small{ font-size:12px; font-weight:700; color:#cfd3ec; margin-left:6px; letter-spacing:0; }
+  .bl-hk .ks{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px 14px; margin-top:6px; }
+  .bl-hk .k .v{ font-size:23px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .bl-hk .k .l{ font-size:11.5px; color:#cfd3ec; line-height:1.3; }
+  .up{ color:#16a34a; font-weight:800; } .dn{ color:#dc2626; font-weight:800; }
+  .bl-hero .up{ color:#4ade80; } .bl-hero .dn{ color:#fb7185; }
+  /* insight tiles */
+  .bl-ins{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+  .bl-in{ border:1px solid var(--border); background:var(--surface); border-radius:16px; padding:14px 16px; border-left:5px solid var(--a); }
+  .bl-in .e{ font-size:20px; } .bl-in .h{ font-size:17px; font-weight:900; letter-spacing:-.02em; margin:2px 0; }
+  .bl-in .t{ font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+  /* cards */
+  .bl-card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:20px 20px 16px; min-width:0; }
+  .bl-card h2{ font-size:16px; margin:0 0 2px; font-weight:800; }
+  .bl-card h3{ font-size:14px; margin:18px 0 6px; font-weight:800; }
+  .bl-head{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; margin-bottom:6px; }
+  .bl-head h2{ margin:0; }
+  .bl-note{ font-size:12.5px; color:var(--text-muted); margin:2px 0 10px; line-height:1.5; }
+  .bl-seg{ display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--surface-alt); border-radius:999px; padding:4px; }
+  .bl-seg button{ appearance:none; border:none; background:transparent; cursor:pointer; padding:7px 12px; border-radius:999px; font:inherit; font-size:12.5px; font-weight:800; color:var(--text-muted); }
+  .bl-seg button:hover{ color:var(--text); }
+  .bl-seg button.on{ background:linear-gradient(135deg,var(--a),var(--b)); color:#fff; box-shadow:0 2px 10px rgba(225,29,72,.3); }
+  .bl-lg{ display:flex; flex-wrap:wrap; gap:5px 14px; font-size:12.5px; font-weight:700; margin:6px 0 2px; }
+  .bl-lg span{ display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+  .bl-lg span.off{ opacity:.35; text-decoration:line-through; }
+  .bl-lg i{ width:16px; height:0; border-top:3px solid var(--c); border-radius:2px; display:inline-block; }
+  .bl-lg i.d{ border-top-style:dashed; border-top-width:2.5px; }
+  .bl-chart{ position:relative; }
+  .bl-chart svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .bl-chart text{ fill:var(--text-muted); font-size:11px; }
+  .bl-chart text.yr{ font-weight:800; fill:var(--text); font-size:11.5px; }
+  .bl-chart text.dl{ font-size:9.5px; font-weight:800; fill:var(--text); paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }
+  .bl-chart .gl{ stroke:var(--border); stroke-dasharray:2 4; }
+  .bl-chart .z0{ stroke:var(--text-muted); stroke-width:1.2; }
+  .bl-chart .ys{ stroke:var(--border); }
+  .bl-chart .guide{ stroke:var(--text-muted); stroke-width:1; stroke-dasharray:3 3; opacity:0; }
+  .bl-tip{ position:absolute; z-index:6; pointer-events:none; opacity:0; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:8px 11px; font-size:12px; line-height:1.55; box-shadow:0 8px 22px rgba(0,0,0,.2); white-space:nowrap; transition:opacity .08s; }
+  .bl-tip b{ font-variant-numeric:tabular-nums; } .bl-tip .h{ font-weight:900; margin-bottom:2px; }
+  .bl-tip i{ display:inline-block; width:10px; height:3px; border-radius:2px; margin-right:6px; vertical-align:3px; }
+  .bl-empty{ padding:30px 10px; text-align:center; color:var(--text-muted); font-size:13px; }
+  .bl-cols{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:1000px){ .bl-cols{ grid-template-columns:1fr; } }
+  .bl-kp{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:6px 0 12px; }
+  .bl-kp div{ background:var(--surface-alt); border-radius:12px; padding:10px 12px; }
+  .bl-kp b{ display:block; font-size:20px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .bl-kp span{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); }
+  .bl-kp small{ display:block; font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+  /* tables */
+  .bl-tw{ overflow:auto; max-height:560px; border:1px solid var(--border); border-radius:10px; }
+  table.bl-t{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  table.bl-t th{ position:sticky; top:0; z-index:2; background:var(--surface-alt); text-align:right; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted); padding:9px 9px; border-bottom:2px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; font-weight:800; }
+  table.bl-t th.l, table.bl-t td.l{ text-align:left; }
+  table.bl-t th:hover{ color:var(--accent); }
+  table.bl-t th.sorted{ color:var(--text); }
+  table.bl-t th.sorted::after{ content:' ▼'; font-size:9px; } table.bl-t th.sorted.asc::after{ content:' ▲'; }
+  table.bl-t td{ padding:6px 9px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; font-family:inherit; }
+  table.bl-t tbody tr:nth-child(even){ background:transparent; }
+  table.bl-t tbody tr:hover td{ background:var(--surface-alt); }
+  table.bl-t td .kd{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+  table.bl-t td.na{ color:var(--text-muted); opacity:.55; }
+  table.bl-t td.sub{ padding-left:26px; color:var(--text-muted); font-size:12px; }
+  table.bl-t td.l{ font-family:inherit; font-weight:600; }
+  .bl-lock{ max-width:440px; margin:70px auto; text-align:center; padding:30px 26px; }
+  .bl-lock input{ width:100%; box-sizing:border-box; padding:11px 13px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font:inherit; margin:12px 0 6px; }
+  .bl-err{ color:var(--accent-strong); font-size:13px; font-weight:700; min-height:18px; }
+  .bl-notes h3{ margin:14px 0 4px; } .bl-notes ul{ margin:4px 0 0; padding-left:18px; font-size:12.5px; color:var(--text-muted); line-height:1.6; }
+  @media (max-width:900px){
+    .bl-shell{ flex-direction:column; }
+    .bl-side{ position:static; width:auto; height:auto; border-right:0; border-bottom:1px solid var(--border); }
+    .bl-main{ padding:18px 14px 60px; }
+  }
+</style>
+</head>
+<body class="bl">
+<div class="bl-shell">
+  <aside class="bl-side" id="side" hidden>
+    <a class="bl-back" href="index.html">← Road to Electric</a>
+    <h1>Bulletins<small>privé</small></h1>
+    <div class="bl-fg"><h3>Enfant</h3><div class="bl-kids" id="f-kids"></div></div>
+    <div class="bl-fg"><h3>Année <span><a data-all="years">tout</a><a data-none="years">aucun</a></span></h3><div id="f-years"></div></div>
+    <div class="bl-fg"><h3>Matière <span><a data-all="subj">tout</a><a data-none="subj">aucun</a></span></h3><div id="f-subj"></div></div>
+    <div class="bl-fg"><h3>Étapes <span><a data-all="steps">tout</a><a data-none="steps">aucun</a></span></h3><div id="f-steps"></div></div>
+    <div class="bl-fg"><h3>Affichage</h3>
+      <label class="bl-ck"><input type="checkbox" id="o-group" checked> Moyenne du groupe (lignes pointillées)</label>
+      <label class="bl-ck"><input type="checkbox" id="o-comp"> Compétences dans le tableau détaillé</label>
+    </div>
+    <button type="button" class="bl-btn bl-reset" id="b-reset">Tout remettre</button>
+    <button type="button" class="bl-btn bl-reset" id="b-lock" style="margin-top:8px">Verrouiller la page</button>
+  </aside>
+
+  <main class="bl-main">
+    <section class="bl-card bl-lock" id="lock" hidden>
+      <h2 style="font-size:20px">Bulletins — page privée</h2>
+      <p class="bl-note">Entrez le mot de passe pour voir les résultats.</p>
+      <input type="password" id="lock-in" placeholder="Mot de passe" autocomplete="current-password">
+      <div class="bl-err" id="lock-err"></div>
+      <button type="button" class="bl-btn" id="lock-go" style="background:linear-gradient(135deg,var(--a),var(--b));color:#fff;border-color:transparent">Ouvrir</button>
+    </section>
+    <div class="bl-page" id="page" hidden>
+      <section class="bl-hero">
+        <div class="eb">Bulletins · école primaire</div>
+        <h2>Les résultats de Zoé et de Léo</h2>
+        <div class="sub" id="hero-sub"></div>
+        <div class="bl-two" id="hero-kids"></div>
+      </section>
+      <div class="bl-ins" id="insights"></div>
+
+      <section class="bl-card" id="c-sum">
+        <div class="bl-head"><h2 id="sum-title">Sommaire</h2>
+          <div class="bl-seg" id="sum-view" role="group" aria-label="Vue">
+            <button type="button" data-v="avg" class="on">Moyenne générale</button>
+            <button type="button" data-v="subj">Par matière</button>
+            <button type="button" data-v="gap">Écart au groupe</button>
+            <button type="button" data-v="gapsubj">Écart par matière</button>
+          </div></div>
+        <p class="bl-note" id="sum-note"></p>
+        <div class="bl-lg" id="sum-lg"></div>
+        <div class="bl-chart" id="sum-chart"></div>
+      </section>
+
+      <section class="bl-card" id="c-se">
+        <div class="bl-head"><h2>Meilleur au début ou à la fin de l’année ?</h2></div>
+        <p class="bl-note" id="se-note"></p>
+        <div class="bl-kp" id="se-kp"></div>
+        <div class="bl-cols">
+          <div><h3 style="margin-top:0">Résultat moyen, étape par étape</h3><div class="bl-lg" id="se-lg1"></div><div class="bl-chart" id="se-ch1"></div></div>
+          <div><h3 style="margin-top:0">Écart moyen au groupe, étape par étape</h3><div class="bl-lg" id="se-lg2"></div><div class="bl-chart" id="se-ch2"></div></div>
+        </div>
+        <h3>Début contre fin, matière par matière</h3>
+        <div class="bl-tw"><table class="bl-t" id="t-se"></table></div>
+      </section>
+
+      <section class="bl-card" id="c-yr">
+        <div class="bl-head"><h2>Moyennes et écarts-types par année et par étape</h2></div>
+        <p class="bl-note">Une ligne par enfant, année et étape : moyenne des matières choisies, écart-type entre les matières, et comparaison avec la moyenne du groupe (classe). Cliquez sur un titre de colonne pour trier.</p>
+        <div class="bl-tw"><table class="bl-t" id="t-yr"></table></div>
+      </section>
+
+      <section class="bl-card" id="c-sb">
+        <div class="bl-head"><h2>Sommaire par matière</h2></div>
+        <p class="bl-note">Toutes les années et étapes cochées : moyenne, écart-type, moyenne du groupe, écart moyen (résultat − groupe) et part des bulletins au-dessus de la moyenne du groupe.</p>
+        <div class="bl-tw"><table class="bl-t" id="t-sb"></table></div>
+      </section>
+
+      <section class="bl-card" id="c-dt">
+        <div class="bl-head"><h2>Résultats détaillés</h2></div>
+        <p class="bl-note">Chaque ligne = un résultat de bulletin. « Écart » = résultat − moyenne du groupe. « Progression » = résultat − résultat de l’étape précédente (l’étape 1 se compare à la dernière étape notée de l’année d’avant). NE = non évalué.</p>
+        <div class="bl-tw"><table class="bl-t" id="t-dt"></table></div>
+      </section>
+
+      <section class="bl-card bl-notes" id="c-nt">
+        <h2>Notes sur les chiffres</h2>
+        <ul id="notes"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var RPC = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co/rest/v1/rpc/school_reports', API = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP';
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+
+/* ---------- constants ---------- */
+var STEPS = ['E1','E2','E3','FINAL'];
+var STEP_LBL = { E1:'Étape 1', E2:'Étape 2', E3:'Étape 3', FINAL:'Résultat final' };
+var STEP_SH = { E1:'É1', E2:'É2', E3:'É3', FINAL:'Final' };
+var STEP_IDX = { E1:0, E2:1, E3:2, FINAL:3 };
+/* every subject has its own colour, in the palette of each child: Zoé = reds and oranges, Léo = blues and greens */
+var SUBJ = [
+  { code:'FR', name:"Français, langue d'enseignement", short:'Français',           z:'#c81e1e', l:'#1d4ed8' },
+  { code:'EN', name:'Anglais, langue seconde',          short:'Anglais',            z:'#f97316', l:'#16a34a' },
+  { code:'MA', name:'Mathématique',                     short:'Mathématique',       z:'#7f1d1d', l:'#0c2d6b' },
+  { code:'SC', name:'Science et technologie',           short:'Science et techno',  z:'#fb7185', l:'#0ea5e9' },
+  { code:'GH', name:'Géographie, histoire et éducation à la citoyenneté', short:'Géo-histoire', z:'#ea580c', l:'#0f766e' },
+  { code:'MU', name:'Musique',                          short:'Musique',            z:'#f59e0b', l:'#60a5fa' },
+  { code:'AP', name:'Arts plastiques',                  short:'Arts plastiques',    z:'#e11d48', l:'#22c55e' },
+  { code:'EP', name:'Éducation physique et à la santé', short:'Éduc. physique',     z:'#c2410c', l:'#14b8a6' },
+  { code:'CC', name:'Culture et citoyenneté québécoise',short:'Culture et citoyenn.', z:'#fca5a5', l:'#4f46e5' },
+  { code:'ER', name:'Éthique et culture religieuse',    short:'Éthique et cult. rel.', z:'#9a3412', l:'#166534' }
+];
+var BY_NAME = {}, BY_CODE = {}; SUBJ.forEach(function(s){ BY_NAME[s.name] = s; BY_CODE[s.code] = s; });
+var KID_COL = { Zoe:'#e8590c', Leo:'#1d6fd8' }, KID_COL2 = { Zoe:'#c81e1e', Leo:'#16a34a' };
+function subjColor(kid, s){ return kid === 'Zoe' ? s.z : s.l; }
+
+/* ---------- number helpers ---------- */
+function f1(v){ return v == null || isNaN(v) ? '–' : v.toFixed(1).replace('.', ','); }
+function f0(v){ return v == null || isNaN(v) ? '–' : String(Math.round(v)); }
+function sg(v, d){ if(v == null || isNaN(v)) return '–'; var a = Math.abs(v).toFixed(d == null ? 1 : d).replace('.', ','); return (v > 0.0001 ? '+' : v < -0.0001 ? '−' : '') + a; }
+function pc(v){ return v == null ? '–' : Math.round(v * 100) + ' %'; }
+function stats(a){ var n = a.length; if(!n) return { n:0, mean:null, sd:null }; var m = a.reduce(function(x, y){ return x + y; }, 0) / n; var sd = n > 1 ? Math.sqrt(a.reduce(function(x, y){ return x + (y - m) * (y - m); }, 0) / (n - 1)) : null; return { n:n, mean:m, sd:sd }; }
+function yShort(y){ return y.slice(0, 4) + '-' + y.slice(7); }
+function gradeLbl(g){ return g === 1 ? '1re' : g + 'e'; }
+function cls(v){ return v == null ? '' : v > 0.0001 ? 'up' : v < -0.0001 ? 'dn' : ''; }
+
+/* ---------- state ---------- */
+var KIDS = [], KNAME = {}, KAV = {}, ROWS = [], YEARS = [], LATEST = {};
+var S = { kids:new Set(), years:new Set(), subj:new Set(), steps:new Set(['E1','E2','E3','FINAL']), comp:false, group:true, view:'avg' };
+var hidden = { sum:new Set(), se1:new Set(), se2:new Set() };
+var key = '';
+try{ key = localStorage.getItem('rte-bulletins-key') || ''; }catch(e){}
+
+/* ---------- load ---------- */
+function load(){
+  $('lock-err').textContent = '';
+  return fetch(RPC, { method:'POST', headers:{ 'Content-Type':'application/json', apikey:API, Authorization:'Bearer ' + API }, body:JSON.stringify({ p_key:key }) })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || d.error){ try{ localStorage.removeItem('rte-bulletins-key'); }catch(e){} showLock(d && d.error === 'locked' ? 'Mot de passe incorrect.' : 'Erreur de chargement.'); return; }
+      try{ localStorage.setItem('rte-bulletins-key', key);  }catch(e){}
+      init(d);
+    })
+    .catch(function(){ showLock('Impossible de joindre la base de données.'); });
+}
+function showLock(msg){ $('page').hidden = true; $('side').hidden = true; $('lock').hidden = false; $('lock-err').textContent = msg || ''; $('lock-in').value = ''; setTimeout(function(){ $('lock-in').focus(); }, 50); }
+$('lock-go').addEventListener('click', function(){ key = $('lock-in').value; if(key) load(); });
+$('lock-in').addEventListener('keydown', function(e){ if(e.key === 'Enter') $('lock-go').click(); });
+$('b-lock').addEventListener('click', function(){ try{ localStorage.removeItem('rte-bulletins-key'); }catch(e){} key = ''; showLock(''); });
+
+/* ---------- data prep ---------- */
+function init(d){
+  KIDS = d.kids; KIDS.forEach(function(k){ KNAME[k.kid] = k.name; KAV[k.kid] = k.avatar; });
+  ROWS = d.grades.map(function(g){ return { kid:g.kid, year:g.year, grade:g.grade, subj:BY_NAME[g.subject], comp:g.comp, step:g.step, score:g.score, group:g.group, ne:g.ne, teacher:g.teacher }; })
+                 .filter(function(r){ return r.subj; });
+  /* a "final" result only means something once the year has an étape 3 */
+  var hasE3 = {}; ROWS.forEach(function(r){ if(r.step === 'E3' && r.score != null) hasE3[r.kid + '|' + r.year] = 1; });
+  ROWS = ROWS.filter(function(r){ return r.step !== 'FINAL' || hasE3[r.kid + '|' + r.year]; });
+  /* previous result of the same kid / subject / competency (étape 1 -> last graded étape of the year before) */
+  var seqs = {};
+  ROWS.forEach(function(r){ if(r.step === 'FINAL' || r.score == null) return; var k = r.kid + '|' + r.subj.code + '|' + (r.comp || ''); (seqs[k] = seqs[k] || []).push(r); });
+  Object.keys(seqs).forEach(function(k){ var a = seqs[k]; a.sort(function(x, y){ return x.year < y.year ? -1 : x.year > y.year ? 1 : STEP_IDX[x.step] - STEP_IDX[y.step]; }); for(var i = 1; i < a.length; i++) a[i].prev = a[i - 1]; });
+  var ys = {}; ROWS.forEach(function(r){ ys[r.year] = 1; }); YEARS = Object.keys(ys).sort();
+  LATEST = {};
+  ROWS.forEach(function(r){ if(r.comp || r.score == null || r.step === 'FINAL') return; var o = LATEST[r.kid]; var v = r.year + '|' + STEP_IDX[r.step]; if(!o || v > o.v) LATEST[r.kid] = { v:v, year:r.year, step:r.step }; });
+  if(!S.kids.size){ KIDS.forEach(function(k){ S.kids.add(k.kid); }); YEARS.forEach(function(y){ S.years.add(y); }); SUBJ.forEach(function(s){ S.subj.add(s.code); }); }
+  $('lock').hidden = true; $('side').hidden = false; $('page').hidden = false;
+  buildFilters(); render();
+}
+
+/* ---------- filters ---------- */
+function buildFilters(){
+  $('f-kids').innerHTML = KIDS.map(function(k){ return '<button type="button" class="bl-kid' + (S.kids.has(k.kid) ? ' on' : '') + '" data-kid="' + k.kid + '" style="--c:' + KID_COL[k.kid] + '"><img src="' + esc(k.avatar) + '" alt="">' + esc(k.name) + '</button>'; }).join('');
+  var gl = {}; ROWS.forEach(function(r){ var k = r.year; (gl[k] = gl[k] || {})[r.kid] = r.grade; });
+  $('f-years').innerHTML = YEARS.slice().reverse().map(function(y){ var g = gl[y]; var t = Object.keys(g).map(function(k){ return KNAME[k] + ' ' + gradeLbl(g[k]); }).join(' · ');
+    return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + yShort(y) + '<small>' + esc(t) + '</small></label>'; }).join('');
+  var present = {}; ROWS.forEach(function(r){ present[r.subj.code] = 1; });
+  $('f-subj').innerHTML = SUBJ.filter(function(s){ return present[s.code]; }).map(function(s){
+    return '<label class="bl-ck"><input type="checkbox" data-s="' + s.code + '"' + (S.subj.has(s.code) ? ' checked' : '') + '><span class="sw"><i style="background:' + s.z + '"></i><i style="background:' + s.l + '"></i></span>' + esc(s.short) + '</label>'; }).join('');
+  $('f-steps').innerHTML = STEPS.map(function(t){ return '<label class="bl-ck"><input type="checkbox" data-t="' + t + '"' + (S.steps.has(t) ? ' checked' : '') + '>' + STEP_LBL[t] + (t === 'FINAL' ? '<small>combine les 3 étapes</small>' : '') + '</label>'; }).join('');
+  $('o-group').checked = S.group; $('o-comp').checked = S.comp;
+}
+function syncChecks(){
+  document.querySelectorAll('#f-years input').forEach(function(i){ i.checked = S.years.has(i.dataset.y); });
+  document.querySelectorAll('#f-subj input').forEach(function(i){ i.checked = S.subj.has(i.dataset.s); });
+  document.querySelectorAll('#f-steps input').forEach(function(i){ i.checked = S.steps.has(i.dataset.t); });
+  document.querySelectorAll('#f-kids .bl-kid').forEach(function(b){ b.classList.toggle('on', S.kids.has(b.dataset.kid)); });
+}
+function toggle(set, v, on){ if(on) set.add(v); else set.delete(v); }
+$('side').addEventListener('change', function(e){
+  var i = e.target;
+  if(i.dataset.y) toggle(S.years, i.dataset.y, i.checked);
+  else if(i.dataset.s) toggle(S.subj, i.dataset.s, i.checked);
+  else if(i.dataset.t) toggle(S.steps, i.dataset.t, i.checked);
+  else if(i.id === 'o-group') S.group = i.checked;
+  else if(i.id === 'o-comp') S.comp = i.checked;
+  render();
+});
+$('side').addEventListener('click', function(e){
+  var kb = e.target.closest('.bl-kid');
+  if(kb){ toggle(S.kids, kb.dataset.kid, !S.kids.has(kb.dataset.kid)); syncChecks(); render(); return; }
+  var a = e.target.closest('a[data-all],a[data-none]'); if(!a) return;
+  var what = a.dataset.all || a.dataset.none, on = !!a.dataset.all;
+  var all = what === 'years' ? YEARS : what === 'subj' ? SUBJ.map(function(s){ return s.code; }) : STEPS;
+  var set = what === 'years' ? S.years : what === 'subj' ? S.subj : S.steps;
+  all.forEach(function(v){ toggle(set, v, on); });
+  syncChecks(); render();
+});
+$('b-reset').addEventListener('click', function(){
+  S.kids = new Set(KIDS.map(function(k){ return k.kid; })); S.years = new Set(YEARS); S.subj = new Set(SUBJ.map(function(s){ return s.code; })); S.steps = new Set(['E1','E2','E3','FINAL']); S.comp = false; S.group = true;
+  hidden.sum.clear(); hidden.se1.clear(); hidden.se2.clear(); buildFilters(); render();
+});
+$('hero-kids').addEventListener('click', function(e){ var im = e.target.closest('img[data-kid]'); if(!im) return; toggle(S.kids, im.dataset.kid, !S.kids.has(im.dataset.kid)); syncChecks(); render(); });
+$('sum-view').addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; S.view = b.dataset.v; renderSummary(); });
+
+/* ---------- selections ---------- */
+function selRows(o){ o = o || {}; return ROWS.filter(function(r){ return S.kids.has(r.kid) && S.years.has(r.year) && S.subj.has(r.subj.code) && (o.allSteps ? true : S.steps.has(r.step)) && !(o.noFinal && r.step === 'FINAL') && (o.comp || !r.comp); }); }
+function graded(rs){ return rs.filter(function(r){ return !r.comp && r.score != null; }); }
+function paired(rs){ return rs.filter(function(r){ return !r.comp && r.score != null && r.group != null; }); }
+function groupBy(arr, fn){ var m = {}, order = []; arr.forEach(function(x){ var k = fn(x); if(!m[k]){ m[k] = []; order.push(k); } m[k].push(x); }); return { m:m, order:order }; }
+
+/* ---------- render all ---------- */
+function render(){
+  renderHero(); renderInsights(); renderSummary(); renderSE(); renderTables(); renderNotes();
+}
+
+/* ---------- hero ---------- */
+function renderHero(){
+  var all = graded(ROWS.filter(function(r){ return !r.comp; }));
+  var nb = ROWS.filter(function(r){ return !r.comp && r.step !== 'FINAL' && r.score != null; }).length;
+  $('hero-sub').innerHTML = 'Bulletins de ' + YEARS[0].slice(0, 4) + ' à ' + YEARS[YEARS.length - 1].slice(5) + ' · ' + nb + ' résultats de matières, comparés à la moyenne du groupe (la classe). Les filtres à gauche s’appliquent à toute la page.';
+  $('hero-kids').innerHTML = KIDS.map(function(k){
+    var on = S.kids.has(k.kid);
+    var rs = graded(selRows({ noFinal:true })).filter(function(r){ return r.kid === k.kid; });
+    var pr = paired(rs); var m = stats(rs.map(function(r){ return r.score; })); var gp = stats(pr.map(function(r){ return r.score - r.group; }));
+    var above = pr.length ? pr.filter(function(r){ return r.score > r.group; }).length / pr.length : null;
+    var bs = groupBy(rs, function(r){ return r.subj.code; }); var best = null;
+    bs.order.forEach(function(c){ var mm = stats(bs.m[c].map(function(r){ return r.score; })).mean; if(!best || mm > best.v) best = { v:mm, s:BY_CODE[c] }; });
+    var lt = LATEST[k.kid];
+    return '<div class="bl-hk' + (on ? '' : ' off') + '" style="--c1:' + KID_COL[k.kid] + ';--c2:' + KID_COL2[k.kid] + '">' +
+      '<img src="' + esc(k.avatar) + '" alt="' + esc(k.name) + '" data-kid="' + k.kid + '" title="Cliquer pour afficher ou masquer">' +
+      '<div><div class="nm">' + esc(k.name) + '<small>' + (lt ? gradeLbl(ROWS.filter(function(r){ return r.kid === k.kid && r.year === lt.year; })[0].grade) + ' année · ' + STEP_SH[lt.step] + ' ' + yShort(lt.year) : '') + '</small></div>' +
+      '<div class="ks"><div class="k"><div class="v">' + (m.n ? f1(m.mean) + ' %' : '–') + '</div><div class="l">moyenne des matières choisies</div></div>' +
+      '<div class="k"><div class="v ' + cls(gp.mean) + '">' + (gp.n ? sg(gp.mean) + ' pts' : '–') + '</div><div class="l">écart moyen au groupe</div></div>' +
+      '<div class="k"><div class="v">' + (above == null ? '–' : pc(above)) + '</div><div class="l">des résultats au-dessus du groupe</div></div>' +
+      '<div class="k"><div class="v" style="font-size:16px;line-height:1.35">' + (best ? esc(best.s.short) + ' · ' + f1(best.v) : '–') + '</div><div class="l">matière la plus forte</div></div></div></div></div>';
+  }).join('');
+}
+
+/* ---------- insights ---------- */
+function startEnd(rs){ /* kid-year-subject rows with a graded E1 and E3 */
+  var g = groupBy(rs.filter(function(r){ return !r.comp && (r.step === 'E1' || r.step === 'E3'); }), function(r){ return r.kid + '|' + r.year + '|' + r.subj.code; });
+  var out = [];
+  g.order.forEach(function(k){ var a = g.m[k], e1 = a.filter(function(r){ return r.step === 'E1'; })[0], e3 = a.filter(function(r){ return r.step === 'E3'; })[0];
+    if(!e1 || !e3 || e1.score == null || e3.score == null) return;
+    var d = e3.score - e1.score, dg = (e1.group != null && e3.group != null) ? e3.group - e1.group : null;
+    out.push({ kid:e1.kid, year:e1.year, grade:e1.grade, subj:e1.subj, e1:e1.score, e3:e3.score, g1:e1.group, g3:e3.group, d:d, dg:dg, rel:dg == null ? null : d - dg });
+  });
+  return out;
+}
+function renderInsights(){
+  var tiles = [];
+  var rs = selRows({ allSteps:true }); var se = startEnd(rs);
+  var txt = KIDS.filter(function(k){ return S.kids.has(k.kid); }).map(function(k){ var a = se.filter(function(x){ return x.kid === k.kid; }); if(!a.length) return null;
+    var d = stats(a.map(function(x){ return x.d; })).mean, dg = stats(a.filter(function(x){ return x.dg != null; }).map(function(x){ return x.dg; })).mean;
+    return '<b>' + esc(k.name) + '</b> ' + sg(d) + ' pts' + (dg != null ? ' (groupe ' + sg(dg) + ')' : ''); }).filter(Boolean);
+  tiles.push({ e:'🏁', h:'Début ou fin d’année', t:txt.length ? 'Changement moyen entre l’étape 1 et l’étape 3 : ' + txt.join(' · ') + '.' : 'Pas d’année complète avec les filtres choisis.' });
+  var bs = groupBy(paired(selRows({ noFinal:true })), function(r){ return r.kid + '|' + r.subj.code; }); var arr = bs.order.map(function(k){ var a = bs.m[k]; return { kid:a[0].kid, s:a[0].subj, gap:stats(a.map(function(r){ return r.score - r.group; })).mean, n:a.length }; }).filter(function(x){ return x.n >= 2; });
+  arr.sort(function(a, b){ return b.gap - a.gap; });
+  if(arr.length){ var t = arr[0]; tiles.push({ e:'⭐', h:esc(KNAME[t.kid]) + ' · ' + esc(t.s.short), t:'Plus grand avance sur le groupe : <b class="up">' + sg(t.gap) + ' pts</b> en moyenne (' + t.n + ' résultats).' });
+    var w = arr[arr.length - 1]; tiles.push({ e:'🔎', h:esc(KNAME[w.kid]) + ' · ' + esc(w.s.short), t:'Plus petit écart au groupe : <b class="' + cls(w.gap) + '">' + sg(w.gap) + ' pts</b> en moyenne (' + w.n + ' résultats).' }); }
+  var pr = KIDS.filter(function(k){ return S.kids.has(k.kid); }).map(function(k){ var lt = LATEST[k.kid]; if(!lt) return null;
+    var cur = ROWS.filter(function(r){ return r.kid === k.kid && !r.comp && r.year === lt.year && r.step === lt.step && r.score != null && r.prev && S.subj.has(r.subj.code); });
+    if(!cur.length) return null; var d = stats(cur.map(function(r){ return r.score - r.prev.score; })).mean;
+    return '<b>' + esc(k.name) + '</b> <b class="' + cls(d) + '">' + sg(d) + '</b>'; }).filter(Boolean);
+  tiles.push({ e:'📈', h:'Dernier bulletin', t:pr.length ? 'Progression moyenne par rapport à l’étape précédente : ' + pr.join(' · ') + ' pts.' : '—' });
+  $('insights').innerHTML = tiles.map(function(t){ return '<div class="bl-in"><div class="e">' + t.e + '</div><div class="h">' + t.h + '</div><div class="t">' + t.t + '</div></div>'; }).join('');
+}
+
+/* ---------- line chart ---------- */
+function niceTicks(a, b, cnt){ var step = (b - a) / cnt, mag = Math.pow(10, Math.floor(Math.log10(step))), r = step / mag, ns = r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10; step = ns * mag; var out = []; for(var v = Math.ceil(a / step - 1e-9) * step; v <= b + 1e-9; v += step) out.push(+v.toFixed(6)); return out; }
+function lineChart(el, lgEl, hid, cfg){
+  var n = cfg.cats.length, vis = cfg.series.filter(function(s){ return !hid.has(s.id); });
+  lgEl.innerHTML = cfg.series.map(function(s){ return '<span data-id="' + esc(s.id) + '" class="' + (hid.has(s.id) ? 'off' : '') + '" style="--c:' + s.color + '"><i class="' + (s.dash ? 'd' : '') + '"></i>' + esc(s.name) + '</span>'; }).join('');
+  lgEl.onclick = function(e){ var sp = e.target.closest('span[data-id]'); if(!sp) return; if(hid.has(sp.dataset.id)) hid.delete(sp.dataset.id); else hid.add(sp.dataset.id); lineChart(el, lgEl, hid, cfg); };
+  var vals = []; vis.forEach(function(s){ s.values.forEach(function(v){ if(v != null) vals.push(v); }); });
+  if(!n || !vals.length){ el.innerHTML = '<div class="bl-empty">Aucune donnée avec les filtres choisis.</div>'; return; }
+  var W = 920, H = cfg.h || 340, ml = 48, mr = 20, mt = 18, mb = cfg.sub ? 58 : 36, lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), y0, y1;
+  if(cfg.zero){ var m = Math.max(2, Math.ceil(Math.max(Math.abs(lo), Math.abs(hi)) + 1)); y0 = -m; y1 = m; } else { y0 = Math.max(0, Math.floor((lo - 3) / 5) * 5); y1 = Math.min(100, Math.ceil((hi + 2) / 5) * 5); if(y1 - y0 < 10) y0 = Math.max(0, y1 - 10); }
+  var X = function(i){ return n === 1 ? ml + (W - ml - mr) / 2 : ml + (W - ml - mr) * i / (n - 1); };
+  var Y = function(v){ return mt + (H - mt - mb) * (1 - (v - y0) / (y1 - y0)); };
+  var g = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(cfg.aria || 'Graphique') + '">';
+  niceTicks(y0, y1, cfg.zero ? 6 : 5).forEach(function(t){ g += '<line class="gl" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(t) + '" y2="' + Y(t) + '"/><text x="' + (ml - 8) + '" y="' + (Y(t) + 4) + '" text-anchor="end">' + (cfg.zero ? sg(t, 0).replace('+', '+') : t) + '</text>'; });
+  if(cfg.zero) g += '<line class="z0" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(0) + '" y2="' + Y(0) + '"/>';
+  cfg.cats.forEach(function(c, i){ g += '<text x="' + X(i) + '" y="' + (H - mb + 17) + '" text-anchor="middle">' + esc(c.label) + '</text>'; });
+  if(cfg.sub){ var i = 0; while(i < n){ var j = i; while(j + 1 < n && cfg.cats[j + 1].sub === cfg.cats[i].sub) j++;
+      g += '<text class="yr" x="' + ((X(i) + X(j)) / 2) + '" y="' + (H - mb + 38) + '" text-anchor="middle">' + esc(cfg.cats[i].sub) + '</text>';
+      if(j + 1 < n) g += '<line class="ys" x1="' + ((X(j) + X(j + 1)) / 2) + '" x2="' + ((X(j) + X(j + 1)) / 2) + '" y1="' + mt + '" y2="' + (H - mb + 44) + '"/>';
+      i = j + 1; } }
+  vis.forEach(function(s){
+    var d = '', pen = false; s.values.forEach(function(v, i){ if(v == null) return; d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    g += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.dash ? 2 : 2.8) + '"' + (s.dash ? ' stroke-dasharray="6 5" opacity=".85"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>';
+    s.values.forEach(function(v, i){ if(v == null) return; g += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (s.dash ? 2.6 : 3.8) + '" fill="' + (s.dash ? s.color : 'var(--surface)') + '" stroke="' + s.color + '" stroke-width="2.4"/>'; });
+  });
+  if(vis.length <= 4 && n <= 16) vis.forEach(function(s){ if(s.dash) return; s.values.forEach(function(v, i){ if(v == null) return; g += '<text class="dl" x="' + X(i).toFixed(1) + '" y="' + (Y(v) - 8).toFixed(1) + '" text-anchor="middle">' + (cfg.zero ? sg(v) : f0(v)) + '</text>'; }); });
+  g += '<line class="guide" x1="0" x2="0" y1="' + mt + '" y2="' + (H - mb) + '"/><rect class="ov" x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent"/></svg><div class="bl-tip"></div>';
+  el.innerHTML = g;
+  var svg = el.querySelector('svg'), guide = el.querySelector('.guide'), tip = el.querySelector('.bl-tip');
+  svg.addEventListener('mousemove', function(ev){
+    var r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W, best = 0, bd = 1e9;
+    for(var i = 0; i < n; i++){ var dd = Math.abs(X(i) - px); if(dd < bd){ bd = dd; best = i; } }
+    var rows = vis.filter(function(s){ return s.values[best] != null; }).sort(function(a, b){ return b.values[best] - a.values[best]; });
+    if(!rows.length){ tip.style.opacity = 0; return; }
+    tip.innerHTML = '<div class="h">' + esc(cfg.cats[best].full || cfg.cats[best].label) + '</div>' + rows.map(function(s){ return '<div><i style="background:' + s.color + '"></i>' + esc(s.name) + ' : <b>' + (cfg.zero ? sg(s.values[best]) + ' pts' : f1(s.values[best]) + ' %') + '</b></div>'; }).join('');
+    var gx = X(best) / W * r.width; guide.setAttribute('x1', X(best)); guide.setAttribute('x2', X(best)); guide.style.opacity = 1;
+    tip.style.opacity = 1; var tw = tip.offsetWidth; var left = gx + 14; if(left + tw > r.width) left = gx - tw - 14; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '8px';
+  });
+  svg.addEventListener('mouseleave', function(){ tip.style.opacity = 0; guide.style.opacity = 0; });
+}
+
+/* ---------- summary chart (timeline) ---------- */
+function timeline(rs){ var seen = {}, out = []; rs.forEach(function(r){ var k = r.year + '|' + STEP_IDX[r.step]; if(!seen[k]){ seen[k] = 1; out.push({ key:k, year:r.year, step:r.step }); } });
+  out.sort(function(a, b){ return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; });
+  return out.map(function(c){ return { key:c.key, label:STEP_SH[c.step], sub:yShort(c.year), full:STEP_LBL[c.step] + ' · ' + yShort(c.year) }; }); }
+function renderSummary(){
+  document.querySelectorAll('#sum-view button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === S.view); });
+  var rs = graded(selRows()), cats = timeline(rs), ix = {}; cats.forEach(function(c, i){ ix[c.key] = i; });
+  var kidsSel = KIDS.filter(function(k){ return S.kids.has(k.kid); }), series = [];
+  var titles = { avg:'Sommaire : moyenne générale', subj:'Résultat par matière', gap:'Écart moyen au groupe', gapsubj:'Écart au groupe, matière par matière' };
+  var notes = {
+    avg:'Moyenne des matières cochées à chaque étape. Les lignes pointillées sont la moyenne du groupe pour les mêmes matières. Cliquez sur une légende pour cacher une ligne.',
+    subj:'Un trait par matière, dans la couleur de la matière pour chaque enfant (Zoé : rouges et oranges, Léo : bleus et verts). Pointillé = moyenne du groupe pour cette matière.',
+    gap:'Résultat moins moyenne du groupe, en points : au-dessus de zéro, l’enfant est devant la classe.',
+    gapsubj:'Résultat moins moyenne du groupe pour chaque matière, en points.' };
+  $('sum-title').textContent = titles[S.view]; $('sum-note').textContent = notes[S.view];
+  kidsSel.forEach(function(k){
+    var mine = rs.filter(function(r){ return r.kid === k.kid; });
+    if(S.view === 'avg' || S.view === 'gap'){
+      var by = groupBy(mine, function(r){ return r.year + '|' + STEP_IDX[r.step]; }), v = cats.map(function(){ return null; }), vg = cats.map(function(){ return null; });
+      by.order.forEach(function(kk){ var a = by.m[kk], p = paired(a); if(S.view === 'avg'){ v[ix[kk]] = stats(a.map(function(r){ return r.score; })).mean; if(p.length) vg[ix[kk]] = stats(p.map(function(r){ return r.group; })).mean; } else if(p.length) v[ix[kk]] = stats(p.map(function(r){ return r.score - r.group; })).mean; });
+      series.push({ id:k.kid, name:k.name, color:KID_COL[k.kid], values:v });
+      if(S.view === 'avg' && S.group) series.push({ id:k.kid + '_g', name:k.name + ' · groupe', color:KID_COL[k.kid], dash:true, values:vg });
+    } else {
+      var bs = groupBy(mine, function(r){ return r.subj.code; });
+      SUBJ.forEach(function(s){ var a = bs.m[s.code]; if(!a) return; var v = cats.map(function(){ return null; }), vg = cats.map(function(){ return null; });
+        a.forEach(function(r){ var i = ix[r.year + '|' + STEP_IDX[r.step]]; if(S.view === 'subj'){ v[i] = r.score; vg[i] = r.group; } else if(r.group != null) v[i] = r.score - r.group; });
+        series.push({ id:k.kid + s.code, name:k.name + ' · ' + s.short, color:subjColor(k.kid, s), values:v });
+        if(S.view === 'subj' && S.group) series.push({ id:k.kid + s.code + '_g', name:k.name + ' · ' + s.short + ' · groupe', color:subjColor(k.kid, s), dash:true, values:vg }); });
+    }
+  });
+  lineChart($('sum-chart'), $('sum-lg'), hidden.sum, { cats:cats, series:series, zero:S.view === 'gap' || S.view === 'gapsubj', sub:true, aria:titles[S.view] });
+}
+
+/* ---------- start vs end ---------- */
+function renderSE(){
+  var se = startEnd(selRows({ allSteps:true }));
+  $('se-note').innerHTML = 'Ce bloc compare l’étape 1 (début d’année) à l’étape 3 (fin d’année) pour les années complètes, matière par matière ; il ignore le filtre « Étapes ». L’étape 2 n’entre dans les courbes que pour les matières notées aux trois étapes. Comme le groupe progresse aussi, on regarde l’<b>écart relatif</b> : le changement de l’enfant moins le changement de la moyenne du groupe.';
+  var kidsSel = KIDS.filter(function(k){ return S.kids.has(k.kid); });
+  $('se-kp').innerHTML = kidsSel.map(function(k){ var a = se.filter(function(x){ return x.kid === k.kid; }); if(!a.length) return '';
+    var d = stats(a.map(function(x){ return x.d; })), dg = stats(a.filter(function(x){ return x.dg != null; }).map(function(x){ return x.dg; })), rel = stats(a.filter(function(x){ return x.rel != null; }).map(function(x){ return x.rel; }));
+    var fin = a.filter(function(x){ return x.d > 0; }).length, deb = a.filter(function(x){ return x.d < 0; }).length, st = a.length - fin - deb;
+    var verdict = d.mean > 0.5 ? 'Meilleur à la fin' : d.mean < -0.5 ? 'Meilleur au début' : 'Stable';
+    return '<div><span>' + esc(k.name) + ' · ' + verdict + '</span><b class="' + cls(d.mean) + '">' + sg(d.mean) + ' pts</b><small>É3 − É1 sur ' + a.length + ' matières-années : ' + fin + ' mieux à la fin, ' + deb + ' mieux au début, ' + st + ' égal. Groupe ' + sg(dg.mean) + ' · écart relatif <b class="' + cls(rel.mean) + '">' + sg(rel.mean) + '</b></small></div>'; }).join('');
+  /* strict set: kid-year-subject with E1, E2 and E3 all graded */
+  var g = groupBy(selRows({ allSteps:true }).filter(function(r){ return !r.comp && r.score != null && r.step !== 'FINAL'; }), function(r){ return r.kid + '|' + r.year + '|' + r.subj.code; });
+  var s1 = [], s2 = [];
+  kidsSel.forEach(function(k){
+    var full = g.order.filter(function(kk){ return kk.indexOf(k.kid + '|') === 0 && g.m[kk].length === 3; }).map(function(kk){ return g.m[kk]; });
+    var cats = [{ label:'Étape 1' }, { label:'Étape 2' }, { label:'Étape 3' }];
+    var mean = [0, 1, 2].map(function(i){ return stats(full.map(function(a){ return a.filter(function(r){ return r.step === STEPS[i]; })[0].score; })).mean; });
+    var gm = [0, 1, 2].map(function(i){ var v = full.map(function(a){ return a.filter(function(r){ return r.step === STEPS[i]; })[0].group; }).filter(function(x){ return x != null; }); return v.length ? stats(v).mean : null; });
+    var gp = [0, 1, 2].map(function(i){ var v = full.map(function(a){ var r = a.filter(function(r){ return r.step === STEPS[i]; })[0]; return r.group == null ? null : r.score - r.group; }).filter(function(x){ return x != null; }); return v.length ? stats(v).mean : null; });
+    if(!full.length){ return; }
+    s1.push({ id:k.kid, name:k.name + ' (' + full.length + ' matières-années)', color:KID_COL[k.kid], values:mean });
+    if(S.group) s1.push({ id:k.kid + '_g', name:k.name + ' · groupe', color:KID_COL[k.kid], dash:true, values:gm });
+    s2.push({ id:k.kid, name:k.name, color:KID_COL[k.kid], values:gp });
+  });
+  var cats3 = [{ label:'Étape 1' }, { label:'Étape 2' }, { label:'Étape 3' }];
+  lineChart($('se-ch1'), $('se-lg1'), hidden.se1, { cats:cats3, series:s1, h:300, aria:'Résultat moyen par étape' });
+  lineChart($('se-ch2'), $('se-lg2'), hidden.se2, { cats:cats3, series:s2, zero:true, h:300, aria:'Écart moyen au groupe par étape' });
+  var vd = function(d){ return d > 0 ? 'Mieux à la fin' : d < 0 ? 'Mieux au début' : 'Égal'; };
+  table($('t-se'), 'se', [
+    { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:function(r){ return '<i class="kd" style="background:' + KID_COL[r.kid] + '"></i>' + esc(KNAME[r.kid]); } },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'subj', t:'Matière', l:1, v:function(r){ return r.subj.short; }, f:function(r){ return '<i class="kd" style="background:' + subjColor(r.kid, r.subj) + '"></i>' + esc(r.subj.short); } },
+    { k:'e1', t:'Étape 1', v:function(r){ return r.e1; }, f:function(r){ return f0(r.e1); } },
+    { k:'e3', t:'Étape 3', v:function(r){ return r.e3; }, f:function(r){ return f0(r.e3); } },
+    { k:'d', t:'É3 − É1', v:function(r){ return r.d; }, f:function(r){ return sg(r.d, 0); }, c:function(r){ return cls(r.d); } },
+    { k:'g1', t:'Groupe É1', v:function(r){ return r.g1; }, f:function(r){ return f0(r.g1); } },
+    { k:'g3', t:'Groupe É3', v:function(r){ return r.g3; }, f:function(r){ return f0(r.g3); } },
+    { k:'dg', t:'Groupe É3 − É1', v:function(r){ return r.dg; }, f:function(r){ return sg(r.dg, 0); }, c:function(r){ return cls(r.dg); } },
+    { k:'rel', t:'Écart relatif', v:function(r){ return r.rel; }, f:function(r){ return sg(r.rel, 0); }, c:function(r){ return cls(r.rel); } },
+    { k:'vd', t:'Verdict', l:1, v:function(r){ return r.d; }, f:function(r){ return vd(r.d); } }
+  ], se, ['year', 1]);
+}
+
+/* ---------- tables ---------- */
+var sortState = {};
+function table(el, id, cols, data, def){
+  var st = sortState[id] || (sortState[id] = { k:def[0], d:def[1] });
+  function draw(){
+    var col = cols.filter(function(c){ return c.k === st.k; })[0] || cols[0], dir = st.d;
+    var rows = data.slice().sort(function(a, b){ var x = col.v(a), y = col.v(b); if(x == null && y == null) return 0; if(x == null) return 1; if(y == null) return -1;
+      var c = typeof x === 'string' ? x.localeCompare(y, 'fr') : x - y; return c * dir; });
+    el.innerHTML = '<thead><tr>' + cols.map(function(c){ return '<th data-k="' + c.k + '" class="' + (c.l ? 'l ' : '') + (c.k === st.k ? 'sorted' + (dir === 1 ? ' asc' : '') : '') + '"' + (c.tip ? ' title="' + esc(c.tip) + '"' : '') + '>' + esc(c.t) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      (rows.length ? rows.map(function(r){ return '<tr>' + cols.map(function(c){ var v = c.v(r), out = c.f ? c.f(r) : (v == null ? '–' : esc(v)); var k = c.c ? c.c(r) : ''; if(v == null || out === '–' || out === 'NE') k += ' na'; return '<td class="' + (c.l ? 'l ' : '') + k + (c.sub && c.sub(r) ? ' sub' : '') + '">' + out + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + cols.length + '" class="bl-empty">Aucune ligne avec les filtres choisis.</td></tr>') + '</tbody>';
+  }
+  el.onclick = function(e){ var th = e.target.closest('th[data-k]'); if(!th) return; if(st.k === th.dataset.k) st.d = -st.d; else { st.k = th.dataset.k; var c = cols.filter(function(x){ return x.k === st.k; })[0]; st.d = c.l ? 1 : -1; } draw(); };
+  draw();
+}
+var kidCell = function(r){ return '<i class="kd" style="background:' + KID_COL[r.kid] + '"></i>' + esc(KNAME[r.kid]); };
+function renderTables(){
+  /* 1) per kid / year / step */
+  var rs = paired(selRows()).concat(graded(selRows()).filter(function(r){ return r.group == null; })), all = graded(selRows());
+  var g = groupBy(all, function(r){ return r.kid + '|' + r.year + '|' + STEP_IDX[r.step]; }), yr = [];
+  all = all; var allNF = all.filter(function(r){ return r.step !== 'FINAL'; });
+  g.order.forEach(function(k){ var a = g.m[k], p = paired(a), m = stats(a.map(function(r){ return r.score; })), gm = stats(p.map(function(r){ return r.group; })), gap = stats(p.map(function(r){ return r.score - r.group; }));
+    var best = a.slice().sort(function(x, y){ return y.score - x.score; })[0], low = a.slice().sort(function(x, y){ return x.score - y.score; })[0];
+    yr.push({ kid:a[0].kid, year:a[0].year, grade:a[0].grade, step:a[0].step, n:m.n, mean:m.mean, sd:m.sd, gmean:p.length ? gm.mean : null, gsd:p.length ? gm.sd : null, gap:p.length ? gap.mean : null, gapsd:p.length ? gap.sd : null,
+      above:p.length ? p.filter(function(r){ return r.score > r.group; }).length / p.length : null, best:best, low:low }); });
+  var byk = groupBy(yr.slice().sort(function(a, b){ return a.year < b.year ? -1 : a.year > b.year ? 1 : STEP_IDX[a.step] - STEP_IDX[b.step]; }), function(r){ return r.kid; });
+  byk.order.forEach(function(k){ var a = byk.m[k]; for(var i = 0; i < a.length; i++) a[i].dprev = i ? a[i].mean - a[i - 1].mean : null; });
+  table($('t-yr'), 'yr', [
+    { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year + STEP_IDX[r.step]; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'step', t:'Étape', l:1, v:function(r){ return STEP_IDX[r.step]; }, f:function(r){ return STEP_LBL[r.step]; } },
+    { k:'n', t:'Matières', v:function(r){ return r.n; }, f:function(r){ return r.n; } },
+    { k:'mean', t:'Moyenne', v:function(r){ return r.mean; }, f:function(r){ return f1(r.mean); } },
+    { k:'sd', t:'Écart-type', tip:'Écart-type des résultats entre les matières', v:function(r){ return r.sd; }, f:function(r){ return f1(r.sd); } },
+    { k:'gmean', t:'Moy. groupe', v:function(r){ return r.gmean; }, f:function(r){ return f1(r.gmean); } },
+    { k:'gsd', t:'Écart-type groupe', tip:'Écart-type des moyennes du groupe entre les matières', v:function(r){ return r.gsd; }, f:function(r){ return f1(r.gsd); } },
+    { k:'gap', t:'Écart moyen', tip:'Moyenne de (résultat − moyenne du groupe)', v:function(r){ return r.gap; }, f:function(r){ return sg(r.gap); }, c:function(r){ return cls(r.gap); } },
+    { k:'gapsd', t:'Écart-type de l’écart', tip:'Écart-type de (résultat − groupe) entre les matières : plus il est petit, plus l’avance est régulière', v:function(r){ return r.gapsd; }, f:function(r){ return f1(r.gapsd); } },
+    { k:'above', t:'Au-dessus du groupe', v:function(r){ return r.above; }, f:function(r){ return pc(r.above); } },
+    { k:'dprev', t:'Prog. vs étape préc.', tip:'Moyenne − moyenne de l’étape précédente affichée', v:function(r){ return r.dprev; }, f:function(r){ return sg(r.dprev); }, c:function(r){ return cls(r.dprev); } },
+    { k:'best', t:'Meilleure matière', l:1, v:function(r){ return r.best.subj.short; }, f:function(r){ return esc(r.best.subj.short) + ' ' + r.best.score; } },
+    { k:'low', t:'Plus faible', l:1, v:function(r){ return r.low.subj.short; }, f:function(r){ return esc(r.low.subj.short) + ' ' + r.low.score; } }
+  ], yr, ['year', -1]);
+  /* 2) per kid / subject */
+  var gs = groupBy(allNF, function(r){ return r.kid + '|' + r.subj.code; }), sb = [];
+  gs.order.forEach(function(k){ var a = gs.m[k], p = paired(a), m = stats(a.map(function(r){ return r.score; })), gm = stats(p.map(function(r){ return r.group; })), gap = stats(p.map(function(r){ return r.score - r.group; }));
+    var last = a.slice().sort(function(x, y){ return (x.year + STEP_IDX[x.step]) < (y.year + STEP_IDX[y.step]) ? 1 : -1; })[0];
+    sb.push({ kid:a[0].kid, subj:a[0].subj, n:m.n, mean:m.mean, sd:m.sd, min:Math.min.apply(null, a.map(function(r){ return r.score; })), max:Math.max.apply(null, a.map(function(r){ return r.score; })),
+      gmean:p.length ? gm.mean : null, gsd:p.length ? gm.sd : null, gap:p.length ? gap.mean : null, gapsd:p.length ? gap.sd : null, above:p.length ? p.filter(function(r){ return r.score > r.group; }).length / p.length : null, last:last }); });
+  table($('t-sb'), 'sb', [
+    { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
+    { k:'subj', t:'Matière', l:1, v:function(r){ return r.subj.short; }, f:function(r){ return '<i class="kd" style="background:' + subjColor(r.kid, r.subj) + '"></i>' + esc(r.subj.short); } },
+    { k:'n', t:'Résultats', v:function(r){ return r.n; }, f:function(r){ return r.n; } },
+    { k:'mean', t:'Moyenne', v:function(r){ return r.mean; }, f:function(r){ return f1(r.mean); } },
+    { k:'sd', t:'Écart-type', v:function(r){ return r.sd; }, f:function(r){ return f1(r.sd); } },
+    { k:'min', t:'Min', v:function(r){ return r.min; }, f:function(r){ return r.min; } },
+    { k:'max', t:'Max', v:function(r){ return r.max; }, f:function(r){ return r.max; } },
+    { k:'gmean', t:'Moy. groupe', v:function(r){ return r.gmean; }, f:function(r){ return f1(r.gmean); } },
+    { k:'gsd', t:'Écart-type groupe', v:function(r){ return r.gsd; }, f:function(r){ return f1(r.gsd); } },
+    { k:'gap', t:'Écart moyen', v:function(r){ return r.gap; }, f:function(r){ return sg(r.gap); }, c:function(r){ return cls(r.gap); } },
+    { k:'gapsd', t:'Écart-type de l’écart', v:function(r){ return r.gapsd; }, f:function(r){ return f1(r.gapsd); } },
+    { k:'above', t:'Au-dessus du groupe', v:function(r){ return r.above; }, f:function(r){ return pc(r.above); } },
+    { k:'last', t:'Dernier résultat', v:function(r){ return r.last.score; }, f:function(r){ return r.last.score + ' <span style="color:var(--text-muted);font-size:11px">(' + STEP_SH[r.last.step] + ' ' + yShort(r.last.year) + ')</span>'; } }
+  ], sb, ['gap', -1]);
+  /* 3) detail */
+  var dt = selRows({ comp:S.comp }).map(function(r){ var p = r.prev; return { r:r, kid:r.kid, year:r.year, grade:r.grade, step:r.step, subj:r.subj, comp:r.comp, score:r.score, group:r.group, ne:r.ne,
+      gap:(r.score != null && r.group != null) ? r.score - r.group : null, pscore:p ? p.score : null, plbl:p ? STEP_SH[p.step] + ' ' + yShort(p.year) : null, prog:(p && r.score != null) ? r.score - p.score : null, teacher:r.teacher }; });
+  table($('t-dt'), 'dt', [
+    { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
+    { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return yShort(r.year) + ' · ' + gradeLbl(r.grade); } },
+    { k:'step', t:'Étape', l:1, v:function(r){ return STEP_IDX[r.step]; }, f:function(r){ return STEP_LBL[r.step]; } },
+    { k:'subj', t:'Matière', l:1, v:function(r){ return r.subj.short + (r.comp ? ' › ' + r.comp : ''); }, f:function(r){ return r.comp ? esc(r.comp) : '<i class="kd" style="background:' + subjColor(r.kid, r.subj) + '"></i>' + esc(r.subj.short); }, sub:function(r){ return !!r.comp; } },
+    { k:'score', t:'Résultat', v:function(r){ return r.score; }, f:function(r){ return r.score != null ? '<b>' + r.score + '</b>' : (r.ne ? 'NE' : '–'); } },
+    { k:'group', t:'Moy. groupe', v:function(r){ return r.group; }, f:function(r){ return f0(r.group); } },
+    { k:'gap', t:'Écart', v:function(r){ return r.gap; }, f:function(r){ return sg(r.gap, 0); }, c:function(r){ return cls(r.gap); } },
+    { k:'pscore', t:'Étape préc.', v:function(r){ return r.pscore; }, f:function(r){ return r.pscore == null ? '–' : r.pscore + ' <span style="color:var(--text-muted);font-size:11px">(' + r.plbl + ')</span>'; } },
+    { k:'prog', t:'Progression', v:function(r){ return r.prog; }, f:function(r){ return sg(r.prog, 0); }, c:function(r){ return cls(r.prog); } },
+    { k:'teacher', t:'Enseignant(e)', l:1, v:function(r){ return r.teacher; }, f:function(r){ return esc(r.teacher || ''); } }
+  ], dt, ['year', -1]);
+}
+
+/* ---------- notes ---------- */
+function renderNotes(){
+  var ne = ROWS.filter(function(r){ return r.ne; });
+  var nes = ne.length ? 'Léo était absent aux étapes 2 et 3 de sa 2e année (2023-24) : ces cases sont marquées NE et ne comptent dans aucune moyenne. Son résultat final de cette année ne repose donc que sur ce qui a été évalué.' : '';
+  $('notes').innerHTML = [
+    'Source : les bulletins PDF de l’école (dossier Enfants_Bulletins), lus par programme, puis copiés dans la table school_grades de la base de données.',
+    'Les bulletins ne donnent que la <b>moyenne du groupe</b>, pas les résultats des autres élèves : les écarts-types calculés ici mesurent la dispersion <b>entre les matières</b> (ou entre les bulletins), pas entre les élèves de la classe.',
+    'Écart = résultat − moyenne du groupe. Écart relatif (début contre fin) = changement de l’enfant entre l’étape 1 et l’étape 3 − changement de la moyenne du groupe sur la même période.',
+    'Les matières ne sont pas toutes notées à chaque étape (par exemple la musique et les arts plastiques commencent souvent à l’étape 2) : la moyenne générale d’une étape dépend donc des matières notées cette étape-là.',
+    'Chaque année terminée a un résultat final : c’est celui que l’école calcule à partir des trois étapes (l’étape 3 pèse le plus). Il est affiché comme un 4e point après l’étape 3, mais il n’entre pas dans les moyennes par matière (pour ne pas compter deux fois la même année). Pour 2026-27, l’année n’est pas terminée : pas encore de résultat final.',
+    'Les compétences (Lire, Écrire, Résoudre une situation-problème…) sont des sous-notes d’une matière ; elles n’ont pas de moyenne du groupe et n’entrent dans aucune moyenne. Cochez « Compétences » à gauche pour les voir dans le tableau détaillé.',
+    'Les niveaux changent d’année : les années 2022-23 à 2024-25 de Léo sont en 1re à 3e année, celles de Zoé en 1re et 2e année (2026-27 : 3e année). Les groupes-classes ne sont donc pas les mêmes d’une année à l’autre.',
+    nes
+  ].filter(Boolean).map(function(t){ return '<li>' + t + '</li>'; }).join('');
+}
+
+if(key) load(); else showLock('');
+})();
+</script>
+</body>
+</html>
