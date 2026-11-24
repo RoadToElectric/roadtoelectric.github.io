@@ -599,6 +599,12 @@ function renderTables(){
   /* 3) detail */
   var dt = selRows({ comp:S.comp }).map(function(r){ var p = r.prev; return { r:r, kid:r.kid, year:r.year, grade:r.grade, step:r.step, subj:r.subj, comp:r.comp, score:r.score, group:r.group, ne:r.ne,
       gap:(r.score != null && r.group != null) ? r.score - r.group : null, pscore:p ? p.score : null, plbl:p ? STEP_SH[p.step] + ' ' + gradeLbl(p.grade) + ' a.' : null, prog:(p && r.score != null) ? r.score - p.score : null, teacher:r.teacher }; });
+  /* z-scores (the bulletins give no class distribution, so they are measured against the child's own results in the selection) */
+  var zg = {}, zs = {};
+  dt.forEach(function(r){ if(r.comp) return; if(r.gap != null) (zg[r.kid] = zg[r.kid] || []).push(r.gap); if(r.score != null) (zs[r.kid + '|' + r.subj.code] = zs[r.kid + '|' + r.subj.code] || []).push(r.score); });
+  Object.keys(zg).forEach(function(k){ zg[k] = stats(zg[k]); }); Object.keys(zs).forEach(function(k){ zs[k] = stats(zs[k]); });
+  dt.forEach(function(r){ if(r.comp) return; var a = zg[r.kid], b = zs[r.kid + '|' + r.subj.code];
+    r.zgap = (r.gap != null && a && a.sd) ? (r.gap - a.mean) / a.sd : null; r.zres = (r.score != null && b && b.sd) ? (r.score - b.mean) / b.sd : null; });
   table($('t-dt'), 'dt', [
     { k:'kid', t:'Enfant', l:1, v:function(r){ return KNAME[r.kid]; }, f:kidCell },
     { k:'year', t:'Année', l:1, v:function(r){ return r.year; }, f:function(r){ return gradeLbl(r.grade) + ' année'; } },
@@ -607,6 +613,8 @@ function renderTables(){
     { k:'score', t:'Résultat', v:function(r){ return r.score; }, f:function(r){ return r.score != null ? '<b>' + r.score + '</b>' : (r.ne ? 'NE' : '–'); } },
     { k:'group', t:'Moy. groupe', v:function(r){ return r.group; }, f:function(r){ return f0(r.group); } },
     { k:'gap', t:'Écart', v:function(r){ return r.gap; }, f:function(r){ return sg(r.gap, 0); }, c:function(r){ return cls(r.gap); } },
+    { k:'zres', t:'Z résultat', tip:'(résultat − moyenne de l’enfant dans cette matière) ÷ écart-type de l’enfant dans cette matière, sur les lignes affichées', v:function(r){ return r.zres; }, f:function(r){ return sg(r.zres, 2); }, c:function(r){ return cls(r.zres); } },
+    { k:'zgap', t:'Z écart', tip:'(écart au groupe − écart moyen de l’enfant) ÷ écart-type des écarts de l’enfant, sur les lignes affichées : positif = avance sur la classe plus grande que d’habitude', v:function(r){ return r.zgap; }, f:function(r){ return sg(r.zgap, 2); }, c:function(r){ return cls(r.zgap); } },
     { k:'pscore', t:'Étape préc.', v:function(r){ return r.pscore; }, f:function(r){ return r.pscore == null ? '–' : r.pscore + ' <span style="color:var(--text-muted);font-size:11px">(' + r.plbl + ')</span>'; } },
     { k:'prog', t:'Progression', v:function(r){ return r.prog; }, f:function(r){ return sg(r.prog, 0); }, c:function(r){ return cls(r.prog); } },
     { k:'teacher', t:'Enseignant(e)', l:1, v:function(r){ return r.teacher; }, f:function(r){ return esc(r.teacher || ''); } }
@@ -623,6 +631,7 @@ function renderNotes(){
     'Écart = résultat − moyenne du groupe. Écart relatif (début contre fin) = changement de l’enfant entre l’étape 1 et l’étape 3 − changement de la moyenne du groupe sur la même période.',
     'Les matières ne sont pas toutes notées à chaque étape (par exemple la musique et les arts plastiques commencent souvent à l’étape 2) : la moyenne générale d’une étape dépend donc des matières notées cette étape-là.',
     'Le bouton « Étapes / Note finale » à gauche choisit ce qui est affiché dans toute la page : les notes des étapes, ou la note finale de chaque année (calculée par l’école à partir des trois étapes, l’étape 3 pèse le plus). Les deux ne sont jamais mélangés. 2026-27 n’est pas terminée : pas encore de note finale. Une étape où moins de 3 matières ont été évaluées (absence) n’est pas moyennée, pour ne pas fausser les courbes.',
+    'Z-score : les bulletins ne donnent pas la distribution de la classe, donc il n’y a pas de z-score « contre la classe ». Le tableau détaillé donne deux z-scores contre l’enfant lui-même, sur les lignes affichées : <b>Z résultat</b> (le résultat est-il haut ou bas par rapport à ses autres résultats dans cette matière ?) et <b>Z écart</b> (l’avance sur la classe est-elle plus grande ou plus petite que d’habitude ?). Plus de +1 ou moins de −1 = inhabituel.',
     'Les compétences (Lire, Écrire, Résoudre une situation-problème…) sont des sous-notes d’une matière ; elles n’ont pas de moyenne du groupe et n’entrent dans aucune moyenne. Cochez « Compétences » à gauche pour les voir dans le tableau détaillé.',
     'Les années sont des années scolaires (1re année, 2e année…), pas des années du calendrier : Zoé et Léo se comparent au même niveau scolaire. Léo : 1re année en 2022-23 jusqu’à la 5e année en 2026-27. Zoé : 1re année en 2024-25 jusqu’à la 3e année en 2026-27. Les groupes-classes changent d’une année à l’autre.',
     nes
