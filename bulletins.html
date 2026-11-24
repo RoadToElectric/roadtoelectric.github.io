@@ -299,8 +299,8 @@ function buildFilters(){
     return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + gradeLbl(+y) + ' année<small>' + esc(t) + '</small><button type="button" class="only-btn" data-only="y" data-v="' + y + '">Seulement</button></label>'; }).join('');
   var present = {}; ROWS.forEach(function(r){ present[r.subj.code] = 1; });
   $('f-subj').innerHTML = SUBJ.filter(function(s){ return present[s.code]; }).map(function(s){
-    return '<label class="bl-ck"><input type="checkbox" data-s="' + s.code + '"' + (S.subj.has(s.code) ? ' checked' : '') + '><span class="sw"><i style="background:' + s.z + '"></i><i style="background:' + s.l + '"></i></span>' + esc(s.short) + '</label>'; }).join('');
-  $('f-steps').innerHTML = STEPS.map(function(t){ return '<label class="bl-ck"><input type="checkbox" data-t="' + t + '"' + (S.steps.has(t) ? ' checked' : '') + '>' + STEP_LBL[t] + (t === 'FINAL' ? '<small>combine les 3 étapes</small>' : '') + '</label>'; }).join('');
+    return '<label class="bl-ck"><input type="checkbox" data-s="' + s.code + '"' + (S.subj.has(s.code) ? ' checked' : '') + '><span class="sw"><i style="background:' + s.z + '"></i><i style="background:' + s.l + '"></i></span>' + esc(s.short) + '<button type="button" class="only-btn" data-only="s" data-v="' + s.code + '">Seulement</button></label>'; }).join('');
+  $('f-steps').innerHTML = STEPS.map(function(t){ return '<label class="bl-ck"><input type="checkbox" data-t="' + t + '"' + (S.steps.has(t) ? ' checked' : '') + '>' + STEP_LBL[t] + (t === 'FINAL' ? '<small>combine les 3 étapes</small>' : '') + '<button type="button" class="only-btn" data-only="t" data-v="' + t + '">Seulement</button></label>'; }).join('');
   $('o-group').checked = S.group; $('o-comp').checked = S.comp;
 }
 function syncChecks(){
@@ -320,6 +320,8 @@ $('side').addEventListener('change', function(e){
   render();
 });
 $('side').addEventListener('click', function(e){
+  var ob = e.target.closest('.only-btn[data-only]');
+  if(ob){ e.preventDefault(); var set = { k:S.kids, y:S.years, s:S.subj, t:S.steps }[ob.dataset.only]; set.clear(); set.add(ob.dataset.v); syncChecks(); render(); return; }
   var kb = e.target.closest('.bl-kid');
   if(kb){ toggle(S.kids, kb.dataset.kid, !S.kids.has(kb.dataset.kid)); syncChecks(); render(); return; }
   var a = e.target.closest('a[data-all],a[data-none]'); if(!a) return;
