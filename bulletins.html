@@ -293,10 +293,10 @@ function init(d){
 
 /* ---------- filters ---------- */
 function buildFilters(){
-  $('f-kids').innerHTML = KIDS.map(function(k){ return '<button type="button" class="bl-kid' + (S.kids.has(k.kid) ? ' on' : '') + '" data-kid="' + k.kid + '" style="--c:' + KID_COL[k.kid] + '"><img src="' + esc(k.avatar) + '" alt="">' + esc(k.name) + '</button>'; }).join('');
+  $('f-kids').innerHTML = KIDS.map(function(k){ return '<div style="text-align:center"><button type="button" class="bl-kid' + (S.kids.has(k.kid) ? ' on' : '') + '" data-kid="' + k.kid + '" style="--c:' + KID_COL[k.kid] + ';width:100%"><img src="' + esc(k.avatar) + '" alt="">' + esc(k.name) + '</button><button type="button" class="only-btn" data-only="k" data-v="' + k.kid + '" style="opacity:1">Seulement</button></div>'; }).join('');
   var gl = {}; ROWS.forEach(function(r){ (gl[r.grade] = gl[r.grade] || {})[r.kid] = r.year; });
   $('f-years').innerHTML = YEARS.slice().reverse().map(function(y){ var g = gl[y]; var t = Object.keys(g).map(function(k){ return KNAME[k] + ' ' + yShort(g[k]); }).join(' · ');
-    return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + gradeLbl(+y) + ' année<small>' + esc(t) + '</small></label>'; }).join('');
+    return '<label class="bl-ck"><input type="checkbox" data-y="' + y + '"' + (S.years.has(y) ? ' checked' : '') + '>' + gradeLbl(+y) + ' année<small>' + esc(t) + '</small><button type="button" class="only-btn" data-only="y" data-v="' + y + '">Seulement</button></label>'; }).join('');
   var present = {}; ROWS.forEach(function(r){ present[r.subj.code] = 1; });
   $('f-subj').innerHTML = SUBJ.filter(function(s){ return present[s.code]; }).map(function(s){
     return '<label class="bl-ck"><input type="checkbox" data-s="' + s.code + '"' + (S.subj.has(s.code) ? ' checked' : '') + '><span class="sw"><i style="background:' + s.z + '"></i><i style="background:' + s.l + '"></i></span>' + esc(s.short) + '</label>'; }).join('');
