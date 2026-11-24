@@ -632,7 +632,8 @@ function showQ(){
   var fb = $('fb'); fb.className='fb hidden'; fb.innerHTML=''; $('nextWrap').classList.add('hidden'); $('check').classList.remove('hidden');
   var a = $('ans'); a.disabled=false;
   // verbes : la personne est déjà écrite dans la case (sauf pour le participe passé)
-  q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
+  q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0])
+    : (q.kind==='vocab' ? ((String(q.item).match(/^(une|un|les|des|du|le|la) +|^l'/i)||[''])[0].replace(/ +$/, ' ')) : '');   // vocabulaire : l'article est déjà écrit
   a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
   // une seconde de calme avant le mot ; on ne dit le mot que si on est toujours sur cette question
   stopClip(); if(synth) synth.cancel(); clearTimeout(S.sayT); clearTimeout(S.corrT);
@@ -682,7 +683,7 @@ function check(){
   var ok = q.expected.some(function(e){ return norm(e) === user; });
   var shown = q.expected[0];
   var mine = raw.trim();
-  if(q.prefill && norm(mine).indexOf(norm(q.prefill)) === 0){ var cut = mine.slice(q.prefill.trim().length).replace(/^[' ]+/, ''); if(cut) mine = cut; }   // la personne pré-écrite n'est pas une faute
+  if(q.kind==='verb' && q.prefill && norm(mine).indexOf(norm(q.prefill)) === 0){ var cut = mine.slice(q.prefill.trim().length).replace(/^[' ]+/, ''); if(cut) mine = cut; }   // la personne pré-écrite n'est pas une faute
   var rec = {key:q.key, item:q.item, tense:q.tense||null, pron:q.pron||null, answer:mine, expected:shown, ok:ok};
   S.answers.push(rec);
   var fb = $('fb');
