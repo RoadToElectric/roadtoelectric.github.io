@@ -328,16 +328,17 @@ function tone(freq, t0, dur, type, vol){
 }
 /* Léo : ses propres sons enregistrés (dossier assets/devoirs/sons) remplacent les sons et cris par défaut */
 var CLIPS = {};
-function isLeo(){ return !!(S.who && S.who.name === 'Léo'); }
+function hasClips(){ return !!S.who; }
+function clipPrefix(){ return S.who && S.who.name === 'Léo' ? 'Leo' : 'Zoe'; }
 function clipFor(name){
   if(!CLIPS[name]){ try{ var a = new Audio('assets/devoirs/sons/' + name + '.mp3'); a.preload = 'auto'; CLIPS[name] = a; }catch(e){ return null; } }
   return CLIPS[name];
 }
 function stopClip(){ Object.keys(CLIPS).forEach(function(k){ try{ CLIPS[k].pause(); CLIPS[k].currentTime = 0; CLIPS[k].onended = null; }catch(e){} }); }
 // joue le clip ; renvoie sa durée en ms (ou 2500 si inconnue), ou 0 si rien n'a pu démarrer (on retombe alors sur les sons par défaut)
-function playClip(name, onend){
-  if(!isLeo() || !soundOn) return 0;
-  var a = clipFor(name); if(!a) return 0;
+function playClip(kind, onend){
+  if(!hasClips() || !soundOn) return 0;
+  var a = clipFor(clipPrefix() + '_' + kind); if(!a) return 0;
   stopClip(); if(synth) synth.cancel();
   var failed = false;
   a.onended = function(){ if(onend) onend(); };
@@ -345,7 +346,7 @@ function playClip(name, onend){
   if(pr && pr.catch) pr.catch(function(){ failed = true; a.onended = null; if(onend) onend(); });
   return (a.duration && isFinite(a.duration)) ? Math.round(a.duration * 1000) : 2500;
 }
-function preloadLeoClips(){ ['Leo_Reussi_1','Leo_Rate_1','Leo_TEST_Reussi_1'].forEach(clipFor); }
+function preloadClips(){ ['Reussi_1','Rate_1','TEST_Reussi_1'].forEach(function(k){ clipFor(clipPrefix() + '_' + k); }); }
 function happySound(){ tone(523,0,.16,'triangle'); tone(659,.12,.16,'triangle'); tone(784,.24,.16,'triangle'); tone(1047,.36,.35,'triangle',.3); }
 function buzzSound(){ tone(120,0,.35,'sawtooth',.3); tone(95,.05,.35,'square',.18); }
 function celebrate(quiet){
@@ -426,7 +427,7 @@ $('pLeo').addEventListener('click', function(){ audio(); chooseSubject(PUPILS.le
 $('pPapa').addEventListener('click', function(){ $('pin').value=''; $('pinErr').textContent=''; show('pin'); setTimeout(function(){ $('pin').focus(); }, 50); });
 
 function chooseSubject(p){
-  setWho(p); if(p.name === 'Léo') preloadLeoClips(); $('sub').textContent = 'Bonjour ' + p.name + ' !';
+  setWho(p); preloadClips(); $('sub').textContent = 'Bonjour ' + p.name + ' !';
   S.counts = {}; show('subject');
   ['voc','verb','dict'].forEach(function(k){ $(k+'Info').textContent = '…'; });
   S.phrases = null; $('bDict').disabled = true;
@@ -687,7 +688,7 @@ function check(){
   var fb = $('fb');
   if(ok){
     fb.className = 'fb ok pop'; fb.innerHTML = '<h2>✅ ' + ['Bravo','Super','Excellent','Génial','Parfait','Bien joué'][Math.floor(Math.random()*6)] + ' !</h2><div class="word">'+esc(shown)+'</div>';
-    var dOk = playClip('Leo_Reussi_1');
+    var dOk = playClip('Reussi_1');
     celebrate(!!dOk);
     if(!dOk) speakEn("Let's go!!");
     lockNext(Math.max(2300, dOk ? dOk + 300 : 0));
@@ -702,7 +703,7 @@ function check(){
     var qi = S.i;
     var g = S.gen;
     var after = function(){ if(S.mode!=='test' && S.gen===g && S.i===qi) S.corrT = setTimeout(function(){ if(S.gen===g && S.i===qi && S.answered && !$('s-quiz').classList.contains('hidden')) speak(shown, 0.6); }, 250); };
-    var dKo = playClip('Leo_Rate_1', after);
+    var dKo = playClip('Rate_1', after);
     failFx(!!dKo);
     if(!dKo) speakEn('Oh come on!!', after);
     lockNext(Math.max(S.mode==='test' ? 2800 : 5200, dKo ? dKo + (S.mode==='test' ? 300 : 2300) : 0));
@@ -734,7 +735,7 @@ function finish(){
     return '<tr><td>'+esc(q)+'</td><td class="good">'+esc(a.expected)+'</td><td class="bad">'+esc(a.answer)+'</td></tr>';
   }).join('');
   show('result');
-  var bigWin = isLeo() && S.mode==='test' && pct > 0.8 && playClip('Leo_TEST_Reussi_1');
+  var bigWin = pct > 0.8 && playClip('TEST_Reussi_1');
   if(pct>=0.6) celebrate(!!bigWin);
   if(S.mode==='qa'){ $('rSave').textContent = '🧪 Mode QA : rien n\'est enregistré, aucun courriel envoyé.'; return; }
   saveResult(ok, ko);
