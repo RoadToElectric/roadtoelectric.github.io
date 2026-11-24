@@ -220,6 +220,7 @@
       <div class="prompt" id="prompt"></div>
       <p class="center"><button class="purple" id="say" type="button" style="font-size:1.5rem;padding:18px 28px">🔊 Écouter</button></p>
       <p class="center" id="aids"><button class="alt small" id="slow" type="button">🐢 Plus lentement</button></p>
+      <div id="sensBox" class="hidden" style="text-align:center;font-size:1.15rem;font-weight:700;color:var(--purple-d);background:#f3e8ff;border-radius:14px;padding:8px 12px;margin:8px 0"></div>
       <div class="hintbox" id="hint"></div>
       <input id="ans" class="answer" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Écris ici">
       <p style="margin-top:12px"><button class="big green" id="check" type="button">✔ Vérifier</button></p>
@@ -364,7 +365,7 @@ var SCREENS = ['home','pin','subject','lists','blocs','tenses','verbpick','mode'
 function show(id){ SCREENS.forEach(function(s){ $('s-'+s).classList.toggle('hidden', s!==id); }); window.scrollTo(0,0); }
 var S = { who:null, cat:null, mode:null, tenses:[], n:15, data:null, qs:[], i:0, answers:[], answered:false, key:null };
 function setWho(p){ S.who = p; var w = $('who'); if(p){ w.classList.remove('hidden'); w.innerHTML = '<span class="av" style="background:'+p.color+'">'+esc(p.name[0])+'</span>'+esc(p.name)+' · '+p.annee+'e'; } else w.classList.add('hidden'); }
-function goHome(){ if(synth) synth.cancel(); setWho(null); $('sub').textContent = 'Écoute, écris, apprends !'; show('home'); }
+function goHome(){ if(typeof stopTalk==='function') stopTalk(); else if(synth) synth.cancel(); setWho(null); $('sub').textContent = 'Écoute, écris, apprends !'; show('home'); }
 $('btnHome').addEventListener('click', function(){ if(!$('s-quiz').classList.contains('hidden') && S.answers.length && !confirm('Arrêter cet exercice ? Il ne sera pas enregistré.')) return; goHome(); });
 $('rHome').addEventListener('click', goHome);
 
@@ -446,7 +447,7 @@ $('blocsOk').addEventListener('click', function(){
 });
 function showTenses(){
   var box = $('tenseChips'); box.innerHTML = '';
-  TENSES.forEach(function(t){ var l = document.createElement('label'); l.className='chip'; l.innerHTML = '<input type="checkbox" value="'+t.id+'"'+(t.on?' checked':'')+'><span>'+t.label+'</span>'; box.appendChild(l); });
+  TENSES.forEach(function(t){ var l = document.createElement('label'); l.className='chip'; l.innerHTML = '<input type="checkbox" value="'+t.id+'"'+((S.who && S.who.name==='Zoé' ? t.id==='present' : t.on)?' checked':'')+'><span>'+t.label+'</span>'; box.appendChild(l); });   // Zoé : seulement le présent au départ
   show('tenses');
 }
 $('tensesOk').addEventListener('click', function(){
@@ -499,7 +500,7 @@ function buildQuestions(n){
       if(S.listSel && S.listSel.indexOf(it.liste) < 0) return;
       if(seen[it.item]) return; seen[it.item] = 1;       // the same word in two lists is asked once
       var p = prog[it.item]||{ok:0,ko:0};
-      pool.push({key:it.item, item:it.item, details:it.details, p:p, kind:'vocab'});
+      pool.push({key:it.item, item:it.item, details:it.details, sens:it.sens||'', p:p, kind:'vocab'});
     });
   } else {
     items.forEach(function(v){
@@ -523,7 +524,7 @@ function buildQuestions(n){
     if(q.kind==='verb'){
       if(q.tense==='participe_passe'){ q.expected = [].concat(q.forms); q.label = ''; }
       else { var p = PRON[Math.floor(Math.random()*PRON.length)]; var f = q.forms[p]; q.pron = p; q.expected = [].concat(f); q.label = pronLabel(p, q.tense, [].concat(f)[0]); }
-    } else { var bare = q.item.replace(/^(un|une|le|la|les|des|du|l') ?/i, ''); q.expected = bare && bare !== q.item ? [q.item, bare] : [q.item]; }
+    } else { var bare = q.item.replace(/^(une|un|les|des|du|le|la) +|^l'/i, ''); q.expected = bare && bare !== q.item ? [q.item, bare] : [q.item]; }
     return q;
   });
 }
@@ -532,9 +533,15 @@ function start(n){
   var d = S.counts && S.counts[S.cat] && S.counts[S.cat].data;
   if(!d){ alert('Les données ne sont pas chargées. Reviens à l\'accueil.'); return; }
   S.data = d; S.qs = buildQuestions(n);
-  if(!S.qs.length){ alert(S.mode==='entrainement' ? 'Bravo ! Il n\'y a plus rien à travailler ici : tout est déjà maîtrisé. 🎉' : 'Aucune question disponible.'); show('mode'); return; }
-  if(S.qs.length < n && S.mode==='entrainement') alert('Il ne reste que ' + S.qs.length + ' à travailler. On commence !');
-  S.i = 0; S.answers = []; show('quiz'); showQ();
+  if(!S.qs.length){
+    // on reste sur cet écran et on explique (une alerte peut être bloquée sur une tablette)
+    var why = S.mode==='entrainement' ? 'Bravo ! Il n\'y a plus rien à travailler dans ce choix : tout est déjà maîtrisé. 🎉 Choisis d\'autres listes, ou le mode Test.' : 'Aucune question disponible pour ce choix.';
+    if($('s-count').classList.contains('hidden')) askCount();
+    $('nqMsg').textContent = why; return;
+  }
+  S.i = 0; S.answers = [];
+  show('quiz'); showQ();
+  if(S.qs.length < n && S.mode==='entrainement') $('qnum').textContent += ' · il ne reste que ' + S.qs.length + ' mots à travailler';
 }
 function qText(q){
   if(q.kind==='vocab') return '';
@@ -555,18 +562,26 @@ function showQ(){
     }).join(' ou ');
   }
   $('hint').textContent = hint;
+  // sens (homophones) : on cache le mot demandé par « … »
+  q.sensText = '';
+  if(q.kind==='vocab' && q.sens){
+    var bare0 = q.item.replace(/^(une|un|les|des|du|le|la) +|^l'/i, '');
+    var esc = bare0.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    try{ q.sensText = q.sens.replace(new RegExp('(^|[^\\p{L}])(' + esc + ')(?![\\p{L}])', 'giu'), '$1…'); }catch(e){ q.sensText = q.sens; }
+  }
+  var sb = $('sensBox'); sb.textContent = q.sensText ? '👉 ' + q.sensText : ''; sb.classList.toggle('hidden', !q.sensText);
   var fb = $('fb'); fb.className='fb hidden'; fb.innerHTML=''; $('nextWrap').classList.add('hidden'); $('check').classList.remove('hidden');
   var a = $('ans'); a.disabled=false;
   // verbes : la personne est déjà écrite dans la case (sauf pour le participe passé)
   q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
   a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
   // une seconde de calme avant le mot ; on ne dit le mot que si on est toujours sur cette question
-  if(synth) synth.cancel(); clearTimeout(S.sayT);
-  var qi = S.i; S.sayT = setTimeout(function(){ if(S.i===qi && !S.answered) sayQ(); }, 1000);
+  if(synth) synth.cancel(); clearTimeout(S.sayT); clearTimeout(S.corrT);
+  var qi = S.i, g = (S.gen = (S.gen||0) + 1); S.sayT = setTimeout(function(){ if(S.gen===g && S.i===qi && !S.answered) sayQ(); }, 1000);
 }
 function sayQ(rate){
   var q = S.qs[S.i]; if(!q) return;
-  if(q.kind==='vocab') speak(q.item, rate);
+  if(q.kind==='vocab') speak(q.sensText ? q.item + '. ' + q.sensText.replace(/…/g, '') : q.item, rate);
   else speak(q.tense==='participe_passe' ? 'Participe passé du verbe '+q.item : q.item+', '+TENSE_SAY[q.tense]+', '+q.label.replace(/ \/ .*/, '').replace(/j'/, 'je').replace(/qu'il/, 'que il'), rate);
 }
 $('say').addEventListener('click', function(){ sayQ(); $('ans').focus(); });
@@ -627,7 +642,8 @@ function check(){
     failFx();
     // « Oh come on ! », puis (hors test) la bonne orthographe est relue lentement
     var qi = S.i;
-    speakEn('Oh come on!!', function(){ if(S.mode!=='test' && S.i===qi) setTimeout(function(){ if(S.i===qi && S.answered) speak(shown, 0.6); }, 250); });
+    var g = S.gen;
+    speakEn('Oh come on!!', function(){ if(S.mode!=='test' && S.gen===g && S.i===qi) S.corrT = setTimeout(function(){ if(S.gen===g && S.i===qi && S.answered && !$('s-quiz').classList.contains('hidden')) speak(shown, 0.6); }, 250); });
     lockNext(S.mode==='test' ? 2800 : 5200);
   }
   $('nextWrap').classList.remove('hidden');
@@ -640,8 +656,9 @@ function lockNext(ms){
 }
 function next(){ if(!S.answered || $('next').disabled) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
 
+function stopTalk(){ S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
 function finish(){
-  if(synth) synth.cancel();
+  stopTalk();
   var ok = S.answers.filter(function(a){ return a.ok; }).length, ko = S.answers.length - ok;
   $('prog').style.width = '100%';
   $('rTitle').textContent = ok + ' / ' + S.answers.length;
@@ -696,9 +713,18 @@ function admResults(body){
   rpc('devoirs_admin_results',{p_key:PIN,p_limit:200}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
     var rows = d.rows||[];
-    body.innerHTML = '<h2>Résultats</h2>' + (rows.length ? '<div class="overflow"><table><thead><tr><th>Date et heure</th><th>Élève</th><th>Matière</th><th>Mode</th><th>Réussites</th><th>Échecs</th><th>Courriel</th></tr></thead><tbody>'
-      + rows.map(function(r){ return '<tr><td>'+esc(fdate(r.played_at))+'</td><td>'+esc(r.eleve)+'</td><td>'+esc(r.categorie)+(r.temps?' ('+esc((r.temps||[]).join(', '))+')':'')+'</td><td>'+esc(r.mode)+'</td><td class="good">'+r.nb_ok+'</td><td class="bad">'+r.nb_ko+'</td><td>'+(r.emailed_at?'envoyé':'—')+'</td></tr>'; }).join('')
+    body.innerHTML = '<h2>Résultats</h2>' + (rows.length ? '<div class="row" style="margin-bottom:10px;align-items:center"><button class="alt small" id="rSel" type="button">Tout sélectionner</button><button class="small" id="rDel" type="button" style="background:var(--red);box-shadow:0 5px 0 #991b1b">Supprimer la sélection</button><span class="small-t" id="rMsg">La progression (mots maîtrisés) n\'est pas touchée.</span></div><div class="overflow"><table><thead><tr><th></th><th>Date et heure</th><th>Élève</th><th>Matière</th><th>Mode</th><th>Réussites</th><th>Échecs</th><th>Courriel</th></tr></thead><tbody>'
+      + rows.map(function(r){ return '<tr><td><input type="checkbox" class="rc" data-id="'+esc(r.id)+'" style="width:22px;height:22px"></td><td>'+esc(fdate(r.played_at))+'</td><td>'+esc(r.eleve)+'</td><td>'+esc(r.categorie)+(r.temps?' ('+esc((r.temps||[]).join(', '))+')':'')+'</td><td>'+esc(r.mode)+'</td><td class="good">'+r.nb_ok+'</td><td class="bad">'+r.nb_ko+'</td><td>'+(r.emailed_at?'envoyé':'—')+'</td></tr>'; }).join('')
       + '</tbody></table></div>' : '<p class="muted">Aucun résultat pour l\'instant.</p>');
+    if(!rows.length) return;
+    var boxes = function(){ return Array.prototype.slice.call(body.querySelectorAll('.rc')); };
+    $('rSel').addEventListener('click', function(){ var all = boxes().every(function(b){ return b.checked; }); boxes().forEach(function(b){ b.checked = !all; }); });
+    $('rDel').addEventListener('click', function(){
+      var ids = boxes().filter(function(b){ return b.checked; }).map(function(b){ return b.dataset.id; });
+      if(!ids.length){ $('rMsg').textContent = 'Coche d\'abord les résultats à effacer.'; return; }
+      if(!confirm('Effacer définitivement ' + ids.length + ' résultat(s) ? Impossible d\'annuler.')) return;
+      rpc('devoirs_admin_delete_results',{p_key:PIN,p_ids:ids}).then(function(){ admTab('results'); }).catch(function(){ $('rMsg').textContent = 'Erreur de connexion.'; });
+    });
   }).catch(function(){ body.textContent='Erreur de connexion.'; });
 }
 function admProgress(body){
@@ -721,20 +747,22 @@ function admList(body, cat){
     body.innerHTML = (cat==='verbes' ? addVerbsForm() : '') + '<h2>'+(cat==='vocabulaire'?'Mots':'Verbes')+' ('+rows.length+')</h2>'
       + '<div class="row" style="margin-bottom:10px"><select id="lfYear" style="flex:1 1 120px"><option value="">Toutes les années</option><option value="3">3e année</option><option value="5">5e année</option></select>'
       + (cat==='vocabulaire' ? '<select id="lfList" style="flex:1 1 140px"><option value="">Toutes les listes</option></select>' : '')
-      + '<input id="lfQ" type="text" placeholder="Chercher…" style="flex:2 1 160px"></div><div class="small-t" id="lfCount"></div><div class="overflow"><table><thead><tr><th>Année</th>'+(cat==='vocabulaire'?'<th>Liste</th>':'<th>Bloc</th>')+'<th>Semaine</th><th>'+(cat==='vocabulaire'?'Mot':'Verbe')+'</th><th>'+(cat==='vocabulaire'?'Détails':'Formes')+'</th><th>Actif</th></tr></thead><tbody id="lfBody"></tbody></table></div>';
+      + '<input id="lfQ" type="text" placeholder="Chercher…" style="flex:2 1 160px"></div><div class="small-t" id="lfCount"></div><div class="overflow"><table><thead><tr><th>Année</th>'+(cat==='vocabulaire'?'<th>Liste</th>':'<th>Bloc</th>')+'<th>Semaine</th><th>'+(cat==='vocabulaire'?'Mot':'Verbe')+'</th><th>'+(cat==='vocabulaire'?'Détails':'Formes')+'</th>'+(cat==='vocabulaire'?'<th>Sens (si homophone)</th>':'')+'<th>Actif</th></tr></thead><tbody id="lfBody"></tbody></table></div>';
     function render(){
       var y = $('lfYear').value, q = norm($('lfQ').value), li = $('lfList') ? $('lfList').value : '';
       var f = rows.filter(function(r){ return (!y || String(r.annee)===y) && (!li || r.liste===li) && (!q || norm(r.item).indexOf(q)>=0); });
       $('lfCount').textContent = f.length + ' ligne(s)' + (f.length>200 ? ' — 200 affichées, précise ta recherche' : '');
       $('lfBody').innerHTML = f.slice(0,200).map(function(r){
-        return '<tr><td>'+r.annee+'e</td>'+'<td class="small-t">'+esc(cat==='vocabulaire' ? (r.liste||'') : (r.bloc||''))+'</td>'+'<td><input type="number" min="1" max="60" value="'+(r.semaine==null?'':r.semaine)+'" data-id="'+r.id+'" class="wk" style="width:70px;padding:6px"></td><td>'+esc(r.item)+'</td><td class="small-t">'+esc(cat==='vocabulaire'?(r.details||''):(r.has_forms?'oui':'à calculer'))+'</td><td><input type="checkbox" data-id="'+r.id+'" class="act"'+(r.actif?' checked':'')+' style="width:22px;height:22px"></td></tr>';
+        return '<tr><td>'+r.annee+'e</td>'+'<td class="small-t">'+esc(cat==='vocabulaire' ? (r.liste||'') : (r.bloc||''))+'</td>'+'<td><input type="number" min="1" max="60" value="'+(r.semaine==null?'':r.semaine)+'" data-id="'+r.id+'" class="wk" style="width:70px;padding:6px"></td><td>'+esc(r.item)+'</td><td class="small-t">'+esc(cat==='vocabulaire'?(r.details||''):(r.has_forms?'oui':'à calculer'))+'</td>'+(cat==='vocabulaire'?'<td><input type="text" class="sn" data-id="'+r.id+'" value="'+esc(r.sens||'')+'" placeholder="—" style="min-width:200px;padding:6px"></td>':'')+'<td><input type="checkbox" data-id="'+r.id+'" class="act"'+(r.actif?' checked':'')+' style="width:22px;height:22px"></td></tr>';
       }).join('');
     }
     function rowOf(id){ return rows.filter(function(r){ return String(r.id)===String(id); })[0]; }
     function save(id){
       var r = rowOf(id), wk = body.querySelector('.wk[data-id="'+id+'"]'), ac = body.querySelector('.act[data-id="'+id+'"]');
       r.semaine = wk.value===''?null:parseInt(wk.value,10); r.actif = ac.checked;
-      rpc('devoirs_admin_set',{p_key:PIN,p_cat:cat,p_id:r.id,p_semaine:r.semaine,p_actif:r.actif});
+      var sn = body.querySelector('.sn[data-id="'+id+'"]'), args = {p_key:PIN,p_cat:cat,p_id:r.id,p_semaine:r.semaine,p_actif:r.actif};
+      if(sn){ r.sens = sn.value.trim(); args.p_sens = r.sens; }
+      rpc('devoirs_admin_set', args);
     }
     if(cat==='verbes') wireAddVerbs();
     $('lfBody').addEventListener('change', function(e){ var id = e.target.dataset.id; if(id) save(id); });
