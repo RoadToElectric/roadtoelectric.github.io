@@ -133,9 +133,8 @@
     <div class="bl-fg"><h3>Enfant</h3><div class="bl-kids" id="f-kids"></div></div>
     <div class="bl-fg"><h3>Année scolaire <span><a data-all="years">tout</a><a data-none="years">aucun</a></span></h3><div id="f-years"></div></div>
     <div class="bl-fg"><h3>Matière <span><a data-all="subj">tout</a><a data-none="subj">aucun</a></span></h3><div id="f-subj"></div></div>
-    <div class="bl-fg"><h3>Notes à afficher</h3><div class="bl-seg" id="f-mode" style="display:flex"><button type="button" data-m="steps" class="on" style="flex:1">Étapes</button><button type="button" data-m="final" style="flex:1">Note finale</button></div>
-      <p class="bl-note" id="f-mode-note" style="margin:6px 0 0;font-size:11.5px">La note finale est calculée par l’école avec les 3 étapes.</p>
-      <div id="f-stepbox" style="margin-top:8px"><h3 style="margin-bottom:4px">Étapes <span><a data-all="steps">tout</a><a data-none="steps">aucun</a></span></h3><div id="f-steps"></div></div></div>
+    <div class="bl-fg">
+      <div id="f-stepbox"><h3 style="margin-bottom:7px">Étapes <span><a data-all="steps">tout</a><a data-none="steps">aucun</a></span></h3><div id="f-steps"></div></div></div>
     <div class="bl-fg"><h3>Affichage</h3>
       <label class="bl-ck"><input type="checkbox" id="o-group" checked> Moyenne du groupe (lignes pointillées)</label>
       <label class="bl-ck"><input type="checkbox" id="o-comp"> Compétences dans le tableau détaillé</label>
@@ -162,6 +161,7 @@
       <div class="bl-ins" id="insights"></div>
 
       <section class="bl-card card chart-card" id="c-sum">
+        <div class="bl-head" style="margin-bottom:10px"><div class="bl-seg" data-nocapture id="f-mode" role="group" aria-label="Notes à afficher" title="La note finale est calculée par l’école avec les 3 étapes"><button type="button" data-m="steps" class="on">Étapes</button><button type="button" data-m="final">Note finale</button></div></div>
         <div class="bl-head"><h2 id="sum-title">Sommaire</h2>
           <div class="bl-seg" data-nocapture id="sum-view" role="group" aria-label="Vue">
             <button type="button" data-v="avg" class="on">Moyenne générale</button>
@@ -332,7 +332,6 @@ $('side').addEventListener('change', function(e){
   render();
 });
 $('side').addEventListener('click', function(e){
-  var mb = e.target.closest('#f-mode button'); if(mb){ S.mode = mb.dataset.m; syncChecks(); render(); return; }
   var ob = e.target.closest('.only-btn[data-only]');
   if(ob){ e.preventDefault(); var set = { k:S.kids, y:S.years, s:S.subj, t:S.steps }[ob.dataset.only]; set.clear(); set.add(ob.dataset.v); syncChecks(); render(); return; }
   var kb = e.target.closest('.bl-kid');
@@ -349,6 +348,7 @@ $('b-reset').addEventListener('click', function(){
   hidden.sum.clear(); hidden.se1.clear(); hidden.se2.clear(); buildFilters(); render();
 });
 $('hero-kids').addEventListener('click', function(e){ var im = e.target.closest('img[data-kid]'); if(!im) return; toggle(S.kids, im.dataset.kid, !S.kids.has(im.dataset.kid)); syncChecks(); render(); });
+$('f-mode').addEventListener('click', function(e){ var mb = e.target.closest('button'); if(!mb) return; S.mode = mb.dataset.m; syncChecks(); render(); });
 $('sum-view').addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; S.view = b.dataset.v; renderSummary(); });
 
 /* ---------- selections ---------- */
