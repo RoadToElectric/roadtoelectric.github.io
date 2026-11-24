@@ -161,7 +161,8 @@
       <div class="bl-ins" id="insights"></div>
 
       <section class="bl-card card chart-card" id="c-sum">
-        <div class="bl-head" style="margin-bottom:10px"><div class="bl-seg" data-nocapture id="f-mode" role="group" aria-label="Notes à afficher" title="La note finale est calculée par l’école avec les 3 étapes"><button type="button" data-m="steps" class="on">Étapes</button><button type="button" data-m="final">Note finale</button></div></div>
+        <div class="bl-head" style="margin-bottom:10px"><div class="bl-seg" data-nocapture id="f-mode" role="group" aria-label="Notes à afficher" title="La note finale est calculée par l’école avec les 3 étapes"><button type="button" data-m="steps" class="on">Étapes</button><button type="button" data-m="final">Note finale</button></div>
+          <div id="sum-kids" style="display:flex;gap:14px;align-items:center"></div></div>
         <div class="bl-head"><h2 id="sum-title">Sommaire</h2>
           <div class="bl-seg" data-nocapture id="sum-view" role="group" aria-label="Vue">
             <button type="button" data-v="avg" class="on">Moyenne générale</button>
@@ -465,6 +466,7 @@ function renderSummary(){
   document.querySelectorAll('#sum-view button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === S.view); });
   var rs = graded(selRows()), cats = timeline(rs), ix = {}; cats.forEach(function(c, i){ ix[c.key] = i; });
   var kidsSel = KIDS.filter(function(k){ return S.kids.has(k.kid); }), series = [];
+  $('sum-kids').innerHTML = (S.kids.size > 1 && (S.view === 'avg' || S.view === 'gap')) ? kidsSel.map(function(k){ return '<span style="display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13px"><img src="' + esc(k.avatar) + '" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:3px solid ' + KID_COL[k.kid] + '">' + esc(k.name) + '</span>'; }).join('') : '';
   var titles = { avg:'Sommaire : moyenne générale', subj:'Résultat par matière', gap:'Écart moyen au groupe', gapsubj:'Écart au groupe, matière par matière' };
   var notes = {
     avg:'Moyenne des matières cochées à chaque étape. Les lignes pointillées sont la moyenne du groupe pour les mêmes matières. Cliquez sur une légende pour cacher une ligne.',
