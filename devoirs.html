@@ -435,7 +435,8 @@ function chooseSubject(p){
   ['vocabulaire','verbes'].forEach(function(cat){
     rpc('devoirs_start', {p_eleve:p.name, p_annee:p.annee, p_cat:cat}).then(function(d){
       var items = d.items||[], prog = d.progress||{}, mastered = 0;
-      if(cat==='vocabulaire') items.forEach(function(it){ if(prog[it.item] && prog[it.item].ok>=2) mastered++; });
+      S.seuil = d.seuil || S.seuil || 2;
+      if(cat==='vocabulaire') items.forEach(function(it){ if(prog[it.item] && prog[it.item].ok>=S.seuil) mastered++; });
       S.counts[cat] = {total:items.length, mastered:mastered, data:d};
       var info = cat==='vocabulaire' ? $('vocInfo') : $('verbInfo'), btn = cat==='vocabulaire' ? $('bVoc') : $('bVerb');
       if(!items.length){ info.textContent = 'Bientôt : la liste arrive.'; btn.disabled = true; }
@@ -575,7 +576,7 @@ function buildQuestions(n){
   }
   var chosen;
   if(S.mode==='entrainement'){
-    var open = pool.filter(function(q){ return q.p.ok < 2; });
+    var open = pool.filter(function(q){ return q.p.ok < (d.seuil || S.seuil || 2); });
     var redo = shuffle(open.filter(function(q){ return q.p.ko > 0; })), fresh = shuffle(open.filter(function(q){ return !(q.p.ko > 0); }));
     chosen = redo.concat(fresh).slice(0,n);          // les mots ratés d'abord
   } else chosen = shuffle(pool).slice(0,n);
@@ -884,14 +885,22 @@ function admResults(body){
 function admProgress(body){
   rpc('devoirs_admin_progress',{p_key:PIN}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
-    var rows = d.rows||[];
-    body.innerHTML = '<h2>Progression (entraînement)</h2>' + (rows.length ? '<table><thead><tr><th>Élève</th><th>Matière</th><th>Vus</th><th>Maîtrisés (2 réussites)</th><th>À revoir</th></tr></thead><tbody>'
+    var rows = d.rows||[], seuil = d.seuil || 2;
+    body.innerHTML = '<h2>Progression (entraînement)</h2>'
+      + '<p><b>Un mot réussi n\'est plus demandé après</b> <input id="seuilIn" type="number" min="1" max="20" value="'+seuil+'" style="width:64px;padding:6px;font-size:1rem"> <b>réussite(s)</b> <button class="small" id="seuilSave" type="button">Enregistrer</button> <span id="seuilMsg" class="muted"></span></p>'
+      + (rows.length ? '<table><thead><tr><th>Élève</th><th>Matière</th><th>Vus</th><th>Maîtrisés ('+seuil+' réussite'+(seuil>1?'s':'')+')</th><th>À revoir</th></tr></thead><tbody>'
       + rows.map(function(r){ return '<tr><td>'+esc(r.eleve)+'</td><td>'+esc(r.categorie)+'</td><td>'+r.vus+'</td><td class="good">'+r.maitrises+'</td><td class="bad">'+r.a_revoir+'</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">Rien pour l\'instant.</p>')
-      + '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><p><b>Remettre la progression à zéro</b> (les mots maîtrisés reviendront) :</p><div class="row"><button class="alt small" data-r="Zoé" type="button">Zoé</button><button class="alt small" data-r="Léo" type="button">Léo</button></div>';
+      + '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><p><b>Remettre la progression à zéro</b> (les mots maîtrisés reviendront) :</p><div class="row"><button class="alt small" data-r="Zoé" type="button">Zoé : tout</button><button class="alt small" data-r="Zoé" data-c="vocabulaire" type="button">Zoé : vocabulaire</button><button class="alt small" data-r="Zoé" data-c="verbes" type="button">Zoé : verbes</button></div><div class="row" style="margin-top:8px"><button class="alt small" data-r="Léo" type="button">Léo : tout</button><button class="alt small" data-r="Léo" data-c="vocabulaire" type="button">Léo : vocabulaire</button><button class="alt small" data-r="Léo" data-c="verbes" type="button">Léo : verbes</button></div>';
     body.querySelectorAll('button[data-r]').forEach(function(b){ b.addEventListener('click', function(){
-      if(!confirm('Remettre à zéro la progression de '+b.dataset.r+' ?')) return;
-      rpc('devoirs_admin_reset',{p_key:PIN,p_eleve:b.dataset.r}).then(function(){ admTab('progress'); });
+      var what = b.dataset.c ? ' ('+b.dataset.c+')' : '';
+      if(!confirm('Remettre à zéro la progression de '+b.dataset.r+what+' ? Les mots maîtrisés seront de nouveau demandés.')) return;
+      rpc('devoirs_admin_reset',{p_key:PIN,p_eleve:b.dataset.r,p_cat:b.dataset.c||null}).then(function(){ admTab('progress'); });
     }); });
+    $('seuilSave').addEventListener('click', function(){
+      var v = parseInt($('seuilIn').value, 10);
+      if(!(v >= 1 && v <= 20)){ $('seuilMsg').textContent = 'Entre 1 et 20.'; return; }
+      rpc('devoirs_admin_set_seuil',{p_key:PIN,p_seuil:v}).then(function(r){ if(r && r.error){ $('seuilMsg').textContent = 'Refusé.'; return; } S.seuil = v; admTab('progress'); }).catch(function(){ $('seuilMsg').textContent = 'Erreur de connexion.'; });
+    });
   }).catch(function(){ body.textContent='Erreur de connexion.'; });
 }
 function admList(body, cat){
