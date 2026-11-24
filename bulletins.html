@@ -227,15 +227,15 @@ var STEP_SH = { E1:'É1', E2:'É2', E3:'É3', FINAL:'Final' };
 var STEP_IDX = { E1:0, E2:1, E3:2, FINAL:3 };
 /* every subject has its own colour, in the palette of each child: Zoé = reds and oranges, Léo = blues and greens */
 var SUBJ = [
-  { code:'FR', name:"Français, langue d'enseignement", short:'Français',           z:'#dc2626', l:'#1d4ed8' },
+  { code:'FR', name:"Français, langue d'enseignement", short:'Français',           z:'#dc2626', l:'#2563eb' },
   { code:'EN', name:'Anglais, langue seconde',          short:'Anglais',            z:'#f97316', l:'#16a34a' },
-  { code:'MA', name:'Mathématique',                     short:'Mathématique',       z:'#7f1d1d', l:'#0c2d6b' },
-  { code:'SC', name:'Science et technologie',           short:'Science et techno',  z:'#ec4899', l:'#0ea5e9' },
-  { code:'GH', name:'Géographie, histoire et éducation à la citoyenneté', short:'Géo-histoire', z:'#facc15', l:'#0f766e' },
-  { code:'MU', name:'Musique',                          short:'Musique',            z:'#fb7185', l:'#60a5fa' },
-  { code:'AP', name:'Arts plastiques',                  short:'Arts plastiques',    z:'#be185d', l:'#22c55e' },
-  { code:'EP', name:'Éducation physique et à la santé', short:'Éduc. physique',     z:'#d97706', l:'#14b8a6' },
-  { code:'CC', name:'Culture et citoyenneté québécoise',short:'Culture et citoyenn.', z:'#f9a8d4', l:'#4f46e5' },
+  { code:'MA', name:'Mathématique',                     short:'Mathématique',       z:'#ec4899', l:'#0c2d6b' },
+  { code:'SC', name:'Science et technologie',           short:'Science et techno',  z:'#b45309', l:'#6366f1' },
+  { code:'GH', name:'Géographie, histoire et éducation à la citoyenneté', short:'Géo-histoire', z:'#7f1d1d', l:'#06b6d4' },
+  { code:'MU', name:'Musique',                          short:'Musique',            z:'#fda4af', l:'#60a5fa' },
+  { code:'AP', name:'Arts plastiques',                  short:'Arts plastiques',    z:'#9d174d', l:'#0f766e' },
+  { code:'EP', name:'Éducation physique et à la santé', short:'Éduc. physique',     z:'#facc15', l:'#84cc16' },
+  { code:'CC', name:'Culture et citoyenneté québécoise',short:'Culture et citoyenn.', z:'#fcd34d', l:'#14b8a6' },
   { code:'ER', name:'Éthique et culture religieuse',    short:'Éthique et cult. rel.', z:'#9a3412', l:'#166534' }
 ];
 var BY_NAME = {}, BY_CODE = {}; SUBJ.forEach(function(s){ BY_NAME[s.name] = s; BY_CODE[s.code] = s; });
