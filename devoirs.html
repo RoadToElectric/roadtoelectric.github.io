@@ -447,7 +447,7 @@ function showQ(){
 function sayQ(rate){
   var q = S.qs[S.i]; if(!q) return;
   if(q.kind==='vocab') speak(q.item, rate);
-  else speak(q.tense==='participe_passe' ? 'Participe passé du verbe '+q.item : q.item+', '+TENSE_SAY[q.tense]+', '+q.label.replace(/ \/ .*/, ''), rate);
+  else speak(q.tense==='participe_passe' ? 'Participe passé du verbe '+q.item : q.item+', '+TENSE_SAY[q.tense]+', '+q.label.replace(/ \/ .*/, '').replace(/j'/, 'je').replace(/qu'il/, 'que il'), rate);
 }
 $('say').addEventListener('click', function(){ sayQ(); $('ans').focus(); });
 $('slow').addEventListener('click', function(){ sayQ(0.5); $('ans').focus(); });
@@ -585,16 +585,16 @@ function admList(body, cat){
   rpc('devoirs_admin_list',{p_key:PIN,p_cat:cat}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
     var rows = d.rows||[];
-    body.innerHTML = '<h2>'+(cat==='vocabulaire'?'Mots':'Verbes')+' ('+rows.length+')</h2>'
+    body.innerHTML = (cat==='verbes' ? addVerbsForm() : '') + '<h2>'+(cat==='vocabulaire'?'Mots':'Verbes')+' ('+rows.length+')</h2>'
       + '<div class="row" style="margin-bottom:10px"><select id="lfYear" style="flex:1 1 120px"><option value="">Toutes les années</option><option value="3">3e année</option><option value="5">5e année</option></select>'
       + (cat==='vocabulaire' ? '<select id="lfList" style="flex:1 1 140px"><option value="">Toutes les listes</option></select>' : '')
-      + '<input id="lfQ" type="text" placeholder="Chercher…" style="flex:2 1 160px"></div><div class="small-t" id="lfCount"></div><div class="overflow"><table><thead><tr><th>Année</th>'+(cat==='vocabulaire'?'<th>Liste</th>':'')+'<th>Semaine</th><th>'+(cat==='vocabulaire'?'Mot':'Verbe')+'</th><th>'+(cat==='vocabulaire'?'Détails':'Formes')+'</th><th>Actif</th></tr></thead><tbody id="lfBody"></tbody></table></div>';
+      + '<input id="lfQ" type="text" placeholder="Chercher…" style="flex:2 1 160px"></div><div class="small-t" id="lfCount"></div><div class="overflow"><table><thead><tr><th>Année</th>'+(cat==='vocabulaire'?'<th>Liste</th>':'<th>Bloc</th>')+'<th>Semaine</th><th>'+(cat==='vocabulaire'?'Mot':'Verbe')+'</th><th>'+(cat==='vocabulaire'?'Détails':'Formes')+'</th><th>Actif</th></tr></thead><tbody id="lfBody"></tbody></table></div>';
     function render(){
       var y = $('lfYear').value, q = norm($('lfQ').value), li = $('lfList') ? $('lfList').value : '';
       var f = rows.filter(function(r){ return (!y || String(r.annee)===y) && (!li || r.liste===li) && (!q || norm(r.item).indexOf(q)>=0); });
       $('lfCount').textContent = f.length + ' ligne(s)' + (f.length>200 ? ' — 200 affichées, précise ta recherche' : '');
       $('lfBody').innerHTML = f.slice(0,200).map(function(r){
-        return '<tr><td>'+r.annee+'e</td>'+(cat==='vocabulaire'?'<td class="small-t">'+esc(r.liste||'')+'</td>':'')+'<td><input type="number" min="1" max="60" value="'+(r.semaine==null?'':r.semaine)+'" data-id="'+r.id+'" class="wk" style="width:70px;padding:6px"></td><td>'+esc(r.item)+'</td><td class="small-t">'+esc(cat==='vocabulaire'?(r.details||''):(r.has_forms?'oui':'à calculer'))+'</td><td><input type="checkbox" data-id="'+r.id+'" class="act"'+(r.actif?' checked':'')+' style="width:22px;height:22px"></td></tr>';
+        return '<tr><td>'+r.annee+'e</td>'+'<td class="small-t">'+esc(cat==='vocabulaire' ? (r.liste||'') : (r.bloc||''))+'</td>'+'<td><input type="number" min="1" max="60" value="'+(r.semaine==null?'':r.semaine)+'" data-id="'+r.id+'" class="wk" style="width:70px;padding:6px"></td><td>'+esc(r.item)+'</td><td class="small-t">'+esc(cat==='vocabulaire'?(r.details||''):(r.has_forms?'oui':'à calculer'))+'</td><td><input type="checkbox" data-id="'+r.id+'" class="act"'+(r.actif?' checked':'')+' style="width:22px;height:22px"></td></tr>';
       }).join('');
     }
     function rowOf(id){ return rows.filter(function(r){ return String(r.id)===String(id); })[0]; }
@@ -603,10 +603,37 @@ function admList(body, cat){
       r.semaine = wk.value===''?null:parseInt(wk.value,10); r.actif = ac.checked;
       rpc('devoirs_admin_set',{p_key:PIN,p_cat:cat,p_id:r.id,p_semaine:r.semaine,p_actif:r.actif});
     }
+    if(cat==='verbes') wireAddVerbs();
     $('lfBody').addEventListener('change', function(e){ var id = e.target.dataset.id; if(id) save(id); });
     if($('lfList')){ var seenL = {}; rows.forEach(function(r){ if(r.liste && !seenL[r.liste]){ seenL[r.liste]=1; var o = document.createElement('option'); o.value = r.liste; o.textContent = r.liste; $('lfList').appendChild(o); } }); $('lfList').addEventListener('change', render); }
     $('lfYear').addEventListener('change', render); $('lfQ').addEventListener('input', render); render();
   }).catch(function(){ body.textContent='Erreur de connexion.'; });
+}
+function addVerbsForm(){
+  return '<h2>Ajouter des verbes</h2><p class="small-t">Un infinitif par ligne (ou séparés par des virgules). Les conjugaisons sont calculées automatiquement avec un dictionnaire libre : aucun temps n\'est tapé à la main.</p>'
+    + '<textarea id="avT" placeholder="manger&#10;finir&#10;aller" spellcheck="false" style="min-height:110px"></textarea>'
+    + '<div class="row" style="margin:10px 0;gap:22px"><label style="display:flex;align-items:center;gap:8px;font-weight:700"><input type="checkbox" id="avY3" style="width:24px;height:24px"> 3e année</label>'
+    + '<label style="display:flex;align-items:center;gap:8px;font-weight:700"><input type="checkbox" id="avY5" checked style="width:24px;height:24px"> 5e année</label></div>'
+    + '<p><button class="green" id="avGo" type="button">Ajouter</button> <span id="avMsg" class="small-t"></span></p><div id="avRes" class="small-t"></div>'
+    + '<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">';
+}
+function wireAddVerbs(){
+  $('avGo').addEventListener('click', function(){
+    var list = $('avT').value.split(/[\n,;]+/).map(function(v){ return v.trim(); }).filter(Boolean), annees = [];
+    if($('avY3').checked) annees.push(3); if($('avY5').checked) annees.push(5);
+    if(!list.length){ $('avMsg').textContent = 'Écris au moins un verbe.'; return; }
+    if(!annees.length){ $('avMsg').textContent = 'Coche 3e et/ou 5e.'; return; }
+    $('avGo').disabled = true; $('avMsg').textContent = 'Calcul des conjugaisons…'; $('avRes').innerHTML = '';
+    fetch(SB+'/functions/v1/devoirs-add-verbs', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:PIN, verbs:list, annees:annees})})
+      .then(function(r){ return r.json(); }).then(function(d){
+        $('avGo').disabled = false;
+        if(d.error){ $('avMsg').textContent = d.error==='locked' ? 'Accès refusé : reconnecte-toi avec le code.' : d.error; return; }
+        $('avMsg').textContent = '';
+        var ok = (d.added||[]).map(function(a){ return esc(a.verb); }).join(', '), bad = (d.errors||[]).map(function(e){ return esc(e.verb) + ' (' + esc(e.reason) + ')'; }).join(', ');
+        $('avRes').innerHTML = (ok ? '<p style="color:var(--green-d)">✓ Ajoutés pour '+annees.map(function(a){ return a+'e'; }).join(' et ')+' : '+ok+'</p>' : '') + (bad ? '<p style="color:var(--red)">✗ Refusés : '+bad+'</p>' : '');
+        if(ok){ $('avT').value = (d.errors||[]).map(function(e){ return e.verb; }).join('\n'); setTimeout(function(){ admTab('verbs'); setTimeout(function(){ var r = $('avRes'); if(r) r.innerHTML = ''; }, 0); }, 1800); }
+      }).catch(function(){ $('avGo').disabled = false; $('avMsg').textContent = 'Connexion impossible.'; });
+  });
 }
 function admImport(body){
   body.innerHTML = '<h2>Importer des mots</h2><p class="small-t">Un mot par ligne. Tu peux ajouter la semaine : <b>mot;semaine</b> (ex. <b>chapeau;3</b>). Les mots déjà présents sont mis à jour.</p>'
