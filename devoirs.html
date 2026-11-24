@@ -342,6 +342,18 @@ function speak(text, rate){
   var v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
   u.rate = rate || 0.85; synth.speak(u);
 }
+/* les cris en anglais : « Let's go !! » (réussi) et « Oh come on !! » (raté), avec une voix anglaise si l'appareil en a une */
+function speakEn(text, onend){
+  var done = false; function fin(){ if(!done){ done = true; if(onend) onend(); } }
+  if(!synth || !soundOn){ fin(); return; }
+  synth.cancel();
+  var u = new SpeechSynthesisUtterance(text), en = voices.filter(function(v){ return /^en/i.test(v.lang); });
+  var v = en.filter(function(x){ return /^en[-_]US/i.test(x.lang); })[0] || en[0];
+  if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
+  u.rate = 1.0; u.pitch = 1.3; u.volume = 1;
+  u.onend = fin; u.onerror = fin; setTimeout(fin, 3500);
+  synth.speak(u);
+}
 if(synth){ loadVoices(); if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices; }
 $('voiceSel').addEventListener('change', function(){ ls('dv_voice', $('voiceSel').value); });
 $('voiceTest').addEventListener('click', function(){ audio(); speak('Bonjour, voici une dictée de mots.'); });
@@ -541,7 +553,7 @@ function showQ(){
   // verbes : la personne est déjà écrite dans la case (sauf pour le participe passé)
   q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
   a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
-  setTimeout(function(){ sayQ(); }, 250);
+  setTimeout(function(){ sayQ(); }, 1000);          // une seconde de calme avant le mot suivant
 }
 function sayQ(rate){
   var q = S.qs[S.i]; if(!q) return;
@@ -552,7 +564,7 @@ $('say').addEventListener('click', function(){ sayQ(); $('ans').focus(); });
 $('slow').addEventListener('click', function(){ sayQ(0.5); $('ans').focus(); });
 $('check').addEventListener('click', check);
 $('ans').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); check(); } });
-document.addEventListener('keydown', function(e){ if(e.key==='Enter' && S.answered && !$('s-quiz').classList.contains('hidden')){ e.preventDefault(); next(); } });
+document.addEventListener('keydown', function(e){ if(e.key==='Enter' && S.answered && !$('next').disabled && !$('s-quiz').classList.contains('hidden')){ e.preventDefault(); next(); } });
 $('next').addEventListener('click', next);
 
 function stripPron(ans, q){
@@ -594,6 +606,8 @@ function check(){
   if(ok){
     fb.className = 'fb ok pop'; fb.innerHTML = '<h2>✅ ' + ['Bravo','Super','Excellent','Génial','Parfait','Bien joué'][Math.floor(Math.random()*6)] + ' !</h2><div class="word">'+esc(shown)+'</div>';
     celebrate();
+    speakEn("Let's go!!");
+    lockNext(2300);
   } else {
     var df = diffHtml(mine, shown);
     var accentOnly = norm(mine).normalize('NFD').replace(/[̀-ͯ]/g,'') === norm(shown).normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -602,13 +616,19 @@ function check(){
       + '<div class="small-t">Ta réponse</div><div class="word mine">'+df.mine+'</div>'
       + '<div class="small-t" style="margin-top:8px">Il fallait écrire</div><div class="word">'+df.right+'</div>';
     failFx();
-    if(S.mode!=='test') setTimeout(function(){ speak(shown, 0.6); }, 450);
+    // « Oh come on ! », puis (hors test) la bonne orthographe est relue lentement
+    speakEn('Oh come on!!', function(){ if(S.mode!=='test') setTimeout(function(){ speak(shown, 0.6); }, 250); });
+    lockNext(S.mode==='test' ? 2800 : 5200);
   }
   $('nextWrap').classList.remove('hidden');
   $('next').textContent = (S.i===S.qs.length-1) ? 'Voir mon résultat 🏆' : 'Suite ➜';
-  $('next').focus();
 }
-function next(){ if(!S.answered) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
+/* une pause : le bouton « Suite » reste gris le temps de l'animation et du cri */
+function lockNext(ms){
+  var b = $('next'); b.disabled = true; clearTimeout(S.lockT);
+  S.lockT = setTimeout(function(){ b.disabled = false; b.focus(); }, ms);
+}
+function next(){ if(!S.answered || $('next').disabled) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
 
 function finish(){
   if(synth) synth.cancel();
