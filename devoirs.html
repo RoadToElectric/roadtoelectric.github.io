@@ -326,10 +326,30 @@ function tone(freq, t0, dur, type, vol){
   g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime+t0+dur);
   o.connect(g); g.connect(c.destination); o.start(c.currentTime+t0); o.stop(c.currentTime+t0+dur+0.05);
 }
+/* Léo : ses propres sons enregistrés (dossier assets/devoirs/sons) remplacent les sons et cris par défaut */
+var CLIPS = {};
+function isLeo(){ return !!(S.who && S.who.name === 'Léo'); }
+function clipFor(name){
+  if(!CLIPS[name]){ try{ var a = new Audio('assets/devoirs/sons/' + name + '.mp3'); a.preload = 'auto'; CLIPS[name] = a; }catch(e){ return null; } }
+  return CLIPS[name];
+}
+function stopClip(){ Object.keys(CLIPS).forEach(function(k){ try{ CLIPS[k].pause(); CLIPS[k].currentTime = 0; CLIPS[k].onended = null; }catch(e){} }); }
+// joue le clip ; renvoie sa durée en ms (ou 2500 si inconnue), ou 0 si rien n'a pu démarrer (on retombe alors sur les sons par défaut)
+function playClip(name, onend){
+  if(!isLeo() || !soundOn) return 0;
+  var a = clipFor(name); if(!a) return 0;
+  stopClip(); if(synth) synth.cancel();
+  var failed = false;
+  a.onended = function(){ if(onend) onend(); };
+  var pr; try{ pr = a.play(); }catch(e){ return 0; }
+  if(pr && pr.catch) pr.catch(function(){ failed = true; a.onended = null; if(onend) onend(); });
+  return (a.duration && isFinite(a.duration)) ? Math.round(a.duration * 1000) : 2500;
+}
+function preloadLeoClips(){ ['Leo_Reussi_1','Leo_Rate_1','Leo_TEST_Reussi_1'].forEach(clipFor); }
 function happySound(){ tone(523,0,.16,'triangle'); tone(659,.12,.16,'triangle'); tone(784,.24,.16,'triangle'); tone(1047,.36,.35,'triangle',.3); }
 function buzzSound(){ tone(120,0,.35,'sawtooth',.3); tone(95,.05,.35,'square',.18); }
-function celebrate(){
-  happySound();
+function celebrate(quiet){
+  if(!quiet) happySound();
   var cols = ['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899'];
   for(var i=0;i<36;i++){
     var d = document.createElement('div'); d.className='confetti';
@@ -342,8 +362,8 @@ function celebrate(){
   var b = document.createElement('div'); b.className='burst'; b.textContent = ['⭐','🎉','🌟','👏','🥳'][Math.floor(Math.random()*5)];
   document.body.appendChild(b); setTimeout(function(){ b.remove(); }, 1100);
 }
-function failFx(){
-  buzzSound();
+function failFx(quiet){
+  if(!quiet) buzzSound();
   var c = $('qcard'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
   document.body.classList.remove('flashred'); void document.body.offsetWidth; document.body.classList.add('flashred');
   if(navigator.vibrate){ try{ navigator.vibrate(200); }catch(e){} }
@@ -406,7 +426,7 @@ $('pLeo').addEventListener('click', function(){ audio(); chooseSubject(PUPILS.le
 $('pPapa').addEventListener('click', function(){ $('pin').value=''; $('pinErr').textContent=''; show('pin'); setTimeout(function(){ $('pin').focus(); }, 50); });
 
 function chooseSubject(p){
-  setWho(p); $('sub').textContent = 'Bonjour ' + p.name + ' !';
+  setWho(p); if(p.name === 'Léo') preloadLeoClips(); $('sub').textContent = 'Bonjour ' + p.name + ' !';
   S.counts = {}; show('subject');
   ['voc','verb','dict'].forEach(function(k){ $(k+'Info').textContent = '…'; });
   S.phrases = null; $('bDict').disabled = true;
@@ -614,7 +634,7 @@ function showQ(){
   q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
   a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
   // une seconde de calme avant le mot ; on ne dit le mot que si on est toujours sur cette question
-  if(synth) synth.cancel(); clearTimeout(S.sayT); clearTimeout(S.corrT);
+  stopClip(); if(synth) synth.cancel(); clearTimeout(S.sayT); clearTimeout(S.corrT);
   var qi = S.i, g = (S.gen = (S.gen||0) + 1); S.sayT = setTimeout(function(){ if(S.gen===g && S.i===qi && !S.answered) sayQ(); }, 1000);
 }
 function sayQ(rate){
@@ -667,9 +687,10 @@ function check(){
   var fb = $('fb');
   if(ok){
     fb.className = 'fb ok pop'; fb.innerHTML = '<h2>✅ ' + ['Bravo','Super','Excellent','Génial','Parfait','Bien joué'][Math.floor(Math.random()*6)] + ' !</h2><div class="word">'+esc(shown)+'</div>';
-    celebrate();
-    speakEn("Let's go!!");
-    lockNext(2300);
+    var dOk = playClip('Leo_Reussi_1');
+    celebrate(!!dOk);
+    if(!dOk) speakEn("Let's go!!");
+    lockNext(Math.max(2300, dOk ? dOk + 300 : 0));
   } else {
     var df = diffHtml(mine, shown);
     var accentOnly = norm(mine).normalize('NFD').replace(/[̀-ͯ]/g,'') === norm(shown).normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -677,12 +698,14 @@ function check(){
     fb.innerHTML = '<h2>❌ ' + (accentOnly ? 'Presque ! Attention aux accents' : 'Pas tout à fait…') + '</h2>'
       + '<div class="small-t">Ta réponse</div><div class="word mine">'+df.mine+'</div>'
       + '<div class="small-t" style="margin-top:8px">Il fallait écrire</div><div class="word">'+df.right+'</div>';
-    failFx();
-    // « Oh come on ! », puis (hors test) la bonne orthographe est relue lentement
+    // « Oh come on ! » (ou le clip de Léo), puis (hors test) la bonne orthographe est relue lentement
     var qi = S.i;
     var g = S.gen;
-    speakEn('Oh come on!!', function(){ if(S.mode!=='test' && S.gen===g && S.i===qi) S.corrT = setTimeout(function(){ if(S.gen===g && S.i===qi && S.answered && !$('s-quiz').classList.contains('hidden')) speak(shown, 0.6); }, 250); });
-    lockNext(S.mode==='test' ? 2800 : 5200);
+    var after = function(){ if(S.mode!=='test' && S.gen===g && S.i===qi) S.corrT = setTimeout(function(){ if(S.gen===g && S.i===qi && S.answered && !$('s-quiz').classList.contains('hidden')) speak(shown, 0.6); }, 250); };
+    var dKo = playClip('Leo_Rate_1', after);
+    failFx(!!dKo);
+    if(!dKo) speakEn('Oh come on!!', after);
+    lockNext(Math.max(S.mode==='test' ? 2800 : 5200, dKo ? dKo + (S.mode==='test' ? 300 : 2300) : 0));
   }
   $('nextWrap').classList.remove('hidden');
   $('next').textContent = (S.i===S.qs.length-1) ? 'Voir mon résultat 🏆' : 'Suite ➜';
@@ -694,7 +717,7 @@ function lockNext(ms){
 }
 function next(){ if(!S.answered || $('next').disabled) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
 
-function stopTalk(){ if(typeof dtStop==='function') dtStop(); S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
+function stopTalk(){ stopClip(); if(typeof dtStop==='function') dtStop(); S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
 function finish(){
   stopTalk();
   var ok = S.answers.filter(function(a){ return a.ok; }).length, ko = S.answers.length - ok;
@@ -711,7 +734,8 @@ function finish(){
     return '<tr><td>'+esc(q)+'</td><td class="good">'+esc(a.expected)+'</td><td class="bad">'+esc(a.answer)+'</td></tr>';
   }).join('');
   show('result');
-  if(pct>=0.6) celebrate();
+  var bigWin = isLeo() && S.mode==='test' && pct > 0.8 && playClip('Leo_TEST_Reussi_1');
+  if(pct>=0.6) celebrate(!!bigWin);
   if(S.mode==='qa'){ $('rSave').textContent = '🧪 Mode QA : rien n\'est enregistré, aucun courriel envoyé.'; return; }
   saveResult(ok, ko);
 }
