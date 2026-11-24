@@ -141,16 +141,16 @@
   <section id="s-lists" class="hidden">
     <div class="card">
       <h2 class="center">Quelles listes de mots ?</h2>
-      <p class="center small-t">Coche une ou plusieurs listes.</p>
       <div class="chips" id="listChips"></div>
-      <div class="row" style="align-items:center;gap:8px;margin:6px 0 4px">
-        <span style="font-weight:700">Liste de</span>
-        <input id="rgFrom" type="number" min="1" inputmode="numeric" style="width:84px;padding:8px">
-        <span style="font-weight:700">à</span>
-        <input id="rgTo" type="number" min="1" inputmode="numeric" style="width:84px;padding:8px">
-        <button class="alt small" id="rgGo" type="button">Cocher</button>
+      <div id="rgBox">
+        <div class="row" style="gap:12px;margin:8px 0">
+          <label style="flex:1 1 150px;font-weight:700">Liste de début
+            <select id="rgFrom"></select></label>
+          <label style="flex:1 1 150px;font-weight:700">Liste de fin
+            <select id="rgTo"></select></label>
+        </div>
+        <p id="rgInfo" class="center small-t" style="min-height:1.4em"></p>
       </div>
-      <div class="row" style="gap:8px;margin-bottom:8px"><button class="alt small" id="listsAll" type="button">Tout cocher</button><button class="alt small" id="listsNone" type="button">Tout décocher</button></div>
       <p id="listsMsg" class="small-t" style="color:var(--red);min-height:1.2em"></p>
       <button class="big green" id="listsOk" type="button">Continuer ➜</button>
     </div>
@@ -351,7 +351,8 @@ function speakEn(text, onend){
   var v = en.filter(function(x){ return /^en[-_]US/i.test(x.lang); })[0] || en[0];
   if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
   u.rate = 1.0; u.pitch = 1.3; u.volume = 1;
-  u.onend = fin; u.onerror = fin; setTimeout(fin, 3500);
+  // une voix coupée par la suivante ne doit JAMAIS déclencher la suite (c'est ce qui relisait l'ancien mot)
+  u.onend = fin; u.onerror = function(){ done = true; }; setTimeout(fin, 3500);
   synth.speak(u);
 }
 if(synth){ loadVoices(); if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices; }
@@ -386,7 +387,7 @@ function chooseSubject(p){
     }).catch(function(){ (cat==='vocabulaire' ? $('vocInfo') : $('verbInfo')).textContent = 'Connexion impossible. Vérifie internet.'; });
   });
 }
-/* Vocabulaire : cases à cocher = GÉNÉRAL (mots de 3e) + Liste 1, 2, 3... (+ autres listes nommées) */
+/* Vocabulaire : GÉNÉRAL (mots de 3e) en case à cocher + « Liste de début » et « Liste de fin » (tous les mots des listes de l'intervalle) */
 function chipHtml(value, label, checked){ return '<label class="chip"><input type="checkbox" value="'+esc(value)+'"'+(checked?' checked':'')+'><span>'+esc(label)+'</span></label>'; }
 $('bVoc').addEventListener('click', function(){
   S.cat='vocabulaire'; S.tenses=[]; S.listSel=null; S.blocSel=null;
@@ -396,29 +397,35 @@ $('bVoc').addEventListener('click', function(){
   });
   var gen = order.filter(function(l){ return groups[l].general; }), num = order.filter(function(l){ return !groups[l].general && groups[l].no != null; }), oth = order.filter(function(l){ return !groups[l].general && groups[l].no == null; });
   num.sort(function(a,b){ return groups[a].no - groups[b].no; }); oth.sort();
-  S.listGroups = groups;
-  if(gen.length + num.length + oth.length < 2){ S.listSel = order; show('mode'); return; }   // only one list: no question
+  S.listGroups = groups; S.numLists = num;
+  if(gen.length + num.length + oth.length < 2){ S.listSel = order; show('mode'); return; }   // une seule liste : pas de question
   var html = '';
-  gen.forEach(function(l){ html += chipHtml(l, 'GÉNÉRAL ('+groups[l].n+')', false); });
-  num.forEach(function(l){ html += chipHtml(l, 'Liste '+groups[l].no+' ('+groups[l].n+')', false); });
-  oth.forEach(function(l){ html += chipHtml(l, l+' ('+groups[l].n+')', false); });
-  $('listChips').innerHTML = html; $('listsMsg').textContent = ''; $('rgFrom').value = ''; $('rgTo').value = '';
+  gen.forEach(function(l){ html += chipHtml(l, 'GÉNÉRAL ('+groups[l].n+' mots)', false); });
+  oth.forEach(function(l){ html += chipHtml(l, l+' ('+groups[l].n+' mots)', false); });
+  $('listChips').innerHTML = html;
+  var opts = '<option value="">—</option>' + num.map(function(l){ return '<option value="'+groups[l].no+'">Liste '+groups[l].no+'</option>'; }).join('');
+  $('rgFrom').innerHTML = opts; $('rgTo').innerHTML = opts;
+  $('rgBox').classList.toggle('hidden', !num.length);
+  $('listsMsg').textContent = ''; updateRangeInfo();
   show('lists');
 });
-function listBoxes(){ return Array.prototype.slice.call(document.querySelectorAll('#listChips input')); }
-$('listsAll').addEventListener('click', function(){ listBoxes().forEach(function(b){ b.checked = true; }); });
-$('listsNone').addEventListener('click', function(){ listBoxes().forEach(function(b){ b.checked = false; }); });
-$('rgGo').addEventListener('click', function(){
+// les listes numérotées dont le numéro est entre début et fin (fin vide = même liste que le début)
+function rangeLists(){
   var a = parseInt($('rgFrom').value,10), b = parseInt($('rgTo').value,10);
-  if(isNaN(a) && isNaN(b)){ $('listsMsg').textContent = 'Écris le numéro de départ et de fin.'; return; }
+  if(isNaN(a) && isNaN(b)) return [];
   if(isNaN(a)) a = b; if(isNaN(b)) b = a; if(a > b){ var t = a; a = b; b = t; }
-  var n = 0;
-  listBoxes().forEach(function(box){ var g = S.listGroups[box.value]; if(g && g.no != null && g.no >= a && g.no <= b){ box.checked = true; n++; } });
-  $('listsMsg').textContent = n ? '' : 'Aucune liste entre ' + a + ' et ' + b + '.';
-});
+  return (S.numLists || []).filter(function(l){ var g = S.listGroups[l]; return g.no >= a && g.no <= b; });
+}
+function updateRangeInfo(){
+  var ls = rangeLists(), n = 0; ls.forEach(function(l){ n += S.listGroups[l].n; });
+  $('rgInfo').textContent = ls.length ? (ls.length + ' liste(s), ' + n + ' mots') : 'Choisis la liste de début (et de fin).';
+}
+$('rgFrom').addEventListener('change', function(){ if($('rgFrom').value && !$('rgTo').value) $('rgTo').value = $('rgFrom').value; updateRangeInfo(); });
+$('rgTo').addEventListener('change', function(){ if($('rgTo').value && !$('rgFrom').value) $('rgFrom').value = $('rgTo').value; updateRangeInfo(); });
 $('listsOk').addEventListener('click', function(){
-  S.listSel = listBoxes().filter(function(b){ return b.checked; }).map(function(b){ return b.value; });
-  if(!S.listSel.length){ $('listsMsg').textContent = 'Coche au moins une liste.'; return; }
+  var sel = Array.prototype.map.call(document.querySelectorAll('#listChips input:checked'), function(i){ return i.value; });
+  S.listSel = sel.concat(rangeLists());
+  if(!S.listSel.length){ $('listsMsg').textContent = 'Choisis GÉNÉRAL, ou une liste de début et de fin.'; return; }
   show('mode');
 });
 
@@ -553,7 +560,9 @@ function showQ(){
   // verbes : la personne est déjà écrite dans la case (sauf pour le participe passé)
   q.prefill = (q.kind==='verb' && q.label) ? (function(l){ return /'$/.test(l) ? l : l + ' '; })(q.label.split(' / ')[0]) : '';
   a.value = q.prefill; a.focus(); try{ a.setSelectionRange(a.value.length, a.value.length); }catch(e){}
-  setTimeout(function(){ sayQ(); }, 1000);          // une seconde de calme avant le mot suivant
+  // une seconde de calme avant le mot ; on ne dit le mot que si on est toujours sur cette question
+  if(synth) synth.cancel(); clearTimeout(S.sayT);
+  var qi = S.i; S.sayT = setTimeout(function(){ if(S.i===qi && !S.answered) sayQ(); }, 1000);
 }
 function sayQ(rate){
   var q = S.qs[S.i]; if(!q) return;
@@ -617,7 +626,8 @@ function check(){
       + '<div class="small-t" style="margin-top:8px">Il fallait écrire</div><div class="word">'+df.right+'</div>';
     failFx();
     // « Oh come on ! », puis (hors test) la bonne orthographe est relue lentement
-    speakEn('Oh come on!!', function(){ if(S.mode!=='test') setTimeout(function(){ speak(shown, 0.6); }, 250); });
+    var qi = S.i;
+    speakEn('Oh come on!!', function(){ if(S.mode!=='test' && S.i===qi) setTimeout(function(){ if(S.i===qi && S.answered) speak(shown, 0.6); }, 250); });
     lockNext(S.mode==='test' ? 2800 : 5200);
   }
   $('nextWrap').classList.remove('hidden');
