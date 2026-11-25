@@ -1,6 +1,9 @@
 """Monthly electric-truck tracker: pulls new truck registrations by fuel from official monthly sources and writes
 assets/ev-trucks-monthly.js (EVTM) for the "Monthly tracker" card of ev-trucking.html.
 
+Each row holds total/el (trucks over 3.5 t), heavy_*, van_* and bus_* where the source has them. "Heavy" is NOT the same class everywhere:
+semi-tractors only in DE, DK and CH (manual.json heavyDef = tractor: shown dashed, never ranked), N3 in NL and ES, 16 t+ in SE, over 12 t in IN.
+
 Sources (all free, no key, re-run any time; each one only adds months, nothing is estimated):
   Denmark      Statistics Denmark StatBank BIL53 (api.statbank.dk): new lorries + road tractors by propellant, monthly 2018+
                ("Electricity" = battery-electric). DST publishes about 6-8 weeks after the month.
@@ -61,7 +64,7 @@ def save(name, rows):
 # ---------- Denmark ----------
 def fetch_dk():
     body = {"table": "BIL53", "format": "BULK", "lang": "en", "variables": [
-        {"code": "OMRÅDE", "values": ["000"]}, {"code": "BILTYPE", "values": ["4000103000", "4000103030"]},
+        {"code": "OMRÅDE", "values": ["000"]}, {"code": "BILTYPE", "values": ["4000102000", "4000103000", "4000103030"]},
         {"code": "BRUG", "values": ["1000"]}, {"code": "DRIV", "values": ["20200", "20225", "20231"]}, {"code": "Tid", "values": ["*"]}]}
     txt = get('https://api.statbank.dk/v1/data', json.dumps(body).encode(), {'Content-Type': 'application/json'}).decode('utf-8-sig')
     out = collections.defaultdict(lambda: {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0})
@@ -70,10 +73,11 @@ def fetch_dk():
         k = t[:4] + '-' + t[5:7]
         if k < START or v in ('', '..'):
             continue
-        v = int(v); tractor = typ.startswith('Road tractors')
-        f = 'total' if fuel.startswith('Total') else 'el'
+        v = int(v); f = 'total' if fuel.startswith('Total') else 'el'
+        if typ.startswith('Vans'):
+            out[k]['van_' + f] = out[k].get('van_' + f, 0) + v; continue
         out[k][f] += v
-        if tractor:
+        if typ.startswith('Road tractors'):
             out[k]['heavy_' + f] += v
     save('dk', out)
 
@@ -82,24 +86,26 @@ def fetch_dk():
 def fetch_no():
     q = {"query": [{"code": "TypeRegistrering", "selection": {"filter": "item", "values": ["N"]}},
                    {"code": "DrivstoffType", "selection": {"filter": "item", "values": ["19", "20", "21", "6"]}},
-                   {"code": "ContentsCode", "selection": {"filter": "item", "values": ["Lastebiler"]}},
+                   {"code": "ContentsCode", "selection": {"filter": "item", "values": ["Lastebiler", "VareCampBiler", "Busser"]}},
                    {"code": "Tid", "selection": {"filter": "all", "values": ["*"]}}], "response": {"format": "json-stat2"}}
     d = json.loads(get('https://data.ssb.no/api/v0/en/table/14020', json.dumps(q).encode()))
     t = list(d['dimension']['Tid']['category']['index']); f = list(d['dimension']['DrivstoffType']['category']['index'])
-    n = len(t); v = d['value']; out = {}
+    cont = list(d['dimension']['ContentsCode']['category']['index']); n, nc = len(t), len(cont); v = d['value']; out = {}
     for j, tt in enumerate(t):
         k = tt[:4] + '-' + tt[5:7]
         if k < START:
             continue
-        vals = {ff: (v[i * n + j] or 0) for i, ff in enumerate(f)}
-        out[k] = {'total': sum(vals.values()), 'el': vals['19']}
+        out[k] = {}
+        for c, pre in (('Lastebiler', ''), ('VareCampBiler', 'van_'), ('Busser', 'bus_')):
+            vals = {ff: (v[(i * nc + cont.index(c)) * n + j] or 0) for i, ff in enumerate(f)}
+            out[k][pre + 'total'] = sum(vals.values()); out[k][pre + 'el'] = vals['19']
     save('no', out)
 
 
 # ---------- Finland ----------
 def fetch_fi():
     q = {"query": [{"code": "Maakunta", "selection": {"filter": "item", "values": ["MA1"]}},
-                   {"code": "Ajoneuvoluokka", "selection": {"filter": "item", "values": ["03"]}},
+                   {"code": "Ajoneuvoluokka", "selection": {"filter": "item", "values": ["02", "03", "04"]}},
                    {"code": "Käyttövoima", "selection": {"filter": "item", "values": ["YH", "04", "05"]}},
                    {"code": "Kuukausi", "selection": {"filter": "all", "values": ["*"]}}], "response": {"format": "json-stat2"}}
     d = json.loads(get('https://trafi2.stat.fi/PXWeb/api/v1/en/TraFi/Ensirekisteroinnit/040_ensirek_tau_104.px', json.dumps(q).encode()))
@@ -108,7 +114,10 @@ def fetch_fi():
         k = tt[:4] + '-' + tt[5:7]
         if k < START:
             continue
-        out[k] = {'total': v[j] or 0, 'el': (v[n + j] or 0) + (v[2 * n + j] or 0)}
+        out[k] = {}
+        for c, pre in enumerate(('van_', '', 'bus_')):      # classes 02, 03, 04; fuels total, electricity, hydrogen
+            g = lambda fu: v[(c * 3 + fu) * n + j] or 0
+            out[k][pre + 'total'] = g(0); out[k][pre + 'el'] = g(1) + g(2)
     save('fi', out)
 
 
@@ -118,7 +127,8 @@ SE_MON = {'januari': 1, 'februari': 2, 'mars': 3, 'april': 4, 'maj': 5, 'juni': 
 
 def se_parse(blob):
     import openpyxl
-    ws = openpyxl.load_workbook(io.BytesIO(blob), data_only=True)['LB - Vikt & Drivmedel']
+    wb = openpyxl.load_workbook(io.BytesIO(blob), data_only=True)
+    ws = wb['LB - Vikt & Drivmedel']
     rows = list(ws.iter_rows(values_only=True))
     title = next(v for r in rows[:4] for v in r if isinstance(v, str) and 'Nyregistreringar' in v)
     m = re.search(r'Nyregistreringar (\w+) (\d{4})', title); mo, yr = SE_MON[m.group(1).lower()], int(m.group(2))
@@ -132,17 +142,41 @@ def se_parse(blob):
             continue
         if r[6] == 'Totalt':
             break
-        if 'Högst' in grp:          # vans up to 3.5 t
-            continue
-        heavy = 'Över' in grp
         f = 'el' if r[6] == 'EL' else ('total' if r[6] == 'Total' else None)
         if not f:
             continue
+        if 'Högst' in grp:          # vans up to 3.5 t
+            for y, c in ((yr, 10), (yr - 1, 11)):
+                e = d.setdefault(ym(y, mo), {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0})
+                e['van_' + f] = r[c] or 0
+            continue
+        heavy = 'Över' in grp
         for y, col in ((yr, 10), (yr - 1, 11)):
             e = d.setdefault(ym(y, mo), {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0})
             e[f] += r[col] or 0
             if heavy:
                 e['heavy_' + f] += r[col] or 0
+    for e in d.values():
+        e.setdefault('van_total', 0); e.setdefault('van_el', 0)
+    # buses (over 3.5 t): first table of the bus sheet, down to its 'Totalt' row
+    if 'Buss - Vikt & Drivmedel' in wb.sheetnames:
+        br = list(wb['Buss - Vikt & Drivmedel'].iter_rows(values_only=True))
+        h = next(i for i, r in enumerate(br) if any(str(x).strip() == 'Antal' for x in r if x))
+        c0 = next(j for j, x in enumerate(br[h]) if x and str(x).strip() == 'Antal')
+        c1 = next(j for j, x in enumerate(br[h]) if x and str(x).strip() == 'SPLY')
+        cf = next(j for r in br[:h] for j, x in enumerate(r) if x == 'Drivmedel')
+        bus = {c0: [0, 0], c1: [0, 0]}
+        for r in br[h + 1:]:
+            if r[cf] == 'Totalt':
+                for c in bus:
+                    bus[c][0] = r[c] or 0
+                break
+            if r[cf] == 'EL':
+                for c in bus:
+                    bus[c][1] += r[c] or 0
+        for y, c in ((yr, c0), (yr - 1, c1)):
+            if ym(y, mo) in d:
+                d[ym(y, mo)].update(bus_total=bus[c][0], bus_el=bus[c][1])
     return (yr, mo), d
 
 
@@ -201,6 +235,38 @@ def fetch_nl():
         e = out[ym(y, m)]; e['total'] += 1; e['el'] += el
         if x['europese_voertuigcategorie'] == 'N3':
             e['heavy_total'] += 1; e['heavy_el'] += el
+    # vans (N1) and buses (M2 + M3): about 5,000 vans a month, so after the first full pull only the last three stored months on are refreshed
+    from concurrent.futures import ThreadPoolExecutor
+    f = os.path.join(DATA, 'nl.json'); prev = json.load(open(f)) if os.path.exists(f) else {}
+    have = sorted(k for k, v in prev.items() if 'van_total' in v)
+    frm = have[-3] if len(have) > 3 else START
+    rows, off = [], 0
+    while True:
+        r = q('m9d7-ebf2', {'$select': 'kenteken,europese_voertuigcategorie,datum_eerste_toelating,datum_eerste_tenaamstelling_in_nederland',
+                            '$where': "europese_voertuigcategorie in('N1','M2','M3') AND datum_eerste_tenaamstelling_in_nederland>='%s01'" % frm.replace('-', ''),
+                            '$limit': 50000, '$offset': off, '$order': 'kenteken'})
+        rows += r; off += len(r)
+        if len(r) < 50000:
+            break
+    new = []
+    for x in rows:
+        t, a = x['datum_eerste_tenaamstelling_in_nederland'], x['datum_eerste_toelating']
+        y, m = int(t[:4]), int(t[4:6]); py, pm = (y, m - 1) if m > 1 else (y - 1, 12)
+        if a >= '%04d%02d01' % (py, pm):
+            new.append((x['kenteken'], ym(y, m), 'van_' if x['europese_voertuigcategorie'] == 'N1' else 'bus_'))
+    fuel, ks = {}, [z[0] for z in new]
+
+    def batch(b):
+        return q('8ys7-d773', {'$select': 'kenteken,brandstof_omschrijving', '$where': 'kenteken in(' + ','.join("'%s'" % k for k in b) + ')', '$limit': 5000})
+    with ThreadPoolExecutor(3) as ex:
+        for res in ex.map(batch, [ks[i:i + 300] for i in range(0, len(ks), 300)]):
+            for x in res:
+                fuel.setdefault(x['kenteken'], set()).add(x['brandstof_omschrijving'])
+    vb = collections.defaultdict(lambda: {'van_total': 0, 'van_el': 0, 'bus_total': 0, 'bus_el': 0})
+    for k, mth, pre in new:
+        vb[mth][pre + 'total'] += 1; vb[mth][pre + 'el'] += bool(fuel.get(k)) and fuel[k] <= {'Elektriciteit', 'Waterstof'}
+    for mth in out:
+        out[mth].update(vb[mth] if mth >= frm else {k: v for k, v in prev.get(mth, {}).items() if k[:4] in ('van_', 'bus_')})
     save('nl', out)
 
 
@@ -209,11 +275,13 @@ IN_BROWSER_JS = r"""
 const B='/analytics/publicdashboard/vahandashboard/durationWiseRegistrationTable?';
 const M={January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12};
 const EL='PURE EV,ELECTRIC(BOV),FUEL CELL HYDROGEN'; const out={}; const Y=new Date().getFullYear();
-for (let y=2024; y<=Y; y++) for (const [sc,key] of [['HEAVY GOODS VEHICLE','h'],['MEDIUM GOODS VEHICLE','m']]) for (const [f,fk] of [[null,'t'],[EL,'e']]) {
-  const p={fromYear:y,toYear:y,calendarType:3,vehicleCategoryGroup:'Goods Vehicle',vehicleSubCategories:sc}; if(f) p.vehicleFuels=f;
+const G=[['h',{vehicleCategoryGroup:'Goods Vehicle',vehicleSubCategories:'HEAVY GOODS VEHICLE'}],['m',{vehicleCategoryGroup:'Goods Vehicle',vehicleSubCategories:'MEDIUM GOODS VEHICLE'}],
+  ['v',{vehicleCategoryGroup:'Goods Vehicle',vehicleSubCategories:'LIGHT GOODS VEHICLE'}],['b',{vehicleCategoryGroup:'Bus'}]];
+for (let y=2024; y<=Y; y++) for (const [key,g] of G) for (const [f,fk] of [[null,'t'],[EL,'e']]) {
+  const p=Object.assign({fromYear:y,toYear:y,calendarType:3},g); if(f) p.vehicleFuels=f;
   const j=await (await fetch(B+new URLSearchParams(p))).json();
   for (const x of j){ const [yy,mn]=x.yearAsString.split('-'); const k=yy+'-'+String(M[mn]).padStart(2,'0'); (out[k]=out[k]||{})[key+fk]=x.registeredVehicleCount; } }
-const res={}; Object.keys(out).sort().forEach(k=>{const v=out[k]; res[k]={total:(v.ht||0)+(v.mt||0), el:(v.he||0)+(v.me||0), heavy_total:v.ht||0, heavy_el:v.he||0};});
+const res={}; Object.keys(out).sort().forEach(k=>{const v=out[k],z=c=>v[c]||0; res[k]={total:z('ht')+z('mt'),el:z('he')+z('me'),heavy_total:z('ht'),heavy_el:z('he'),van_total:z('vt'),van_el:z('ve'),bus_total:z('bt'),bus_el:z('be')};});
 JSON.stringify(res)
 """
 
@@ -226,11 +294,10 @@ def de_parse(blob):
     rows = [[v for v in r if v not in (None, '')] for r in ws.iter_rows(values_only=True)]
     num = lambda v: v if isinstance(v, (int, float)) else 0
     sat = [r for r in rows if r and str(r[0]).startswith('darunter Sattel')]
-    if len(sat) < 2:
-        return None
     # columns after the label: total, alternative total, share, electric total, share, BEV, fuel cell, PHEV, ...
     f = lambda r: {'total': int(num(r[1])), 'el': int(num(r[6]) + num(r[7]))}
-    return f(sat[0]), f(sat[1])
+    bus = [r for r in rows if r and str(r[0]) == 'Kraftomnibusse' and len(r) > 7]
+    return f(sat[0]) if sat else None, f(sat[1]) if len(sat) > 1 else None, f(bus[0]) if bus else None
 
 
 def fetch_de():
@@ -241,17 +308,22 @@ def fetch_de():
     f = os.path.join(DATA, 'de.json')
     prev = json.load(open(f)) if os.path.exists(f) else {}
     out = {k: v for k, v in prev.items() if k != 'ytd'}; ytd = prev.get('ytd')
-    t = datetime.date.today(); y, m = 2026, 5
+    t = datetime.date.today(); y, m = int(START[:4]), int(START[5:])
     while (y, m) < (t.year, t.month):
         k = ym(y, m)
-        if k not in out:
+        if 'bus_total' not in out.get(k, {}):
             try:
                 r = de_parse(get(f'https://www.kba.de/SharedDocs/Downloads/DE/Statistik/Fahrzeuge/FZ28/fz28_{y}_{m:02d}.xlsx?__blob=publicationFile'))
-            except Exception:
-                r = None    # not published yet (KBA serves an HTML 404 page)
+            except Exception as ex:      # not published yet (KBA serves an HTML 404 page) or unreadable
+                print('  de', k, 'not read:', str(ex)[:60]); r = None
             if r:
-                out[k] = {'heavy_total': r[0]['total'], 'heavy_el': r[0]['el']}
-                ytd = {'to': k, 'heavy_total': r[1]['total'], 'heavy_el': r[1]['el']}
+                e = out.setdefault(k, {})
+                if r[0]:
+                    e.update(heavy_total=r[0]['total'], heavy_el=r[0]['el'])
+                if r[1] and (not ytd or k >= ytd['to']):
+                    ytd = {'to': k, 'heavy_total': r[1]['total'], 'heavy_el': r[1]['el']}
+                if r[2]:
+                    e.update(bus_total=r[2]['total'], bus_el=r[2]['el'])
         y, m = (y + 1, 1) if m == 12 else (y, m + 1)
     if ytd:
         out['ytd'] = ytd
@@ -265,7 +337,7 @@ def fetch_ch():
     035 Lastwagen (trucks over 3.5 t), 036 Sattelmotorfahrzeug, 038 Sattelschlepper (semi-tractors, = heavy);
     EL = battery-electric, FC = fuel cell. Figures for recent months are provisional and get small revisions."""
     import csv
-    url = ('https://disseminate.stats.swiss/rest/data/CH1.MFZ_IVS,DF_IVS_0_GENERAL_M/_T._T.N.035+036+038._T+EL+FC.M'
+    url = ('https://disseminate.stats.swiss/rest/data/CH1.MFZ_IVS,DF_IVS_0_GENERAL_M/_T._T.N.035+036+038+030+020+021+022._T+EL+FC.M'
            f'?startPeriod={START}&dimensionAtObservation=AllDimensions')
     txt = get(url, headers={'Accept': 'application/vnd.sdmx.data+csv;version=1.0.0'}).decode('utf-8-sig')
     out = collections.defaultdict(lambda: {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0})
@@ -274,6 +346,9 @@ def fetch_ch():
         if k < START or not x['OBS_VALUE']:
             continue
         v = int(float(x['OBS_VALUE'])); f = 'total' if fuel == '_T' else 'el'
+        pre = 'van_' if typ == '030' else ('bus_' if typ in ('020', '021', '022') else '')
+        if pre:
+            out[k][pre + f] = out[k].get(pre + f, 0) + v; continue
         out[k][f] += v
         if typ == '038':
             out[k]['heavy_' + f] += v
@@ -299,20 +374,23 @@ def fetch_es(start='2025-01'):
     t = datetime.date.today(); y, m = int(start[:4]), int(start[5:])
     while (y, m) < (t.year, t.month):
         k = ym(y, m)
-        if k not in out:
+        if 'van_total' not in out.get(k, {}):
             try:
                 blob = get(f'https://www.dgt.es/microdatos/salida/{y}/{m}/vehiculos/matriculaciones/export_mensual_mat_{y}{m:02d}.zip', timeout=600)
                 z = zipfile.ZipFile(io.BytesIO(blob))
             except Exception:
                 z = None    # not published yet
             if z:
-                e = {'total': 0, 'el': 0, 'heavy_total': 0, 'heavy_el': 0}
+                e = {x + y_: 0 for x in ('', 'heavy_', 'van_', 'bus_') for y_ in ('total', 'el')}
                 with z.open(z.namelist()[0]) as fh:
                     for line in io.TextIOWrapper(fh, encoding='latin1'):
-                        cat = line[off[47]:off[48]].strip()
-                        if cat not in ('N2', 'N3') or F(line, 26) != 'N':
+                        cat = line[off[47]:off[48]].strip()[:2]      # N1G, N3G, M3G... = off-road versions of the same class
+                        if cat not in ('N1', 'N2', 'N3', 'M2', 'M3') or F(line, 26) != 'N':
                             continue
                         el = F(line, 9) == '2' or F(line, 54) in ('BEV', 'FCEV')
+                        if cat in ('N1', 'M2', 'M3'):
+                            pre = 'van_' if cat == 'N1' else 'bus_'
+                            e[pre + 'total'] += 1; e[pre + 'el'] += el; continue
                         e['total'] += 1; e['el'] += el
                         if cat == 'N3':
                             e['heavy_total'] += 1; e['heavy_el'] += el
@@ -333,7 +411,10 @@ def build():
         if not os.path.exists(f):
             continue
         raw = json.load(open(f)); ytd = raw.pop('ytd', None)
-        rows = {k: v for k, v in raw.items() if k < cur and (v.get('total') or v.get('heavy_total'))}   # drop the running month
+        rows = {k: v for k, v in raw.items() if k < cur and any(v.get(x) for x in ('total', 'heavy_total', 'van_total', 'bus_total'))}   # drop the running month
+        for pre in info.get('hide', []):      # classes a source does not cover well enough to show (reason in manual.json)
+            for v in rows.values():
+                v.pop(pre + 'total', None); v.pop(pre + 'el', None)
         countries[code] = dict(info, rows=rows, last=max(rows))
         if ytd:
             countries[code]['ytd'] = ytd

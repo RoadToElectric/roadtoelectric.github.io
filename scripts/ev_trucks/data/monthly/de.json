@@ -1,27 +1,151 @@
 {
+"2024-01": {
+"bus_total": 592,
+"bus_el": 76
+},
+"2024-02": {
+"bus_total": 510,
+"bus_el": 56
+},
+"2024-03": {
+"bus_total": 494,
+"bus_el": 33
+},
+"2024-04": {
+"bus_total": 459,
+"bus_el": 45
+},
+"2024-05": {
+"bus_total": 407,
+"bus_el": 42
+},
+"2024-06": {
+"bus_total": 679,
+"bus_el": 130
+},
+"2024-07": {
+"bus_total": 456,
+"bus_el": 86
+},
+"2024-08": {
+"bus_total": 327,
+"bus_el": 24
+},
+"2024-09": {
+"bus_total": 300,
+"bus_el": 20
+},
+"2024-10": {
+"bus_total": 344,
+"bus_el": 49
+},
+"2024-11": {
+"bus_total": 424,
+"bus_el": 81
+},
+"2024-12": {
+"bus_total": 390,
+"bus_el": 71
+},
+"2025-01": {
+"bus_total": 390,
+"bus_el": 72
+},
+"2025-02": {
+"bus_total": 439,
+"bus_el": 84
+},
+"2025-03": {
+"bus_total": 527,
+"bus_el": 122
+},
+"2025-04": {
+"bus_total": 560,
+"bus_el": 180
+},
+"2025-05": {
+"bus_total": 622,
+"bus_el": 132
+},
+"2025-06": {
+"bus_total": 504,
+"bus_el": 85
+},
+"2025-07": {
+"bus_total": 636,
+"bus_el": 113
+},
+"2025-08": {
+"bus_total": 607,
+"bus_el": 128
+},
+"2025-09": {
+"bus_total": 480,
+"bus_el": 97
+},
+"2025-10": {
+"bus_total": 567,
+"bus_el": 173
+},
+"2025-11": {
+"bus_total": 773,
+"bus_el": 285
+},
+"2025-12": {
+"bus_total": 785,
+"bus_el": 180
+},
+"2026-01": {
+"bus_total": 688,
+"bus_el": 88
+},
+"2026-02": {
+"bus_total": 549,
+"bus_el": 138
+},
+"2026-03": {
+"bus_total": 590,
+"bus_el": 71
+},
+"2026-04": {
+"bus_total": 629,
+"bus_el": 105
+},
 "2026-05": {
 "heavy_total": 2489,
-"heavy_el": 135
+"heavy_el": 135,
+"bus_total": 542,
+"bus_el": 118
 },
 "2026-06": {
 "heavy_total": 3764,
-"heavy_el": 256
+"heavy_el": 256,
+"bus_total": 700,
+"bus_el": 68
 },
 "2026-07": {
 "heavy_total": 2327,
-"heavy_el": 96
+"heavy_el": 96,
+"bus_total": 560,
+"bus_el": 77
 },
 "2026-08": {
 "heavy_total": 1795,
-"heavy_el": 77
+"heavy_el": 77,
+"bus_total": 500,
+"bus_el": 56
 },
 "2026-09": {
 "heavy_total": 2567,
-"heavy_el": 107
+"heavy_el": 107,
+"bus_total": 487,
+"bus_el": 132
 },
 "2026-10": {
 "heavy_total": 3060,
-"heavy_el": 162
+"heavy_el": 162,
+"bus_total": 789,
+"bus_el": 409
 },
 "ytd": {
 "to": "2026-10",

@@ -1,138 +1,274 @@
 {
 "2024-01": {
 "total": 536,
-"el": 39
+"el": 39,
+"van_total": 1432,
+"van_el": 518,
+"bus_total": 31,
+"bus_el": 3
 },
 "2024-02": {
 "total": 484,
-"el": 42
+"el": 42,
+"van_total": 2695,
+"van_el": 1056,
+"bus_total": 54,
+"bus_el": 5
 },
 "2024-03": {
 "total": 438,
-"el": 78
+"el": 78,
+"van_total": 2578,
+"van_el": 864,
+"bus_total": 36,
+"bus_el": 2
 },
 "2024-04": {
 "total": 595,
-"el": 63
+"el": 63,
+"van_total": 3489,
+"van_el": 984,
+"bus_total": 73,
+"bus_el": 33
 },
 "2024-05": {
 "total": 463,
-"el": 51
+"el": 51,
+"van_total": 2888,
+"van_el": 587,
+"bus_total": 60,
+"bus_el": 6
 },
 "2024-06": {
 "total": 458,
-"el": 66
+"el": 66,
+"van_total": 3264,
+"van_el": 772,
+"bus_total": 247,
+"bus_el": 147
 },
 "2024-07": {
 "total": 255,
-"el": 34
+"el": 34,
+"van_total": 1620,
+"van_el": 338,
+"bus_total": 75,
+"bus_el": 40
 },
 "2024-08": {
 "total": 473,
-"el": 71
+"el": 71,
+"van_total": 2563,
+"van_el": 533,
+"bus_total": 104,
+"bus_el": 49
 },
 "2024-09": {
 "total": 537,
-"el": 84
+"el": 84,
+"van_total": 2017,
+"van_el": 443,
+"bus_total": 41,
+"bus_el": 12
 },
 "2024-10": {
 "total": 542,
-"el": 57
+"el": 57,
+"van_total": 2346,
+"van_el": 636,
+"bus_total": 39,
+"bus_el": 13
 },
 "2024-11": {
 "total": 444,
-"el": 52
+"el": 52,
+"van_total": 1929,
+"van_el": 621,
+"bus_total": 60,
+"bus_el": 40
 },
 "2024-12": {
 "total": 301,
-"el": 54
+"el": 54,
+"van_total": 2223,
+"van_el": 784,
+"bus_total": 44,
+"bus_el": 14
 },
 "2025-01": {
 "total": 467,
-"el": 36
+"el": 36,
+"van_total": 1733,
+"van_el": 753,
+"bus_total": 39,
+"bus_el": 5
 },
 "2025-02": {
 "total": 368,
-"el": 55
+"el": 55,
+"van_total": 2004,
+"van_el": 852,
+"bus_total": 38,
+"bus_el": 18
 },
 "2025-03": {
 "total": 449,
-"el": 85
+"el": 85,
+"van_total": 3063,
+"van_el": 1043,
+"bus_total": 115,
+"bus_el": 83
 },
 "2025-04": {
 "total": 376,
-"el": 43
+"el": 43,
+"van_total": 1823,
+"van_el": 987,
+"bus_total": 41,
+"bus_el": 10
 },
 "2025-05": {
 "total": 405,
-"el": 55
+"el": 55,
+"van_total": 1978,
+"van_el": 867,
+"bus_total": 171,
+"bus_el": 94
 },
 "2025-06": {
 "total": 383,
-"el": 40
+"el": 40,
+"van_total": 2584,
+"van_el": 1079,
+"bus_total": 399,
+"bus_el": 323
 },
 "2025-07": {
 "total": 270,
-"el": 62
+"el": 62,
+"van_total": 1523,
+"van_el": 634,
+"bus_total": 74,
+"bus_el": 38
 },
 "2025-08": {
 "total": 369,
-"el": 43
+"el": 43,
+"van_total": 2631,
+"van_el": 1078,
+"bus_total": 54,
+"bus_el": 12
 },
 "2025-09": {
 "total": 337,
-"el": 55
+"el": 55,
+"van_total": 2925,
+"van_el": 1215,
+"bus_total": 126,
+"bus_el": 76
 },
 "2025-10": {
 "total": 381,
-"el": 78
+"el": 78,
+"van_total": 2812,
+"van_el": 1245,
+"bus_total": 60,
+"bus_el": 9
 },
 "2025-11": {
 "total": 334,
-"el": 74
+"el": 74,
+"van_total": 2528,
+"van_el": 1188,
+"bus_total": 76,
+"bus_el": 57
 },
 "2025-12": {
 "total": 400,
-"el": 178
+"el": 178,
+"van_total": 4894,
+"van_el": 2211,
+"bus_total": 90,
+"bus_el": 37
 },
 "2026-01": {
 "total": 563,
-"el": 143
+"el": 143,
+"van_total": 1211,
+"van_el": 761,
+"bus_total": 38,
+"bus_el": 6
 },
 "2026-02": {
 "total": 353,
-"el": 77
+"el": 77,
+"van_total": 1753,
+"van_el": 679,
+"bus_total": 43,
+"bus_el": 13
 },
 "2026-03": {
 "total": 354,
-"el": 85
+"el": 85,
+"van_total": 2282,
+"van_el": 1130,
+"bus_total": 63,
+"bus_el": 20
 },
 "2026-04": {
 "total": 333,
-"el": 74
+"el": 74,
+"van_total": 2104,
+"van_el": 1109,
+"bus_total": 45,
+"bus_el": 1
 },
 "2026-05": {
 "total": 348,
-"el": 93
+"el": 93,
+"van_total": 2085,
+"van_el": 1051,
+"bus_total": 540,
+"bus_el": 454
 },
 "2026-06": {
 "total": 456,
-"el": 103
+"el": 103,
+"van_total": 2905,
+"van_el": 1527,
+"bus_total": 353,
+"bus_el": 188
 },
 "2026-07": {
 "total": 259,
-"el": 62
+"el": 62,
+"van_total": 1288,
+"van_el": 695,
+"bus_total": 87,
+"bus_el": 48
 },
 "2026-08": {
 "total": 402,
-"el": 119
+"el": 119,
+"van_total": 3248,
+"van_el": 1410,
+"bus_total": 74,
+"bus_el": 7
 },
 "2026-09": {
 "total": 409,
-"el": 108
+"el": 108,
+"van_total": 2112,
+"van_el": 1512,
+"bus_total": 96,
+"bus_el": 49
 },
 "2026-10": {
 "total": 333,
-"el": 86
+"el": 86,
+"van_total": 1998,
+"van_el": 1316,
+"bus_total": 58,
+"bus_el": 7
 }
 }

@@ -3,10 +3,13 @@
   "de": {
    "name": "Germany",
    "color": "#111827",
-   "basis": "Heavy only: new semi-tractors (Sattelzugmaschinen); electric = battery + fuel cell. KBA's truck row includes vans, so Germany has no all-trucks line; monthly from May 2026, January-April only as part of the year-to-date total",
+   "basis": "New semi-tractors (Sattelzugmaschinen); electric = battery + fuel cell. KBA's truck row includes vans, so Germany has no all-trucks line; monthly from May 2026, January-April only as part of the year-to-date total",
    "source": "KBA, FZ28 monthly",
    "url": "https://www.kba.de/DE/Statistik/Fahrzeuge/Neuzulassungen/Umwelt/n_umwelt_node.html",
-   "lag": "~mid-month"
+   "lag": "~mid-month",
+   "heavyDef": "tractor",
+   "vanBasis": null,
+   "busBasis": "buses (Kraftomnibusse), battery-electric + fuel cell"
   },
   "no": {
    "name": "Norway",
@@ -14,7 +17,9 @@
    "basis": "New lorries, all weights over 3.5 t; electric = battery + hydrogen (zero-emission)",
    "source": "Statistics Norway, table 14020",
    "url": "https://www.ssb.no/en/statbank/table/14020",
-   "lag": "~1 week"
+   "lag": "~1 week",
+   "vanBasis": "vans and motorhomes together",
+   "busBasis": "all buses"
   },
   "dk": {
    "name": "Denmark",
@@ -22,7 +27,10 @@
    "basis": "New lorries + road tractors over 3.5 t; electric = battery-electric. Heavy = road tractors",
    "source": "Statistics Denmark, StatBank BIL53",
    "url": "https://www.statbank.dk/BIL53",
-   "lag": "~7 weeks"
+   "lag": "~7 weeks",
+   "heavyDef": "tractor",
+   "vanBasis": "vans up to 3.5 t, battery-electric",
+   "busBasis": null
   },
   "nl": {
    "name": "Netherlands",
@@ -30,7 +38,9 @@
    "basis": "New N2 + N3 trucks; electric = battery-electric. Heavy = N3 (over 12 t). Registry counts only trucks still registered",
    "source": "RDW open data (vehicle registry)",
    "url": "https://opendata.rdw.nl/",
-   "lag": "live registry"
+   "lag": "live registry",
+   "vanBasis": "EU class N1 (up to 3.5 t)",
+   "busBasis": "EU classes M2 + M3"
   },
   "se": {
    "name": "Sweden",
@@ -38,7 +48,9 @@
    "basis": "New trucks over 3.5 t; electric = battery-electric. Heavy = 16 t and over",
    "source": "Mobility Sweden, monthly report",
    "url": "https://mobilitysweden.se/statistik/Nyregistreringar_per_manad_1",
-   "lag": "1st working day"
+   "lag": "1st working day",
+   "vanBasis": "light trucks up to 3.5 t, battery-electric",
+   "busBasis": "buses over 3.5 t, battery-electric"
   },
   "fi": {
    "name": "Finland",
@@ -46,7 +58,9 @@
    "basis": "First registrations of lorries over 3.5 t; electric = electricity + hydrogen",
    "source": "Traficom statistics",
    "url": "https://trafi2.stat.fi/PXWeb/pxweb/en/TraFi/TraFi__Ensirekisteroinnit/040_ensirek_tau_104.px/",
-   "lag": "~1 week"
+   "lag": "~1 week",
+   "vanBasis": "vans",
+   "busBasis": "buses and coaches"
   },
   "ch": {
    "name": "Switzerland",
@@ -54,15 +68,24 @@
    "basis": "New trucks (Lastwagen) + semi-tractors; electric = battery + fuel cell. Heavy = semi-tractors (Sattelschlepper). Recent months are provisional",
    "source": "Federal Statistical Office (BFS), monthly",
    "url": "https://stats.swiss/vis?lc=de&df%5bds%5d=disseminate&df%5bid%5d=DF_IVS_0_GENERAL_M&df%5bag%5d=CH1.MFZ_IVS",
-   "lag": "~10 days"
+   "lag": "~10 days",
+   "heavyDef": "tractor",
+   "vanBasis": "delivery vans (Lieferwagen)",
+   "busBasis": "coaches, minibuses and articulated buses"
   },
   "es": {
    "name": "Spain",
    "color": "#ca8a04",
-   "basis": "New N2 + N3 trucks from the vehicle-registration microdata; electric = battery + fuel cell. Heavy = N3 (over 12 t). Monthly from January 2025",
+   "basis": "New N2 + N3 trucks (off-road versions included) from the vehicle-registration microdata; electric = battery + fuel cell. Heavy = N3 (over 12 t). Monthly from January 2025",
    "source": "DGT, monthly registration microdata",
    "url": "https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-mensual.html",
-   "lag": "~2 weeks"
+   "lag": "~2 weeks",
+   "vanBasis": null,
+   "busBasis": "EU classes M2 + M3",
+   "hide": [
+    "van_"
+   ],
+   "hideWhy": "DGT N1 registrations cover only 68% of ACEA/ANFAC vans and 36% of the electric ones (Jan-Sep 2026): not usable"
   },
   "in": {
    "name": "India",
@@ -70,7 +93,9 @@
    "basis": "New goods vehicles in the VAHAN register: medium (7.5-12 t) + heavy (over 12 t) goods vehicles; electric = pure EV, battery-operated (BOV) and fuel cell. Heavy = heavy goods vehicles (over 12 t). Live register: the latest month rises for weeks as late registrations land; light goods vehicles (up to 7.5 t) are left out",
    "source": "VAHAN dashboard (Ministry of Road Transport)",
    "url": "https://analytics.parivahan.gov.in/analytics/publicdashboard/vahan?lang=en",
-   "lag": "live, refresh the previous month too"
+   "lag": "live, refresh the previous month too",
+   "vanBasis": "light goods vehicles, up to 7.5 t (a wider class than Europe's 3.5 t)",
+   "busBasis": "all buses"
   }
  },
  "china": {
@@ -158,6 +183,30 @@
     "ACEA H1 2026",
     "https://www.acea.auto/cv-registrations/new-commercial-vehicle-registrations-vans-1-9-trucks-9-8-buses-22-7-in-h1-2026/"
    ]
+  ],
+  "ytdVan": [
+   {
+    "to": "2026-03",
+    "share": 12.0,
+    "prev": 8.7
+   },
+   {
+    "to": "2026-09",
+    "share": 14.1,
+    "prev": 10.2
+   }
+  ],
+  "ytdBus": [
+   {
+    "to": "2026-03",
+    "share": 21.8,
+    "prev": 20.0
+   },
+   {
+    "to": "2026-09",
+    "share": 26.4,
+    "prev": 22.1
+   }
   ]
  },
  "aceaQ3": {
@@ -182,6 +231,18 @@
      214,
      5389,
      5277
+    ],
+    "van": [
+     3667,
+     3323,
+     27537,
+     24113
+    ],
+    "bus": [
+     139,
+     101,
+     1013,
+     819
     ]
    },
    "Belgium": {
@@ -196,6 +257,18 @@
      132,
      5697,
      5916
+    ],
+    "van": [
+     6171,
+     4101,
+     52722,
+     56153
+    ],
+    "bus": [
+     196,
+     685,
+     924,
+     1271
     ]
    },
    "Bulgaria": {
@@ -210,6 +283,18 @@
      0,
      2326,
      2456
+    ],
+    "van": [
+     248,
+     153,
+     4513,
+     4136
+    ],
+    "bus": [
+     19,
+     67,
+     193,
+     223
     ]
    },
    "Croatia": {
@@ -224,6 +309,18 @@
      0,
      1253,
      1131
+    ],
+    "van": [
+     405,
+     80,
+     6120,
+     5499
+    ],
+    "bus": [
+     107,
+     9,
+     380,
+     239
     ]
    },
    "Cyprus": {
@@ -238,6 +335,18 @@
      0,
      111,
      78
+    ],
+    "van": [
+     45,
+     71,
+     1798,
+     1638
+    ],
+    "bus": [
+     0,
+     0,
+     59,
+     37
     ]
    },
    "Czechia": {
@@ -252,6 +361,18 @@
      90,
      7242,
      6570
+    ],
+    "van": [
+     1748,
+     1000,
+     16059,
+     14472
+    ],
+    "bus": [
+     49,
+     21,
+     740,
+     595
     ]
    },
    "Denmark": {
@@ -266,6 +387,18 @@
      167,
      3286,
      3445
+    ],
+    "van": [
+     8273,
+     5579,
+     18911,
+     18797
+    ],
+    "bus": [
+     329,
+     301,
+     514,
+     439
     ]
    },
    "Estonia": {
@@ -280,6 +413,18 @@
      3,
      524,
      520
+    ],
+    "van": [
+     159,
+     86,
+     2098,
+     1756
+    ],
+    "bus": [
+     40,
+     0,
+     127,
+     83
     ]
    },
    "Finland": {
@@ -294,6 +439,18 @@
      35,
      1746,
      1804
+    ],
+    "van": [
+     1414,
+     1619,
+     7031,
+     7983
+    ],
+    "bus": [
+     180,
+     123,
+     361,
+     344
     ]
    },
    "France": {
@@ -308,6 +465,18 @@
      567,
      27389,
      27653
+    ],
+    "van": [
+     34355,
+     25765,
+     249656,
+     264365
+    ],
+    "bus": [
+     665,
+     501,
+     5289,
+     4786
     ]
    },
    "Germany": {
@@ -322,6 +491,18 @@
      900,
      41275,
      39718
+    ],
+    "van": [
+     28755,
+     19205,
+     188704,
+     196739
+    ],
+    "bus": [
+     836,
+     1202,
+     5245,
+     4765
     ]
    },
    "Greece": {
@@ -336,6 +517,18 @@
      2,
      344,
      300
+    ],
+    "van": [
+     1630,
+     962,
+     8620,
+     7966
+    ],
+    "bus": [
+     209,
+     110,
+     821,
+     749
     ]
    },
    "Hungary": {
@@ -350,6 +543,18 @@
      18,
      3675,
      3470
+    ],
+    "van": [
+     2203,
+     1378,
+     16527,
+     17024
+    ],
+    "bus": [
+     50,
+     34,
+     597,
+     462
     ]
    },
    "Ireland": {
@@ -364,6 +569,18 @@
      7,
      2159,
      2083
+    ],
+    "van": [
+     2870,
+     1926,
+     31912,
+     29725
+    ],
+    "bus": [
+     60,
+     17,
+     477,
+     356
     ]
    },
    "Italy": {
@@ -378,6 +595,18 @@
      41,
      17868,
      17214
+    ],
+    "van": [
+     8043,
+     7622,
+     133992,
+     141179
+    ],
+    "bus": [
+     1970,
+     911,
+     5338,
+     3972
     ]
    },
    "Latvia": {
@@ -392,6 +621,18 @@
      0,
      1023,
      880
+    ],
+    "van": [
+     148,
+     105,
+     2077,
+     1948
+    ],
+    "bus": [
+     13,
+     36,
+     87,
+     102
     ]
    },
    "Lithuania": {
@@ -406,6 +647,18 @@
      3,
      10963,
      8780
+    ],
+    "van": [
+     247,
+     197,
+     2920,
+     3071
+    ],
+    "bus": [
+     139,
+     143,
+     340,
+     287
     ]
    },
    "Luxembourg": {
@@ -420,6 +673,18 @@
      6,
      817,
      778
+    ],
+    "van": [
+     413,
+     344,
+     4240,
+     3732
+    ],
+    "bus": [
+     100,
+     61,
+     240,
+     178
     ]
    },
    "Malta": {
@@ -434,6 +699,18 @@
      1,
      41,
      31
+    ],
+    "van": [
+     100,
+     146,
+     509,
+     563
+    ],
+    "bus": [
+     40,
+     2,
+     67,
+     157
     ]
    },
    "Netherlands": {
@@ -448,6 +725,18 @@
      556,
      9180,
      7139
+    ],
+    "van": [
+     14556,
+     11853,
+     17266,
+     14381
+    ],
+    "bus": [
+     783,
+     421,
+     1045,
+     694
     ]
    },
    "Poland": {
@@ -462,6 +751,18 @@
      36,
      23549,
      19702
+    ],
+    "van": [
+     2731,
+     1529,
+     55403,
+     49165
+    ],
+    "bus": [
+     999,
+     152,
+     3107,
+     1843
     ]
    },
    "Portugal": {
@@ -476,6 +777,18 @@
      7,
      5227,
      3835
+    ],
+    "van": [
+     6039,
+     2449,
+     25133,
+     23007
+    ],
+    "bus": [
+     642,
+     134,
+     1168,
+     882
     ]
    },
    "Romania": {
@@ -490,6 +803,18 @@
      39,
      6851,
      6087
+    ],
+    "van": [
+     677,
+     1452,
+     12125,
+     13150
+    ],
+    "bus": [
+     239,
+     218,
+     292,
+     303
     ]
    },
    "Slovakia": {
@@ -504,6 +829,18 @@
      7,
      2524,
      2025
+    ],
+    "van": [
+     642,
+     367,
+     6171,
+     5776
+    ],
+    "bus": [
+     49,
+     0,
+     265,
+     107
     ]
    },
    "Slovenia": {
@@ -518,6 +855,18 @@
      6,
      1756,
      1573
+    ],
+    "van": [
+     252,
+     156,
+     5832,
+     5047
+    ],
+    "bus": [
+     59,
+     6,
+     225,
+     230
     ]
    },
    "Spain": {
@@ -532,6 +881,18 @@
      106,
      19884,
      17533
+    ],
+    "van": [
+     16792,
+     11869,
+     147218,
+     138556
+    ],
+    "bus": [
+     299,
+     323,
+     2952,
+     2914
     ]
    },
    "Sweden": {
@@ -546,6 +907,18 @@
      260,
      3758,
      3666
+    ],
+    "van": [
+     9108,
+     6453,
+     28333,
+     23713
+    ],
+    "bus": [
+     422,
+     698,
+     829,
+     1538
     ]
    },
    "EU": {
@@ -560,6 +933,18 @@
      3203,
      205857,
      189664
+    ],
+    "van": [
+     151691,
+     109790,
+     1073427,
+     1073654
+    ],
+    "bus": [
+     8633,
+     6276,
+     32695,
+     28375
     ]
    },
    "Iceland": {
@@ -574,6 +959,18 @@
      4,
      181,
      174
+    ],
+    "van": [
+     223,
+     201,
+     901,
+     1090
+    ],
+    "bus": [
+     39,
+     8,
+     165,
+     158
     ]
    },
    "Norway": {
@@ -588,6 +985,18 @@
      275,
      3081,
      3140
+    ],
+    "van": [
+     10204,
+     8937,
+     17877,
+     19616
+    ],
+    "bus": [
+     785,
+     599,
+     1344,
+     1002
     ]
    },
    "Switzerland": {
@@ -602,6 +1011,18 @@
      373,
      2502,
      2433
+    ],
+    "van": [
+     3909,
+     2955,
+     20808,
+     20649
+    ],
+    "bus": [
+     244,
+     178,
+     559,
+     415
     ]
    },
    "EFTA": {
@@ -616,6 +1037,18 @@
      652,
      5764,
      5747
+    ],
+    "van": [
+     14336,
+     12093,
+     39586,
+     41355
+    ],
+    "bus": [
+     1068,
+     785,
+     2068,
+     1575
     ]
    },
    "United Kingdom": {
@@ -630,6 +1063,18 @@
      300,
      25449,
      26055
+    ],
+    "van": [
+     37133,
+     27670,
+     251036,
+     241783
+    ],
+    "bus": [
+     1727,
+     2233,
+     5672,
+     7795
     ]
    },
    "EU + EFTA + UK": {
@@ -644,9 +1089,21 @@
      4155,
      237070,
      221466
+    ],
+    "van": [
+     203160,
+     149553,
+     1364049,
+     1356792
+    ],
+    "bus": [
+     11428,
+     9294,
+     40435,
+     37745
     ]
    }
   },
-  "note": "ACEA press release of 28 October 2026, tables 'Total new truck registrations' (over 3.5 t) and 'New heavy truck registrations' (16 t and over)."
+  "note": "ACEA press release of 28 October 2026: 'Total new truck registrations' (over 3.5 t), 'New heavy truck registrations' (16 t and over), 'New van registrations' (up to 3.5 t) and 'New bus registrations' (over 3.5 t)."
  }
 }
