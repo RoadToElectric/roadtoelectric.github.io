@@ -356,10 +356,11 @@ function clipFor(name){
 }
 function stopClip(){ Object.keys(CLIPS).forEach(function(k){ try{ CLIPS[k].pause(); CLIPS[k].currentTime = 0; CLIPS[k].onended = null; }catch(e){} }); }
 // joue le clip ; renvoie sa durée en ms (ou 2500 si inconnue), ou 0 si rien n'a pu démarrer (on retombe alors sur les sons par défaut)
+var LEO_FAIL = Math.random() < 0.5;
 function playClip(kind, onend){
   if(!hasClips() || !soundOn) return 0;
   if(kind === 'Reussi_1' && clipPrefix() === 'Leo') kind = 'But_' + ['1','3','4'][Math.floor(Math.random() * 3)];   /* Léo : un « GOOOAL » de commentateur (3 versions) à chaque mot réussi */
-  if(kind === 'Rate_1' && clipPrefix() === 'Leo') kind = 'Rate_2';   /* Léo : « Ohhh nooo, he missed it! » à chaque mot raté (son d'avant : Leo_Rate_1.mp3, toujours dans le dossier) */
+  if(kind === 'Rate_1' && clipPrefix() === 'Leo'){ LEO_FAIL = !LEO_FAIL; if(LEO_FAIL) kind = 'Rate_2'; }   /* Léo : un mot raté sur deux « Ohhh nooo, he missed it! », l'autre « Oh come on » (Leo_Rate_1.mp3) */
   var a = clipFor(clipPrefix() + '_' + kind); if(!a) return 0;
   stopClip(); if(synth) synth.cancel();
   var failed = false;
