@@ -22,6 +22,8 @@
   button{font:inherit;font-weight:800;border:0;border-radius:18px;padding:16px 22px;cursor:pointer;color:#fff;background:var(--blue);box-shadow:0 5px 0 var(--blue-d);transition:transform .08s}
   button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--blue-d)}
   button.big{display:block;width:100%;font-size:1.6rem;padding:24px 20px;margin:14px 0}
+  button.big:has(.pp){display:flex;align-items:center;justify-content:center;gap:18px;padding:14px 20px}
+  img.pp{width:84px;height:84px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.3);flex:none;background:#fff}
   button.zoe{background:var(--pink);box-shadow:0 5px 0 var(--pink-d)}
   button.leo{background:var(--blue);box-shadow:0 5px 0 var(--blue-d)}
   button.papa{background:var(--grey);box-shadow:0 5px 0 var(--grey-d)}
@@ -103,8 +105,8 @@
   <section id="s-home">
     <div class="card">
       <h2 class="center">Qui joue ?</h2>
-      <button class="big zoe" id="pZoe" type="button">Zoé · 3e année</button>
-      <button class="big leo" id="pLeo" type="button">Léo · 5e année</button>
+      <button class="big zoe" id="pZoe" type="button"><img class="pp" id="phZoe" alt="" width="84" height="84"><span>Zoé · 3e année</span></button>
+      <button class="big leo" id="pLeo" type="button"><img class="pp" id="phLeo" alt="" width="84" height="84"><span>Léo · 5e année</span></button>
       <button class="big papa" id="pPapa" type="button">Papa</button>
     </div>
     <details class="card">
@@ -296,6 +298,17 @@
 (function(){
 'use strict';
 var SB = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co', KEY = 'sb_publishable_RU6wsMy6kxytGFfsMR4l6w_uSSntvgP';
+/* photos on the « Qui joue ? » buttons: a different one each time the page opens (never the same as last time) */
+(function(){
+  var PH = { Zoe:['zoe5','zoe8','zoe9','zoe10','zoe12','zoe14'], Leo:['leo2','leo9','leo10','leo12','leo13','leo14'] };
+  ['Zoe','Leo'].forEach(function(k){
+    var list = PH[k], last = -1, key = 'dv_photo_' + k;
+    try{ last = parseInt(localStorage.getItem(key), 10); }catch(e){}
+    var i; do{ i = Math.floor(Math.random() * list.length); }while(i === last && list.length > 1);
+    try{ localStorage.setItem(key, i); }catch(e){}
+    var el = document.getElementById('ph' + k); if(el) el.src = 'assets/devoirs/photos/' + list[i] + '.jpg';
+  });
+})();
 var PUPILS = { zoe:{name:'Zoé', annee:3, color:'#ec4899'}, leo:{name:'Léo', annee:5, color:'#2563eb'} };
 var TENSES = [
   {id:'present', label:'PRÉSENT', on:true}, {id:'imparfait', label:'IMPARFAIT', on:true}, {id:'passe_compose', label:'PASSÉ COMPOSÉ', on:true},
@@ -391,7 +404,19 @@ function pickVoice(){
   var saved = ls('dv_voice'); if(saved){ for(var i=0;i<fr.length;i++) if(fr[i].name===saved) return fr[i]; }
   var ca = fr.filter(function(v){ return /^fr[-_]CA/i.test(v.lang); }); return ca[0] || fr[0];
 }
+/* mots et sens des homophones : fichiers mp3 ElevenLabs (voix québécoise) dans assets/devoirs/mots, nommés par un code du texte ; sinon la voix de l'appareil */
+var wordAudio = null;
+function wordClip(text){ var t = text.replace(/\s+/g, ' ').trim(), h = 0x811c9dc5; for(var i = 0; i < t.length; i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return 'assets/devoirs/mots/' + ('00000000' + h.toString(16)).slice(-8) + '_' + t.length + '.mp3'; }
+function stopWordAudio(){ if(wordAudio){ try{ wordAudio.pause(); }catch(e){} wordAudio = null; } }
+function speakWord(text, rate){
+  if(synth) synth.cancel(); stopWordAudio();
+  var a = new Audio(wordClip(text)), fell = false; wordAudio = a;
+  a.playbackRate = (rate && rate < 0.8) ? 0.65 : 1;
+  var fall = function(){ if(fell || wordAudio !== a) return; fell = true; speak(text, rate); };
+  a.onerror = fall; var p = a.play(); if(p && p.catch) p.catch(fall);
+}
 function speak(text, rate){
+  stopWordAudio();
   if(!synth) return; synth.cancel();
   var u = new SpeechSynthesisUtterance(text); u.lang = 'fr-CA';
   var v = pickVoice(); if(v){ u.voice = v; u.lang = v.lang; }
@@ -643,7 +668,7 @@ function showQ(){
 }
 function sayQ(rate){
   var q = S.qs[S.i]; if(!q) return;
-  if(q.kind==='vocab') speak(q.sensText ? q.item + '. ' + q.sensText.replace(/…/g, '') : q.item, rate);
+  if(q.kind==='vocab') speakWord(q.sensText ? q.item + '. ' + q.sensText.replace(/…/g, '') : q.item, rate);
   else speak(q.tense==='participe_passe' ? 'Participe passé du verbe '+q.item : q.item+', '+TENSE_SAY[q.tense]+', '+q.label.replace(/ \/ .*/, '').replace(/j'/, 'je').replace(/qu'il/, 'que il'), rate);
 }
 $('say').addEventListener('click', function(){ sayQ(); $('ans').focus(); });
@@ -721,7 +746,7 @@ function lockNext(ms){
 }
 function next(){ if(!S.answered || $('next').disabled) return; if(S.i < S.qs.length-1){ S.i++; showQ(); } else finish(); }
 
-function stopTalk(){ stopClip(); if(typeof dtStop==='function') dtStop(); S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
+function stopTalk(){ stopWordAudio(); stopClip(); if(typeof dtStop==='function') dtStop(); S.gen = (S.gen||0) + 1; clearTimeout(S.sayT); clearTimeout(S.corrT); if(synth) synth.cancel(); }
 function finish(){
   stopTalk();
   var ok = S.answers.filter(function(a){ return a.ok; }).length, ko = S.answers.length - ok;
@@ -860,26 +885,33 @@ function admTab(t){
   if(t==='results') admResults(body); else if(t==='progress') admProgress(body); else if(t==='missed') admMissed(body); else if(t==='words') admList(body,'vocabulaire'); else if(t==='verbs') admList(body,'verbes'); else if(t==='phrases') admPhrases(body); else admImport(body);
 }
 function fdate(s){ var d = new Date(s); return d.toLocaleDateString('fr-CA')+' '+d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'}); }
+var ADM_KID = '';
+function kidBar(){
+  var b = function(v, img, label){ return '<button type="button" class="alt small" data-kf="'+v+'" style="display:inline-flex;align-items:center;gap:8px;margin-right:8px'+(ADM_KID===v?';outline:3px solid #2563eb':'')+'">'+(img?'<img src="assets/devoirs/photos/'+img+'.jpg" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover">':'')+label+'</button>'; };
+  return '<div style="margin:6px 0 12px">'+b('', '', 'Tous')+b('Zoé','zoe5','Zoé')+b('Léo','leo12','Léo')+'</div>';
+}
+function bindKidBar(body, tab){ body.querySelectorAll('[data-kf]').forEach(function(x){ x.addEventListener('click', function(){ ADM_KID = x.dataset.kf; admTab(tab); }); }); }
 function admMissed(body){
   rpc('devoirs_admin_results',{p_key:PIN,p_limit:500}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
     var m = {};
-    (d.rows||[]).forEach(function(r){ if(r.categorie==='dictee') return;
+    (d.rows||[]).forEach(function(r){ if(r.categorie==='dictee' || (ADM_KID && r.eleve!==ADM_KID)) return;
       (Array.isArray(r.details)?r.details:[]).forEach(function(a){ if(a.ok) return;
         var q = a.item + (a.tense ? ' · '+a.tense+(a.pron?' · '+a.pron:'') : ''), k = r.eleve+'|'+r.categorie+'|'+q;
         var o = m[k] || (m[k] = {eleve:r.eleve, cat:r.categorie, q:q, exp:a.expected, n:0, last:r.played_at, liste:r.liste, ans:[]});
         o.n++; if(r.played_at > o.last){ o.last = r.played_at; o.liste = r.liste; } if(a.answer && o.ans.indexOf(a.answer)<0 && o.ans.length<3) o.ans.push(a.answer); }); });
     var list = Object.keys(m).map(function(k){ return m[k]; }).sort(function(a,b){ return a.eleve.localeCompare(b.eleve) || b.n-a.n || (a.last<b.last?1:-1); });
-    body.innerHTML = '<h2>Mots ratés</h2><p class="small-t">Tous les mots ratés dans les exercices enregistrés (500 derniers résultats), du plus raté au moins raté, pour chaque enfant.</p>' +
+    body.innerHTML = '<h2>Mots ratés</h2>' + kidBar() + '<p class="small-t">Tous les mots ratés dans les exercices enregistrés (500 derniers résultats), du plus raté au moins raté, pour chaque enfant.</p>' +
       (list.length ? '<div style="overflow:auto"><table><thead><tr><th>Enfant</th><th>Mot</th><th>Bonne réponse</th><th>Réponses données</th><th>Ratés</th><th>Dernière fois</th><th>Liste</th></tr></thead><tbody>' +
       list.map(function(o){ return '<tr><td>'+esc(o.eleve)+'</td><td>'+esc(o.q)+'</td><td class="good">'+esc(o.exp)+'</td><td class="bad">'+esc(o.ans.join(' · '))+'</td><td>'+o.n+'</td><td>'+esc(fdate(o.last))+'</td><td class="small-t">'+esc(o.liste||'')+'</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="muted">Aucun mot raté pour l’instant.</p>');
+    bindKidBar(body, 'missed');
   }).catch(function(){ body.textContent='Erreur de connexion.'; });
 }
 function admResults(body){
   rpc('devoirs_admin_results',{p_key:PIN,p_limit:200}).then(function(d){
     if(d.error){ body.textContent='Accès refusé.'; return; }
-    var rows = d.rows||[];
-    body.innerHTML = '<h2>Résultats</h2>' + (rows.length ? '<div class="row" style="margin-bottom:10px;align-items:center"><button class="alt small" id="rSel" type="button">Tout sélectionner</button><button class="small" id="rDel" type="button" style="background:var(--red);box-shadow:0 5px 0 #991b1b">Supprimer la sélection</button><span class="small-t" id="rMsg">La progression (mots maîtrisés) n\'est pas touchée.</span></div><div class="overflow"><table><thead><tr><th></th><th>Date et heure</th><th>Élève</th><th>Matière</th><th>Mode</th><th>Réussites</th><th>Échecs</th><th>Courriel</th></tr></thead><tbody>'
+    var rows = (d.rows||[]).filter(function(r){ return !ADM_KID || r.eleve===ADM_KID; });
+    body.innerHTML = '<h2>Résultats</h2>' + kidBar() + (rows.length ? '<div class="row" style="margin-bottom:10px;align-items:center"><button class="alt small" id="rSel" type="button">Tout sélectionner</button><button class="small" id="rDel" type="button" style="background:var(--red);box-shadow:0 5px 0 #991b1b">Supprimer la sélection</button><span class="small-t" id="rMsg">La progression (mots maîtrisés) n\'est pas touchée.</span></div><div class="overflow"><table><thead><tr><th></th><th>Date et heure</th><th>Élève</th><th>Matière</th><th>Mode</th><th>Réussites</th><th>Échecs</th><th>Courriel</th></tr></thead><tbody>'
       + rows.map(function(r){
           var chk = '<td><input type="checkbox" class="rc" data-id="'+esc(r.id)+'" style="width:22px;height:22px"></td><td>'+esc(fdate(r.played_at))+'</td><td>'+esc(r.eleve)+'</td>';
           if(r.categorie==='dictee'){
@@ -888,6 +920,7 @@ function admResults(body){
           }
           return '<tr>'+chk+'<td>'+esc(r.categorie)+(r.temps?' ('+esc((r.temps||[]).join(', '))+')':'')+'</td><td>'+esc(r.mode)+'</td><td class="good">'+r.nb_ok+'</td><td class="bad">'+r.nb_ko+'</td><td>'+(r.emailed_at?'envoyé':'—')+'</td></tr>'; }).join('')
       + '</tbody></table></div>' : '<p class="muted">Aucun résultat pour l\'instant.</p>');
+    bindKidBar(body, 'results');
     if(!rows.length) return;
     var boxes = function(){ return Array.prototype.slice.call(body.querySelectorAll('.rc')); };
     $('rSel').addEventListener('click', function(){ var all = boxes().every(function(b){ return b.checked; }); boxes().forEach(function(b){ b.checked = !all; }); });
