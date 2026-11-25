@@ -22,8 +22,14 @@
   button{font:inherit;font-weight:800;border:0;border-radius:18px;padding:16px 22px;cursor:pointer;color:#fff;background:var(--blue);box-shadow:0 5px 0 var(--blue-d);transition:transform .08s}
   button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--blue-d)}
   button.big{display:block;width:100%;font-size:1.6rem;padding:24px 20px;margin:14px 0}
-  button.big:has(.pp){display:flex;align-items:center;justify-content:center;gap:18px;padding:14px 20px}
-  img.pp{width:84px;height:84px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.3);flex:none;background:#fff}
+  /* « Qui joue ? » : seulement les photos rondes (le nom reste pour les lecteurs d'écran) */
+  #s-home .card{text-align:center}
+  button.big:has(.pp){display:inline-block;width:auto;padding:0;margin:10px 16px;background:none !important;box-shadow:none !important;border:0;border-radius:50%;line-height:0}
+  button.big:has(.pp) span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  img.pp{width:min(40vw,170px);height:min(40vw,170px);border-radius:50%;object-fit:cover;border:6px solid var(--pc,#fff);box-shadow:0 6px 16px rgba(0,0,0,.3);background:#fff;transition:transform .15s}
+  button.big.zoe .pp{--pc:#ec4899} button.big.leo .pp{--pc:#2563eb}
+  button.big:has(.pp):hover .pp, button.big:has(.pp):focus-visible .pp{transform:scale(1.06)}
+  button.big.papa{display:inline-block;width:auto;font-size:1rem;padding:8px 18px;margin:18px 0 0}
   button.zoe{background:var(--pink);box-shadow:0 5px 0 var(--pink-d)}
   button.leo{background:var(--blue);box-shadow:0 5px 0 var(--blue-d)}
   button.papa{background:var(--grey);box-shadow:0 5px 0 var(--grey-d)}
@@ -105,8 +111,8 @@
   <section id="s-home">
     <div class="card">
       <h2 class="center">Qui joue ?</h2>
-      <button class="big zoe" id="pZoe" type="button"><img class="pp" id="phZoe" alt="" width="84" height="84"><span>Zoé · 3e année</span></button>
-      <button class="big leo" id="pLeo" type="button"><img class="pp" id="phLeo" alt="" width="84" height="84"><span>Léo · 5e année</span></button>
+      <button class="big zoe" id="pZoe" type="button"><img class="pp" id="phZoe" alt="Zoé" width="170" height="170"><span>Zoé · 3e année</span></button>
+      <button class="big leo" id="pLeo" type="button"><img class="pp" id="phLeo" alt="Léo" width="170" height="170"><span>Léo · 5e année</span></button>
       <button class="big papa" id="pPapa" type="button">Papa</button>
     </div>
     <details class="card">
