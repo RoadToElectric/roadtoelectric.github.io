@@ -38,7 +38,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 DATA = os.path.join(HERE, 'data', 'monthly')
 START = '2024-01'
-UA = {'User-Agent': 'Mozilla/5.0 (RoadToElectric data refresh)'}
+UA = {'User-Agent': 'Mozilla/5.0'}
 os.makedirs(DATA, exist_ok=True)
 
 
