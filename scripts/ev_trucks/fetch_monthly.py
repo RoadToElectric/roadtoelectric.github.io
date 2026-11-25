@@ -22,6 +22,8 @@ Sources (all free, no key, re-run any time; each one only adds months, nothing i
                first registration in NL in the month AND first admission no earlier than the previous month (= new,
                not a used import). Electric = only fuel "Elektriciteit". The registry only holds vehicles still
                registered, so trucks exported since are missing: older months read a little low.
+  Singapore    LTA monthly goods vehicles and buses by make and fuel; New Zealand: Motor Vehicle Register; Israel: Ministry of Transport registry
+               (see the function docstrings).
 India (BROWSER STEP, not downloaded by this script): the VAHAN dashboard JSON answers only from a page on its own
   origin (curl gets 401). Open https://analytics.parivahan.gov.in/analytics/publicdashboard/vahan?lang=en in a browser,
   run IN_BROWSER_JS below in the page (devtools console / javascript tool), and save the JSON string it returns as
@@ -400,6 +402,95 @@ def fetch_es(start='2025-01'):
     save('es', out)
 
 
+# ---------- Singapore ----------
+# forklifts, road rollers, sweepers, airport and plant machines are registered as goods vehicles in Singapore: makes left out of the truck and van counts
+SG_OFFROAD = set((
+    'HC,CATERPILLAR,TLD,SAKAI,BOBCAT,NICHIYU,HYSTER,STILL,HAMM,DULEVO,GUANGTAI,WIRTGEN,HELI,T.C.M.,VMAX,TREPEL,UN,CHARLATTE,MERLO,'
+    'BOMAG,MANITOU,NOBLELIFT,J.C.B.,BUCHER,E-P,KANTO,LIUGONG,AMMANN,SOCMA,JUNGHEINRICH,CLARK,LEKTRO,LINDE,KOMATSU,ROSENBAUER,LIEBHERR,VOGELE,KALMAR,'
+    'DOOSAN,DINGLI,ZPMC,JLG,SHANDONG LINGONG,XGMA,KATO,GOLDHOFER,HAKO,MADVAC,TENNANT,KARCHER,KUBOTA,MICROLIFT,POWERPLUS,OSHKOSH,SEM,RONGGONG').split(','))
+
+
+def fetch_sg():
+    """LTA DataMall zip (GET works, HEAD gets 403): month, make, fuel_type, vehicle_type, number, from 2016. Trucks = Heavy (3.5-16 t) + Very Heavy
+    (over 16 t, = heavy) Goods Vehicles; vans = Light Goods Vehicles (up to 3.5 t). 'Electric' only (plug-ins excluded)."""
+    import csv, zipfile
+    u = 'https://datamall.lta.gov.sg/content/dam/datamall/datasets/Facts_Figures/Vehicle%20Registration/Monthly%20New%20Registration%20of%20Goods%20Vehicles%20%26%20Buses%20by%20Make.zip'
+    z = zipfile.ZipFile(io.BytesIO(get(u)))
+    txt = z.read(next(n for n in z.namelist() if n.lower().endswith('.csv'))).decode('utf-8-sig')
+    out = collections.defaultdict(lambda: {p + f: 0 for p in ('', 'heavy_', 'van_', 'bus_') for f in ('total', 'el')})
+    cls = {'Heavy Goods Vehicles': [''], 'Very Heavy Goods Vehicles': ['', 'heavy_'], 'Light Goods Vehicles': ['van_'], 'Buses': ['bus_']}
+    for x in csv.DictReader(io.StringIO(txt)):
+        if x['month'] < START or not x['number'].strip():
+            continue
+        goods = x['vehicle_type'] != 'Buses'
+        if goods and (x['make'] in SG_OFFROAD or (x['make'] == 'TOYOTA' and x['fuel_type'] == 'Electric')):      # electric Toyotas here are forklifts
+            continue
+        v = int(x['number'].replace(',', ''))
+        for p in cls.get(x['vehicle_type'], []):
+            out[x['month']][p + 'total'] += v
+            if x['fuel_type'] == 'Electric':
+                out[x['month']][p + 'el'] += v
+    save('sg', out)
+
+
+# ---------- New Zealand ----------
+def fetch_nz():
+    """Waka Kotahi Motor Vehicle Register (ArcGIS table, refreshed monthly; the service name carries a date, so it is looked up).
+    New vehicles (IMPORT_STATUS NEW) by month of first NZ registration, still in the register. Trucks = goods vehicles over 3.5 t GVM without utes
+    (pickups); heavy = over 12 t; vans = body LIGHT VAN up to 3.5 t; electric = battery + hydrogen fuel cell."""
+    item = json.loads(get('https://opendata-nzta.opendata.arcgis.com/api/search/v1/collections/all/items/7b4df667d5014f1a93e6050b31d18407'))
+    base = item['properties']['url'].rstrip('/')
+    tid = (lambda m: (m.get('tables') or m.get('layers'))[0]['id'])(json.loads(get(base + '?f=json')))
+    out = collections.defaultdict(lambda: {p + f: 0 for p in ('', 'heavy_', 'van_', 'bus_') for f in ('total', 'el')})
+
+    def q(where):
+        p = {'where': where, 'groupByFieldsForStatistics': 'FIRST_NZ_REGISTRATION_YEAR,FIRST_NZ_REGISTRATION_MONTH,MOTIVE_POWER', 'f': 'json', 'resultRecordCount': 2000,
+             'outStatistics': json.dumps([{'statisticType': 'count', 'onStatisticField': 'OBJECTID', 'outStatisticFieldName': 'n'}])}
+        d = json.loads(get(f'{base}/{tid}/query?' + urllib.parse.urlencode(p), timeout=180))
+        if 'features' not in d or d.get('exceededTransferLimit'):
+            raise RuntimeError('register query failed: ' + str(d)[:120])
+        return [f['attributes'] for f in d['features']]
+    new = f"FIRST_NZ_REGISTRATION_YEAR>={START[:4]} AND IMPORT_STATUS='NEW' AND "
+    goods = new + "VEHICLE_TYPE='GOODS VAN/TRUCK/UTILITY' AND "
+    for pre, w in (('', goods + "GROSS_VEHICLE_MASS>3500 AND BODY_TYPE<>'UTILITY'"), ('heavy_', goods + "GROSS_VEHICLE_MASS>12000 AND BODY_TYPE<>'UTILITY'"),
+                   ('van_', goods + "GROSS_VEHICLE_MASS<=3500 AND BODY_TYPE='LIGHT VAN'"), ('bus_', new + "VEHICLE_TYPE='BUS'")):
+        for a in q(w):
+            e = out[ym(a['FIRST_NZ_REGISTRATION_YEAR'], a['FIRST_NZ_REGISTRATION_MONTH'])]
+            e[pre + 'total'] += a['n']
+            mp = a['MOTIVE_POWER'] or ''
+            if mp == 'ELECTRIC' or 'HYDROGEN' in mp:
+                e[pre + 'el'] += a['n']
+    save('nz', out)
+
+
+# ---------- Israel ----------
+def fetch_il():
+    """Ministry of Transport registry of vehicles without a model code (data.gov.il), by month of first road use 'moed_aliya_lakvish' (YYYY-M, no
+    leading zero). Trucks = EU class N2 + N3 without US-built pickups (Silverado / Sierra EV, Ram, F-series weigh over 3.5 t and would be most of N2);
+    heavy = N3; buses = M2 + M3. Only vehicles still registered. Vans (N1) sit in another registry without the EU class: not loaded."""
+    import datetime
+    R = 'cd3acc5c-03c3-4c89-9c54-d40f93c0d790'
+    t = datetime.date.today(); y, m = int(START[:4]), int(START[5:]); out = {}
+    while (y, m) <= (t.year, t.month):
+        p = {'resource_id': R, 'filters': json.dumps({'moed_aliya_lakvish': f'{y}-{m}'}), 'limit': 20000, 'fields': 'tkina_EU,sug_delek_nm,tozeret_nm,tozeret_eretz_nm'}
+        r = json.loads(get('https://data.gov.il/api/3/action/datastore_search?' + urllib.parse.urlencode(p)))['result']
+        e = {p_ + f: 0 for p_ in ('', 'heavy_', 'bus_') for f in ('total', 'el')}
+        for x in r['records']:
+            c = (x['tkina_EU'] or '')[:2]; el = x['sug_delek_nm'] == 'חשמל'
+            if c == 'N2' and ((x['tozeret_eretz_nm'] or '').startswith('ארה') or 'קרייזלר' in (x['tozeret_nm'] or '')):
+                continue        # US pickups
+            if c in ('N2', 'N3'):
+                e['total'] += 1; e['el'] += el
+                if c == 'N3':
+                    e['heavy_total'] += 1; e['heavy_el'] += el
+            elif c in ('M2', 'M3'):
+                e['bus_total'] += 1; e['bus_el'] += el
+        if r['records']:
+            out[ym(y, m)] = e
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    save('il', out)
+
+
 # ---------- build ----------
 def build():
     import datetime
@@ -431,7 +522,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if '--build' not in args:
         skip = set(args[args.index('--skip') + 1].split(',')) if '--skip' in args else set()
-        for code, fn in (('de', fetch_de), ('ch', fetch_ch), ('es', fetch_es), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
+        for code, fn in (('sg', fetch_sg), ('nz', fetch_nz), ('il', fetch_il), ('de', fetch_de), ('ch', fetch_ch), ('es', fetch_es), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
             if code in skip:
                 continue
             try:

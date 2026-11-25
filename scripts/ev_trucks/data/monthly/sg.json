@@ -1,0 +1,342 @@
+{
+"2024-01": {
+"total": 335,
+"el": 3,
+"heavy_total": 102,
+"heavy_el": 2,
+"van_total": 165,
+"van_el": 79,
+"bus_total": 76,
+"bus_el": 9
+},
+"2024-02": {
+"total": 253,
+"el": 5,
+"heavy_total": 84,
+"heavy_el": 4,
+"van_total": 115,
+"van_el": 59,
+"bus_total": 71,
+"bus_el": 2
+},
+"2024-03": {
+"total": 666,
+"el": 5,
+"heavy_total": 164,
+"heavy_el": 4,
+"van_total": 242,
+"van_el": 98,
+"bus_total": 114,
+"bus_el": 4
+},
+"2024-04": {
+"total": 231,
+"el": 2,
+"heavy_total": 58,
+"heavy_el": 1,
+"van_total": 232,
+"van_el": 106,
+"bus_total": 55,
+"bus_el": 5
+},
+"2024-05": {
+"total": 292,
+"el": 5,
+"heavy_total": 91,
+"heavy_el": 1,
+"van_total": 183,
+"van_el": 69,
+"bus_total": 66,
+"bus_el": 8
+},
+"2024-06": {
+"total": 244,
+"el": 2,
+"heavy_total": 108,
+"heavy_el": 1,
+"van_total": 209,
+"van_el": 91,
+"bus_total": 73,
+"bus_el": 17
+},
+"2024-07": {
+"total": 355,
+"el": 2,
+"heavy_total": 106,
+"heavy_el": 0,
+"van_total": 308,
+"van_el": 145,
+"bus_total": 88,
+"bus_el": 6
+},
+"2024-08": {
+"total": 368,
+"el": 1,
+"heavy_total": 129,
+"heavy_el": 0,
+"van_total": 245,
+"van_el": 95,
+"bus_total": 124,
+"bus_el": 5
+},
+"2024-09": {
+"total": 402,
+"el": 6,
+"heavy_total": 138,
+"heavy_el": 0,
+"van_total": 271,
+"van_el": 120,
+"bus_total": 100,
+"bus_el": 4
+},
+"2024-10": {
+"total": 353,
+"el": 4,
+"heavy_total": 113,
+"heavy_el": 1,
+"van_total": 266,
+"van_el": 143,
+"bus_total": 83,
+"bus_el": 27
+},
+"2024-11": {
+"total": 360,
+"el": 0,
+"heavy_total": 145,
+"heavy_el": 0,
+"van_total": 196,
+"van_el": 73,
+"bus_total": 87,
+"bus_el": 18
+},
+"2024-12": {
+"total": 373,
+"el": 4,
+"heavy_total": 179,
+"heavy_el": 1,
+"van_total": 158,
+"van_el": 74,
+"bus_total": 115,
+"bus_el": 31
+},
+"2025-01": {
+"total": 316,
+"el": 3,
+"heavy_total": 108,
+"heavy_el": 0,
+"van_total": 140,
+"van_el": 65,
+"bus_total": 91,
+"bus_el": 28
+},
+"2025-02": {
+"total": 365,
+"el": 4,
+"heavy_total": 125,
+"heavy_el": 0,
+"van_total": 247,
+"van_el": 151,
+"bus_total": 60,
+"bus_el": 12
+},
+"2025-03": {
+"total": 534,
+"el": 8,
+"heavy_total": 138,
+"heavy_el": 0,
+"van_total": 747,
+"van_el": 301,
+"bus_total": 72,
+"bus_el": 9
+},
+"2025-04": {
+"total": 393,
+"el": 2,
+"heavy_total": 144,
+"heavy_el": 1,
+"van_total": 96,
+"van_el": 80,
+"bus_total": 76,
+"bus_el": 40
+},
+"2025-05": {
+"total": 383,
+"el": 1,
+"heavy_total": 133,
+"heavy_el": 0,
+"van_total": 158,
+"van_el": 115,
+"bus_total": 67,
+"bus_el": 31
+},
+"2025-06": {
+"total": 353,
+"el": 1,
+"heavy_total": 99,
+"heavy_el": 0,
+"van_total": 228,
+"van_el": 135,
+"bus_total": 93,
+"bus_el": 42
+},
+"2025-07": {
+"total": 535,
+"el": 4,
+"heavy_total": 205,
+"heavy_el": 3,
+"van_total": 225,
+"van_el": 152,
+"bus_total": 53,
+"bus_el": 26
+},
+"2025-08": {
+"total": 492,
+"el": 2,
+"heavy_total": 160,
+"heavy_el": 0,
+"van_total": 194,
+"van_el": 134,
+"bus_total": 72,
+"bus_el": 32
+},
+"2025-09": {
+"total": 505,
+"el": 1,
+"heavy_total": 181,
+"heavy_el": 0,
+"van_total": 223,
+"van_el": 155,
+"bus_total": 96,
+"bus_el": 59
+},
+"2025-10": {
+"total": 482,
+"el": 1,
+"heavy_total": 195,
+"heavy_el": 1,
+"van_total": 190,
+"van_el": 115,
+"bus_total": 87,
+"bus_el": 52
+},
+"2025-11": {
+"total": 442,
+"el": 4,
+"heavy_total": 210,
+"heavy_el": 0,
+"van_total": 182,
+"van_el": 128,
+"bus_total": 86,
+"bus_el": 56
+},
+"2025-12": {
+"total": 494,
+"el": 1,
+"heavy_total": 174,
+"heavy_el": 0,
+"van_total": 278,
+"van_el": 213,
+"bus_total": 88,
+"bus_el": 29
+},
+"2026-01": {
+"total": 485,
+"el": 58,
+"heavy_total": 235,
+"heavy_el": 7,
+"van_total": 193,
+"van_el": 125,
+"bus_total": 50,
+"bus_el": 13
+},
+"2026-02": {
+"total": 331,
+"el": 63,
+"heavy_total": 119,
+"heavy_el": 6,
+"van_total": 136,
+"van_el": 68,
+"bus_total": 46,
+"bus_el": 16
+},
+"2026-03": {
+"total": 581,
+"el": 92,
+"heavy_total": 256,
+"heavy_el": 4,
+"van_total": 209,
+"van_el": 137,
+"bus_total": 75,
+"bus_el": 40
+},
+"2026-04": {
+"total": 521,
+"el": 94,
+"heavy_total": 192,
+"heavy_el": 5,
+"van_total": 196,
+"van_el": 154,
+"bus_total": 46,
+"bus_el": 14
+},
+"2026-05": {
+"total": 440,
+"el": 121,
+"heavy_total": 147,
+"heavy_el": 2,
+"van_total": 161,
+"van_el": 113,
+"bus_total": 26,
+"bus_el": 5
+},
+"2026-06": {
+"total": 397,
+"el": 114,
+"heavy_total": 130,
+"heavy_el": 3,
+"van_total": 139,
+"van_el": 105,
+"bus_total": 33,
+"bus_el": 12
+},
+"2026-07": {
+"total": 444,
+"el": 103,
+"heavy_total": 160,
+"heavy_el": 2,
+"van_total": 121,
+"van_el": 103,
+"bus_total": 43,
+"bus_el": 20
+},
+"2026-08": {
+"total": 402,
+"el": 98,
+"heavy_total": 169,
+"heavy_el": 2,
+"van_total": 102,
+"van_el": 86,
+"bus_total": 41,
+"bus_el": 10
+},
+"2026-09": {
+"total": 471,
+"el": 218,
+"heavy_total": 115,
+"heavy_el": 5,
+"van_total": 104,
+"van_el": 73,
+"bus_total": 41,
+"bus_el": 18
+},
+"2026-10": {
+"total": 514,
+"el": 212,
+"heavy_total": 142,
+"heavy_el": 1,
+"van_total": 126,
+"van_el": 112,
+"bus_total": 57,
+"bus_el": 28
+}
+}

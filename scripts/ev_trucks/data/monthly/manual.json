@@ -96,18 +96,76 @@
    "lag": "live, refresh the previous month too",
    "vanBasis": "light goods vehicles, up to 7.5 t (a wider class than Europe's 3.5 t)",
    "busBasis": "all buses"
+  },
+  "sg": {
+   "name": "Singapore",
+   "color": "#0ea5e9",
+   "basis": "New Heavy (3.5-16 t) + Very Heavy (over 16 t) Goods Vehicles, forklifts and other off-road machines left out by make; electric = battery-electric. Heavy = Very Heavy. Most electric ones are at the light end (3.5-7 t)",
+   "source": "Land Transport Authority, DataMall",
+   "url": "https://datamall.lta.gov.sg/content/datamall/en/static-data.html",
+   "lag": "~3-4 weeks",
+   "vanBasis": "Light Goods Vehicles up to 3.5 t, off-road machines left out by make",
+   "busBasis": "all buses"
+  },
+  "nz": {
+   "name": "New Zealand",
+   "color": "#64748b",
+   "basis": "New goods vehicles over 3.5 t without utes (pickups), still in the register; electric = battery + fuel cell. Heavy = over 12 t",
+   "source": "Waka Kotahi, Motor Vehicle Register",
+   "url": "https://opendata-nzta.opendata.arcgis.com/",
+   "lag": "~10 days",
+   "vanBasis": "light vans up to 3.5 t, utes (pickups) left out",
+   "busBasis": "new buses (used imports left out)"
+  },
+  "il": {
+   "name": "Israel",
+   "color": "#a16207",
+   "basis": "EU classes N2 + N3 still registered, without US-built pickups (electric Silverado and Sierra weigh over 3.5 t and would be most of the electric N2); electric = battery. Heavy = N3 (over 12 t)",
+   "source": "Ministry of Transport registry, data.gov.il",
+   "url": "https://data.gov.il/",
+   "lag": "live registry",
+   "vanBasis": null,
+   "busBasis": "EU classes M2 + M3"
   }
  },
  "china": {
-  "basis": "Heavy trucks, new-energy share of sales (compulsory-insurance registrations as reported in the Chinese trade press). Not an official statistics release.",
-  "fy2025": 28.9,
+  "basis": "Heavy trucks, new-energy share of registrations (compulsory-insurance basis, as reported by the Chinese trade press). New energy = battery-electric, plus small numbers of plug-in hybrids and fuel cells. Not an official statistics release.",
+  "fy2025": 28.89,
   "months": {
+   "2025-11": {
+    "share": 36.45
+   },
+   "2025-12": {
+    "share": 53.89,
+    "units": 45299
+   },
+   "2026-01": {
+    "share": 33.18,
+    "units": 16070
+   },
+   "2026-02": {
+    "share": 26.16,
+    "units": 7435
+   },
+   "2026-03": {
+    "share": 23.3,
+    "units": 20403
+   },
    "2026-04": {
-    "share": 30.2
+    "share": 30.2,
+    "units": 27900
    },
    "2026-05": {
     "share": 40.88,
     "units": 30800
+   },
+   "2026-06": {
+    "share": 44.75,
+    "units": 37400
+   },
+   "2026-07": {
+    "share": 47.24,
+    "units": 26503
    },
    "2026-08": {
     "share": 47.43,
@@ -116,41 +174,81 @@
    "2026-09": {
     "share": 50.28,
     "units": 33100
+   },
+   "2026-10": {
+    "share": 57.13,
+    "units": 35309
    }
   },
   "ytd": [
    {
+    "to": "2026-03",
+    "units": 43908,
+    "share": 26.71
+   },
+   {
     "to": "2026-05",
     "units": 102600,
-    "share": 30.9
+    "share": 30.89
+   },
+   {
+    "to": "2026-06",
+    "units": 140021,
+    "share": 33.68,
+    "growth": 77
+   },
+   {
+    "to": "2026-07",
+    "units": 166524,
+    "growth": 74
    },
    {
     "to": "2026-08",
     "units": 193300,
-    "share": 36.59
+    "share": 36.59,
+    "growth": 70
    },
    {
     "to": "2026-09",
     "units": 226400,
     "share": 38.1,
     "growth": 64
+   },
+   {
+    "to": "2026-10",
+    "units": 261736,
+    "share": 39.9,
+    "growth": 66
    }
   ],
-  "note": "CAAM (wholesale, released 11 Nov 2026) says the October new-energy share of heavy trucks again topped 50%.",
+  "note": "Basis: compulsory-insurance / licensing registrations, exports excluded (cvworld.cn and reposts). Counts on another basis (transport permits) are lower, about 238,000 for January-October; not used.",
   "links": [
    [
-    "21jingji, Nov 2026",
-    "https://www.21jingji.com/article/20261109/herald/68ba8e4ed1ba0c2f7632bc3af3bde812.html"
+    "October",
+    "https://www.sina.cn/weibo/detail/5365918735798388.html"
    ],
    [
-    "ifeng, August 2026",
-    "https://auto.ifeng.com/c/8wbfdJM8Lwy"
+    "July",
+    "https://www.sohu.com/a/1067502911_120774496"
    ],
    [
-    "CnEVPost, CAAM October",
-    "https://cnevpost.com/2026/11/11/china-nev-sales-oct-2026-caam/"
+    "June, first half",
+    "https://finance.sina.com.cn/wm/2026-07-16/doc-inihxnus4593332.shtml"
+   ],
+   [
+    "March, February",
+    "https://finance.sina.com.cn/wm/2026-04-15/doc-inhuqnca3458138.shtml"
+   ],
+   [
+    "January",
+    "https://chejiahao.autohome.com.cn/info/24904009"
+   ],
+   [
+    "December 2025",
+    "https://www.163.com/dy/article/KL0P7ADR0518EEN3.html"
    ]
-  ]
+  ],
+  "derived": "April units = published year-to-date to May minus May minus Q1; January share = February share plus the published 7.02-point fall; January-October share 39.9% = units divided by the sum of the monthly markets (units / share). Everything else is published. Monthly units add up to every published year-to-date total within rounding."
  },
  "eu": {
   "basis": "ACEA, EU new trucks over 3.5 t, electrically chargeable (battery-electric + plug-in hybrid) share, year to date",
