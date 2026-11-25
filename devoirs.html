@@ -358,6 +358,7 @@ function stopClip(){ Object.keys(CLIPS).forEach(function(k){ try{ CLIPS[k].pause
 // joue le clip ; renvoie sa durée en ms (ou 2500 si inconnue), ou 0 si rien n'a pu démarrer (on retombe alors sur les sons par défaut)
 function playClip(kind, onend){
   if(!hasClips() || !soundOn) return 0;
+  if(kind === 'Reussi_1' && clipPrefix() === 'Leo') kind = 'But_' + ['1','3','4'][Math.floor(Math.random() * 3)];   /* Léo : un « GOOOAL » de commentateur (3 versions) à chaque mot réussi */
   var a = clipFor(clipPrefix() + '_' + kind); if(!a) return 0;
   stopClip(); if(synth) synth.cancel();
   var failed = false;
@@ -366,7 +367,7 @@ function playClip(kind, onend){
   if(pr && pr.catch) pr.catch(function(){ failed = true; a.onended = null; if(onend) onend(); });
   return (a.duration && isFinite(a.duration)) ? Math.round(a.duration * 1000) : 2500;
 }
-function preloadClips(){ ['Reussi_1','Rate_1','TEST_Reussi_1'].forEach(function(k){ clipFor(clipPrefix() + '_' + k); }); }
+function preloadClips(){ ['Reussi_1','Rate_1','TEST_Reussi_1'].concat(clipPrefix()==='Leo' ? ['But_1','But_3','But_4'] : []).forEach(function(k){ clipFor(clipPrefix() + '_' + k); }); }
 function happySound(){ tone(523,0,.16,'triangle'); tone(659,.12,.16,'triangle'); tone(784,.24,.16,'triangle'); tone(1047,.36,.35,'triangle',.3); }
 function buzzSound(){ tone(120,0,.35,'sawtooth',.3); tone(95,.05,.35,'square',.18); }
 function celebrate(quiet){
