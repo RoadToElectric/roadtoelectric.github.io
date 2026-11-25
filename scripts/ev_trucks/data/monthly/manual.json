@@ -126,6 +126,20 @@
    "lag": "live registry",
    "vanBasis": null,
    "busBasis": "EU classes M2 + M3"
+  },
+  "kr": {
+   "name": "South Korea",
+   "color": "#7f1d1d",
+   "basis": "Cargo vehicles of all weights: shown under Vans, because the official count has no weight split and is mostly one-tonne trucks",
+   "source": "KOTSA new registrations, data.go.kr",
+   "url": "https://www.data.go.kr/",
+   "lag": "~1 week",
+   "vanBasis": "cargo vehicles of all weights, mostly one-tonne trucks; electric = battery + hydrogen",
+   "busBasis": null,
+   "hide": [
+    "bus_"
+   ],
+   "hideWhy": "seunghap = 11 seats and more, so it mixes buses with people-carriers (electric count 104 in April, 663 in June 2026); not comparable with buses elsewhere"
   }
  },
  "china": {

@@ -1,0 +1,206 @@
+{
+"2024-01": {
+"van_total": 16970,
+"van_el": 118,
+"bus_total": 2105,
+"bus_el": 180
+},
+"2024-02": {
+"van_total": 12733,
+"van_el": 61,
+"bus_total": 1785,
+"bus_el": 171
+},
+"2024-03": {
+"van_total": 17848,
+"van_el": 4183,
+"bus_total": 1835,
+"bus_el": 178
+},
+"2024-04": {
+"van_total": 16547,
+"van_el": 1499,
+"bus_total": 2365,
+"bus_el": 221
+},
+"2024-05": {
+"van_total": 15921,
+"van_el": 1494,
+"bus_total": 2038,
+"bus_el": 276
+},
+"2024-06": {
+"van_total": 14763,
+"van_el": 1660,
+"bus_total": 2170,
+"bus_el": 412
+},
+"2024-07": {
+"van_total": 16045,
+"van_el": 2381,
+"bus_total": 2506,
+"bus_el": 410
+},
+"2024-08": {
+"van_total": 12132,
+"van_el": 1922,
+"bus_total": 1955,
+"bus_el": 427
+},
+"2024-09": {
+"van_total": 11745,
+"van_el": 1723,
+"bus_total": 1944,
+"bus_el": 291
+},
+"2024-10": {
+"van_total": 14714,
+"van_el": 1932,
+"bus_total": 2708,
+"bus_el": 575
+},
+"2024-11": {
+"van_total": 11965,
+"van_el": 2343,
+"bus_total": 2541,
+"bus_el": 484
+},
+"2024-12": {
+"van_total": 12472,
+"van_el": 1476,
+"bus_total": 2842,
+"bus_el": 829
+},
+"2025-01": {
+"van_total": 11033,
+"van_el": 82,
+"bus_total": 1877,
+"bus_el": 142
+},
+"2025-02": {
+"van_total": 12570,
+"van_el": 2238,
+"bus_total": 1884,
+"bus_el": 171
+},
+"2025-03": {
+"van_total": 13902,
+"van_el": 2485,
+"bus_total": 2317,
+"bus_el": 159
+},
+"2025-04": {
+"van_total": 15697,
+"van_el": 2687,
+"bus_total": 2546,
+"bus_el": 305
+},
+"2025-05": {
+"van_total": 14593,
+"van_el": 2697,
+"bus_total": 2249,
+"bus_el": 242
+},
+"2025-06": {
+"van_total": 13398,
+"van_el": 1958,
+"bus_total": 2196,
+"bus_el": 215
+},
+"2025-07": {
+"van_total": 15951,
+"van_el": 3104,
+"bus_total": 2320,
+"bus_el": 273
+},
+"2025-08": {
+"van_total": 13729,
+"van_el": 3229,
+"bus_total": 1709,
+"bus_el": 302
+},
+"2025-09": {
+"van_total": 15517,
+"van_el": 2975,
+"bus_total": 2038,
+"bus_el": 308
+},
+"2025-10": {
+"van_total": 12401,
+"van_el": 3262,
+"bus_total": 1941,
+"bus_el": 281
+},
+"2025-11": {
+"van_total": 12703,
+"van_el": 2179,
+"bus_total": 2039,
+"bus_el": 326
+},
+"2025-12": {
+"van_total": 11723,
+"van_el": 924,
+"bus_total": 2519,
+"bus_el": 601
+},
+"2026-01": {
+"van_total": 10076,
+"van_el": 199,
+"bus_total": 1814,
+"bus_el": 77
+},
+"2026-02": {
+"van_total": 14905,
+"van_el": 6850,
+"bus_total": 1471,
+"bus_el": 82
+},
+"2026-03": {
+"van_total": 18331,
+"van_el": 5781,
+"bus_total": 2030,
+"bus_el": 84
+},
+"2026-04": {
+"van_total": 15580,
+"van_el": 4087,
+"bus_total": 2039,
+"bus_el": 104
+},
+"2026-05": {
+"van_total": 12673,
+"van_el": 4005,
+"bus_total": 1616,
+"bus_el": 190
+},
+"2026-06": {
+"van_total": 14052,
+"van_el": 4397,
+"bus_total": 2350,
+"bus_el": 663
+},
+"2026-07": {
+"van_total": 13941,
+"van_el": 4009,
+"bus_total": 2794,
+"bus_el": 851
+},
+"2026-08": {
+"van_total": 11589,
+"van_el": 2964,
+"bus_total": 1696,
+"bus_el": 516
+},
+"2026-09": {
+"van_total": 11685,
+"van_el": 2787,
+"bus_total": 2530,
+"bus_el": 1037
+},
+"2026-10": {
+"van_total": 13848,
+"van_el": 4748,
+"bus_total": 2930,
+"bus_el": 1170
+}
+}

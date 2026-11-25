@@ -491,6 +491,41 @@ def fetch_il():
     save('il', out)
 
 
+# ---------- Korea ----------
+def fetch_kr():
+    """KOTSA new-registration API (data.go.kr). Needs the key file .scratch/kr/ts.key (git-ignored; never put the key in the repo). One count per call:
+    vhctyAsortCode 3 = cargo (all weights, stored as van_*: no weight split exists), 2 = seunghap (11 seats and more: buses AND people-carriers,
+    stored as bus_* but hidden). useFuelCode 5 = electric, 3 = hydrogen. Only months not stored yet plus the last two are asked for."""
+    import datetime
+    key = open(os.path.join(ROOT, '.scratch', 'kr', 'ts.key')).read().strip()
+    f = os.path.join(DATA, 'kr.json')
+    out = json.load(open(f)) if os.path.exists(f) else {}
+    last = sorted(out)[-2:]
+
+    def q(y, m, v, fuel=None):
+        p = dict(registYy=y, registMt='%02d' % m, vhctyAsortCode=v)
+        if fuel:
+            p['useFuelCode'] = fuel
+        x = get('https://apis.data.go.kr/B553881/newRegistlnfoService_02/getnewRegistlnfoService02?serviceKey=' + key + '&' + urllib.parse.urlencode(p)).decode('utf8', 'replace')
+        c = re.search(r'<resultCode>(\d+)<', x)
+        if c and c.group(1) == '03':
+            return 0
+        if not c or c.group(1) != '00':
+            raise RuntimeError('API answer ' + (c.group(1) if c else 'unreadable'))
+        return int(re.search(r'<dtaCo>(\d+)<', x).group(1))
+    t = datetime.date.today(); y, m = int(START[:4]), int(START[5:])
+    while (y, m) < (t.year, t.month):
+        k = ym(y, m)
+        if k not in out or k in last:
+            e = {}
+            for v, pre in ((3, 'van_'), (2, 'bus_')):
+                e[pre + 'total'] = q(y, m, v); e[pre + 'el'] = q(y, m, v, 5) + q(y, m, v, 3)
+            if e['van_total']:
+                out[k] = e
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    save('kr', out)
+
+
 # ---------- build ----------
 def build():
     import datetime
@@ -522,7 +557,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if '--build' not in args:
         skip = set(args[args.index('--skip') + 1].split(',')) if '--skip' in args else set()
-        for code, fn in (('sg', fetch_sg), ('nz', fetch_nz), ('il', fetch_il), ('de', fetch_de), ('ch', fetch_ch), ('es', fetch_es), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
+        for code, fn in (('kr', fetch_kr), ('sg', fetch_sg), ('nz', fetch_nz), ('il', fetch_il), ('de', fetch_de), ('ch', fetch_ch), ('es', fetch_es), ('dk', fetch_dk), ('no', fetch_no), ('fi', fetch_fi), ('se', fetch_se), ('nl', fetch_nl)):
             if code in skip:
                 continue
             try:
