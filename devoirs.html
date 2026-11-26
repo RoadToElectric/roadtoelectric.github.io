@@ -318,10 +318,11 @@ var SB = 'https://rtmlxvjpjxcvjdykrkvm.supabase.co', KEY = 'sb_publishable_RU6ws
 var PUPILS = { zoe:{name:'Zoé', annee:3, color:'#ec4899'}, leo:{name:'Léo', annee:5, color:'#2563eb'} };
 var TENSES = [
   {id:'present', label:'PRÉSENT', on:true}, {id:'imparfait', label:'IMPARFAIT', on:true}, {id:'passe_compose', label:'PASSÉ COMPOSÉ', on:true},
+  {id:'plus_que_parfait', label:'PLUS-QUE-PARFAIT', on:true, pupil:'Léo'},
   {id:'participe_passe', label:'PARTICIPE PASSÉ', on:true}, {id:'futur', label:'FUTUR', on:true},
   {id:'conditionnel_present', label:'CONDITIONNEL PRÉSENT', on:false}, {id:'subjonctif_present', label:'SUBJONCTIF PRÉSENT', on:false}
 ];
-var TENSE_SAY = {present:'au présent', imparfait:"à l'imparfait", passe_compose:'au passé composé', participe_passe:'participe passé', futur:'au futur', conditionnel_present:'au conditionnel présent', subjonctif_present:'au subjonctif présent'};
+var TENSE_SAY = {present:'au présent', imparfait:"à l'imparfait", passe_compose:'au passé composé', plus_que_parfait:'au plus-que-parfait', participe_passe:'participe passé', futur:'au futur', conditionnel_present:'au conditionnel présent', subjonctif_present:'au subjonctif présent'};
 var PRON = ['je','tu','il','nous','vous','ils'];
 var CLASSES = {'n.':'nom','adj.':'adjectif','v.':'verbe','adv.':'adverbe','dét.':'déterminant','pron.':'pronom','prép.':'préposition','conj.':'conjonction','m.':'masculin','f.':'féminin','m. ou f.':'masculin ou féminin'};
 
@@ -541,7 +542,7 @@ $('blocsOk').addEventListener('click', function(){
 });
 function showTenses(){
   var box = $('tenseChips'); box.innerHTML = '';
-  TENSES.forEach(function(t){ var l = document.createElement('label'); l.className='chip'; l.innerHTML = '<input type="checkbox" value="'+t.id+'"'+((S.who && S.who.name==='Zoé' ? t.id==='present' : t.on)?' checked':'')+'><span>'+t.label+'</span>'; box.appendChild(l); });   // Zoé : seulement le présent au départ
+  TENSES.forEach(function(t){ if(t.pupil && !(S.who && S.who.name === t.pupil)) return; var l = document.createElement('label'); l.className='chip'; l.innerHTML = '<input type="checkbox" value="'+t.id+'"'+((S.who && S.who.name==='Zoé' ? t.id==='present' : t.on)?' checked':'')+'><span>'+t.label+'</span>'; box.appendChild(l); });   // Zoé : seulement le présent au départ
   show('tenses');
 }
 $('tensesOk').addEventListener('click', function(){
