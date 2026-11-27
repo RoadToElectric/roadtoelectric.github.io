@@ -588,15 +588,22 @@ function pronLabel(p, tense, form){
   if(sub){ lab = (p==='je' && lab==="j'") ? "que j'" : ({je:'que je',tu:'que tu',il:"qu'il / qu'elle",nous:'que nous',vous:'que vous',ils:"qu'ils / qu'elles"}[p]); }
   return lab;
 }
+/* orthographe rectifiée : « une flute » et « une flûte » sont le même mot (i ou u avec ou sans accent circonflexe) quand la liste a les deux ;
+   le mot n'est demandé qu'une fois et les deux réponses sont bonnes. Les mots avec un « sens » (homophones) ne sont jamais regroupés. */
+function spellKey(w){ return String(w).toLowerCase().replace(/î/g, 'i').replace(/û/g, 'u'); }
 function buildQuestions(n){
   var d = S.data, items = d.items||[], prog = d.progress||{}, pool = [];
   if(S.cat==='vocabulaire'){
-    var seen = {};
+    var seen = {}, variants = {};
+    items.forEach(function(it){ if(it.sens) return; var k = spellKey(it.item), a = variants[k] || (variants[k] = []); if(a.indexOf(it.item) < 0) a.push(it.item); });
     items.forEach(function(it){
       if(S.listSel && S.listSel.indexOf(it.liste) < 0) return;
-      if(seen[it.item]) return; seen[it.item] = 1;       // the same word in two lists is asked once
-      var p = prog[it.item]||{ok:0,ko:0};
-      pool.push({key:it.item, item:it.item, details:it.details, sens:it.sens||'', p:p, kind:'vocab'});
+      var sk = it.sens ? it.item : spellKey(it.item);
+      if(seen[sk]) return; seen[sk] = 1;                  // the same word in two lists (or in both spellings) is asked once
+      var alts = it.sens ? [it.item] : variants[sk];
+      var word = alts.filter(function(a){ return /[îû]/.test(a); })[0] || it.item;
+      var p = {ok:0, ko:0}; alts.forEach(function(a){ var x = prog[a]; if(x){ p.ok += x.ok || 0; p.ko += x.ko || 0; } });
+      pool.push({key:word, item:word, alts:alts, details:it.details, sens:it.sens||'', p:p, kind:'vocab'});
     });
   } else {
     items.forEach(function(v){
@@ -620,7 +627,11 @@ function buildQuestions(n){
     if(q.kind==='verb'){
       if(q.tense==='participe_passe'){ q.expected = [].concat(q.forms); q.label = ''; }
       else { var p = PRON[Math.floor(Math.random()*PRON.length)]; var f = q.forms[p]; q.pron = p; q.expected = [].concat(f); q.label = pronLabel(p, q.tense, [].concat(f)[0]); }
-    } else { var bare = q.item.replace(/^(une|un|les|des|du|le|la) +|^l'/i, ''); q.expected = bare && bare !== q.item ? [q.item, bare] : [q.item]; }
+    } else {
+      q.expected = [];
+      [q.item].concat((q.alts || []).filter(function(a){ return a !== q.item; })).forEach(function(w){
+        var bare = w.replace(/^(une|un|les|des|du|le|la) +|^l'/i, ''); q.expected.push(w); if(bare && bare !== w) q.expected.push(bare); });
+    }
     return q;
   });
 }
