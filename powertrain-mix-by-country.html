@@ -697,12 +697,14 @@ const MONTHLY_DATA = {
       // Israel Ministry of Transport vehicle registry (data.gov.il, queried 2026-11-25, preliminary: late entries still arrive), moed_aliya_lakvish=2026-10: BEV 4,137 / PHEV 5,398 / diesel 1,245 exact; the petrol bucket 12,439 (petrol + HEV) split with the October ratio from I-VIA's cumulative PDFs (October minus September: HEV 7,198 of 22,657 deliveries, petrol about 4,444), giving petrol 4,748 / HEV 7,691
       "Israel": [4137,5398,7691,0,4748,1245,23219],
       // AAP Informe Estadistico Automotor October 2026 (SUNARP): total 27,177 light + heavy (monthly table); BEV 136 / PHEV 373 / HEV 1,382 from the monthly electrified chart (HEV includes MHEV); petrol = total minus those three
-      "Peru": [136,373,1382,0,25286,0,27177]
+      "Peru": [136,373,1382,0,25286,0,27177],
+      // ANAC A.G. (Registro Civil): Cero y Bajas Emisiones Octubre 2026 (BEV 995, PHEV 566 + P-REEV 104, HEV+REEV 1,229 + MHEV 2,107) + Mercado Automotor Octubre 2026 total 27,687 livianos y medianos; ICE residual 22,686 split with the ~28.7% diesel share (ANAC annual ratio, same approximation as every Chile row)
+      "Chile": [995,670,3336,0,16175,6511,27687]
     },
     priorYearBev: {
-          "Sweden":8707,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":367,      "United Kingdom":36830,      "Netherlands":13899,      "Portugal":4618,      "Ireland":706,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908,      "Malaysia":4345,      "India":20981,      "Luxembourg":922,      "Uruguay":1748,      "Colombia":2090,      "New Zealand":502,      "Singapore":2081,      "Ecuador":448,      "Taiwan":1260,      "Vietnam":20388,      "Paraguay":135,      "Indonesia":13899,      "United States":83292,      "Kazakhstan":277,      "Bosnia-Herzegovina":13,      "Bulgaria":282,      "Croatia":212,      "Cyprus":137,      "Czechia":1264,      "Estonia":77,      "Greece":799,      "Hungary":943,      "Latvia":126,      "Lithuania":307,      "Malta":377,      "Romania":1019,      "Slovakia":403,      "Slovenia":687,      "Philippines":1341,      "Thailand":8517,      "Israel":3149,      "Peru":48},
+          "Sweden":8707,      "Chile":392,      "Italy":6280,      "Finland":2225,      "Norway":10852,      "France":34108,      "Spain":9065,      "Switzerland":4175,      "Denmark":11405,      "Poland":4812,      "South Korea":20046,      "Germany":52425,      "Iceland":367,      "United Kingdom":36830,      "Netherlands":13899,      "Portugal":4618,      "Ireland":706,      "Belgium":12360,      "Austria":5165,      "Brazil":8011,      "Mexico":2073,      "China":812000,      "Japan":3908,      "Malaysia":4345,      "India":20981,      "Luxembourg":922,      "Uruguay":1748,      "Colombia":2090,      "New Zealand":502,      "Singapore":2081,      "Ecuador":448,      "Taiwan":1260,      "Vietnam":20388,      "Paraguay":135,      "Indonesia":13899,      "United States":83292,      "Kazakhstan":277,      "Bosnia-Herzegovina":13,      "Bulgaria":282,      "Croatia":212,      "Cyprus":137,      "Czechia":1264,      "Estonia":77,      "Greece":799,      "Hungary":943,      "Latvia":126,      "Lithuania":307,      "Malta":377,      "Romania":1019,      "Slovakia":403,      "Slovenia":687,      "Philippines":1341,      "Thailand":8517,      "Israel":3149,      "Peru":48},
     priorYearTotal: {
-          "Sweden":24078,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":755,      "United Kingdom":144945,      "Netherlands":34244,      "Portugal":16137,      "Ireland":2180,      "Belgium":33954,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000,      "Japan":214454,      "Malaysia":81413,      "India":591282,      "Luxembourg":3800,      "Uruguay":5056,      "Colombia":25254,      "New Zealand":10676,      "Singapore":3956,      "Ecuador":11613,      "Taiwan":30292,      "Vietnam":57484,      "Paraguay":3627,      "Indonesia":74014,      "United States":1281615,      "Kazakhstan":20205,      "Bosnia-Herzegovina":961,      "Bulgaria":4931,      "Croatia":5200,      "Cyprus":1147,      "Czechia":23298,      "Estonia":1266,      "Greece":10763,      "Hungary":10803,      "Latvia":1831,      "Lithuania":4055,      "Malta":684,      "Romania":12839,      "Slovakia":8215,      "Slovenia":4885,      "Philippines":42409,      "Thailand":47032,      "Israel":20250,      "Peru":18881}
+          "Sweden":24078,      "Chile":23531,      "Italy":125961,      "Finland":6219,      "Norway":11138,      "France":139514,      "Spain":96785,      "Switzerland":18452,      "Denmark":16156,      "Poland":52728,      "South Korea":124296,      "Germany":250133,      "Iceland":755,      "United Kingdom":144945,      "Netherlands":34244,      "Portugal":16137,      "Ireland":2180,      "Belgium":33954,      "Austria":24479,      "Brazil":248082,      "Mexico":132674,      "China":2242000,      "Japan":214454,      "Malaysia":81413,      "India":591282,      "Luxembourg":3800,      "Uruguay":5056,      "Colombia":25254,      "New Zealand":10676,      "Singapore":3956,      "Ecuador":11613,      "Taiwan":30292,      "Vietnam":57484,      "Paraguay":3627,      "Indonesia":74014,      "United States":1281615,      "Kazakhstan":20205,      "Bosnia-Herzegovina":961,      "Bulgaria":4931,      "Croatia":5200,      "Cyprus":1147,      "Czechia":23298,      "Estonia":1266,      "Greece":10763,      "Hungary":10803,      "Latvia":1831,      "Lithuania":4055,      "Malta":684,      "Romania":12839,      "Slovakia":8215,      "Slovenia":4885,      "Philippines":42409,      "Thailand":47032,      "Israel":20250,      "Peru":18881}
   },
   "2026-09": {
     label: "September 2026",
@@ -1956,7 +1958,7 @@ const MONTHLY_DATA = {
       // source: THB (公路局) new-registration data, Seq=104, via Taiwan Stats (stats.tw), Jan-Jul 2026 summed — passenger cars only, PHEV folded into HEV
       "Taiwan": [34328,0,128489,0,135060,3992,301869],
       // source: ANAC A.G. (Registro Civil), Jan-Jul 2026 summed — see monthly comments for Petrol/Diesel residual methodology
-      "Chile": [8209,6628,31029,0,136407,54908,237181],
+      "Chile": [9204,7298,34365,0,152582,61419,264868],
       // source: Department of Customs Nepal (customs.gov.np), HS 8703 imports, Jan-Jul 2026 summed from the day-weighted monthly figures — three-wheelers excluded; imports not registrations
       "Nepal": [11797,32,27,2,3144,516,15518],
       // source: VAMA + VinFast + TC Group (merged) — VAMA member-brand sales (PC+Special→Petrol, CV→Diesel) plus VinFast (100% BEV, not a VAMA member) plus TC Group/Hyundai (independent of VAMA, folded into Petrol)
@@ -2019,7 +2021,7 @@ const MONTHLY_DATA = {
       "Malaysia":"through Oct 2026",
       "Thailand":"through Oct 2026",
       "Indonesia":"through Oct 2026",
-      "Chile":"through Sep 2026",
+      "Chile":"through Oct 2026",
       "Vietnam":"through Oct 2026",
       "Taiwan":"through Oct 2026",
       "Nepal":"through Sep 2026",
@@ -2044,6 +2046,7 @@ const MONTHLY_DATA = {
       "Canada":84582,"Mexico":17442,"New Zealand":5608,"United States":1109566,"India":160825,"South Korea":190942,"Taiwan":23266,
       "Israel":52910,
       "Peru":618,
+      "Chile":4264,
       "Uruguay":10884,
       "Albania":3038,
       "Paraguay":682,
@@ -2068,6 +2071,7 @@ const MONTHLY_DATA = {
       "Austria":239594,"Belgium":357822,"Bulgaria":41140,"Croatia":61891,"Cyprus":12951,"Czechia":205735,"Denmark":150258,"Estonia":10688,"Finland":60152,"France":1326298,"Germany":2360481,"Greece":122995,"Hungary":106756,"Iceland":11436,"Ireland":123855,"Italy":1293729,"Latvia":19397,"Lithuania":35428,"Luxembourg":40294,"Malta":5317,"Netherlands":304128,"Norway":124545,"Poland":480636,"Portugal":187701,"Romania":121609,"Slovakia":75669,"Slovenia":49302,"Spain":951445,"Sweden":228105,"Switzerland":187381,"United Kingdom":1723120,"Canada":1455051,"Mexico":1221825,"New Zealand":80915,"United States":13491500,"India":3804936,"South Korea":1409095,"Taiwan":288716,
       "Israel":268465,
       "Peru":172087,
+      "Chile":255401,
       "Uruguay":39275,
       "Albania":54624,
       "Paraguay":25586,
@@ -2153,7 +2157,7 @@ const MONTHLY_DATA = {
       // source: THB via Taiwan Stats (stats.tw) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; PHEV folded into HEV
       "Taiwan": [42853, 0, 154187, 0, 162072, 4790, 363902],
       // source: ANAC A.G. — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
-      "Chile": [10993, 8837, 41714, 0, 184936, 74442, 320922],
+      "Chile": [11203, 8758, 41672, 0, 186104, 74912, 322649],
       // source: VAMA + VinFast + TC Group — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months
       "Vietnam": [248918, 0, 21579, 0, 241684, 74777, 586958],
       // source: Department of Customs Nepal (customs.gov.np) — each fuel trended from the last 3 actual months' average (or the 7-mo YTD average if higher), applied to the remaining 5 months; imports not registrations, three-wheelers excluded
